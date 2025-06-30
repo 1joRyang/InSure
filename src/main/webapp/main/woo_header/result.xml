@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" 
+    xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+            <w2:dataCollection baseNode="map">
+                <!-- 보험금 정보 데이터맵 -->
+                <w2:dataMap baseNode="map" id="dma_claimInfo">
+                    <w2:keyInfo>
+                        <w2:key id="claimNo" name="청구번호" dataType="text"/>
+                        <w2:key id="insuredPerson" name="피보험자" dataType="text"/>
+                        <w2:key id="reviewer" name="심사역" dataType="text"/>
+                        <w2:key id="totalAmount" name="총지급액" dataType="number"/>
+                        <w2:key id="deathBenefit" name="질병코드" dataType="text"/>
+                        <w2:key id="disabilityBenefit" name="재해코드" dataType="text"/>
+                        <w2:key id="surgeryBenefit" name="재해원자" dataType="text"/>
+                    </w2:keyInfo>
+                    <w2:data>
+                        <w2:entry>
+                            <claimNo>CLM-2025-001</claimNo>
+                            <insuredPerson>김보험</insuredPerson>
+                            <reviewer>김심사</reviewer>
+                            <totalAmount>1890000</totalAmount>
+                            <deathBenefit>○○○</deathBenefit>
+                            <disabilityBenefit>○○○○</disabilityBenefit>
+                            <surgeryBenefit>○○○○</surgeryBenefit>
+                        </w2:entry>
+                    </w2:data>
+                </w2:dataMap>
+                
+                <!-- 지급 내역 데이터리스트 -->
+                <w2:dataList id="dlt_paymentDetails" baseNode="list" saveRemovedData="true">
+                    <w2:columnInfo>
+                        <w2:column id="productCode" name="증권번호" dataType="text"/>
+                        <w2:column id="coverage" name="상품명" dataType="text"/>
+                        <w2:column id="paymentType" name="계약자" dataType="text"/>
+                        <w2:column id="requestAmount" name="보험금액" dataType="number"/>
+                        <w2:column id="approvalCode" name="청구결제" dataType="text"/>
+                        <w2:column id="approvedAmount" name="지급결제" dataType="number"/>
+                        <w2:column id="status" name="상태" dataType="text"/>
+                    </w2:columnInfo>
+                    <w2:data>
+                        <w2:row>
+                            <productCode>P-2024-001001</productCode>
+                            <coverage>종합보험금보장보험</coverage>
+                            <paymentType>김종수</paymentType>
+                            <requestAmount>5000000</requestAmount>
+                            <approvalCode>1,890,000원</approvalCode>
+                            <approvedAmount>1310000</approvedAmount>
+                            <status>지급완료</status>
+                        </w2:row>
+                        <w2:row>
+                            <productCode>P-2024-001002</productCode>
+                            <coverage>특약보험금보장보험</coverage>
+                            <paymentType>김종수</paymentType>
+                            <requestAmount>1000000</requestAmount>
+                            <approvalCode>580,000원</approvalCode>
+                            <approvedAmount>540000</approvedAmount>
+                            <status>지급완료</status>
+                        </w2:row>
+                    </w2:data>
+                </w2:dataList>
+                
+                <!-- 차트 데이터 -->
+                <w2:dataList id="dlt_chartData" baseNode="list">
+                    <w2:columnInfo>
+                        <w2:column id="category" name="항목" dataType="text"/>
+                        <w2:column id="amount" name="금액" dataType="number"/>
+                        <w2:column id="percentage" name="비율" dataType="number"/>
+                    </w2:columnInfo>
+                    <w2:data>
+                        <w2:row>
+                            <category>총 청구금액</category>
+                            <amount>2100000</amount>
+                            <percentage>100</percentage>
+                        </w2:row>
+                        <w2:row>
+                            <category>공제금액 (자기부담금)</category>
+                            <amount>150000</amount>
+                            <percentage>10</percentage>
+                        </w2:row>
+                        <w2:row>
+                            <category>본인부담율 (10%)</category>
+                            <amount>60000</amount>
+                            <percentage>5</percentage>
+                        </w2:row>
+                        <w2:row>
+                            <category>최종 지급금액</category>
+                            <amount>1890000</amount>
+                            <percentage>85</percentage>
+                        </w2:row>
+                    </w2:data>
+                </w2:dataList>
+            </w2:dataCollection>
+            <w2:workflowCollection/>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        
+        <style type="text/css"><![CDATA[
+            .claim_container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f5f7fa;
+            }
+            
+            .claim_header {
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            
+            .claim_info_row {
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+                gap: 20px;
+            }
+            
+            .claim_info_item {
+                display: flex;
+                align-items: center;
+            }
+            
+            .claim_info_label {
+                font-weight: bold;
+                margin-right: 8px;
+                color: #333;
+            }
+            
+            .claim_info_value {
+                color: #666;
+            }
+            
+            .btn_complete {
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 24px;
+                border: none;
+                border-radius: 4px;
+                font-size: 16px;
+                cursor: pointer;
+                margin-left: auto;
+            }
+            
+            .btn_complete:hover {
+                background-color: #45a049;
+            }
+            
+            .main_content {
+                display: flex;
+                gap: 20px;
+            }
+            
+            .left_panel {
+                flex: 1;
+                background-color: white;
+                padding: 30px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            
+            .amount_display {
+                text-align: center;
+                padding: 40px 20px;
+                border: 2px solid #2196F3;
+                border-radius: 8px;
+                background-color: #E3F2FD;
+                margin-bottom: 30px;
+            }
+            
+            .amount_number {
+                font-size: 48px;
+                font-weight: bold;
+                color: #1976D2;
+                margin-bottom: 10px;
+            }
+            
+            .amount_desc {
+                color: #666;
+                font-size: 14px;
+            }
+            
+            .payment_grid {
+                margin-top: 30px;
+            }
+            
+            .chart_section {
+                margin-top: 30px;
+            }
+            
+            .right_panel {
+                width: 350px;
+                background-color: white;
+                padding: 30px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            
+            .exam_info {
+                margin-bottom: 30px;
+            }
+            
+            .exam_info h3 {
+                font-size: 18px;
+                margin-bottom: 20px;
+                color: #333;
+            }
+            
+            .exam_item {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 15px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .exam_label {
+                color: #666;
+            }
+            
+            .exam_value {
+                font-weight: bold;
+                color: #333;
+            }
+            
+            .message_input {
+                width: 100%;
+                min-height: 150px;
+                padding: 15px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                resize: vertical;
+                font-family: inherit;
+            }
+            
+            .button_group {
+                display: flex;
+                gap: 10px;
+                margin-top: 30px;
+            }
+            
+            .btn_action {
+                flex: 1;
+                padding: 12px 20px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                background-color: white;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.3s;
+            }
+            
+            .btn_action:hover {
+                background-color: #f5f5f5;
+            }
+            
+            .status_chip {
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            
+            .status_approved {
+                background-color: #E8F5E9;
+                color: #2E7D32;
+            }
+            
+            .status_pending {
+                background-color: #FFF3E0;
+                color: #F57C00;
+            }
+        ]]></style>
+        
+        <script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = function() {
+    // 초기 데이터 설정
+    scwin.initializeData();
+    
+    // 차트 초기화
+    scwin.initializeChart();
+};
+
+scwin.initializeData = function() {
+    // 총 금액 포맷팅
+    var totalAmount = dma_claimInfo.get("totalAmount");
+    var formattedAmount = scwin.formatNumber(totalAmount);
+    dma_claimInfo.set("totalAmount", formattedAmount);
+};
+
+scwin.formatNumber = function(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
+scwin.initializeChart = function() {
+    // 차트 초기화 코드
+    // 실제 구현시 WebSquare의 차트 컴포넌트 사용
+};
+
+scwin.btn_complete_onclick = function() {
+    com.confirm("최종 심사를 완료하시겠습니까?", function(result) {
+        if (result) {
+            // 심사 완료 처리
+            com.alert("심사가 완료되었습니다.");
+        }
+    });
+};
+
+scwin.btn_save_onclick = function() {
+    com.alert("반송요청이 저장되었습니다.");
+};
+
+scwin.btn_approve_onclick = function() {
+    com.alert("보완요청이 처리되었습니다.");
+};
+
+scwin.btn_settlement_onclick = function() {
+    com.alert("결재신청이 완료되었습니다.");
+};
+
+scwin.btn_process_onclick = function() {
+    com.alert("지급처리가 완료되었습니다.");
+};
+]]></script>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+        <xf:group class="claim_container" id="">
+            <!-- 헤더 영역 -->
+            <xf:group class="claim_header" id="">
+                <w2:textbox id="" label="보험금 최종 심사 완료" style="font-size:24px;font-weight:bold;margin-bottom:15px;"></w2:textbox>
+                
+                <xf:group class="claim_info_row" id="">
+                    <xf:group class="claim_info_item" id="">
+                        <w2:span class="claim_info_label" id="" label="청구번호 :"></w2:span>
+                        <w2:span class="claim_info_value" id="" ref="data:dma_claimInfo.claimNo"></w2:span>
+                    </xf:group>
+                    
+                    <xf:group class="claim_info_item" id="">
+                        <w2:span class="claim_info_label" id="" label="피보험자 :"></w2:span>
+                        <w2:span class="claim_info_value" id="" ref="data:dma_claimInfo.insuredPerson"></w2:span>
+                    </xf:group>
+                    
+                    <xf:group class="claim_info_item" id="">
+                        <w2:span class="claim_info_label" id="" label="심사역 :"></w2:span>
+                        <w2:span class="claim_info_value" id="" ref="data:dma_claimInfo.reviewer"></w2:span>
+                    </xf:group>
+                    
+                    <xf:trigger class="btn_complete" id="btn_complete" type="button" ev:onclick="scwin.btn_complete_onclick">
+                        <xf:label>최종 심사 완료</xf:label>
+                    </xf:trigger>
+                </xf:group>
+            </xf:group>
+            
+            <!-- 메인 컨텐츠 영역 -->
+            <xf:group class="main_content" id="">
+                <!-- 왼쪽 패널 -->
+                <xf:group class="left_panel" id="">
+                    <!-- 금액 표시 영역 -->
+                    <xf:group class="amount_display" id="">
+                        <w2:textbox class="amount_number" id="" label=""></w2:textbox>
+                        <w2:textbox class="amount_desc" id="" label=""></w2:textbox>
+                    </xf:group>
+                    
+                    <xf:group id="" style="display:flex;align-items:center;margin-bottom:20px;">
+                        <w2:span id="" label="⚫ 계약 보험 증권별 지급 내역" style="font-size:14px;color:#666;"></w2:span>
+                    </xf:group>
+                    
+                    <!-- 지급 내역 그리드 -->
+                    <w2:gridView id="grd_paymentDetails" style="height:200px;" dataList="data:dlt_paymentDetails" 
+                        autoFit="allColumn" readOnly="true" sortable="true">
+                        <w2:caption style="" id="caption1" value="지급 내역"></w2:caption>
+                        <w2:header style="" id="header1">
+                            <w2:row style="" id="row1">
+                                <w2:column width="120" inputType="text" id="column1" value="증권번호" displayMode="label"></w2:column>
+                                <w2:column width="150" inputType="text" id="column2" value="상품명" displayMode="label"></w2:column>
+                                <w2:column width="80" inputType="text" id="column3" value="계약자" displayMode="label"></w2:column>
+                                <w2:column width="100" inputType="text" id="column4" value="보험금액" displayMode="label"></w2:column>
+                                <w2:column width="100" inputType="text" id="column5" value="청구결제" displayMode="label"></w2:column>
+                                <w2:column width="100" inputType="text" id="column6" value="지급결제" displayMode="label"></w2:column>
+                                <w2:column width="80" inputType="text" id="column7" value="상태" displayMode="label"></w2:column>
+                            </w2:row>
+                        </w2:header>
+                        <w2:gBody style="" id="gBody1">
+                            <w2:row style="" id="row2">
+                                <w2:column width="120" inputType="text" id="productCode" displayMode="label"></w2:column>
+                                <w2:column width="150" inputType="text" id="coverage" displayMode="label"></w2:column>
+                                <w2:column width="80" inputType="text" id="paymentType" displayMode="label"></w2:column>
+                                <w2:column width="100" inputType="text" id="requestAmount" displayMode="label" displayFormat="#,###"></w2:column>
+                                <w2:column width="100" inputType="text" id="approvalCode" displayMode="label"></w2:column>
+                                <w2:column width="100" inputType="text" id="approvedAmount" displayMode="label" displayFormat="#,###원"></w2:column>
+                                <w2:column width="80" inputType="text" id="status" displayMode="label"></w2:column>
+                            </w2:row>
+                        </w2:gBody>
+                    </w2:gridView>
+                    
+                    <!-- 차트 영역 -->
+                    <xf:group class="chart_section" id="">
+                        <w2:textbox id="" label="지급 금액 산출 내역" style="font-size:16px;font-weight:bold;margin-bottom:20px;"></w2:textbox>
+                        
+                        <!-- 차트 플레이스홀더 -->
+                        <xf:group id="" style="height:250px;background-color:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;">
+                            <w2:textbox id="" label="[차트 영역]" style="color:#999;"></w2:textbox>
+                        </xf:group>
+                    </xf:group>
+                </xf:group>
+                
+                <!-- 오른쪽 패널 -->
+                <xf:group class="right_panel" id="">
+                    <xf:group class="exam_info" id="">
+                        <w2:textbox tagname="h3" id="" label="심사 정보(혹은 심사 메모)"></w2:textbox>
+                        
+                        <xf:group class="exam_item" id="">
+                            <w2:span class="exam_label" id="" label="질병코드 :"></w2:span>
+                            <w2:span class="exam_value" id="" ref="data:dma_claimInfo.deathBenefit"></w2:span>
+                        </xf:group>
+                        
+                        <xf:group class="exam_item" id="">
+                            <w2:span class="exam_label" id="" label="재해코드 :"></w2:span>
+                            <w2:span class="exam_value" id="" ref="data:dma_claimInfo.disabilityBenefit"></w2:span>
+                        </xf:group>
+                        
+                        <xf:group class="exam_item" id="">
+                            <w2:span class="exam_label" id="" label="재해원자 :"></w2:span>
+                            <w2:span class="exam_value" id="" ref="data:dma_claimInfo.surgeryBenefit"></w2:span>
+                        </xf:group>
+                    </xf:group>
+                    
+                    <xf:group id="">
+                        <w2:textbox id="" label="심사에 대한 결과 내용 및 메모" style="font-size:14px;font-weight:bold;margin-bottom:15px;"></w2:textbox>
+                        <xf:textarea class="message_input" id="txt_examMemo" placeholder="심사 결과 및 메모를 입력하세요."></xf:textarea>
+                    </xf:group>
+                    
+                    <xf:group id="" style="display:flex;gap:10px;margin-top:20px;">
+                        <xf:trigger type="button" id="" style="flex:1;padding:8px;border:1px solid #ddd;background:white;">
+                            <xf:label>초기화</xf:label>
+                        </xf:trigger>
+                        <xf:trigger type="button" id="" style="flex:1;padding:8px;background-color:#2196F3;color:white;border:none;">
+                            <xf:label>메모 저장</xf:label>
+                        </xf:trigger>
+                    </xf:group>
+                    
+                    <xf:group class="button_group" id="">
+                        <xf:trigger class="btn_action" id="btn_save" type="button" ev:onclick="scwin.btn_save_onclick">
+                            <xf:label>반송요청</xf:label>
+                        </xf:trigger>
+                        <xf:trigger class="btn_action" id="btn_approve" type="button" ev:onclick="scwin.btn_approve_onclick">
+                            <xf:label>보완요청</xf:label>
+                        </xf:trigger>
+                    </xf:group>
+                    
+                    <xf:group class="button_group" id="">
+                        <xf:trigger class="btn_action" id="btn_settlement" type="button" ev:onclick="scwin.btn_settlement_onclick">
+                            <xf:label>결재신청</xf:label>
+                        </xf:trigger>
+                        <xf:trigger class="btn_action" id="btn_process" type="button" ev:onclick="scwin.btn_process_onclick">
+                            <xf:label>지급처리</xf:label>
+                        </xf:trigger>
+                    </xf:group>
+                </xf:group>
+            </xf:group>
+        </xf:group>
+    </body>
+</html>

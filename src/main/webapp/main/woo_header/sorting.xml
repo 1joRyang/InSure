@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" 
+    xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+            <w2:dataCollection baseNode="map">
+                <!-- 폴더 정보 및 분류 결과 저장용 DataMap -->
+                <w2:dataMap baseNode="map" id="dma_folderInfo">
+                    <w2:keyInfo>
+                        <w2:key id="folderPath" name="폴더경로" dataType="text"/>
+                        <w2:key id="totalFiles" name="전체파일수" dataType="number"/>
+                        <w2:key id="processedFiles" name="처리파일수" dataType="number"/>
+                        <w2:key id="highestPriorityDocument" name="최우선문서" dataType="text"/>
+                        <w2:key id="deathCertCount" name="사망진단서수" dataType="number"/>
+                        <w2:key id="disabilityCertCount" name="장해진단서수" dataType="number"/>
+                        <w2:key id="surgeryCertCount" name="수술확인서수" dataType="number"/>
+                        <w2:key id="unclassifiedCount" name="미분류수" dataType="number"/>
+                    </w2:keyInfo>
+                </w2:dataMap>
+                
+                <!-- 파일별 상세 결과 저장용 DataList -->
+                <w2:dataList baseNode="list" id="dlt_fileResults" saveRemovedData="true">
+                    <w2:columnInfo>
+                        <w2:column id="idx" name="순번" dataType="number"/>
+                        <w2:column id="filename" name="파일명" dataType="text"/>
+                        <w2:column id="documentType" name="문서유형" dataType="text"/>
+                        <w2:column id="confidence" name="신뢰도" dataType="number"/>
+                        <w2:column id="keywords" name="키워드" dataType="text"/>
+                    </w2:columnInfo>
+                </w2:dataList>
+            </w2:dataCollection>
+            <w2:workflowCollection/>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        
+        <style type="text/css"><![CDATA[
+            .doc_classifier_container { padding: 20px; }
+            .section_box { 
+                margin-bottom: 20px; 
+                padding: 15px; 
+                border: 1px solid #ddd; 
+                border-radius: 5px;
+                background-color: #f9f9f9;
+            }
+            .result_box {
+                margin-top: 20px;
+                padding: 20px;
+                background-color: #fff;
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+            .priority_death { 
+                background-color: #ffe0e0; 
+                border: 2px solid #ff0000;
+                color: #ff0000;
+                font-weight: bold;
+                padding: 15px;
+                text-align: center;
+                font-size: 18px;
+                border-radius: 5px;
+            }
+            .priority_disability { 
+                background-color: #e0ffe0; 
+                border: 2px solid #00aa00;
+                color: #00aa00;
+                font-weight: bold;
+                padding: 15px;
+                text-align: center;
+                font-size: 18px;
+                border-radius: 5px;
+            }
+            .priority_surgery { 
+                background-color: #e0e0ff; 
+                border: 2px solid #0000ff;
+                color: #0000ff;
+                font-weight: bold;
+                padding: 15px;
+                text-align: center;
+                font-size: 18px;
+                border-radius: 5px;
+            }
+            .priority_unclassified { 
+                background-color: #f0f0f0; 
+                border: 2px solid #666666;
+                color: #666666;
+                font-weight: bold;
+                padding: 15px;
+                text-align: center;
+                font-size: 18px;
+                border-radius: 5px;
+            }
+            .stat_item {
+                display: inline-block;
+                margin: 0 10px;
+                padding: 10px;
+                background-color: #e8f4f8;
+                border-radius: 3px;
+            }
+        ]]></style>
+        
+        <script lazy="false" type="text/javascript"><![CDATA[
+// 공통 함수가 없을 경우 직접 정의
+if (typeof com === 'undefined') {
+    window.com = {};
+}
+
+// HTTP 통신 함수
+if (!com.executeHttpSubmission) {
+    com.executeHttpSubmission = function(options) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(options.method || "GET", options.action, true);
+        
+        if (options.mediatype) {
+            xhr.setRequestHeader("Content-Type", options.mediatype);
+        }
+        
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    if (options.success) {
+                        options.success({
+                            responseText: xhr.responseText,
+                            responseXML: xhr.responseXML
+                        });
+                    }
+                } else {
+                    if (options.error) {
+                        options.error({
+                            status: xhr.status,
+                            responseText: xhr.responseText
+                        });
+                    }
+                }
+            }
+        };
+        
+        xhr.send(options.requestData || null);
+    };
+}
+
+// 로딩 표시 함수
+if (!com.showLoading) {
+    com.showLoading = function(show) {
+        if (window.$p && $p.showLoading) {
+            if (show) {
+                $p.showLoading();
+            } else {
+                $p.hideLoading();
+            }
+        }
+    };
+}
+
+if (!com.hideLoading) {
+    com.hideLoading = function() {
+        com.showLoading(false);
+    };
+}
+
+// 알림 함수
+if (!com.alert) {
+    com.alert = function(message) {
+        if (window.$p && $p.alert) {
+            $p.alert(message);
+        } else {
+            alert(message);
+        }
+    };
+}
+
+// API 설정
+scwin.API_CONFIG = {
+    // Python API 직접 호출
+    pythonApiUrl: 'http://localhost:5000',
+    // Spring Boot API 호출 (있을 경우)
+    springApiUrl: 'http://localhost:8080/api/document',
+    // 사용할 API ('python' 또는 'spring')
+    useApi: 'python'
+};
+
+scwin.onpageload = function() {
+    // 초기화
+    scwin.initPage();
+};
+
+// 페이지 초기화
+scwin.initPage = function() {
+    // 결과 영역 숨기기
+    grp_result.hide();
+    
+    // 샘플 폴더 경로 설정 (선택사항)
+    // ibx_folderPath.setValue("C:\\document_classifier_api\\test_images");
+};
+
+// 폴더 분류 버튼 클릭
+scwin.btn_classify_onclick = function() {
+    var folderPath = ibx_folderPath.getValue();
+    
+    if (!folderPath || folderPath.trim() === "") {
+        com.alert("폴더 경로를 입력해주세요.");
+        return;
+    }
+    
+    // API 호출
+    scwin.classifyFolder(folderPath);
+};
+
+// 폴더 분류 API 호출
+scwin.classifyFolder = function(folderPath) {
+    // 로딩 표시
+    com.showLoading(true);
+    
+    // 결과 영역 초기화
+    grp_result.hide();
+    dlt_fileResults.removeAll();
+    
+    // API URL 설정
+    var apiUrl = scwin.API_CONFIG.useApi === 'spring' 
+        ? scwin.API_CONFIG.springApiUrl + '/classify-folder'
+        : scwin.API_CONFIG.pythonApiUrl + '/classify-folder';
+    
+    // API 호출
+    com.executeHttpSubmission({
+        action: apiUrl,
+        method: "post",
+        mediatype: "application/json",
+        requestData: JSON.stringify({
+            "folder_path": folderPath
+        }),
+        success: function(e) {
+            var response = JSON.parse(e.responseText);
+            scwin.displayResult(response);
+        },
+        error: function(e) {
+            com.hideLoading();
+            var errorMsg = "문서 분류 중 오류가 발생했습니다.";
+            
+            try {
+                var errorResponse = JSON.parse(e.responseText);
+                if (errorResponse.error) {
+                    errorMsg = errorResponse.error;
+                }
+            } catch(ex) {
+                errorMsg = "서버 연결 오류가 발생했습니다.";
+            }
+            
+            com.alert(errorMsg);
+        }
+    });
+};
+
+// 결과 표시
+scwin.displayResult = function(data) {
+    // 로딩 숨기기
+    com.hideLoading();
+    
+    // DataMap에 기본 정보 설정
+    dma_folderInfo.set("folderPath", data.folder_path);
+    dma_folderInfo.set("totalFiles", data.total_files);
+    dma_folderInfo.set("processedFiles", data.processed_files);
+    dma_folderInfo.set("highestPriorityDocument", data.highest_priority_document);
+    
+    // 문서 유형별 개수 설정
+    if (data.document_counts) {
+        dma_folderInfo.set("deathCertCount", data.document_counts["사망진단서"] || 0);
+        dma_folderInfo.set("disabilityCertCount", data.document_counts["장해진단서"] || 0);
+        dma_folderInfo.set("surgeryCertCount", data.document_counts["수술확인서"] || 0);
+        dma_folderInfo.set("unclassifiedCount", data.document_counts["미분류"] || 0);
+    }
+    
+    // 최우선 문서 스타일 설정
+    scwin.setPriorityStyle(data.highest_priority_document);
+    
+    // DataList에 파일별 결과 설정
+    if (data.results && data.results.length > 0) {
+        var gridData = [];
+        
+        for (var i = 0; i < data.results.length; i++) {
+            var item = data.results[i];
+            gridData.push({
+                idx: i + 1,
+                filename: item.filename,
+                documentType: item.document_type || "오류",
+                confidence: item.confidence ? (item.confidence * 100) : 0,
+                keywords: item.found_keywords ? item.found_keywords.join(", ") : ""
+            });
+        }
+        
+        dlt_fileResults.setJSON(gridData);
+    }
+    
+    // 결과 영역 표시
+    grp_result.show();
+    
+    // 처리 완료 메시지
+    com.alert("문서 분류가 완료되었습니다.\n최우선 문서: " + data.highest_priority_document);
+};
+
+// 최우선 문서 스타일 설정
+scwin.setPriorityStyle = function(documentType) {
+    // 모든 스타일 초기화
+    div_priority.removeClass("priority_death");
+    div_priority.removeClass("priority_disability");
+    div_priority.removeClass("priority_surgery");
+    div_priority.removeClass("priority_unclassified");
+    
+    // 문서 유형에 따른 스타일 적용
+    switch(documentType) {
+        case "사망진단서":
+            div_priority.addClass("priority_death");
+            break;
+        case "장해진단서":
+            div_priority.addClass("priority_disability");
+            break;
+        case "수술확인서":
+            div_priority.addClass("priority_surgery");
+            break;
+        default:
+            div_priority.addClass("priority_unclassified");
+    }
+};
+
+// 파일 업로드를 통한 분류 (선택사항)
+scwin.udc_fileUpload_onchange = function(info) {
+    var files = info.target.files;
+    
+    if (files && files.length > 0) {
+        // 여러 파일 업로드 처리
+        scwin.classifyFiles(files);
+    }
+};
+
+// 엔터키 입력 시 분류 실행
+scwin.ibx_folderPath_onkeyup = function(e) {
+    if (e.keyCode === 13) { // Enter key
+        scwin.btn_classify_onclick();
+    }
+};
+
+// 초기화 버튼 클릭
+scwin.btn_reset_onclick = function() {
+    // 입력 필드 초기화
+    ibx_folderPath.setValue("");
+    
+    // 결과 영역 숨기기
+    grp_result.hide();
+    
+    // 데이터 초기화
+    dma_folderInfo.removeAll();
+    dlt_fileResults.removeAll();
+};
+]]></script>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+        <xf:group class="doc_classifier_container" id="" style="">
+            <w2:textbox id="" label="문서 분류 시스템" style="font-size:24px;font-weight:bold;text-align:center;margin-bottom:20px;" tagname="h1"></w2:textbox>
+            
+            <!-- 입력 영역 -->
+            <xf:group class="section_box" id="">
+                <w2:textbox id="" label="폴더 경로 입력" style="font-size:18px;font-weight:bold;margin-bottom:10px;" tagname="h3"></w2:textbox>
+                
+                <xf:group id="" style="margin-bottom:10px;">
+                    <w2:textbox id="" label="분류할 문서가 있는 폴더 경로를 입력하세요:" style="margin-bottom:5px;"></w2:textbox>
+                    <xf:input id="ibx_folderPath" style="width:100%;height:35px;font-size:14px;" placeholder="예: C:\Documents\medical_documents" ev:onkeyup="scwin.ibx_folderPath_onkeyup"></xf:input>
+                </xf:group>
+                
+                <xf:group id="" style="text-align:center;">
+                    <xf:trigger type="button" id="btn_classify" style="width:200px;height:40px;font-size:16px;background-color:#4CAF50;color:white;" ev:onclick="scwin.btn_classify_onclick">
+                        <xf:label>폴더 분류하기</xf:label>
+                    </xf:trigger>
+                    <xf:trigger type="button" id="btn_reset" style="width:100px;height:40px;font-size:16px;margin-left:10px;" ev:onclick="scwin.btn_reset_onclick">
+                        <xf:label>초기화</xf:label>
+                    </xf:trigger>
+                </xf:group>
+            </xf:group>
+            
+            <!-- 결과 영역 -->
+            <xf:group id="grp_result" style="display:none;">
+                <!-- 최우선 문서 표시 -->
+                <xf:group class="result_box" id="">
+                    <w2:textbox id="" label="분석 결과" style="font-size:20px;font-weight:bold;margin-bottom:15px;" tagname="h2"></w2:textbox>
+                    
+                    <xf:group id="div_priority" class="priority_unclassified" style="margin-bottom:20px;">
+                        <w2:textbox id="" label="최우선 문서: " style="display:inline;"></w2:textbox>
+                        <w2:textbox id="" ref="data:dma_folderInfo.highestPriorityDocument" style="display:inline;"></w2:textbox>
+                    </xf:group>
+                    
+                    <!-- 통계 정보 -->
+                    <xf:group id="" style="margin-bottom:20px;text-align:center;">
+                        <w2:textbox class="stat_item" id="" style="">
+                            <w2:label>전체 파일: </w2:label>
+                            <w2:span ref="data:dma_folderInfo.totalFiles"></w2:span>
+                            <w2:label>개</w2:label>
+                        </w2:textbox>
+                        <w2:textbox class="stat_item" id="" style="">
+                            <w2:label>처리된 파일: </w2:label>
+                            <w2:span ref="data:dma_folderInfo.processedFiles"></w2:span>
+                            <w2:label>개</w2:label>
+                        </w2:textbox>
+                    </xf:group>
+                    
+                    <!-- 문서 유형별 개수 -->
+                    <xf:group id="" style="margin-bottom:20px;">
+                        <w2:textbox id="" label="문서 유형별 개수" style="font-size:16px;font-weight:bold;margin-bottom:10px;" tagname="h3"></w2:textbox>
+                        <w2:textbox class="stat_item" id="" style="background-color:#ffe0e0;">
+                            <w2:label>사망진단서: </w2:label>
+                            <w2:span ref="data:dma_folderInfo.deathCertCount"></w2:span>
+                            <w2:label>개</w2:label>
+                        </w2:textbox>
+                        <w2:textbox class="stat_item" id="" style="background-color:#e0ffe0;">
+                            <w2:label>장해진단서: </w2:label>
+                            <w2:span ref="data:dma_folderInfo.disabilityCertCount"></w2:span>
+                            <w2:label>개</w2:label>
+                        </w2:textbox>
+                        <w2:textbox class="stat_item" id="" style="background-color:#e0e0ff;">
+                            <w2:label>수술확인서: </w2:label>
+                            <w2:span ref="data:dma_folderInfo.surgeryCertCount"></w2:span>
+                            <w2:label>개</w2:label>
+                        </w2:textbox>
+                        <w2:textbox class="stat_item" id="" style="background-color:#f0f0f0;">
+                            <w2:label>미분류: </w2:label>
+                            <w2:span ref="data:dma_folderInfo.unclassifiedCount"></w2:span>
+                            <w2:label>개</w2:label>
+                        </w2:textbox>
+                    </xf:group>
+                </xf:group>
+                
+                <!-- 파일별 상세 결과 그리드 -->
+                <xf:group class="result_box" id="">
+                    <w2:textbox id="" label="파일별 상세 결과" style="font-size:16px;font-weight:bold;margin-bottom:10px;" tagname="h3"></w2:textbox>
+                    <w2:gridView id="grd_fileResults" style="height:300px;" scrollByColumn="false" defaultCellHeight="20" scrollByColumnAdaptive="false"
+                        dataList="data:dlt_fileResults" autoFit="allColumn" visibleRowNum="10">
+                        <w2:caption style="" id="caption1" value="this is a grid caption."></w2:caption>
+                        <w2:header style="" id="header1">
+                            <w2:row style="" id="row1">
+                                <w2:column width="50" inputType="text" id="column5" value="순번" displayMode="label"></w2:column>
+                                <w2:column width="200" inputType="text" id="column4" value="파일명" displayMode="label"></w2:column>
+                                <w2:column width="100" inputType="text" id="column3" value="문서유형" displayMode="label"></w2:column>
+                                <w2:column width="80" inputType="text" id="column2" value="신뢰도(%)" displayMode="label"></w2:column>
+                                <w2:column width="200" inputType="text" id="column1" value="키워드" displayMode="label"></w2:column>
+                            </w2:row>
+                        </w2:header>
+                        <w2:gBody style="" id="gBody1">
+                            <w2:row style="" id="row2">
+                                <w2:column width="50" inputType="text" id="idx" displayMode="label" textAlign="center"></w2:column>
+                                <w2:column width="200" inputType="text" id="filename" displayMode="label"></w2:column>
+                                <w2:column width="100" inputType="text" id="documentType" displayMode="label" textAlign="center"></w2:column>
+                                <w2:column width="80" inputType="text" id="confidence" displayMode="label" textAlign="center" displayFormat="#.#"></w2:column>
+                                <w2:column width="200" inputType="text" id="keywords" displayMode="label"></w2:column>
+                            </w2:row>
+                        </w2:gBody>
+                    </w2:gridView>
+                </xf:group>
+            </xf:group>
+        </xf:group>
+    </body>
+</html>

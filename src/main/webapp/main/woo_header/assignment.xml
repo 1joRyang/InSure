@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+            <w2:dataCollection baseNode="map">
+                <w2:dataMap baseNode="map" id="dma_modalData">
+                    <w2:keyInfo>
+                        <w2:key dataType="text" id="keyword" name="키워드"/>
+                        <w2:key dataType="text" id="description" name="설명"/>
+                    </w2:keyInfo>
+                </w2:dataMap>
+            </w2:dataCollection>
+            <w2:workflowCollection/>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        <style type="text/css"><![CDATA[
+            /* 편집 중인 input 스타일 */
+            .editing {
+                background-color: #fffbf0 !important;
+                border: 1px solid #ff9800 !important;
+            }
+            
+            /* 호버 효과 */
+            #rule_container .rule_item:hover {
+                border-color: #4285f4;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            }
+            
+            /* 버튼 스타일 */
+            .btn_cm {
+                background-color: #4285f4;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            
+            .btn_cm:hover {
+                background-color: #3367d6;
+            }
+            
+            /* 삭제 버튼 스타일 */
+            .btn_delete {
+                background-color: #dc3545;
+            }
+            
+            .btn_delete:hover {
+                background-color: #c82333;
+            }
+        ]]></style>
+        <script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = function() {
+    scwin._cnt = 0;
+};
+
+// 추가 버튼 클릭 - 웹스퀘어 방식으로 수정
+scwin.add_rule_onclick = function(e) {
+    scwin.showAddModal();
+};
+
+// 수정 버튼 클릭 - 간단한 방법
+scwin.item_edit_onclick = function(e) {
+    console.log("수정 버튼 클릭됨");
+    
+    try {
+        // 웹스퀘어에서 제공하는 getGeneratedIndex() 사용
+        var index = this.getGeneratedIndex();
+        console.log("Generator 인덱스:", index);
+        
+        if (index === undefined || index === -1) {
+            console.error("인덱스를 찾을 수 없습니다.");
+            return;
+        }
+        
+        var _editBtn = rule_gen.getChild(index, "item_edit");
+        var _input1 = rule_gen.getChild(index, "item_input1");
+        var _input2 = rule_gen.getChild(index, "item_input2");
+        var _keywordDisplay = rule_gen.getChild(index, "item_keyword_display");
+        var _descDisplay = rule_gen.getChild(index, "item_desc_display");
+        
+        if (!_editBtn || !_input1 || !_input2) {
+            console.error("컴포넌트를 찾을 수 없습니다.");
+            return;
+        }
+        
+        if (_editBtn.getValue() === "수정") {
+            // 수정 모드로 전환
+            // 키워드 부분: span을 숨기고 input을 같은 위치에 표시
+            _keywordDisplay.hide();
+            _input1.show();
+            _input1.setStyle("display", "inline-block");
+            
+            // 설명 부분
+            _descDisplay.hide();
+            _input2.show();
+            
+            _input1.setReadOnly(false);
+            _input2.setReadOnly(false);
+            _editBtn.setValue("저장");
+            _editBtn.removeClass("btn_outline");
+            _editBtn.addClass("btn_cm");
+            _input1.addClass("editing");
+            _input2.addClass("editing");
+            _input1.focus();
+        } else {
+            var keyword = _input1.getValue();
+            var description = _input2.getValue();
+            
+            if (!keyword || !description) {
+                alert("키워드와 설명을 모두 입력해주세요.");
+                return;
+            }
+            
+            // 저장 모드 - 키워드가 같은 줄에 표시되도록 수정
+            _keywordDisplay.setValue(keyword);
+            _descDisplay.setValue(description);
+            
+            // display를 inline-block으로 유지
+            _keywordDisplay.show();
+            _keywordDisplay.setStyle("display", "inline-block");
+            _descDisplay.show();
+            _input1.hide();
+            _input2.hide();
+            
+            _input1.setReadOnly(true);
+            _input2.setReadOnly(true);
+            _editBtn.setValue("수정");
+            _editBtn.removeClass("btn_cm");
+            _editBtn.addClass("btn_outline");
+            _input1.removeClass("editing");
+            _input2.removeClass("editing");
+            
+            alert("수정이 완료되었습니다.");
+        }
+    } catch (error) {
+        console.error("수정 버튼 처리 중 오류:", error);
+    }
+};
+
+// 삭제 버튼 클릭
+scwin.item_delete_onclick = function(e) {
+    // 삭제 확인 모달 스타일로 변경
+    var confirmModal = '<div id="deleteModal" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; border-radius:8px; padding:20px; z-index:9999; box-shadow:0 0 20px rgba(0,0,0,0.3); width:300px;">' +
+        '<h3 style="margin:0 0 15px 0; font-size:16px;">규칙 삭제</h3>' +
+        '<p style="margin:0 0 20px 0; color:#666; font-size:14px;">이 규칙을 삭제하시겠습니까?</p>' +
+        '<div style="text-align:right;">' +
+            '<button id="deleteCancel" style="padding:6px 15px; margin-right:10px; border:1px solid #ddd; background:white; border-radius:4px; cursor:pointer;">취소</button>' +
+            '<button id="deleteConfirm" style="padding:6px 15px; background:#dc3545; color:white; border:none; border-radius:4px; cursor:pointer;">삭제</button>' +
+        '</div>' +
+    '</div>' +
+    '<div id="deleteBackdrop" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9998;"></div>';
+    
+    var modalDiv = document.createElement('div');
+    modalDiv.innerHTML = confirmModal;
+    document.body.appendChild(modalDiv);
+    
+    var self = this;
+    
+    document.getElementById('deleteConfirm').addEventListener('click', function() {
+        try {
+            var index = self.getGeneratedIndex();
+            console.log("Generator 인덱스:", index);
+            
+            if (index !== undefined && index !== -1) {
+                rule_gen.removeChild(index);
+                console.log("삭제 완료 - 인덱스:", index);
+            }
+            
+            // 모달 닫기
+            modalDiv.remove();
+        } catch (error) {
+            console.error("삭제 처리 중 오류:", error);
+        }
+    });
+    
+    document.getElementById('deleteCancel').addEventListener('click', function() {
+        modalDiv.remove();
+    });
+    
+    document.getElementById('deleteBackdrop').addEventListener('click', function() {
+        modalDiv.remove();
+    });
+};
+
+// 간단한 입력 모달 (웹스퀘어 내장 기능 사용)
+scwin.showAddModal = function() {
+    // 기존 모달이 있으면 제거
+    if (document.getElementById('modalContainer')) {
+        document.getElementById('modalContainer').remove();
+    }
+    
+    // 임시 div로 모달 생성
+    var modalContainer = document.createElement('div');
+    modalContainer.id = 'modalContainer';
+    
+    var customModal = document.createElement('div');
+    customModal.id = 'customModal';
+    customModal.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; border:1px solid #ccc; padding:20px; z-index:9999; box-shadow:0 0 10px rgba(0,0,0,0.5); border-radius:5px;';
+    
+    customModal.innerHTML = 
+        '<h3 style="margin-top:0;">규칙 추가</h3>' +
+        '<div style="margin-bottom:15px;">' +
+            '<label style="display:inline-block; width:80px; font-weight:bold;">키워드:</label>' +
+            '<input type="text" id="modalKeyword" style="width:250px; padding:5px;" />' +
+        '</div>' +
+        '<div style="margin-bottom:15px;">' +
+            '<label style="display:inline-block; width:80px; font-weight:bold;">설명:</label>' +
+            '<input type="text" id="modalDescription" style="width:250px; padding:5px;" />' +
+        '</div>' +
+        '<div style="text-align:center; margin-top:20px;">' +
+            '<button id="modalConfirmBtn" style="padding:8px 20px; margin-right:10px; cursor:pointer;">확인</button>' +
+            '<button id="modalCancelBtn" style="padding:8px 20px; cursor:pointer;">취소</button>' +
+        '</div>';
+    
+    var modalBackdrop = document.createElement('div');
+    modalBackdrop.id = 'modalBackdrop';
+    modalBackdrop.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9998;';
+    
+    modalContainer.appendChild(modalBackdrop);
+    modalContainer.appendChild(customModal);
+    document.body.appendChild(modalContainer);
+    
+    // 이벤트 핸들러를 직접 함수로 정의
+    var confirmHandler = function() {
+        var keyword = document.getElementById('modalKeyword').value;
+        var description = document.getElementById('modalDescription').value;
+        
+        if (!keyword || !description) {
+            alert("키워드와 설명을 모두 입력해주세요.");
+            return;
+        }
+        
+        // 모달 닫기
+        document.getElementById('modalContainer').remove();
+        
+        // Generator에 새 아이템 추가
+        scwin._cnt++;
+        rule_gen.insertChild(scwin._cnt);
+        
+        // 데이터 설정
+        setTimeout(function() {
+            var childCount = rule_gen.getChildrenCount();
+            if (childCount > 0) {
+                var lastIndex = childCount - 1;
+                
+                var _input1 = rule_gen.getChild(lastIndex, "item_input1");
+                var _input2 = rule_gen.getChild(lastIndex, "item_input2");
+                var _keywordDisplay = rule_gen.getChild(lastIndex, "item_keyword_display");
+                var _descDisplay = rule_gen.getChild(lastIndex, "item_desc_display");
+                var _editBtn = rule_gen.getChild(lastIndex, "item_edit");
+                var _deleteBtn = rule_gen.getChild(lastIndex, "item_delete");
+                
+                if (_input1 && _input2 && _keywordDisplay && _descDisplay) {
+                    // input에 값 설정
+                    _input1.setValue(keyword);
+                    _input1.setReadOnly(true);
+                    _input2.setValue(description);
+                    _input2.setReadOnly(true);
+                    
+                    // display 요소에도 실제 입력한 값 설정
+                    _keywordDisplay.setValue(keyword);
+                    _descDisplay.setValue(description);  // 고정값이 아닌 실제 입력한 설명 사용
+                    
+                    // input은 숨기고 display만 보이게
+                    _input1.hide();
+                    _input2.hide();
+                    
+                    // 버튼에 인덱스 정보 저장
+                    if (_editBtn) {
+                        _editBtn.setUserData("rowIndex", lastIndex);
+                    }
+                    if (_deleteBtn) {
+                        _deleteBtn.setUserData("rowIndex", lastIndex);
+                    }
+                    
+                    console.log("규칙 추가 완료 - 키워드: " + keyword + ", 설명: " + description + ", 인덱스: " + lastIndex);
+                } else {
+                    console.error("입력 필드를 찾을 수 없습니다.");
+                }
+            }
+        }, 200);
+    };
+    
+    var cancelHandler = function() {
+        document.getElementById('modalContainer').remove();
+    };
+    
+    // 이벤트 리스너 추가
+    document.getElementById('modalConfirmBtn').addEventListener('click', confirmHandler);
+    document.getElementById('modalCancelBtn').addEventListener('click', cancelHandler);
+    document.getElementById('modalBackdrop').addEventListener('click', cancelHandler);
+    
+    // 엔터 키 이벤트
+    document.getElementById('modalKeyword').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('modalDescription').focus();
+        }
+    });
+    
+    document.getElementById('modalDescription').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            confirmHandler();
+        }
+    });
+    
+    // 키워드 입력란에 포커스
+    setTimeout(function() {
+        document.getElementById('modalKeyword').focus();
+    }, 100);
+};
+
+]]></script>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+        <xf:group class="sub_contents" id="" style="">
+            <xf:group class="pgtbox" id="" style="">
+                <w2:textbox class="pgt_tit" id="" label="자동배정 설정" style="" tagname=""/>
+            </xf:group>
+            
+            <xf:group class="titbox" id="" style="">
+                <w2:textbox class="" id="" label="현재 적용 중인 규칙" style="" tagname="h4"/>
+            </xf:group>
+            
+            <!-- Generator를 위한 별도 컨테이너 영역 -->
+            <xf:group id="rule_container" style="width:100%; padding:20px; background-color:#f8f9fa;">
+                <w2:generator id="rule_gen" style="width:100%;">
+                    <xf:group id="rule_item" style="width:100%; margin-bottom:15px; padding:20px; border:1px solid #e0e0e0; border-radius:8px; background-color:#ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); box-sizing:border-box;">
+                        <xf:group style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+                            <xf:group style="flex:1; min-width:0; padding-right:10px;">
+                                <xf:group style="margin-bottom:10px;">
+                                    <w2:textbox label="키워드 : " style="display:inline-block; font-size:13px; color:#666; margin-bottom:5px;"/>
+                                    <w2:span id="item_keyword_display" label="" style="font-size:14px; color:#333; font-weight:500;"/>
+                                    <xf:input id="item_input1" readOnly="true" style="width:90%; display:none; margin-top:5px;"/>
+                                </xf:group>
+                                <xf:group style="display:flex; align-items:flex-start;">
+                                    <w2:span label="•" style="font-size:12px; color:#999; margin-right:5px; margin-top:2px;"/>
+                                    <xf:group style="flex:1;">
+                                        <w2:span id="item_desc_display" label="" style="font-size:13px; color:#666; display:block;"/>
+                                        <xf:input id="item_input2" readOnly="true" style="width:100%; display:none;"/>
+                                    </xf:group>
+                                </xf:group>
+                            </xf:group>
+                            <xf:group style="display:flex; align-items:center; flex-shrink:0;">
+                                <xf:trigger class="btn_cm" ev:onclick="scwin.item_edit_onclick" id="item_edit" style="width:50px; height:30px; margin-right:5px; font-size:13px;" type="button">
+                                    <xf:label><![CDATA[수정]]></xf:label>
+                                </xf:trigger>
+                                <xf:trigger class="btn_cm btn_delete" ev:onclick="scwin.item_delete_onclick" id="item_delete" style="width:50px; height:30px; font-size:13px;" type="button">
+                                    <xf:label><![CDATA[삭제]]></xf:label>
+                                </xf:trigger>
+                            </xf:group>
+                        </xf:group>
+                    </xf:group>
+                </w2:generator>
+            </xf:group>
+            
+            <!-- 추가 버튼 -->
+            <xf:group id="button_area" style="width:100%; text-align:right;">
+                <xf:trigger class="btn_cm" ev:onclick="scwin.add_rule_onclick" id="add_rule" style="width:100px; height:35px;" type="button">
+                    <xf:label><![CDATA[규칙 추가]]></xf:label>
+                </xf:trigger>
+            </xf:group>
+        </xf:group>
+    </body>
+</html>
