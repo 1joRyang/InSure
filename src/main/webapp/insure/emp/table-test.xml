@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="/InsWebApp/css/table.css" type="text/css"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+            <w2:dataCollection baseNode="map">
+            	<w2:dataMap baseNode="map" id="dm_sub">
+            		<w2:keyInfo>
+            			<w2:key dataType="text" name="진료비총액" id="total_medical_fee"></w2:key>
+            			<w2:key dataType="text" name="환자부담총액" id="total_patient_payment"></w2:key>
+            			<w2:key dataType="text" name="이미납부한금액" id="amount_paid"></w2:key>
+            			<w2:key dataType="text" name="납부할금액" id="due_amt"></w2:key>
+            			<w2:key dataType="text" name="납부한금액" id="due_pay"></w2:key>
+            		</w2:keyInfo>
+            	</w2:dataMap>
+            	<w2:dataMap baseNode="map" id="dm_result">
+            		<w2:keyInfo>
+            			<w2:key dataType="text" name="최종수납액" id="final_due"></w2:key>
+            			<w2:key dataType="text" name="병원공제금" id="hospital_prepaid"></w2:key>
+            			<w2:key dataType="text" name="삭감항목금액" id="deducation_amt"></w2:key>
+            			<w2:key dataType="text" name="산출금" id="refund_amt"></w2:key>
+            		</w2:keyInfo>
+            	</w2:dataMap>
+            	<w2:dataList baseNode="list" repeatNode="map" id="dl_result" saveRemovedData="true">
+            		<w2:columnInfo>
+            			<w2:column dataType="text" name="구분" id="col1"></w2:column>
+            			<w2:column dataType="text" name="금액산정내용" id="col2"></w2:column>
+            		</w2:columnInfo>
+            		<w2:data use="true">
+            			<w2:row>
+            				<col1><![CDATA[최종수납]]></col1>
+            				<col2><![CDATA[0]]></col2>
+            			</w2:row>
+            			<w2:row>
+            				<col1><![CDATA[병원공제금]]></col1>
+            				<col2><![CDATA[0]]></col2>
+            			</w2:row>
+            			<w2:row>
+            				<col1><![CDATA[삭감항목총액]]></col1>
+            				<col2><![CDATA[0]]></col2>
+            			</w2:row>
+            			<w2:row>
+            				<col1><![CDATA[산출금]]></col1>
+            				<col2><![CDATA[0]]></col2>
+            			</w2:row>
+            		</w2:data>
+            	</w2:dataList>
+            </w2:dataCollection>
+            <w2:workflowCollection/>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/ocr-table.js" scopeVariable="" type="text/javascript"></script>
+        <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/ocr-tableStruc.js" scopeVariable="" type="text/javascript"></script>
+        <script lazy="false" type="text/javascript"><![CDATA[// 페이지 로드 시 모든 테이블 생성
+scwin.onpageload = function() {
+    // todo: 테이블 불러와서 넣기
+    // 페이지가 로드될 때 기본 빈 테이블 생성
+    scwin.createEmptyTable();
+    
+    // 서브테이블과 결과테이블 생성
+    //scwin.createSubTable();
+    //scwin.createResultTable();
+};
+
+scwin.btn_ocr_onclick = function (e) {
+    // OCR 버튼 클릭 시 OCR 결과를 받아서 테이블을 동적으로 업데이트
+    let data_rows = [
+        { "col1": "진찰료", "col2": 100, "col3": 200, "col4": 300, "col5": 400, "col6": 500 },
+        { "col1": "1인실", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "식대", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "행위료", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "약품비", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "행위료", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "약품비", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "마취료", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "처치및수술료", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "검사료", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "영상진단료", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "방사선치료료", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "치료재료대", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "재활및물리치료료", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "정신요법료", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "전혈및혈액성분제제료", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "보장구", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+        { "col1": "CD필름", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
+    ];
+    
+    // 수정된 헤더 - 실제 받아오는 데이터 헤더
+    let headers = ["본인부담금", "공단부담금", "전액본인부담", "선택진료료", "선택진료료 외"];
+    
+    let result = {
+        'success': true,
+        'message': 'OCR 처리가 완료되었습니다.',
+        'data': {
+            'headers': headers,
+            'rows': data_rows,
+            'total_rows': data_rows.length,
+            'total_columns': headers.length
+        }
+    };
+    
+    scwin.createTable(result);
+};
+
+scwin.btn_before_onclick = function (e) {
+    // 이전 화면으로
+    
+};
+
+scwin.btn_next_onclick = function (e) {
+    // 다음 화면으로
+};
+]]></script>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+        <xf:group class="sub_contents">
+        	<xf:group class="pgtbox">
+        		<w2:textbox class="pgt_tit" label="청구번호: " />
+        		<w2:textbox class="pgt_tit" label="피보험자: " />
+        		<xf:group class="btn_schbox">
+        			<xf:trigger id="btn_ocr" type="button" ev:onclick="scwin.btn_ocr_onclick">
+        				<xf:label><![CDATA[OCR]]></xf:label>
+        			</xf:trigger>
+        		</xf:group>
+        	</xf:group>
+        	<!-- 동적으로 테이블을 생성할 공간 -->
+        	<xf:group style="width: 100%; display: flex;" id="">
+        		<xf:group style="width: 70%;" id="">
+        			<div style="" id="tableContainer"></div>
+        		</xf:group>
+        		<xf:group style="width: 30%; margin-left: 15px;" id="">
+        			<xf:group tagname="table" style="width:100%;height: 100px;" id="" class="w2tb">
+        				<w2:attributes>
+        					<w2:summary></w2:summary>
+        				</w2:attributes>
+        				<xf:group tagname="caption"></xf:group>
+        				<xf:group tagname="colgroup">
+        					<xf:group tagname="col" style="width:50.00%;"></xf:group>
+        					<xf:group tagname="col" style="width:50.00%;"></xf:group>
+        				</xf:group>
+        				<xf:group tagname="tr" style="height:30px;">
+        					<xf:group tagname="th"
+        						style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:center;width:50%;height: 30px;" class="w2tb_th">
+        						구분
+        						<w2:attributes>
+        							<w2:scope>col</w2:scope>
+        						</w2:attributes>
+        					</xf:group>
+        					<xf:group tagname="th"
+        						style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:center;width:50%;height: 30px;" class="w2tb_th">
+        						금액산정내용
+        						<w2:attributes>
+        							<w2:scope>col</w2:scope>
+        						</w2:attributes>
+        					</xf:group>
+        				</xf:group>
+        				<xf:group tagname="tr" style="">
+        					<xf:group tagname="td" style="" class="w2tb_td">진료비총액</xf:group>
+        					<xf:group tagname="td" style="" id="cell_total" class="w2tb_td">
+        						<xf:input ref="data:dm_sub.total_medical_fee" maxByteLength="" dataType="text"
+        							style="width: 144px;height: 21px;" id="">
+        						</xf:input>
+        					</xf:group>
+        				</xf:group>
+        				<xf:group tagname="tr" style="">
+        					<xf:group tagname="td" style="" class="w2tb_td">환자부담총액</xf:group>
+        					<xf:group tagname="td" style="" class="w2tb_td">
+        						<xf:input ref="data:dm_sub.total_patient_payment" maxByteLength="" dataType="text"
+        							style="width: 144px;height: 21px;" id="">
+        						</xf:input>
+        					</xf:group>
+        				</xf:group>
+        				<xf:group tagname="tr" style="">
+        					<xf:group tagname="td" style="" class="w2tb_td">이미납부한금액</xf:group>
+        					<xf:group tagname="td" style="" class="w2tb_td">
+        						<xf:input ref="data:dm_sub.amount_paid" maxByteLength="" dataType="text" style="width: 144px;height: 21px;"
+        							id="">
+        						</xf:input>
+        					</xf:group>
+        				</xf:group>
+        				<xf:group tagname="tr" style="">
+        					<xf:group tagname="td" style="" class="w2tb_td">납부할금액</xf:group>
+        					<xf:group tagname="td" style="" class="w2tb_td">
+        						<xf:input ref="data:dm_sub.due_amt" maxByteLength="" dataType="text" style="width: 144px;height: 21px;"
+        							id="">
+        						</xf:input>
+        					</xf:group>
+        				</xf:group>
+        				<xf:group tagname="tr" style="">
+        					<xf:group tagname="td" style="" class="w2tb_td">납부한금액</xf:group>
+        					<xf:group tagname="td" style="" class="w2tb_td">
+        						<xf:input ref="data:dm_sub.due_pay" maxByteLength="" dataType="text" style="width: 144px;height: 21px;"
+        							id="">
+        						</xf:input>
+        					</xf:group>
+        				</xf:group>
+        			</xf:group>
+        			<xf:group adaptiveThreshold="" meta_snippetCategory="06_그리드" meta_snippetName="6_01 그리드" meta_snippetKeyComponent="true"
+        				style="font-size: 11px;margin-top: 20px;" id="" class="gvwbox">
+        				<w2:gridView scrollByColumnAdaptive="false" focusMode="row" dataList="data:dl_result" scrollByColumn="false"
+        					style="height: 10%;" autoFit="allColumn" id="" class="gvw" checkReadOnlyOnPasteEnable="">
+        					<w2:header style="" id="header2">
+        						<w2:row style="" id="row3">
+        							<w2:column removeBorderStyle="false" width="70" inputType="text" id="column12" value="구분"
+        								blockSelect="false" displayMode="label">
+        							</w2:column>
+        							<w2:column removeBorderStyle="false" width="70" inputType="text" id="column11" value="금액산정내용"
+        								blockSelect="false" displayMode="label">
+        							</w2:column>
+        						</w2:row>
+        					</w2:header>
+        					<w2:gBody style="" id="gBody2">
+        						<w2:row style="" id="row4">
+        							<w2:column removeBorderStyle="false" width="70" inputType="text" id="col1" blockSelect="false"
+        								displayMode="label">
+        							</w2:column>
+        							<w2:column removeBorderStyle="false" width="70" inputType="text" id="col2" blockSelect="false"
+        								displayMode="label">
+        							</w2:column>
+        						</w2:row>
+        					</w2:gBody>
+        				</w2:gridView>
+        			</xf:group>
+        			<div style="width:100%;" id="resultTable">
+        				<table class="w2tb" style="border-collapse:collapse;width:100%;margin-top:20px;">
+        					<thead>
+        						<tr>
+        							<th style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:center;width:50%;">구분</th>
+        							<th style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:center;width:50%;">
+        								금액산정내용
+        							</th>
+        						</tr>
+        					</thead>
+        					<tbody>
+        						<tr style="">
+        							<td style="border:1px solid #ddd;padding:8px;background:#f9f9f9;text-align:center;">최종수납액</td>
+        							<td style="border:1px solid #ddd;padding:8px;text-align:right;cursor:pointer;" id="result_item1"
+        								onclick="editResultTableCell(this, '결과1')">
+        								<xf:input id="" style="width: 144px;height: 21px;" ref="data:dm_result.final_due" maxByteLength=""
+        									dataType="text">
+        								</xf:input>
+        							</td>
+        						</tr>
+        						<tr style="">
+        							<td style="border:1px solid #ddd;padding:8px;background:#f9f9f9;text-align:center;">병원공제금</td>
+        							<td style="border:1px solid #ddd;padding:8px;text-align:right;cursor:pointer;" id="result_item2"
+        								onclick="editResultTableCell(this, '결과2')">
+        								<xf:input id="" style="width: 144px;height: 21px;" ref="data:dm_result.hospital_prepaid"
+        									maxByteLength="" dataType="text">
+        								</xf:input>
+        							</td>
+        						</tr>
+        						<tr style="">
+        							<td style="border:1px solid #ddd;padding:8px;background:#f9f9f9;text-align:center;">삭감항목총액</td>
+        							<td style="border:1px solid #ddd;padding:8px;text-align:right;cursor:pointer;" id="result_item2"
+        								onclick="editResultTableCell(this, '결과2')">
+        								<xf:input id="" style="width: 144px;height: 21px;" ref="data:dm_result.deducation_amt"
+        									maxByteLength="" dataType="text">
+        								</xf:input>
+        							</td>
+        						</tr>
+        						<tr style="">
+        							<td style="border:1px solid #ddd;padding:8px;background:#f9f9f9;text-align:center;">산출금</td>
+        							<td style="border:1px solid #ddd;padding:8px;text-align:right;cursor:pointer;" id="result_item2"
+        								onclick="editResultTableCell(this, '결과2')">
+        								<xf:input id="" style="width: 144px;height: 21px;" ref="data:dm_result.refund_amt" maxByteLength=""
+        									dataType="text">
+        								</xf:input>
+        							</td>
+        						</tr>
+        					</tbody>
+        				</table>
+        			</div>
+        		</xf:group>
+
+        	</xf:group>
+        	<xf:group class="btnbox" id="" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true" meta_snippetName="8_04 전체제어버튼"
+        		style="">
+        		<xf:group class="rt" id="" style="">
+        			<xf:trigger class="btn_cm" id="btn_before" style="" type="button" ev:onclick="scwin.btn_before_onclick">
+        				<xf:label><![CDATA[이전]]></xf:label>
+        			</xf:trigger>
+        			<w2:textbox class="bar_btndiv" id="" label="" style=""></w2:textbox>
+        			<xf:trigger class="btn_cm pt" id="btn_next" style="" type="button" ev:onclick="scwin.btn_next_onclick">
+        				<xf:label><![CDATA[다음]]></xf:label>
+        			</xf:trigger>
+        		</xf:group>
+        	</xf:group>
+        </xf:group>
+    </body>
+</html>
