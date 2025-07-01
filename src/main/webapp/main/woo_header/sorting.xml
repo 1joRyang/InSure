@@ -28,11 +28,24 @@
                     <w2:columnInfo>
                         <w2:column id="idx" name="순번" dataType="number"/>
                         <w2:column id="filename" name="파일명" dataType="text"/>
+                        <w2:column id="filePath" name="파일경로" dataType="text"/>
                         <w2:column id="documentType" name="문서유형" dataType="text"/>
                         <w2:column id="confidence" name="신뢰도" dataType="number"/>
                         <w2:column id="keywords" name="키워드" dataType="text"/>
                     </w2:columnInfo>
                 </w2:dataList>
+                
+                <!-- 다른 시스템으로 전달할 데이터 -->
+                <w2:dataMap baseNode="map" id="dma_transferData">
+                    <w2:keyInfo>
+                        <w2:key id="folderPath" name="폴더경로" dataType="text"/>
+                        <w2:key id="classificationDate" name="분류일시" dataType="text"/>
+                        <w2:key id="deathCertificates" name="사망진단서목록" dataType="text"/>
+                        <w2:key id="disabilityCertificates" name="장해진단서목록" dataType="text"/>
+                        <w2:key id="surgeryCertificates" name="수술확인서목록" dataType="text"/>
+                        <w2:key id="priorityDocument" name="우선처리문서" dataType="text"/>
+                    </w2:keyInfo>
+                </w2:dataMap>
             </w2:dataCollection>
             <w2:workflowCollection/>
         </xf:model>
@@ -101,6 +114,20 @@
                 padding: 10px;
                 background-color: #e8f4f8;
                 border-radius: 3px;
+            }
+            .transfer_button {
+                background-color: #FF6B6B;
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                margin-top: 20px;
+            }
+            .transfer_button:hover {
+                background-color: #FF5252;
             }
         ]]></style>
         
@@ -181,7 +208,17 @@ scwin.API_CONFIG = {
     // Spring Boot API 호출 (있을 경우)
     springApiUrl: 'http://localhost:8080/api/document',
     // 사용할 API ('python' 또는 'spring')
-    useApi: 'python'
+    useApi: 'python',
+    // 결과 전달 대상 시스템 URL
+    targetSystemUrl: 'http://localhost:8080/api/process-documents'
+};
+
+// 분류된 문서 정보를 저장할 전역 변수
+scwin.classifiedDocuments = {
+    deathCertificates: [],
+    disabilityCertificates: [],
+    surgeryCertificates: [],
+    unclassified: []
 };
 
 scwin.onpageload = function() {
@@ -193,6 +230,9 @@ scwin.onpageload = function() {
 scwin.initPage = function() {
     // 결과 영역 숨기기
     grp_result.hide();
+    
+    // 전달 버튼 숨기기
+    btn_transfer.hide();
     
     // 샘플 폴더 경로 설정 (선택사항)
     // ibx_folderPath.setValue("C:\\document_classifier_api\\test_images");
@@ -218,7 +258,16 @@ scwin.classifyFolder = function(folderPath) {
     
     // 결과 영역 초기화
     grp_result.hide();
+    btn_transfer.hide();
     dlt_fileResults.removeAll();
+    
+    // 분류된 문서 정보 초기화
+    scwin.classifiedDocuments = {
+        deathCertificates: [],
+        disabilityCertificates: [],
+        surgeryCertificates: [],
+        unclassified: []
+    };
     
     // API URL 설정
     var apiUrl = scwin.API_CONFIG.useApi === 'spring' 
@@ -258,7 +307,7 @@ scwin.classifyFolder = function(folderPath) {
 // 결과 표시
 scwin.displayResult = function(data) {
     // 로딩 숨기기
-    com.hideLoading();
+    // com.hideLoading();
     
     // DataMap에 기본 정보 설정
     dma_folderInfo.set("folderPath", data.folder_path);
@@ -277,29 +326,74 @@ scwin.displayResult = function(data) {
     // 최우선 문서 스타일 설정
     scwin.setPriorityStyle(data.highest_priority_document);
     
-    // DataList에 파일별 결과 설정
+    // DataList에 파일별 결과 설정 및 문서 유형별 분류
     if (data.results && data.results.length > 0) {
         var gridData = [];
         
         for (var i = 0; i < data.results.length; i++) {
             var item = data.results[i];
-            gridData.push({
+            var fileInfo = {
                 idx: i + 1,
                 filename: item.filename,
+                filePath: data.folder_path + "/" + item.filename,
                 documentType: item.document_type || "오류",
                 confidence: item.confidence ? (item.confidence * 100) : 0,
                 keywords: item.found_keywords ? item.found_keywords.join(", ") : ""
-            });
+            };
+            
+            gridData.push(fileInfo);
+            
+            // 문서 유형별로 분류하여 저장
+            switch(item.document_type) {
+                case "사망진단서":
+                    scwin.classifiedDocuments.deathCertificates.push(fileInfo);
+                    break;
+                case "장해진단서":
+                    scwin.classifiedDocuments.disabilityCertificates.push(fileInfo);
+                    break;
+                case "수술확인서":
+                    scwin.classifiedDocuments.surgeryCertificates.push(fileInfo);
+                    break;
+                default:
+                    scwin.classifiedDocuments.unclassified.push(fileInfo);
+            }
         }
         
         dlt_fileResults.setJSON(gridData);
     }
     
+    // 전달 데이터 준비
+    scwin.prepareTransferData(data);
+    
     // 결과 영역 표시
     grp_result.show();
     
+    // 분류된 문서가 있으면 전달 버튼 표시
+    if (data.processed_files > 0) {
+        btn_transfer.show();
+    }
+    
     // 처리 완료 메시지
     com.alert("문서 분류가 완료되었습니다.\n최우선 문서: " + data.highest_priority_document);
+};
+
+// 전달 데이터 준비
+scwin.prepareTransferData = function(data) {
+    var now = new Date();
+    var dateStr = now.getFullYear() + "-" + 
+                  String(now.getMonth() + 1).padStart(2, '0') + "-" + 
+                  String(now.getDate()).padStart(2, '0') + " " +
+                  String(now.getHours()).padStart(2, '0') + ":" +
+                  String(now.getMinutes()).padStart(2, '0') + ":" +
+                  String(now.getSeconds()).padStart(2, '0');
+    
+    // 전달할 데이터 설정
+    dma_transferData.set("folderPath", data.folder_path);
+    dma_transferData.set("classificationDate", dateStr);
+    dma_transferData.set("deathCertificates", JSON.stringify(scwin.classifiedDocuments.deathCertificates));
+    dma_transferData.set("disabilityCertificates", JSON.stringify(scwin.classifiedDocuments.disabilityCertificates));
+    dma_transferData.set("surgeryCertificates", JSON.stringify(scwin.classifiedDocuments.surgeryCertificates));
+    dma_transferData.set("priorityDocument", data.highest_priority_document);
 };
 
 // 최우선 문서 스타일 설정
@@ -326,14 +420,84 @@ scwin.setPriorityStyle = function(documentType) {
     }
 };
 
-// 파일 업로드를 통한 분류 (선택사항)
-scwin.udc_fileUpload_onchange = function(info) {
-    var files = info.target.files;
+// 결과 전달 버튼 클릭
+scwin.btn_transfer_onclick = function() {
+    com.showLoading(true);
     
-    if (files && files.length > 0) {
-        // 여러 파일 업로드 처리
-        scwin.classifyFiles(files);
+    // 전달할 데이터 구성
+    var transferData = {
+        folderPath: dma_transferData.get("folderPath"),
+        classificationDate: dma_transferData.get("classificationDate"),
+        priorityDocument: dma_transferData.get("priorityDocument"),
+        documents: {
+            deathCertificates: scwin.classifiedDocuments.deathCertificates,
+            disabilityCertificates: scwin.classifiedDocuments.disabilityCertificates,
+            surgeryCertificates: scwin.classifiedDocuments.surgeryCertificates,
+            unclassified: scwin.classifiedDocuments.unclassified
+        },
+        summary: {
+            total: dma_folderInfo.get("totalFiles"),
+            processed: dma_folderInfo.get("processedFiles"),
+            deathCount: dma_folderInfo.get("deathCertCount"),
+            disabilityCount: dma_folderInfo.get("disabilityCertCount"),
+            surgeryCount: dma_folderInfo.get("surgeryCertCount"),
+            unclassifiedCount: dma_folderInfo.get("unclassifiedCount")
+        }
+    };
+    
+    // 다른 시스템으로 데이터 전송
+    com.executeHttpSubmission({
+        action: scwin.API_CONFIG.targetSystemUrl,
+        method: "post",
+        mediatype: "application/json",
+        requestData: JSON.stringify(transferData),
+        success: function(e) {
+            com.hideLoading();
+            com.alert("분류 결과가 성공적으로 전달되었습니다.");
+            
+            // 부모 창이나 다른 페이지로 이동이 필요한 경우
+            // window.parent.postMessage(transferData, '*');
+            // 또는
+            // location.href = "/nextPage?data=" + encodeURIComponent(JSON.stringify(transferData));
+        },
+        error: function(e) {
+            com.hideLoading();
+            com.alert("결과 전달 중 오류가 발생했습니다.");
+        }
+    });
+};
+
+// 문서 유형별 상세 보기
+scwin.showDocumentsByType = function(documentType) {
+    var documents = [];
+    var title = "";
+    
+    switch(documentType) {
+        case "death":
+            documents = scwin.classifiedDocuments.deathCertificates;
+            title = "사망진단서 목록";
+            break;
+        case "disability":
+            documents = scwin.classifiedDocuments.disabilityCertificates;
+            title = "장해진단서 목록";
+            break;
+        case "surgery":
+            documents = scwin.classifiedDocuments.surgeryCertificates;
+            title = "수술확인서 목록";
+            break;
     }
+    
+    if (documents.length === 0) {
+        com.alert("해당 유형의 문서가 없습니다.");
+        return;
+    }
+    
+    // 팝업이나 다이얼로그로 상세 목록 표시
+    var fileList = documents.map(function(doc) {
+        return doc.filename + " (신뢰도: " + doc.confidence.toFixed(1) + "%)";
+    }).join("\n");
+    
+    com.alert(title + ":\n\n" + fileList);
 };
 
 // 엔터키 입력 시 분류 실행
@@ -350,114 +514,164 @@ scwin.btn_reset_onclick = function() {
     
     // 결과 영역 숨기기
     grp_result.hide();
+    btn_transfer.hide();
     
     // 데이터 초기화
     dma_folderInfo.removeAll();
+    dma_transferData.removeAll();
     dlt_fileResults.removeAll();
+    
+    // 분류된 문서 정보 초기화
+    scwin.classifiedDocuments = {
+        deathCertificates: [],
+        disabilityCertificates: [],
+        surgeryCertificates: [],
+        unclassified: []
+    };
+};
+
+// WebSquare 페이지 간 데이터 전달 (옵션)
+scwin.transferToWebSquarePage = function() {
+    // WebSquare의 페이지 이동 방식
+    if (window.$p && $p.frame) {
+        var param = {
+            classificationData: scwin.classifiedDocuments,
+            summary: {
+                folderPath: dma_folderInfo.get("folderPath"),
+                priorityDocument: dma_folderInfo.get("highestPriorityDocument"),
+                deathCount: dma_folderInfo.get("deathCertCount"),
+                disabilityCount: dma_folderInfo.get("disabilityCertCount"),
+                surgeryCount: dma_folderInfo.get("surgeryCertCount")
+            }
+        };
+        
+        // 프레임 내 페이지 이동
+        $p.frame.go("/nextPage.xml", param);
+    }
 };
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
         <xf:group class="doc_classifier_container" id="" style="">
-            <w2:textbox id="" label="문서 분류 시스템" style="font-size:24px;font-weight:bold;text-align:center;margin-bottom:20px;" tagname="h1"></w2:textbox>
-            
-            <!-- 입력 영역 -->
-            <xf:group class="section_box" id="">
-                <w2:textbox id="" label="폴더 경로 입력" style="font-size:18px;font-weight:bold;margin-bottom:10px;" tagname="h3"></w2:textbox>
-                
-                <xf:group id="" style="margin-bottom:10px;">
-                    <w2:textbox id="" label="분류할 문서가 있는 폴더 경로를 입력하세요:" style="margin-bottom:5px;"></w2:textbox>
-                    <xf:input id="ibx_folderPath" style="width:100%;height:35px;font-size:14px;" placeholder="예: C:\Documents\medical_documents" ev:onkeyup="scwin.ibx_folderPath_onkeyup"></xf:input>
-                </xf:group>
-                
-                <xf:group id="" style="text-align:center;">
-                    <xf:trigger type="button" id="btn_classify" style="width:200px;height:40px;font-size:16px;background-color:#4CAF50;color:white;" ev:onclick="scwin.btn_classify_onclick">
-                        <xf:label>폴더 분류하기</xf:label>
-                    </xf:trigger>
-                    <xf:trigger type="button" id="btn_reset" style="width:100px;height:40px;font-size:16px;margin-left:10px;" ev:onclick="scwin.btn_reset_onclick">
-                        <xf:label>초기화</xf:label>
-                    </xf:trigger>
-                </xf:group>
-            </xf:group>
-            
-            <!-- 결과 영역 -->
-            <xf:group id="grp_result" style="display:none;">
-                <!-- 최우선 문서 표시 -->
-                <xf:group class="result_box" id="">
-                    <w2:textbox id="" label="분석 결과" style="font-size:20px;font-weight:bold;margin-bottom:15px;" tagname="h2"></w2:textbox>
-                    
-                    <xf:group id="div_priority" class="priority_unclassified" style="margin-bottom:20px;">
-                        <w2:textbox id="" label="최우선 문서: " style="display:inline;"></w2:textbox>
-                        <w2:textbox id="" ref="data:dma_folderInfo.highestPriorityDocument" style="display:inline;"></w2:textbox>
-                    </xf:group>
-                    
-                    <!-- 통계 정보 -->
-                    <xf:group id="" style="margin-bottom:20px;text-align:center;">
-                        <w2:textbox class="stat_item" id="" style="">
-                            <w2:label>전체 파일: </w2:label>
-                            <w2:span ref="data:dma_folderInfo.totalFiles"></w2:span>
-                            <w2:label>개</w2:label>
-                        </w2:textbox>
-                        <w2:textbox class="stat_item" id="" style="">
-                            <w2:label>처리된 파일: </w2:label>
-                            <w2:span ref="data:dma_folderInfo.processedFiles"></w2:span>
-                            <w2:label>개</w2:label>
-                        </w2:textbox>
-                    </xf:group>
-                    
-                    <!-- 문서 유형별 개수 -->
-                    <xf:group id="" style="margin-bottom:20px;">
-                        <w2:textbox id="" label="문서 유형별 개수" style="font-size:16px;font-weight:bold;margin-bottom:10px;" tagname="h3"></w2:textbox>
-                        <w2:textbox class="stat_item" id="" style="background-color:#ffe0e0;">
-                            <w2:label>사망진단서: </w2:label>
-                            <w2:span ref="data:dma_folderInfo.deathCertCount"></w2:span>
-                            <w2:label>개</w2:label>
-                        </w2:textbox>
-                        <w2:textbox class="stat_item" id="" style="background-color:#e0ffe0;">
-                            <w2:label>장해진단서: </w2:label>
-                            <w2:span ref="data:dma_folderInfo.disabilityCertCount"></w2:span>
-                            <w2:label>개</w2:label>
-                        </w2:textbox>
-                        <w2:textbox class="stat_item" id="" style="background-color:#e0e0ff;">
-                            <w2:label>수술확인서: </w2:label>
-                            <w2:span ref="data:dma_folderInfo.surgeryCertCount"></w2:span>
-                            <w2:label>개</w2:label>
-                        </w2:textbox>
-                        <w2:textbox class="stat_item" id="" style="background-color:#f0f0f0;">
-                            <w2:label>미분류: </w2:label>
-                            <w2:span ref="data:dma_folderInfo.unclassifiedCount"></w2:span>
-                            <w2:label>개</w2:label>
-                        </w2:textbox>
-                    </xf:group>
-                </xf:group>
-                
-                <!-- 파일별 상세 결과 그리드 -->
-                <xf:group class="result_box" id="">
-                    <w2:textbox id="" label="파일별 상세 결과" style="font-size:16px;font-weight:bold;margin-bottom:10px;" tagname="h3"></w2:textbox>
-                    <w2:gridView id="grd_fileResults" style="height:300px;" scrollByColumn="false" defaultCellHeight="20" scrollByColumnAdaptive="false"
-                        dataList="data:dlt_fileResults" autoFit="allColumn" visibleRowNum="10">
-                        <w2:caption style="" id="caption1" value="this is a grid caption."></w2:caption>
-                        <w2:header style="" id="header1">
-                            <w2:row style="" id="row1">
-                                <w2:column width="50" inputType="text" id="column5" value="순번" displayMode="label"></w2:column>
-                                <w2:column width="200" inputType="text" id="column4" value="파일명" displayMode="label"></w2:column>
-                                <w2:column width="100" inputType="text" id="column3" value="문서유형" displayMode="label"></w2:column>
-                                <w2:column width="80" inputType="text" id="column2" value="신뢰도(%)" displayMode="label"></w2:column>
-                                <w2:column width="200" inputType="text" id="column1" value="키워드" displayMode="label"></w2:column>
-                            </w2:row>
-                        </w2:header>
-                        <w2:gBody style="" id="gBody1">
-                            <w2:row style="" id="row2">
-                                <w2:column width="50" inputType="text" id="idx" displayMode="label" textAlign="center"></w2:column>
-                                <w2:column width="200" inputType="text" id="filename" displayMode="label"></w2:column>
-                                <w2:column width="100" inputType="text" id="documentType" displayMode="label" textAlign="center"></w2:column>
-                                <w2:column width="80" inputType="text" id="confidence" displayMode="label" textAlign="center" displayFormat="#.#"></w2:column>
-                                <w2:column width="200" inputType="text" id="keywords" displayMode="label"></w2:column>
-                            </w2:row>
-                        </w2:gBody>
-                    </w2:gridView>
-                </xf:group>
-            </xf:group>
+        	<w2:textbox id="" label="문서 분류 시스템" style="font-size:24px;font-weight:bold;text-align:center;margin-bottom:20px;"
+        		tagname="h1">
+        	</w2:textbox>
+
+        	<!-- 입력 영역 -->
+        	<xf:group class="section_box" id="">
+        		<w2:textbox id="" label="폴더 경로 입력" style="font-size:18px;font-weight:bold;margin-bottom:10px;" tagname="h3"></w2:textbox>
+
+        		<xf:group id="" style="margin-bottom:10px;">
+        			<w2:textbox id="" label="분류할 문서가 있는 폴더 경로를 입력하세요:" style="margin-bottom:5px;"></w2:textbox>
+        			<xf:input id="ibx_folderPath" style="width:100%;height:35px;font-size:14px;"
+        				placeholder="예: C:\Documents\medical_documents" ev:onkeyup="scwin.ibx_folderPath_onkeyup">
+        			</xf:input>
+        		</xf:group>
+
+        		<xf:group id="" style="text-align:center;">
+        			<xf:trigger type="button" id="btn_classify"
+        				style="width:200px;height:40px;font-size:16px;background-color:#4CAF50;color:white;" ev:onclick="scwin.btn_classify_onclick">
+        				<xf:label>폴더 분류하기</xf:label>
+        			</xf:trigger>
+        			<xf:trigger type="button" id="btn_reset" style="width:100px;height:40px;font-size:16px;margin-left:10px;"
+        				ev:onclick="scwin.btn_reset_onclick">
+        				<xf:label>초기화</xf:label>
+        			</xf:trigger>
+        		</xf:group>
+        	</xf:group>
+
+        	<!-- 결과 영역 -->
+        	<xf:group id="grp_result" style="display:none;">
+        		<!-- 최우선 문서 표시 -->
+        		<xf:group class="result_box" id="">
+        			<w2:textbox id="" label="분석 결과" style="font-size:20px;font-weight:bold;margin-bottom:15px;" tagname="h2"></w2:textbox>
+
+        			<xf:group id="div_priority" class="priority_unclassified" style="margin-bottom:20px;">
+        				<w2:textbox id="" label="최우선 문서: " style="display:inline;"></w2:textbox>
+        				<w2:textbox id="" ref="data:dma_folderInfo.highestPriorityDocument" style="display:inline;"></w2:textbox>
+        			</xf:group>
+
+        			<!-- 통계 정보 -->
+        			<xf:group id="" style="margin-bottom:20px;text-align:center;">
+        				<w2:textbox class="stat_item" id="" style="">
+        					<w2:label>전체 파일:</w2:label>
+        					<w2:span ref="data:dma_folderInfo.totalFiles"></w2:span>
+        					<w2:label>개</w2:label>
+        				</w2:textbox>
+        				<w2:textbox class="stat_item" id="" style="">
+        					<w2:label>처리된 파일:</w2:label>
+        					<w2:span ref="data:dma_folderInfo.processedFiles"></w2:span>
+        					<w2:label>개</w2:label>
+        				</w2:textbox>
+        			</xf:group>
+
+        			<!-- 문서 유형별 개수 (클릭 가능) -->
+        			<xf:group id="" style="margin-bottom:20px;">
+        				<w2:textbox id="" label="문서 유형별 개수 (클릭하여 상세보기)" style="font-size:16px;font-weight:bold;margin-bottom:10px;"
+        					tagname="h3">
+        				</w2:textbox>
+        				<w2:textbox class="stat_item" id="" style="background-color:#ffe0e0;cursor:pointer;"
+        					ev:onclick="scwin.showDocumentsByType('death')">
+        					<w2:label>사망진단서:</w2:label>
+        					<w2:span ref="data:dma_folderInfo.deathCertCount"></w2:span>
+        					<w2:label>개</w2:label>
+        				</w2:textbox>
+        				<w2:textbox class="stat_item" id="" style="background-color:#e0ffe0;cursor:pointer;"
+        					ev:onclick="scwin.showDocumentsByType('disability')">
+        					<w2:label>장해진단서:</w2:label>
+        					<w2:span ref="data:dma_folderInfo.disabilityCertCount"></w2:span>
+        					<w2:label>개</w2:label>
+        				</w2:textbox>
+        				<w2:textbox class="stat_item" id="" style="background-color:#e0e0ff;cursor:pointer;"
+        					ev:onclick="scwin.showDocumentsByType('surgery')">
+        					<w2:label>수술확인서:</w2:label>
+        					<w2:span ref="data:dma_folderInfo.surgeryCertCount"></w2:span>
+        					<w2:label>개</w2:label>
+        				</w2:textbox>
+        				<w2:textbox class="stat_item" id="" style="background-color:#f0f0f0;">
+        					<w2:label>미분류:</w2:label>
+        					<w2:span ref="data:dma_folderInfo.unclassifiedCount"></w2:span>
+        					<w2:label>개</w2:label>
+        				</w2:textbox>
+        			</xf:group>
+
+        			<!-- 결과 전달 버튼 -->
+        			<xf:group id="" style="text-align:center;">
+        				<xf:trigger type="button" id="btn_transfer" class="transfer_button" ev:onclick="scwin.btn_transfer_onclick">
+        					<xf:label>분류 결과를 다음 단계로 전달</xf:label>
+        				</xf:trigger>
+        			</xf:group>
+        		</xf:group>
+
+        		<!-- 파일별 상세 결과 그리드 -->
+        		<xf:group class="result_box" id="">
+        			<w2:textbox id="" label="파일별 상세 결과" style="font-size:16px;font-weight:bold;margin-bottom:10px;" tagname="h3"></w2:textbox>
+        			<w2:gridView id="grd_fileResults" style="height:300px;" scrollByColumn="false" defaultCellHeight="20"
+        				scrollByColumnAdaptive="false" dataList="data:dlt_fileResults" autoFit="allColumn" visibleRowNum="10">
+        				<w2:caption style="" id="caption1" value="this is a grid caption."></w2:caption>
+        				<w2:header style="" id="header1">
+        					<w2:row style="" id="row1">
+        						<w2:column width="50" inputType="text" id="column5" value="순번" displayMode="label"></w2:column>
+        						<w2:column width="200" inputType="text" id="column4" value="파일명" displayMode="label"></w2:column>
+        						<w2:column width="100" inputType="text" id="column3" value="문서유형" displayMode="label"></w2:column>
+        						<w2:column width="80" inputType="text" id="column2" value="신뢰도(%)" displayMode="label"></w2:column>
+        						<w2:column width="200" inputType="text" id="column1" value="키워드" displayMode="label"></w2:column>
+        					</w2:row>
+        				</w2:header>
+        				<w2:gBody style="" id="gBody1">
+        					<w2:row style="" id="row2">
+        						<w2:column width="50" inputType="text" id="idx" displayMode="label" textAlign="center"></w2:column>
+        						<w2:column width="200" inputType="text" id="filename" displayMode="label"></w2:column>
+        						<w2:column width="100" inputType="text" id="documentType" displayMode="label" textAlign="center"></w2:column>
+        						<w2:column width="80" inputType="text" id="confidence" displayMode="label" textAlign="center"
+        							displayFormat="#.#">
+        						</w2:column>
+        						<w2:column width="200" inputType="text" id="keywords" displayMode="label"></w2:column>
+        					</w2:row>
+        				</w2:gBody>
+        			</w2:gridView>
+        		</xf:group>
+        	</xf:group>
         </xf:group>
     </body>
 </html>
