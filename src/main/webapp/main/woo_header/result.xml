@@ -103,27 +103,7 @@
         <w2:publicInfo method=""/>
         
         <style type="text/css"><![CDATA[
-            .claim_container {
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 20px;
-                background-color: #f5f7fa;
-            }
-            
-            .claim_header {
-                background-color: white;
-                padding: 20px;
-                border-radius: 8px;
-                margin-bottom: 20px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            }
-            
-            .claim_info_row {
-                display: flex;
-                align-items: center;
-                margin-bottom: 10px;
-                gap: 20px;
-            }
+        
             
             .claim_info_item {
                 display: flex;
@@ -155,40 +135,6 @@
                 background-color: #45a049;
             }
             
-            .main_content {
-                display: flex;
-                gap: 20px;
-            }
-            
-            .left_panel {
-                flex: 1;
-                background-color: white;
-                padding: 30px;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            }
-            
-            .amount_display {
-                text-align: center;
-                padding: 40px 20px;
-                border: 2px solid #2196F3;
-                border-radius: 8px;
-                background-color: #E3F2FD;
-                margin-bottom: 30px;
-            }
-            
-            .amount_number {
-                font-size: 48px;
-                font-weight: bold;
-                color: #1976D2;
-                margin-bottom: 10px;
-            }
-            
-            .amount_desc {
-                color: #666;
-                font-size: 14px;
-            }
-            
             .payment_grid {
                 margin-top: 30px;
             }
@@ -196,14 +142,7 @@
             .chart_section {
                 margin-top: 30px;
             }
-            
-            .right_panel {
-                width: 350px;
-                background-color: white;
-                padding: 30px;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            }
+
             
             .exam_info {
                 margin-bottom: 30px;
@@ -334,12 +273,12 @@ scwin.btn_process_onclick = function() {
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
-        <xf:group class="claim_container" id="">
+        <xf:group class="claim_container" id="" style="padding: 20px;">
             <!-- 헤더 영역 -->
-            <xf:group class="claim_header" id="">
+            <xf:group class="claim_header" id="" style="background-color: white;                padding: 20px;                border-radius: 8px;                margin-bottom: 20px;                box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                 <w2:textbox id="" label="보험금 최종 심사 완료" style="font-size:24px;font-weight:bold;margin-bottom:15px;"></w2:textbox>
                 
-                <xf:group class="claim_info_row" id="">
+                <xf:group class="claim_info_row" id="" style="display: flex;                align-items: center;margin-bottom: 10px; gap: 20px;">
                     <xf:group class="claim_info_item" id="">
                         <w2:span class="claim_info_label" id="" label="청구번호 :"></w2:span>
                         <w2:span class="claim_info_value" id="" ref="data:dma_claimInfo.claimNo"></w2:span>
@@ -362,11 +301,11 @@ scwin.btn_process_onclick = function() {
             </xf:group>
             
             <!-- 메인 컨텐츠 영역 -->
-            <xf:group class="main_content" id="">
+            <xf:group class="main_content" id="" style="display: flex;                gap: 20px;">
                 <!-- 왼쪽 패널 -->
-                <xf:group class="left_panel" id="">
+                <xf:group class="left_panel" id="" style="flex: 1;                background-color: white;                padding: 30px;                border-radius: 8px;                box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                     <!-- 금액 표시 영역 -->
-                    <xf:group class="amount_display" id="">
+                    <xf:group class="amount_display" id="" style="text-align: center;                padding: 40px 20px;                border: 2px solid #2196F3;                border-radius: 8px;                background-color: #E3F2FD;                margin-bottom: 30px;">
                         <w2:textbox class="amount_number" id="" label=""></w2:textbox>
                         <w2:textbox class="amount_desc" id="" label=""></w2:textbox>
                     </xf:group>
@@ -415,7 +354,7 @@ scwin.btn_process_onclick = function() {
                 </xf:group>
                 
                 <!-- 오른쪽 패널 -->
-                <xf:group class="right_panel" id="">
+                <xf:group class="right_panel" id="" style="width: 500px;                background-color: white;                padding: 30px;                border-radius: 8px;                box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                     <xf:group class="exam_info" id="">
                         <w2:textbox tagname="h3" id="" label="심사 정보(혹은 심사 메모)"></w2:textbox>
                         
