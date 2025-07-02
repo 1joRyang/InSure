@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+    	<w2:type>COMPONENT</w2:type>
+    	<w2:buildDate />
+    	<w2:MSA />
+    	<xf:model>
+    		<w2:dataCollection baseNode="map">
+    			<w2:dataMap baseNode="map" id="dma_UserLogin">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="아이디" id="userId"></w2:key>
+    					<w2:key dataType="text" name="비밀번호" id="pw"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    		</w2:dataCollection>
+    		<w2:workflowCollection />
+    		<xf:submission id="sbm_UserLogin" action="/InsWebApp/UserLogin.pwkjson" method="post" mediatype="application/json" ref="" target='data:json,{"id":"dma_UserLogin","key":"elData"}' encoding="UTF-8"
+    			instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_UserLogin_submitdone"
+    			ev:submiterror="" abortTrigger="">
+    		</xf:submission>
+    	</xf:model>
+    	<w2:layoutInfo />
+    	<w2:publicInfo method="" />
+    	<script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = function() {
+	
+};
+
+scwin.sbm_UserLogin_submitdone = function (e) {
+    let elHeader = e.responseJSON.elHeader;
+    if(elHeader != "" && elHeader != null && elHeader != "undefined") {	
+        if(elHeader.resSuc == true) {
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml"
+        }else{
+            dma_UserLogin.setEmptyValue();
+            alert("로그인 정보를 확인하세요");
+        }
+    }
+};
+
+scwin.login_btn_onclick = function (e) {
+    var reqData = {"elData":dma_UserLogin.getJSON()};
+    $c.sbm.execute(sbm_UserLogin, reqData);
+};
+]]></script>
+    	<w2:require as="udc_notification" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/notification.xml"></w2:require>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+    	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
+    		style="">
+    		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
+    			style="border-bottom:;border-bottom-style:solid;border-bottom-color:#BFBFBF;color:#578FCA;border-bottom-width:0em;width:100%;">
+    			<xf:image src="/InsWebApp/images/ws5/logo/insureLogo.png" style="width:131px;height:50px;" id=""></xf:image>
+    			<xf:group class="breadcrumb" id="" style="">
+    				<xf:group id="" style="" tagname="ul">
+    					<xf:group id="" style="" tagname="li"></xf:group>
+    				</xf:group>
+    			</xf:group>
+    			<w2:udc_notification style="width: 30px;height: 30px;" title="" message=""></w2:udc_notification>
+    			<w2:button style="width: 80px;height: 23px;border-color:#FFFFFF;background-color:#FFFFFF;" id="" class="" label="로그아웃"></w2:button>
+    		</xf:group>
+    	</xf:group>
+    	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
+    		style="display: flex;  justify-content: center;  align-items: center;">
+
+
+    		<xf:image id="" src="/InsWebApp/images/ws5/logo/insureLogo.png" style="width:131px;height:50px;"></xf:image>
+    	</xf:group>
+    	<xf:group class="tblbox" id="" meta_snippetCategory="05_입출력테이블" meta_snippetKeyComponent="true" meta_snippetName="5_01 1단테이블"
+    		style="">
+    		<xf:group adaptive="layout" adaptiveThreshold="768" class="w2tb tbl" id="" style="" tagname="table">
+    			<w2:attributes>
+    				<w2:summary></w2:summary>
+    			</w2:attributes>
+    			<xf:group tagname="colgroup">
+    				<xf:group style="" tagname="col"></xf:group>
+    			</xf:group>
+    			<xf:group style="" tagname="tr">
+    				<xf:group class="w2tb_td" style=";text-align:center;" tagname="td">
+    					<w2:span id="" label="아이디" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
+    						meta_snippetName="10_16 출력텍스트" style="">
+    					</w2:span>
+
+    					<xf:input id="" style="width:144px; height:21px; " ref="data:dma_UserLogin.userId"></xf:input>
+    				</xf:group>
+    			</xf:group>
+    			<xf:group tagname="tr">
+    				<xf:group tagname="td" class="w2tb_td" style=";text-align:center;">
+    					<w2:attributes></w2:attributes>
+    					<w2:span id="" label="비밀번호" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
+    						meta_snippetName="10_16 출력텍스트" style="">
+    					</w2:span>
+    					<xf:secret id="" style="width:144px; height:21px; " ref="data:dma_UserLogin.pw"></xf:secret>
+    				</xf:group>
+    			</xf:group>
+    		</xf:group>
+    	</xf:group>
+    <xf:group id="" style="display: flex;justify-content: right;  align-items: right;"><w2:button style="width:80px; height:23px; " id="login_btn" label="로그인" ev:onclick="scwin.login_btn_onclick"></w2:button></xf:group></body>
+</html>
