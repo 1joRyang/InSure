@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 보험 관련 처리를 담당하는 Sql Mapper
+	@description : 보험 관련 처리를 담당하는 Sql Mapper
+	@author      : Inswave
+	@since       : 2025/07/01
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/07/01              Inswave             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.insurance">
+	<select id="selectListSubInsurance" parameterType="com.demo.proworks.claim.vo.ClaimUserVo" resultType="com.demo.proworks.insurance.vo.SubInsuranceListVo">
+    	<!-- 가입 보험 조회 -->	
+       SELECT 
+		    i.insu_id, 
+		    i.insu_name, 
+		    u.user_name, 
+		    '유효' AS status
+		FROM 
+		    INSURANCE i
+		JOIN 
+		    SUB_INSURANCE si ON i.insu_id = si.insu_id
+		JOIN 
+		    USER u ON si.ID = u.ID
+		WHERE 
+		    CURDATE() BETWEEN si.start_date AND si.end_date
+		    AND si.ID = #{ID};
+    </select>
+	
+    <insert id="insertInsurance" parameterType="com.demo.proworks.insurance.vo.InsuranceVo">
+    	<!-- 보험를 등록한다. -->	
+    		
+        INSERT INTO INSURANCE   /* QueryID : com.demo.proworks.insurance.insertInsurance */
+        ( 
+            INSU_ID
+            <if test="insu_name != null"> , INSU_NAME  </if>
+            <if test="insu_terms!= null"> , INSU_TERMS </if>
+        )
+        VALUES  
+        ( 
+            #{insu_id}
+            <if test="insu_name != null"> , #{insu_name}  </if>
+            <if test="insu_terms!= null"> , #{insu_terms} </if> 
+        )          
+    </insert>	
+	
+    <update id="updateInsurance" parameterType="com.demo.proworks.insurance.vo.InsuranceVo">
+    	<!-- 보험를 갱신한다. -->
+    	
+        UPDATE INSURANCE    /* QueryID : com.demo.proworks.insurance.updateInsurance */      
+      	  SET  
+                INSU_ID    = #{insu_id}           	                       
+            <if test="insu_name != null"> , INSU_NAME  = #{insu_name}  </if>
+            <if test="insu_terms!= null"> , INSU_TERMS = #{insu_terms} </if>                 
+        WHERE   
+                INSU_ID    = #{insu_id}   
+    </update>
+	
+    <delete id="deleteInsurance" parameterType="com.demo.proworks.insurance.vo.InsuranceVo">
+    	<!-- 보험를 삭제한다. -->
+    	
+        DELETE FROM INSURANCE   /* QueryID : com.demo.proworks.insurance.deleteInsurance */ 
+        WHERE   
+                INSU_ID    = #{insu_id}           
+    </delete>
+	
+    <select id="selectInsurance" parameterType="com.demo.proworks.insurance.vo.InsuranceVo" resultType="com.demo.proworks.insurance.vo.InsuranceVo">
+    	<!-- 보험를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.insurance.selectInsurance */
+            INSU_ID, INSU_NAME, INSU_TERMS
+        FROM INSURANCE 
+        WHERE 
+                INSU_ID    = #{insu_id}   			
+    </select>
+	
+    <select id="selectListInsurance" parameterType="com.demo.proworks.insurance.vo.InsuranceVo" resultType="com.demo.proworks.insurance.vo.InsuranceVo">
+    	<!-- 보험 목록을 조회한다. -->
+           SELECT    /* QueryID : com.demo.proworks.insurance.selectListInsurance */
+               INSU_ID, INSU_NAME, INSU_TERMS		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM INSURANCE
+                   WHERE  1=1    		
+	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountInsurance" parameterType="com.demo.proworks.insurance.vo.InsuranceVo" resultType="long">
+    <!-- 보험 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.insurance.selectListCountInsurance */
+             COUNT(*) totcnt  		                  
+         FROM INSURANCE
+         WHERE  1=1    		
+
+    </select>
+
+</mapper>
