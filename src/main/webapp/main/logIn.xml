@@ -46,8 +46,6 @@ scwin.sbm_login_submitdone = function (e) {
             // location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/emp/empListView.xml"
             location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml"
 
-
-
         }else{
             dma_login.setEmptyValue();
             alert("로그인 정보를 확인하세요");

@@ -810,17 +810,21 @@ function openExclusionModal(rowIndex, colIndex, currentValue) {
 	const existingDetails = exclusionData[key] || '';
 	
 	console.log(key);
+	localStorage.setItem('itemId', rowIndex);
+	localStorage.setItem('excId', colIndex);
+	localStorage.setItem("treatmentId", 1);
+	localStorage.setItem("claimNo", "a52d8406-5629-11f0-b4f3-bc2411231130");
 	
 	requires("uiplugin.popup"); 
 	var winWid = $(window).width();
 	var winHei = $(window).height();
 	var popWid = 1000;
-	var popHei = 300;
+	var popHei = 600;
 	var sumLeft = (winWid - popWid) / 2;
 	var sumTop = (winHei - popHei) / 2;
 					
 	var opts = {
-					"id" : "popup_window_wframe",
+					"id" : "exc_popup",
 					"type" : "litewindow",
 					"width" : popWid + "px",
 					"height" : popHei + "px",
@@ -833,7 +837,7 @@ function openExclusionModal(rowIndex, colIndex, currentValue) {
 					"useATagBtn" : true,
 					"frameMode" : "wframe"
 				};
-	$p.openPopup("/InsWebApp/ui/emp/exec-popup.xml", opts);
+	$p.openPopup("/InsWebApp/ui/audit/exec-popup.xml", opts);
     
     // 모달 HTML 생성
 	/** 
