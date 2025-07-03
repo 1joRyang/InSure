@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 청구 관련 처리를 담당하는 Sql Mapper
+	@description : 청구 관련 처리를 담당하는 Sql Mapper
+	@author      : Inswave
+	@since       : 2025/07/01
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/07/01              Inswave             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.claim">
+	<select id="selectClaimJoinClaimResult" parameterType="com.demo.proworks.claim.vo.ClaimUserVo" resultType="com.demo.proworks.claim.vo.ClaimNClaimResultVo">
+	    <!-- 기지급이력 조회 (insure-second.xml에서 사용) todo: 고객id 넘기기-->
+	    SELECT 
+	        CR.CLAIM_NO, 
+	        C.RECEIPT_DATE, 
+	        CR.AMOUNT, 
+	        C.STATUS
+	    FROM 
+	        CLAIM_RESULT CR
+	    JOIN 
+	        CLAIM C ON CR.CLAIM_NO = C.CLAIM_NO
+	    WHERE 
+	        C.STATUS = '완료' 
+	        AND C.ID = #{ID}
+	</select>
+
+	
+    <insert id="insertClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo">
+    	<!-- 청구를 등록한다. -->	
+    		
+        INSERT INTO CLAIM   /* QueryID : com.demo.proworks.claim.insertClaim */
+        ( 
+            CLAIM_NO
+            <if test="claim_type      != null"> , CLAIM_TYPE       </if>
+            <if test="receipt_date    != null"> , RECEIPT_DATE     </if>
+            <if test="status          != null"> , STATUS           </if>
+            <if test="emp_no          != null"> , EMP_NO           </if>
+            <if test="ID              != null"> , ID               </if>
+            <if test="claim_content   != null"> , CLAIM_CONTENT    </if>
+            <if test="disease_code    != null"> , DISEASE_CODE     </if>
+            <if test="date_of_accident!= null"> , DATE_OF_ACCIDENT </if>
+        )
+        VALUES  
+        ( 
+            #{claim_no}
+            <if test="claim_type      != null"> , #{claim_type}       </if>
+            <if test="receipt_date    != null"> , #{receipt_date}     </if>
+            <if test="status          != null"> , #{status}           </if>
+            <if test="emp_no          != null"> , #{emp_no}           </if>
+            <if test="ID              != null"> , #{ID}               </if>
+            <if test="claim_content   != null"> , #{claim_content}    </if>
+            <if test="disease_code    != null"> , #{disease_code}     </if>
+            <if test="date_of_accident!= null"> , #{date_of_accident} </if> 
+        )          
+    </insert>	
+	
+    <update id="updateClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo">
+    	<!-- 청구를 갱신한다. -->
+    	
+        UPDATE CLAIM    /* QueryID : com.demo.proworks.claim.updateClaim */      
+      	  SET  
+                CLAIM_NO         = #{claim_no}                	                       
+            <if test="claim_type      != null"> , CLAIM_TYPE       = #{claim_type}       </if>
+            <if test="receipt_date    != null"> , RECEIPT_DATE     = #{receipt_date}     </if>
+            <if test="status          != null"> , STATUS           = #{status}           </if>
+            <if test="emp_no          != null"> , EMP_NO           = #{emp_no}           </if>
+            <if test="ID              != null"> , ID               = #{ID}               </if>
+            <if test="claim_content   != null"> , CLAIM_CONTENT    = #{claim_content}    </if>
+            <if test="disease_code    != null"> , DISEASE_CODE     = #{disease_code}     </if>
+            <if test="date_of_accident!= null"> , DATE_OF_ACCIDENT = #{date_of_accident} </if>                 
+        WHERE   
+                CLAIM_NO         = #{claim_no}        
+    </update>
+	
+    <delete id="deleteClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo">
+    	<!-- 청구를 삭제한다. -->
+    	
+        DELETE FROM CLAIM   /* QueryID : com.demo.proworks.claim.deleteClaim */ 
+        WHERE   
+                CLAIM_NO         = #{claim_no}                
+    </delete>
+	
+    <select id="selectClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo" resultType="com.demo.proworks.claim.vo.ClaimVo">
+    	<!-- 청구를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.claim.selectClaim */
+            CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT
+        FROM CLAIM 
+        WHERE 
+                CLAIM_NO         = #{claim_no}        			
+    </select>
+	
+    <select id="selectListClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo" resultType="com.demo.proworks.claim.vo.ClaimVo">
+    	<!-- 청구 목록을 조회한다. -->
+           SELECT    /* QueryID : com.demo.proworks.claim.selectListClaim */
+               CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM CLAIM
+                   WHERE  1=1    		
+                        <if test="SC_receipt_date != null and SC_receipt_date != ''">
+                             AND RECEIPT_DATE like '%${SC_receipt_date}%'
+                        </if>
+                        <if test="SC_ID != null and SC_ID != ''">
+                             AND ID like '%${SC_ID}%'
+                        </if>	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo" resultType="long">
+    <!-- 청구 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.claim.selectListCountClaim */
+             COUNT(*) totcnt  		                  
+         FROM CLAIM
+         WHERE  1=1    		
+            <if test="SC_receipt_date != null and SC_receipt_date != ''">
+                 AND RECEIPT_DATE like '%${SC_receipt_date}%'
+            </if>
+            <if test="SC_ID != null and SC_ID != ''">
+                 AND ID like '%${SC_ID}%'
+            </if>
+    </select>
+
+</mapper>
