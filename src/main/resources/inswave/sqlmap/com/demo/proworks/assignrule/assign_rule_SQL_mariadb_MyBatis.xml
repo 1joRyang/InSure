@@ -87,5 +87,122 @@
          WHERE  1=1    		
 
     </select>
+    
+    <!-- ====================== 청구 자동 배정 관련 쿼리 ====================== -->
+    
+    <select id="selectAssignRuleByKeyword" parameterType="string" resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+    	<!-- 키워드로 배정규칙을 조회한다. -->
+    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectAssignRuleByKeyword */
+    		RULE_ID, KEYWORD, DEPT
+    	FROM ASSIGN_RULE 
+    	WHERE KEYWORD = #{keyword}
+    	ORDER BY RULE_ID
+    	LIMIT 1
+    </select>
+    
+    <select id="selectDeptIdByDeptName" parameterType="string" resultType="string">
+    	<!-- 부서명으로 부서 ID를 조회한다. -->
+    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectDeptIdByDeptName */
+    		DEPT_ID
+    	FROM INS_DEPT 
+    	WHERE DEPT_NAME = #{deptName}
+    	LIMIT 1
+    </select>
+    
+    <select id="selectEmployeeByDeptId" parameterType="string" resultType="int">
+    	<!-- 부서 ID로 직원 번호를 조회한다. -->
+    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectEmployeeByDeptId */
+    		EMPNO
+    	FROM EMP 
+    	WHERE DEPTNO = #{deptId}
+    	ORDER BY EMPNO
+    	LIMIT 1
+    </select>
+    
+    <select id="selectClaimForAssignment" parameterType="string" resultType="com.demo.proworks.claim.vo.ClaimVo">
+    	<!-- 배정을 위한 청구 정보를 조회한다. -->
+    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectClaimForAssignment */
+    		CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, 
+    		CLAIM_TYPE, DISEASE_CODE, DATE_OF_ACCIDENT
+    	FROM CLAIM 
+    	WHERE CLAIM_NO = #{claimNo}
+    </select>
+    
+    <update id="updateClaimAssignment" parameterType="map">
+    	<!-- 청구에 담당자를 배정한다. -->
+    	UPDATE CLAIM    /* QueryID : com.demo.proworks.assignrule.updateClaimAssignment */
+    	SET EMP_NO = #{empNo}
+    	WHERE CLAIM_NO = #{claimNo}
+    </update>
+    
+    <select id="selectUnassignedClaims" resultType="com.demo.proworks.claim.vo.ClaimVo">
+    	<!-- 미배정 청구 목록을 조회한다. -->
+    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectUnassignedClaims */
+    		CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, 
+    		CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT
+    	FROM CLAIM 
+    	WHERE (EMP_NO IS NULL OR EMP_NO = '')
+    	ORDER BY RECEIPT_DATE DESC
+    </select>
+    
+    <select id="selectAllAssignRules" resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+    	<!-- 모든 배정규칙을 조회한다. -->
+    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectAllAssignRules */
+    		RULE_ID, KEYWORD, DEPT
+    	FROM ASSIGN_RULE 
+    	ORDER BY RULE_ID
+    </select>
+    
+    <select id="selectKeywordMatchingRules" parameterType="string" resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+    	<!-- 청구 내용에서 키워드가 매칭되는 배정규칙들을 조회한다. -->
+    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectKeywordMatchingRules */
+    		RULE_ID, KEYWORD, DEPT
+    	FROM ASSIGN_RULE 
+    	WHERE #{claimType} LIKE CONCAT('%', KEYWORD, '%')
+    	ORDER BY RULE_ID
+    	LIMIT 1
+    </select>
+    
+    <select id="selectEmployeesByDeptId" parameterType="string" resultType="com.demo.proworks.emp.vo.EmpVo">
+    	<!-- 부서 ID로 모든 직원을 조회한다. -->
+    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectEmployeesByDeptId */
+    		EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO, DNAME
+    	FROM EMP 
+    	WHERE DEPTNO = #{deptId}
+    	ORDER BY EMPNO
+    </select>
+    
+    <!-- 청구 자동 배정을 위한 통합 쿼리 -->
+    <select id="selectClaimAssignmentInfo" parameterType="string" resultType="map">
+    	<!-- 청구 배정을 위한 모든 정보를 한번에 조회한다. -->
+    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectClaimAssignmentInfo */
+    		c.CLAIM_NO,
+    		c.CLAIM_TYPE,
+    		c.EMP_NO as CURRENT_EMP_NO,
+    		ar.KEYWORD,
+    		ar.DEPT as DEPT_NAME,
+    		id.DEPT_ID,
+    		e.EMPNO as ASSIGNED_EMP_NO,
+    		e.ENAME as ASSIGNED_EMP_NAME
+    	FROM CLAIM c
+    	CROSS JOIN ASSIGN_RULE ar
+    	LEFT JOIN INS_DEPT id ON ar.DEPT = id.DEPT_NAME
+    	LEFT JOIN EMP e ON id.DEPT_ID = e.DEPTNO
+    	WHERE c.CLAIM_NO = #{claimNo}
+    	  AND c.CLAIM_TYPE LIKE CONCAT('%', ar.KEYWORD, '%')
+    	ORDER BY ar.RULE_ID, e.EMPNO
+    	LIMIT 1
+    </select>
+    
+    <!-- 배정 통계 조회 -->
+    <select id="selectAssignmentStatistics" resultType="map">
+    	<!-- 배정 통계를 조회한다. -->
+    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectAssignmentStatistics */
+    		COUNT(*) as TOTAL_CLAIMS,
+    		SUM(CASE WHEN EMP_NO IS NOT NULL AND EMP_NO != '' THEN 1 ELSE 0 END) as ASSIGNED_CLAIMS,
+    		SUM(CASE WHEN EMP_NO IS NULL OR EMP_NO = '' THEN 1 ELSE 0 END) as UNASSIGNED_CLAIMS,
+    		ROUND(SUM(CASE WHEN EMP_NO IS NOT NULL AND EMP_NO != '' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as ASSIGNMENT_RATE
+    	FROM CLAIM
+    </select>
 
 </mapper>

@@ -3,6 +3,7 @@ package com.demo.proworks.assignrule.service;
 import java.util.List;
 
 import com.demo.proworks.assignrule.vo.AssignRuleVo;
+import com.demo.proworks.emp.vo.EmpVo;
 
 /**  
  * @subject     : 배정규칙 관련 처리를 담당하는 인터페이스
@@ -64,12 +65,56 @@ public interface AssignRuleService {
 	public int updateAssignRule(AssignRuleVo assignRuleVo) throws Exception;
 	
     /**
-     * 배정규칙를 삭제 처리 한다.
-     *
-     * @param  assignRuleVo 배정규칙 AssignRuleVo
-     * @return 번호
-     * @throws Exception
-     */
-	public int deleteAssignRule(AssignRuleVo assignRuleVo) throws Exception;
+    * 배정규칙를 삭제 처리 한다.
+    *
+    * @param  assignRuleVo 배정규칙 AssignRuleVo
+    * @return 번호
+    * @throws Exception
+    */
+    public int deleteAssignRule(AssignRuleVo assignRuleVo) throws Exception;
+    
+	/**
+	 * 키워드로 부서명을 찾고 부서 ID를 반환한다.
+	 *
+	 * @param keyword 검색 키워드
+	 * @return 부서 ID (문자열)
+	 * @throws Exception
+	 */
+	public String findDeptIdByKeyword(String keyword) throws Exception;
+	
+	/**
+	 * 부서 ID로 해당 부서의 실무자(직원)를 찾는다.
+	 *
+	 * @param deptId 부서 ID
+	 * @return 직원 번호 (정수형을 문자열로 변환)
+	 * @throws Exception
+	 */
+	public String findEmployeeByDeptId(String deptId) throws Exception;
+	
+	/**
+	 * 청구를 실무자에게 배정한다.
+	 *
+	 * @param claimNo 청구 번호
+	 * @return 배정 결과 메시지
+	 * @throws Exception
+	 */
+	public String assignEmployeeToClaim(String claimNo) throws Exception;
+	
+	/**
+	 * 여러 청구를 한번에 자동 배정한다.
+	 *
+	 * @return 배정 결과 목록
+	 * @throws Exception
+	 */
+	public List<String> assignAllUnassignedClaims() throws Exception;
+	
+	/**
+	 * 특정 키워드에 대한 배정 가능한 직원 목록을 조회한다.
+	 *
+	 * @param keyword 검색 키워드
+	 * @return 배정 가능한 직원 목록
+	 * @throws Exception
+	 */
+	public List<EmpVo> getAvailableEmployeesByKeyword(String keyword) throws Exception;
 	
 }
