@@ -20,7 +20,13 @@ scwin.onpageload = function() {
     // todo: 테이블 불러와서 넣기
     // 페이지가 로드될 때 기본 빈 테이블 생성
     scwin.createEmptyTable();
-    
+
+    let savedData = JSON.parse(localStorage.getItem('dateList') || '[]');
+
+    savedData.forEach(item => {
+        date_drop.addItem(item.imgIdx, item.dateRange);
+    });
+    date_drop.setSelectedIndex(0);
     // 서브테이블과 결과테이블 생성
     scwin.createSubTable();
     scwin.createResultTable();
@@ -101,22 +107,9 @@ scwin.btn_next_onclick = function (e) {
     							<w2:textbox class="" id="" label="입통원일자" style=""></w2:textbox>
     						</xf:group>
     						<xf:group class="w2tb_td" style="" tagname="td">
-    							<xf:select1 allOption="true" appearance="minimal" chooseOption="" class="" direction="auto" disabled="false"
-    								disabledClass="w2selectbox_disabled" id="" ref="" renderType="" style="width:100px;" submenuSize="auto">
-    								<xf:choices>
-    									<xf:item>
-    										<xf:label><![CDATA[new row]]></xf:label>
-    										<xf:value></xf:value>
-    									</xf:item>
-    									<xf:item>
-    										<xf:label><![CDATA[new row]]></xf:label>
-    										<xf:value></xf:value>
-    									</xf:item>
-    									<xf:item>
-    										<xf:label><![CDATA[new row]]></xf:label>
-    										<xf:value></xf:value>
-    									</xf:item>
-    								</xf:choices>
+    							<xf:select1 allOption="" appearance="minimal" chooseOption="" class="" direction="auto" disabled="false"
+    								disabledClass="w2selectbox_disabled" id="date_drop" ref="" renderType="" style="width:100px;" submenuSize="auto">
+    								<xf:choices></xf:choices>
     							</xf:select1>
     						</xf:group>
     						<xf:group class="w2tb_th" style="" tagname="th">

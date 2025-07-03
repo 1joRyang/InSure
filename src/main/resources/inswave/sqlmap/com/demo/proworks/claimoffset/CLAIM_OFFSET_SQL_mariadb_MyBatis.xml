@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 상계 관련 처리를 담당하는 Sql Mapper
+	@description : 상계 관련 처리를 담당하는 Sql Mapper
+	@author      : Inswave
+	@since       : 2025/07/03
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/07/03              Inswave             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.claimoffset">
+    <insert id="insertClaimOffset" parameterType="com.demo.proworks.claimoffset.vo.ClaimOffsetVo">
+    	<!-- 상계를 등록한다. -->	
+    		
+        INSERT INTO CLAIM_OFFSET   /* QueryID : com.demo.proworks.claimoffset.insertClaimOffset */
+        ( 
+            CLAIM_NO
+            <if test="reason   != null"> , REASON    </if>
+            <if test="charge   != null"> , CHARGE    </if>
+            <if test="claim_no2!= null"> , CLAIM_NO2 </if>
+        )
+        VALUES  
+        ( 
+            #{claim_no}
+            <if test="reason   != null"> , #{reason}    </if>
+            <if test="charge   != null"> , #{charge}    </if>
+            <if test="claim_no2!= null"> , #{claim_no2} </if> 
+        )          
+    </insert>	
+	
+    <update id="updateClaimOffset" parameterType="com.demo.proworks.claimoffset.vo.ClaimOffsetVo">
+    	<!-- 상계를 갱신한다. -->
+    	
+        UPDATE CLAIM_OFFSET    /* QueryID : com.demo.proworks.claimoffset.updateClaimOffset */      
+      	  SET  
+                CLAIM_NO  = #{claim_no}         	                       
+            <if test="reason   != null"> , REASON    = #{reason}    </if>
+            <if test="charge   != null"> , CHARGE    = #{charge}    </if>
+            <if test="claim_no2!= null"> , CLAIM_NO2 = #{claim_no2} </if>                 
+        WHERE   
+                CLAIM_NO  = #{claim_no} 
+    </update>
+	
+    <delete id="deleteClaimOffset" parameterType="com.demo.proworks.claimoffset.vo.ClaimOffsetVo">
+    	<!-- 상계를 삭제한다. -->
+    	
+        DELETE FROM CLAIM_OFFSET   /* QueryID : com.demo.proworks.claimoffset.deleteClaimOffset */ 
+        WHERE   
+                CLAIM_NO  = #{claim_no}         
+    </delete>
+	
+    <select id="selectClaimOffset" parameterType="com.demo.proworks.claimoffset.vo.ClaimOffsetVo" resultType="com.demo.proworks.claimoffset.vo.ClaimOffsetVo">
+    	<!-- 상계를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.claimoffset.selectClaimOffset */
+            CLAIM_NO, REASON, CHARGE, CLAIM_NO2
+        FROM CLAIM_OFFSET 
+        WHERE 
+                CLAIM_NO  = #{claim_no} 			
+    </select>
+	
+    <select id="selectListClaimOffset" parameterType="com.demo.proworks.claimoffset.vo.ClaimOffsetVo" resultType="com.demo.proworks.claimoffset.vo.ClaimOffsetVo">
+    	<!-- 상계 목록을 조회한다. -->
+           SELECT    /* QueryID : com.demo.proworks.claimoffset.selectListClaimOffset */
+               CLAIM_NO, REASON, CHARGE, CLAIM_NO2		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM CLAIM_OFFSET
+                   WHERE  1=1    		
+	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountClaimOffset" parameterType="com.demo.proworks.claimoffset.vo.ClaimOffsetVo" resultType="long">
+    <!-- 상계 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.claimoffset.selectListCountClaimOffset */
+             COUNT(*) totcnt  		                  
+         FROM CLAIM_OFFSET
+         WHERE  1=1    		
+
+    </select>
+
+</mapper>

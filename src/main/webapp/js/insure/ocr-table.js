@@ -812,8 +812,8 @@ function openExclusionModal(rowIndex, colIndex, currentValue) {
 	console.log(key);
 	localStorage.setItem('itemId', rowIndex);
 	localStorage.setItem('excId', colIndex);
+	// todo: treatmentId localStorage 저장..
 	localStorage.setItem("treatmentId", 1);
-	localStorage.setItem("claimNo", "a52d8406-5629-11f0-b4f3-bc2411231130");
 	
 	requires("uiplugin.popup"); 
 	var winWid = $(window).width();

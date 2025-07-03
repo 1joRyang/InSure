@@ -26,13 +26,12 @@
         				<w2:key dataType="text" name="ID" id="ID"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
-        		<w2:dataMap baseNode="map" id="dataMap3">
+        		<w2:dataMap baseNode="map" id="dm_claimoffset">
         			<w2:keyInfo>
-        				<w2:key dataType="text" name="name1" id="SC_receipt_date"></w2:key>
-        				<w2:key dataType="text" name="name2" id="SC_ID"></w2:key>
-        				<w2:key dataType="text" name="name3" id="pageIndex"></w2:key>
-        				<w2:key dataType="text" name="name4" id="pageSize"></w2:key>
-        				<w2:key dataType="text" name="name5" id="totalPageCount"></w2:key>
+        				<w2:key dataType="text" name="청구번호" id="claim_no"></w2:key>
+        				<w2:key dataType="text" name="청구번호" id="claim_no2"></w2:key>
+        				<w2:key dataType="text" name="사유" id="reason"></w2:key>
+        				<w2:key dataType="text" name="금액" id="charge"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
         		<w2:dataList baseNode="list" repeatNode="map" id="dl_claimbefore" saveRemovedData="true">
@@ -53,38 +52,102 @@
         		</w2:dataList>
         	</w2:dataCollection>
         	<w2:workflowCollection />
-        	<xf:submission id="sbm_reclaim" action="/InsWebApp/CLAIMnCResultList.pwkjson" method="post" mediatype="application/json"
+        	<xf:submission id="sbm_befClaim" action="/InsWebApp/CLAIMnCResultList.pwkjson" method="post" mediatype="application/json"
         		ref='data:json,{"id":"dm_claimuser","key":"elData"}' target='data:json,{"id":"dl_claimbefore","key":"claimNClaimResultVoList"}'
         		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
         		ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_getclaim" action="/InsWebApp/CLAIMUpdView.pwkjson" method="post" mediatype="application/json" ref=""
+        	<xf:submission id="sbm_getClaim" action="/InsWebApp/CLAIMUpdView.pwkjson" method="post" mediatype="application/json" ref=""
         		target='data:json,{"id":"dm_claim","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
         		mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_subinsu" action="/InsWebApp/INSURANCESubList.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_claimuser","key":"elData"}'
-        		target='data:json,{"id":"dl_subinsu","key":"subInsuranceListVoList"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        	<xf:submission id="sbm_getSubInsu" action="/InsWebApp/INSURANCESubList.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,{"id":"dm_claimuser","key":"elData"}' target='data:json,{"id":"dl_subinsu","key":"subInsuranceListVoList"}'
+        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
         		ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_insertOffset" action="/InsWebApp/CLAIMOFFSETIns.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_claimoffset","key":"elData"}' target="" encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="저장 중" ev:submit="" ev:submitdone=""
+        		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
         <script lazy="false" type="text/javascript"><![CDATA[scwin.index = 0;
+scwin.genList = [];
+// todo localstorage 저장은 다른 페이지에서
+localStorage.setItem("claimNo", "a52d86a3-5629-11f0-b4f3-bc2411231130");
+localStorage.setItem("ID", "1");
 
 scwin.onpageload = function() {
-    let reqData = {"elData":{"ID": "1"}};
-    $c.sbm.execute(sbm_reclaim, reqData);
-    $c.sbm.execute(sbm_subinsu, reqData);
+    let reqData = {"elData":{"ID": localStorage.getItem("ID")}};
+    $c.sbm.execute(sbm_befClaim, reqData);
+    $c.sbm.execute(sbm_getSubInsu, reqData);
 
-    let request = {"claimVo": {"claim_no": "a52d86a3-5629-11f0-b4f3-bc2411231130"}}
-    $c.sbm.execute(sbm_getclaim, request);
-    
+    let request = {"claimVo": {"claim_no": localStorage.getItem("claimNo")}};
+    $c.sbm.execute(sbm_getClaim, request);
 
+    scwin.genList.push(scwin.index);
 	gen_date.insertChild(scwin.index++);   
 };
         
 scwin.btn_next_onclick = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-ocr.xml";
+    let missingFields = [];
+    let claimOffset = false;
+    let dateDrop = false; 
+
+    // 상계 
+    const claimNo = ipt_claimNo.getValue();
+    const reason = ipt_reason.getValue();
+    const charge = ipt_charge.getValue();
+
+    if (claimNo !== "" && reason !== "" && charge !== "") {
+        // 상계 저장 처리
+        dm_claimoffset.set("claim_no", localStorage.getItem("claimNo")); 
+        $c.sbm.execute(sbm_insertOffset); 
+        claimOffset = true;
+    } 
+    else if (claimNo === "" && reason === "" && charge === "") { // (상계) 모든 값이 비어있는 경우
+        claimOffset = true;
+    } 
+    else {
+        missingFields.push("상계 금액 정보");
+    }
+
+    // 입통원 일자
+    let saveList = [];
+    for (let i = 0; i < scwin.genList.length; i++) {
+        const idx = scwin.genList[i];
+        let date = gen_date.getChild(idx, "ipt_startDate").realValue;
+        let date2 = gen_date.getChild(idx, "ipt_endDate").realValue;
+        let imgIdx = gen_date.getChild(idx, "ipt_idx").realValue;
+            
+        if (!date || !imgIdx) {
+            missingFields.push("입통원일자 목록");
+            break;
+        }
+
+        let dateRange = date2 ? `${date}~${date2}` : date;
+
+        saveList.push({
+            dateRange: dateRange,
+            imgIdx: imgIdx
+        });
+        if (i === scwin.genList.length -1) {
+            dateDrop = true;
+        }
+    }
+
+    localStorage.setItem('dateList', JSON.stringify(saveList));
+    console.log('저장 완료:', saveList);
+    
+
+    if (claimOffset && dateDrop) {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-ocr.xml";
+    }
+    else {
+        alert("다음 항목이 입력되지 않았습니다\n" + missingFields.join(", "));
+    }
 };
 
 scwin.btn_befo_onclick = function (e) {
@@ -92,17 +155,25 @@ scwin.btn_befo_onclick = function (e) {
 };
 
 scwin.btn_add_date_onclick = function (e) {
-    gen_date.insertChild(scwin.index++);   
+    scwin.genList.push(scwin.index);
+    gen_date.insertChild(scwin.index++);
 };
 
 scwin.btn_del_date_onclick = function (e) {
-    let cmpGenerator = this.getGenerator();
-
-    // 자신의 반복부 index를 반환합니다.
+    let dateGen = this.getGenerator();
     let numIndex = this.getGeneratedIndex();
 
-    // index에 해당하는 반복부 아이템을 삭제합니다.
-    cmpGenerator.removeChild(numIndex);
+    dateGen.removeChild(numIndex);
+
+    const indexToRemove = scwin.genList.indexOf(numIndex); 
+    if (indexToRemove !== -1) {
+        scwin.genList.splice(indexToRemove, 1); 
+    }
+};
+
+
+scwin.grd_befClaim_oncellclick = function (rowIndex, columnIndex, columnId) {
+    ipt_claimNo.setValue(dl_claimbefore.getRowJSON(rowIndex).claim_no)
 };
 ]]></script>
     </head>
@@ -163,7 +234,7 @@ scwin.btn_del_date_onclick = function (e) {
     					</xf:group>
     					<xf:group adaptiveThreshold="" style="height: 250px;" id="" class="gvwbox">
     						<w2:gridView scrollByColumnAdaptive="false" focusMode="row" dataList="data:dl_claimbefore"
-    							scrollByColumn="false" style="height: 250px;" autoFit="allColumn" id="" class="gvw" checkReadOnlyOnPasteEnable="">
+    							scrollByColumn="false" style="height: 250px;" autoFit="allColumn" id="grd_befClaim" class="gvw" checkReadOnlyOnPasteEnable="" ev:oncellclick="scwin.grd_befClaim_oncellclick">
     							<w2:caption style="" id="caption2" value="this is a grid caption."></w2:caption>
     							<w2:header style="" id="header2">
     								<w2:row style="" id="row3">
@@ -211,20 +282,20 @@ scwin.btn_del_date_onclick = function (e) {
     						meta_snippetName="1_02 가변 3단 분할" style="">
     						<xf:group class=" col_3" id="" style="">
     							<w2:textbox style="width: 150px;height: 23px;" id="" label="청구 번호"></w2:textbox>
-    							<xf:input class="" id="" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    								meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;">
+    							<xf:input class="" id="ipt_claimNo" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
+    								meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_claimoffset.claim_no2">
     							</xf:input>
     						</xf:group>
     						<xf:group class=" col_4" id="" style="">
     							<w2:textbox id="" label="사유" style="width: 150px;height: 23px;"></w2:textbox>
-    							<xf:input class="" id="" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    								meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;">
+    							<xf:input class="" id="ipt_reason" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
+    								meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_claimoffset.reason">
     							</xf:input>
     						</xf:group>
     						<xf:group class=" col_3" id="" style="">
     							<w2:textbox style="width: 150px;height: 23px;" id="" label="금액"></w2:textbox>
-    							<xf:input class="" id="" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    								meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;">
+    							<xf:input class="" id="ipt_charge" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
+    								meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_claimoffset.charge">
     							</xf:input>
     						</xf:group>
     					</xf:group>
@@ -284,16 +355,16 @@ scwin.btn_del_date_onclick = function (e) {
     						meta_snippetKeyComponent="true" style="padding: 10px;" id="" class="lybox col4">
     						<xf:group style="" id="" class="">
     							<w2:textbox style="width: 150px;height: 23px;" id="" label="입통원 일자"></w2:textbox>
-    							<w2:inputCalendar style="" id="" calendarValueType="yearMonthDate"></w2:inputCalendar>
+    							<w2:inputCalendar style="" id="ipt_startDate" calendarValueType="yearMonthDate"></w2:inputCalendar>
     						</xf:group>
     						<xf:group style="" id="" class="">
     							<w2:textbox style="width: 150px;height: 23px;" id="" label="퇴원 일자"></w2:textbox>
-    							<w2:inputCalendar style="" id="" calendarValueType="yearMonthDate"></w2:inputCalendar>
+    							<w2:inputCalendar style="" id="ipt_endDate" calendarValueType="yearMonthDate"></w2:inputCalendar>
     						</xf:group>
     						<xf:group style="" id="" class="">
     							<w2:textbox style="width: 150px;height: 23px;" id="" label="인덱스"></w2:textbox>
     							<xf:input meta_snippetCategory="10_입력폼" meta_snippetName="10_07 Inputbox_100per"
-    								meta_snippetKeyComponent="true" style="width:100%;" id="" placeholder="" class="">
+    								meta_snippetKeyComponent="true" style="width:100%;" id="ipt_idx" placeholder="" class="">
     							</xf:input>
     						</xf:group>
     						<xf:group style="" id="" class="">
