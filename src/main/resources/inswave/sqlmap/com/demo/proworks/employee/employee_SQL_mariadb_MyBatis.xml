@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 실무자,관리자정보 관련 처리를 담당하는 Sql Mapper
+	@description : 실무자,관리자정보 관련 처리를 담당하는 Sql Mapper
+	@author      : 임소희
+	@since       : 2025/06/30
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/06/30              임소희             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.employee">
+    <insert id="insertEmployee" parameterType="com.demo.proworks.employee.vo.EmployeeVo">
+    	<!-- 실무자,관리자정보를 등록한다. -->	
+    		
+        INSERT INTO EMPLOYEE   /* QueryID : com.demo.proworks.employee.insertEmployee */
+        ( 
+            EMP_NO
+            <if test="empName!= null"> , EMP_NAME </if>
+            <if test="status  != null"> , STATUS   </if>
+            <if test="deptId != null"> , DEPT_ID  </if>
+            <if test="role    != null"> , ROLE     </if>
+        )
+        VALUES  
+        ( 
+            #{empNo}
+            <if test="empName!= null"> , #{empName} </if>
+            <if test="status  != null"> , #{status}   </if>
+            <if test="deptId != null"> , #{deptId}  </if>
+            <if test="role    != null"> , #{role}     </if> 
+        )          
+    </insert>	
+	
+    <update id="updateEmployee" parameterType="com.demo.proworks.employee.vo.EmployeeVo">
+    	<!-- 실무자,관리자정보를 갱신한다. -->
+    	
+        UPDATE EMPLOYEE    /* QueryID : com.demo.proworks.employee.updateEmployee */      
+      	  SET  
+                EMP_NO   = #{empNo}          	                       
+            <if test="empName!= null"> , EMP_NAME = #{empName} </if>
+            <if test="status  != null"> , STATUS   = #{status}   </if>
+            <if test="deptId != null"> , DEPT_ID  = #{deptId}  </if>
+            <if test="role    != null"> , ROLE     = #{role}     </if>                 
+        WHERE   
+                EMP_NO   = #{empNo}  
+    </update>
+	
+    <delete id="deleteEmployee" parameterType="com.demo.proworks.employee.vo.EmployeeVo">
+    	<!-- 실무자,관리자정보를 삭제한다. -->
+    	
+        DELETE FROM EMPLOYEE   /* QueryID : com.demo.proworks.employee.deleteEmployee */ 
+        WHERE   
+                EMP_NO   = #{empNo}          
+    </delete>
+	
+    <select id="selectEmployee" parameterType="com.demo.proworks.employee.vo.EmployeeVo" resultType="com.demo.proworks.employee.vo.EmployeeVo">
+    	<!-- 실무자,관리자정보를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.employee.selectEmployee */
+            EMP_NO as empNo, EMP_NAME as empName, STATUS as status, DEPT_ID as deptId, ROLE as role
+        FROM EMPLOYEE 
+        WHERE 
+                EMP_NO   = #{empNo}  			
+    </select>
+	
+    <select id="selectListEmployee" parameterType="com.demo.proworks.employee.vo.EmployeeVo" resultType="com.demo.proworks.employee.vo.EmployeeVo">
+    	<!-- 실무자,관리자정보 목록을 조회한다. -->
+           SELECT    /* QueryID : com.demo.proworks.employee.selectListEmployee */
+               EMP_NO as empNo, EMP_NAME as empName, STATUS as status, DEPT_ID as deptId, ROLE as role		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM EMPLOYEE
+                   WHERE  1=1    		
+	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountEmployee" parameterType="com.demo.proworks.employee.vo.EmployeeVo" resultType="long">
+    <!-- 실무자,관리자정보 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.employee.selectListCountEmployee */
+             COUNT(*) totcnt  		                  
+         FROM EMPLOYEE
+         WHERE  1=1    		
+
+    </select>
+
+</mapper>
