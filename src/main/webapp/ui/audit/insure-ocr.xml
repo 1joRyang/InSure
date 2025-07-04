@@ -15,7 +15,7 @@
         <w2:publicInfo method=""/>
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/ocr-table.js" scopeVariable="" type="text/javascript"></script>
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/ocr-tableStruc.js" scopeVariable="" type="text/javascript"></script>
-        <script lazy="false" type="text/javascript"><![CDATA[// 페이지 로드 시 모든 테이블 생성
+        <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
     // todo: 테이블 불러와서 넣기
     // 페이지가 로드될 때 기본 빈 테이블 생성
@@ -27,9 +27,6 @@ scwin.onpageload = function() {
         date_drop.addItem(item.imgIdx, item.dateRange);
     });
     date_drop.setSelectedIndex(0);
-    // 서브테이블과 결과테이블 생성
-    scwin.createSubTable();
-    scwin.createResultTable();
 };
 
 scwin.btn_ocr_onclick = function (e) {

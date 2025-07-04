@@ -129,14 +129,13 @@ function setTotalPay(newValue) {
     let total = Number(ipt_fianlpay.getValue());
     total += Number(newValue);
     ipt_fianlpay.setValue(total);
-    ipt_paytotal.setValue(total);
 
     calcuResultTableTotal();
 }
 
 scwin.sel_hospital_onchange = function (info) {
     ipt_hosp.setValue(0);
-    let hospital_prepaid = info.newValue === "1" ? 10000 : info.newValue === "2" ? 20000 : 30000;
+    let hospital_prepaid = info.newValue === "1" ? 10000 : info.newValue === "2" ? 15000 : 20000;
     ipt_hosp.setValue(hospital_prepaid);
 
     calcuResultTableTotal();
@@ -144,7 +143,7 @@ scwin.sel_hospital_onchange = function (info) {
 
 // result table 산출금 계산 
 function calcuResultTableTotal() {
-    let value = Number(ipt_paytotal.getValue()) - Number(ipt_hosp.getValue());
+    let value = Number(ipt_fianlpay.getValue()) - Number(ipt_hosp.getValue());
     console.log(value);
     ipt_result.setValue(value);
 }
@@ -261,11 +260,15 @@ function calcuResultTableTotal() {
         				</xf:group>
         				<xf:group tagname="tr" style="">
         					<xf:group tagname="td" style="" class="w2tb_td">진료비총액</xf:group>
-        					<xf:group tagname="td" style="" id="cell_total" class="w2tb_td"></xf:group>
+        					<xf:group tagname="td" style="" id="cell_total" class="w2tb_td">
+        						<xf:input id="" style="width: 144px;height: 21px;" readOnly="true" readOnlyClass="readonly"></xf:input>
+        					</xf:group>
         				</xf:group>
         				<xf:group tagname="tr" style="">
         					<xf:group tagname="td" style="" class="w2tb_td">환자부담총액</xf:group>
-        					<xf:group tagname="td" style="" class="w2tb_td"></xf:group>
+        					<xf:group tagname="td" style="" class="w2tb_td">
+        						<xf:input id="" style="width: 144px;height: 21px;" readOnly="true" readOnlyClass="readonly"></xf:input>
+        					</xf:group>
         				</xf:group>
         				<xf:group tagname="tr" style="">
         					<xf:group tagname="td" style="" class="w2tb_td">이미납부한금액</xf:group>
@@ -292,56 +295,6 @@ function calcuResultTableTotal() {
         					</xf:group>
         				</xf:group>
         			</xf:group>
-        			<div style="width:100%;" id="resultTable">
-        				<table class="w2tb" style="border-collapse:collapse;width:100%;margin-top:20px;">
-        					<thead>
-        						<tr>
-        							<th style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:center;width:50%;">구분</th>
-        							<th style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:center;width:50%;">
-        								금액산정내용
-        							</th>
-        						</tr>
-        					</thead>
-        					<tbody>
-        						<tr style="">
-        							<td style="border:1px solid #ddd;padding:8px;background:#f9f9f9;text-align:center;">최종수납액</td>
-        							<td style="border:1px solid #ddd;padding:8px;text-align:right;cursor:pointer;" id="result_item1"
-        								onclick="editResultTableCell(this, '결과1')">
-        								<xf:input id="ipt_paytotal" style="width: 144px;height: 21px;background-color: white;color: black;" ref="data:dm_result.final_due" maxByteLength=""
-        									dataType="text" readOnly="true" ev:onchange="scwin.ipt_paytotal_onchange">
-        								</xf:input>
-        							</td>
-        						</tr>
-        						<tr style="">
-        							<td style="border:1px solid #ddd;padding:8px;background:#f9f9f9;text-align:center;">병원공제금</td>
-        							<td style="border:1px solid #ddd;padding:8px;text-align:right;cursor:pointer;" id="result_item2"
-        								onclick="editResultTableCell(this, '결과2')">
-        								<xf:input id="ipt_hosp" style="width: 144px;height: 21px;" ref="data:dm_result.hospital_prepaid"
-        									maxByteLength="" dataType="text">
-        								</xf:input>
-        							</td>
-        						</tr>
-        						<tr style="">
-        							<td style="border:1px solid #ddd;padding:8px;background:#f9f9f9;text-align:center;">삭감항목총액</td>
-        							<td style="border:1px solid #ddd;padding:8px;text-align:right;cursor:pointer;" id="result_item2"
-        								onclick="editResultTableCell(this, '결과2')">
-        								<xf:input id="" style="width: 144px;height: 21px;" ref="data:dm_result.deducation_amt"
-        									maxByteLength="" dataType="text">
-        								</xf:input>
-        							</td>
-        						</tr>
-        						<tr style="">
-        							<td style="border:1px solid #ddd;padding:8px;background:#f9f9f9;text-align:center;">산출금</td>
-        							<td style="border:1px solid #ddd;padding:8px;text-align:right;cursor:pointer;" id="result_item2"
-        								onclick="editResultTableCell(this, '결과2')">
-        								<xf:input id="ipt_result" style="width: 144px;height: 21px;" ref="data:dm_result.refund_amt" maxByteLength=""
-        									dataType="text">
-        								</xf:input>
-        							</td>
-        						</tr>
-        					</tbody>
-        				</table>
-        			</div>
         			<xf:group class="w2tb" id="" style="width:100%;height: 100px;margin-top: 20px;" tagname="table">
         				<w2:attributes>
         					<w2:summary></w2:summary>
@@ -370,21 +323,25 @@ function calcuResultTableTotal() {
         				<xf:group style="" tagname="tr">
         					<xf:group class="w2tb_td" style="" tagname="td">최종수납액</xf:group>
         					<xf:group class="w2tb_td" id="" style="" tagname="td">
-        						<xf:input id="ipt_fianlpay" style="width: 144px;height: 21px;background-color: white;color: black;" readOnly="true"></xf:input>
+        						<xf:input id="ipt_fianlpay" style="width: 144px;height: 21px;" readOnly="true" ref="data:dm_result.final_due" class="" readOnlyClass="readonly"></xf:input>
         					</xf:group>
         				</xf:group>
         				<xf:group style="" tagname="tr">
         					<xf:group class="w2tb_td" style="" tagname="td">병원공제금</xf:group>
-        					<xf:group class="w2tb_td" style="" tagname="td"></xf:group>
+        					<xf:group class="w2tb_td" style="" tagname="td">
+        						<xf:input id="ipt_hosp" style="width: 144px;height: 21px;" ref="data:dm_result.hospital_prepaid" readOnly="true" class="readonly" readOnlyClass="readonly"></xf:input>
+        					</xf:group>
         				</xf:group>
         				<xf:group style="" tagname="tr">
         					<xf:group class="w2tb_td" style="" tagname="td">삭감항목총액</xf:group>
         					<xf:group class="w2tb_td" style="" tagname="td">
+        						<xf:input id="" style="width: 144px;height: 21px;" ref="data:dm_result.deducation_amt" class="readonly" readOnly="true" readOnlyClass="readonly"></xf:input>
         					</xf:group>
         				</xf:group>
         				<xf:group style="" tagname="tr">
         					<xf:group class="w2tb_td" style="" tagname="td">산출금</xf:group>
         					<xf:group class="w2tb_td" style="" tagname="td">
+        						<xf:input id="ipt_result" style="width: 144px;height: 21px;" ref="data:dm_result.refund_amt" class="readonly" readOnly="true" readOnlyClass="readonly"></xf:input>
         					</xf:group>
         				</xf:group>
         			</xf:group>
