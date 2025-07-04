@@ -13,12 +13,9 @@
         				<w2:key dataType="number" name="ID" id="ID"></w2:key>
         				<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
         				<w2:key dataType="text" name="receipt_date" id="receipt_date"></w2:key>
-        				<w2:key dataType="text" name="status" id="staus"></w2:key>
-        				<w2:key dataType="text" name="emp_no" id="emp_no"></w2:key>
         				<w2:key dataType="text" name="claim_content" id="claim_content"></w2:key>
         				<w2:key dataType="text" name="disease_code" id="disease_code"></w2:key>
-        				<w2:key dataType="text" name="disease_code" id="date_of_accident"></w2:key>
-        				<w2:key dataType="text" name="claim_type" id="claim_type"></w2:key>
+        				<w2:key dataType="date" name="date_of_accident" id="date_of_accident"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
         		<w2:dataMap baseNode="map" id="dm_claimuser">
@@ -50,7 +47,8 @@
         				<w2:column dataType="text" name="상태" id="status"></w2:column>
         			</w2:columnInfo>
         		</w2:dataList>
-        		<w2:dataList baseNode="list" repeatNode="map" id="dl_hcode1" saveRemovedData="true" useFilter="true" style="visibility: none;">
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_hcode1" saveRemovedData="true" useFilter="true"
+        			style="visibility: none;">
         			<w2:columnInfo>
         				<w2:column dataType="text" name="코드" id="code"></w2:column>
         				<w2:column dataType="text" name="설명" id="des"></w2:column>
@@ -118,9 +116,13 @@
         		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
         		ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_insertOffset" action="/InsWebApp/CLAIMOFFSETIns.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_claimoffset","key":"elData"}' target="" encoding="UTF-8"
-        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="저장 중" ev:submit="" ev:submitdone=""
-        		ev:submiterror="" abortTrigger="">
+        	<xf:submission id="sbm_insertOffset" action="/InsWebApp/CLAIMOFFSETIns.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,{"id":"dm_claimoffset","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_updateClaim" action="/InsWebApp/CLAIMUpd.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,{"id":"dm_claim","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="저장 중..." ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -132,6 +134,7 @@ localStorage.setItem("claimNo", "a52d86a3-5629-11f0-b4f3-bc2411231130");
 localStorage.setItem("ID", "1");
 
 scwin.onpageload = function() {
+    dm_claim.set("claim_no", localStorage.getItem("claimNo"));
     let reqData = {"elData":{"ID": localStorage.getItem("ID")}};
     $c.sbm.execute(sbm_befClaim, reqData);
     $c.sbm.execute(sbm_getSubInsu, reqData);
@@ -145,8 +148,10 @@ scwin.onpageload = function() {
         
 scwin.btn_next_onclick = function (e) {
     let missingFields = [];
-    let claimOffset = false;
-    let dateDrop = false; 
+    let isClaimOffset = false;
+    let isDateDrop = false;
+    let isHcode = false;
+    let isSaveOffset = false;
 
     // 상계 
     const claimNo = ipt_claimNo.getValue();
@@ -156,11 +161,11 @@ scwin.btn_next_onclick = function (e) {
     if (claimNo !== "" && reason !== "" && charge !== "") {
         // 상계 저장 처리
         dm_claimoffset.set("claim_no", localStorage.getItem("claimNo")); 
-        $c.sbm.execute(sbm_insertOffset); 
-        claimOffset = true;
+        isClaimOffset = true;
+        isSaveOffset = true;
     } 
     else if (claimNo === "" && reason === "" && charge === "") { // (상계) 모든 값이 비어있는 경우
-        claimOffset = true;
+        isClaimOffset = true;
     } 
     else {
         missingFields.push("상계 금액 정보");
@@ -186,19 +191,42 @@ scwin.btn_next_onclick = function (e) {
             imgIdx: imgIdx
         });
         if (i === scwin.genList.length -1) {
-            dateDrop = true;
+            isDateDrop = true;
         }
     }
 
     localStorage.setItem('dateList', JSON.stringify(saveList));
     console.log('저장 완료:', saveList);
 
+    let hcode1 = ipt_hcode1.getValue();
+    let hcode2 = ipt_hcode2.getValue();
+    let hcode2Date = ipt_hcodeDate.getValue();
 
-    if (claimOffset && dateDrop) {
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-ocr.xml";
+    if (hcode1 !== "") {
+        isHcode = true;
+        dm_claim.set("disease_code", hcode1);
+    } else if (hcode2 !== "" && hcode2Date !== "") {
+        isHcode = true;
+        dm_claim.set("disease_code", hcode2);
+        dm_claim.set("date_of_accident", hcode2Date);
+    } else if (hcode2 !== "" && hcode2Date === "") {
+        missingFields.push("청구내역 및 처리정보 (사인코드 입력시 날짜 선택은 필수입니다)");
+    } else {
+        missingFields.push("청구내역 및 처리정보 (병명코드 혹은 사인코드는 필수 입력입니다.)");
+    }
+
+    if (isClaimOffset && isDateDrop && isHcode) {
+        // 서브미션 호출
+        if (isSaveOffset) {
+            $c.sbm.execute(sbm_insertOffset); 
+        }
+        console.log(dm_claim.getJSON());
+        $c.sbm.execute(sbm_updateClaim);
+
+        //location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-ocr.xml";
     }
     else {
-        alert("다음 항목이 입력되지 않았습니다\n" + missingFields.join(", "));
+        alert("다음 항목의 입력을 확인하세요\n" + missingFields.join(", "));
     }
 };
 
@@ -237,7 +265,7 @@ scwin.ipt_hcode2_onclick = function (e) {
     openHcodePopup("/InsWebApp/ui/audit/hcode2-popup.xml");
 };
 
-function openHcodePopup(link, closeFunc) {
+function openHcodePopup(link) {
     requires("uiplugin.popup"); 
 	var winWid = $(window).width();
 	var winHei = $(window).height();
@@ -426,9 +454,9 @@ function openHcodePopup(link, closeFunc) {
     						</xf:group>
     						<xf:group class="" id="" style="">
     							<w2:textbox id="" label="재해 일자" style="width: 150px;height: 23px;"></w2:textbox>
-    							<w2:inputCalendar calendarValueType="yearMonthDate" focusOnDateSelect="false" footerDiv="true" id=""
+    							<w2:inputCalendar calendarValueType="yearMonthDate" focusOnDateSelect="false" footerDiv="true" id="ipt_hcodeDate"
     								meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true" meta_snippetName="10_11 기간조회" renderDiv="true" renderType=""
-    								rightAlign="false" style="" ref="data:dm_claim.date_of_accident">
+    								rightAlign="false" style="" ref="">
     							</w2:inputCalendar>
     						</xf:group>
     					</xf:group>
