@@ -16,7 +16,7 @@
         		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
-        	<xf:submission id="sbm_login" action="/InsWebApp/CmmLogin.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"login","key":"elData"}' target="" encoding="UTF-8" instance=""
+        	<xf:submission id="sbm_login" action="/InsWebApp/CmmLogin.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"login","key":"loginVo"}' target="" encoding="UTF-8" instance=""
         		replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="login loading ..." ev:submit="" ev:submitdone="scwin.sbm_login_submitdone" ev:submiterror=""
         		abortTrigger="">
         	</xf:submission>
@@ -56,7 +56,10 @@ scwin.sbm_login_submitdone = function (e) {
             // $p.url("/InsWebApp/html/emp/empList.html")
             // $c.win.moveUrl("/InsWebApp/ui/dept/Dept.xml");
             // location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/dept/Dept.xml";
-            location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml";
+            location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/insdept/InsDept.xml";
+
+                //C:\InswaveToolSP1\workspace\InsWebApp\src\main\webapp\ui\user\User.xml
+
         } else {
             exceptionAlert("로그인", elHeader.resCode, elHeader.resMsg);
         }

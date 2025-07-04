@@ -1,0 +1,43 @@
+#tableContainer {
+  height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+table {
+  width: 100%;
+  height: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 11px; /* 아주 작게 */
+}
+th, td {
+  border: 1px solid #aaa;
+  padding: 0;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 1px; /* 기본값, JS에서 덮어씌울 수 있음 */
+}
+
+.thead1 {
+	border-top: 2px solid #aaa;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #f2f2f2;
+}
+.thead2 {
+  position: sticky;
+  top: 31px;    /* 첫 번째 헤더 줄의 높이(px)와 맞춰주세요 */
+  z-index: 2;
+  background: #f2f2f2;
+}
+.thead3 {
+  position: sticky;
+  top: 61px;    /* 첫 번째+두 번째 헤더 줄의 높이 */
+  z-index: 1;
+  background: #f2f2f2;
+}
