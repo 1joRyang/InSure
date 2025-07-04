@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+    	<w2:type>COMPONENT</w2:type>
+    	<w2:buildDate />
+    	<w2:MSA />
+    	<xf:model>
+    		<w2:dataCollection baseNode="map">
+    			<w2:dataMap baseNode="map" id="dma_SimpleLogin">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="간단비밀번호" id="sp_pw"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    		</w2:dataCollection>
+    		<w2:workflowCollection />
+    		<xf:submission id="sbm_SimpleLogin" action="/InsWebApp/SimpleLogin.pwkjson" method="post" mediatype="application/json" ref="	" target='data:json,{"id":"dma_SimpleLogin","key":"elData"}' encoding="UTF-8"
+    			instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_SimpleLogin_submitdone"
+    			ev:submiterror="" abortTrigger="">
+    		</xf:submission>
+    	</xf:model>
+    	<w2:layoutInfo />
+    	<w2:publicInfo method="" />
+    	<script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = function() {
+	scwin.password = "";
+};
+
+scwin.button1_onclick = function (e) {
+    scwin.addDigit('1');
+};
+
+scwin.button2_onclick = function (e) {
+    scwin.addDigit('2');
+};
+
+scwin.button3_onclick = function (e) {
+     scwin.addDigit('3');
+};
+
+scwin.button4_onclick = function (e) {
+    scwin.addDigit('4');
+};
+
+scwin.button5_onclick = function (e) {
+    scwin.addDigit('5');
+};
+
+scwin.button6_onclick = function (e) {
+    scwin.addDigit('6');
+};
+
+scwin.button7_onclick = function (e) {
+    scwin.addDigit('7');
+};
+
+scwin.button8_onclick = function (e) {
+    scwin.addDigit('8');
+};
+
+scwin.button9_onclick = function (e) {
+    scwin.addDigit('9');
+};
+
+scwin.button0_onclick = function (e) {
+    scwin.addDigit('0');
+};
+
+
+// 공통 함수
+scwin.addDigit = function(digit) {
+    if (scwin.password.length < 6) {
+        scwin.password += digit;
+        scwin.updateCircles();
+        
+        if (scwin.password.length === 6) {
+            console.log("비밀번호 입력 완료:", scwin.password);
+  
+            dma_SimpleLogin.set("sp_pw", scwin.password);
+
+            let reqData = { "elData": dma_SimpleLogin.getJSON() };
+            
+            $c.sbm.execute(sbm_SimpleLogin, reqData);
+        }
+    }
+};
+
+scwin.updateCircles = function() {
+    // 모든 동그라미 초기화
+    $p.getComponentById("circle1").removeClass("filled");
+    $p.getComponentById("circle2").removeClass("filled");
+    $p.getComponentById("circle3").removeClass("filled");
+    $p.getComponentById("circle4").removeClass("filled");
+    $p.getComponentById("circle5").removeClass("filled");
+    $p.getComponentById("circle6").removeClass("filled");
+    
+    // 입력된 개수만큼 채우기
+    if (scwin.password.length >= 1) $p.getComponentById("circle1").addClass("filled");
+    if (scwin.password.length >= 2) $p.getComponentById("circle2").addClass("filled");
+    if (scwin.password.length >= 3) $p.getComponentById("circle3").addClass("filled");
+    if (scwin.password.length >= 4) $p.getComponentById("circle4").addClass("filled");
+    if (scwin.password.length >= 5) $p.getComponentById("circle5").addClass("filled");
+    if (scwin.password.length >= 6) $p.getComponentById("circle6").addClass("filled");
+};
+
+
+scwin.sbm_SimpleLogin_submitdone = function (e) {
+    let elHeader = e.responseJSON.elHeader;
+    if(elHeader != "" && elHeader != null && elHeader != "undefined") {	
+        if(elHeader.resSuc == true) {
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml"
+            console.log("연결성공");
+        }else{
+            dma_SimpleLogin.setEmptyValue();
+            alert("로그인 정보를 확인하세요");
+        }
+    }
+};
+]]></script>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+    	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
+    		style="">
+    		<xf:group style="height: 100px;" id=""></xf:group>
+    		<w2:textbox id="" label="간편 비밀번호" style="height: 30px;text-align:center;font-size:25px;font-weight:bolder;"></w2:textbox>
+    		<xf:group style="height: 20px;" id=""></xf:group>
+    		<w2:textbox id="" label="6자리 간편 비밀번호를 입력하세요." style="height: 23px;text-align:center;"></w2:textbox>
+    		<xf:group style="height: 20px;" id=""></xf:group>
+    		<xf:group style="height: 30px;text-align:center;display: flex; justify-content: center;" id="">
+    			<xf:group id="" style="width:178px;height:30px;display:flex;gap:5px;justify-content: center;align-items: center;">
+    				<w2:textbox style="border-radius:11px;width:20px;height:20px;border-color:#D9D9D9;border-style:solid;" id="circle1" label=""></w2:textbox>
+    				<w2:textbox style="border-radius:11px;width:20px;height:20px;border-color:#D9D9D9;border-style:solid;" id="circle2" label=""></w2:textbox>
+    				<w2:textbox style="border-radius:11px;width:20px;height:20px;border-color:#D9D9D9;border-style:solid;" id="circle3" label=""></w2:textbox>
+    				<w2:textbox style="border-radius:11px;width:20px;height:20px;border-color:#D9D9D9;border-style:solid;" id="circle4" label=""></w2:textbox>
+    				<w2:textbox style="border-radius:11px;width:20px;height:20px;border-color:#D9D9D9;border-style:solid;" id="circle5" label=""></w2:textbox>
+    				<w2:textbox style="border-radius:11px;width:20px;height:20px;border-color:#D9D9D9;border-style:solid;" id="circle6" label=""></w2:textbox>
+    			</xf:group>
+    		</xf:group>
+    		<xf:group style="height: 50px;" id=""></xf:group>
+    		<xf:group class="lybox" id="" meta_snippetCategory="01_화면분할" meta_snippetKeyComponent="true"
+    			meta_snippetName="1_03 가변 3단 분할_width값 고정 33per" style="">
+    			<xf:group class="" id="" style="display: flex;    justify-content: right;    align-items: center;">
+    				<w2:button id="button1"
+    					style="width:100px;height:100px;border:1px solid #ccc;text-align:center;line-height:90px;box-sizing:border-box;border-radius: 50px;font-size:40px;font-weight:bold;background-color: #F5F8FC;border: 1px solid #D9D9D9;cursor: pointer;transition: all 0.2s ease;.circle.filled {    background-color: rgba(54, 116, 181, 0.1); /* #3674B5 + 10% 투명도 */    border-color: #3674B5; /* #3674B5 + 100% 투명도 (불투명) */}"
+    					label="1" ev:onclick="scwin.button1_onclick">
+    				</w2:button>
+    			</xf:group>
+    			<xf:group class="" id="" style="">
+    				<xf:group class="" id="" style="display: flex;    justify-content: center;    align-items: center;">
+    					<w2:button
+    						style="width:100px;height:100px;border:1px solid #ccc;text-align:center;line-height:90px;box-sizing:border-box;border-radius: 50px;font-size:40px;font-weight:bold;background-color: #F5F8FC;border: 1px solid #D9D9D9;cursor: pointer;transition: all 0.2s ease;.button:active {  background-color: rgba(54, 116, 181, 0.1); /* #3674B5 with 10% opacity */  border-color: #3674B5; /* #3674B5 with 100% opacity */}/* 또는 :hover 상태도 원한다면 */ .button:hover {  background-color: rgba(54, 116, 181, 0.05);border-width:1px;"
+    						id="button2" label="2" ev:onclick="scwin.button2_onclick">
+    					</w2:button>
+    				</xf:group>
+    			</xf:group>
+    			<xf:group class="" id="" style="">
+    				<xf:group class="" id="" style="display: flex;    justify-content: left;    align-items: center;">
+    					<w2:button
+    						style="width:100px;height:100px;border:1px solid #ccc;text-align:center;line-height:90px;box-sizing:border-box;border-radius: 50px;font-size:40px;font-weight:bold;background-color: #F5F8FC;border: 1px solid #D9D9D9;cursor: pointer;transition: all 0.2s ease;.button:active {  background-color: rgba(54, 116, 181, 0.1); /* #3674B5 with 10% opacity */  border-color: #3674B5; /* #3674B5 with 100% opacity */}/* 또는 :hover 상태도 원한다면 */ .button:hover {  background-color: rgba(54, 116, 181, 0.05);"
+    						id="button3" label="3" ev:onclick="scwin.button3_onclick">
+    					</w2:button>
+    				</xf:group>
+    			</xf:group>
+    		</xf:group>
+    		<xf:group class="lybox" id="" meta_snippetCategory="01_화면분할" meta_snippetKeyComponent="true"
+    			meta_snippetName="1_03 가변 3단 분할_width값 고정 33per" style="">
+    			<xf:group class="" id="" style="display: flex;    justify-content: right;    align-items: center;">
+    				<w2:button id="button4" label="4"
+    					style="width:100px;height:100px;border:1px solid #ccc;text-align:center;line-height:90px;box-sizing:border-box;border-radius: 50px;font-size:40px;font-weight:bold;background-color: #F5F8FC;border: 1px solid #D9D9D9;cursor: pointer;transition: all 0.2s ease;" ev:onclick="scwin.button4_onclick">
+    				</w2:button>
+    			</xf:group>
+    			<xf:group class="" id="" style="">
+    				<xf:group class="" id="" style="display: flex;    justify-content: center;    align-items: center;">
+    					<w2:button id="button5" label="5"
+    						style="width:100px;height:100px;border:1px solid #ccc;text-align:center;line-height:90px;box-sizing:border-box;border-radius: 50px;font-size:40px;font-weight:bold;background-color: #F5F8FC;border: 1px solid #D9D9D9;cursor: pointer;transition: all 0.2s ease;" ev:onclick="scwin.button5_onclick">
+    					</w2:button>
+    				</xf:group>
+    			</xf:group>
+    			<xf:group class="" id="" style="">
+    				<xf:group class="" id="" style="display: flex;    justify-content: left;    align-items: center;">
+    					<w2:button id="button6" label="6"
+    						style="width:100px;height:100px;border:1px solid #ccc;text-align:center;line-height:90px;box-sizing:border-box;border-radius: 50px;font-size:40px;font-weight:bold;background-color: #F5F8FC;border: 1px solid #D9D9D9;cursor: pointer;transition: all 0.2s ease;" ev:onclick="scwin.button6_onclick">
+    					</w2:button>
+    				</xf:group>
+    			</xf:group>
+    		</xf:group>
+    		<xf:group class="lybox" id="" meta_snippetCategory="01_화면분할" meta_snippetKeyComponent="true"
+    			meta_snippetName="1_03 가변 3단 분할_width값 고정 33per" style="">
+    			<xf:group class="" id="" style="display: flex;    justify-content: right;    align-items: center;">
+    				<w2:button id="button7" label="7"
+    					style="width:100px;height:100px;border:1px solid #ccc;text-align:center;line-height:90px;box-sizing:border-box;border-radius: 50px;font-size:40px;font-weight:bold;background-color: #F5F8FC;border: 1px solid #D9D9D9;cursor: pointer;transition: all 0.2s ease;" ev:onclick="scwin.button7_onclick">
+    				</w2:button>
+    			</xf:group>
+    			<xf:group class="" id="" style="">
+    				<xf:group class="" id="" style="display: flex;    justify-content: center;    align-items: center;">
+    					<w2:button id="button8" label="8"
+    						style="width:100px;height:100px;border:1px solid #ccc;text-align:center;line-height:90px;box-sizing:border-box;border-radius: 50px;font-size:40px;font-weight:bold;background-color: #F5F8FC;border: 1px solid #D9D9D9;cursor: pointer;transition: all 0.2s ease;" ev:onclick="scwin.button8_onclick">
+    					</w2:button>
+    				</xf:group>
+    			</xf:group>
+    			<xf:group class="" id="" style="">
+    				<xf:group class="" id="" style="display: flex;    justify-content: left;    align-items: center;">
+    					<w2:button id="button9" label="9"
+    						style="width:100px;height:100px;border:1px solid #ccc;text-align:center;line-height:90px;box-sizing:border-box;border-radius: 50px;font-size:40px;font-weight:bold;background-color: #F5F8FC;border: 1px solid #D9D9D9;cursor: pointer;transition: all 0.2s ease;" ev:onclick="scwin.button9_onclick">
+    					</w2:button>
+    				</xf:group>
+    			</xf:group>
+    		</xf:group>
+    		<xf:group class="lybox" id="" meta_snippetCategory="01_화면분할" meta_snippetKeyComponent="true"
+    			meta_snippetName="1_03 가변 3단 분할_width값 고정 33per" style="">
+    			<xf:group class="" id="" style="display: flex;    justify-content: right;    align-items: center;"></xf:group>
+    			<xf:group class="" id="" style="">
+    				<xf:group class="" id="" style="display: flex;    justify-content: center;    align-items: center;">
+    					<w2:button id="button0" label="0"
+    						style="width:100px;height:100px;border:1px solid #ccc;text-align:center;line-height:90px;box-sizing:border-box;border-radius: 50px;font-size:40px;font-weight:bold;background-color: #F5F8FC;border: 1px solid #D9D9D9;cursor: pointer;transition: all 0.2s ease;" ev:onclick="scwin.button0_onclick">
+    					</w2:button>
+    				</xf:group>
+    			</xf:group>
+    			<xf:group class="" id="" style="">
+    				<xf:group class="" id="" style="display: flex;    justify-content: left;    align-items: center;"></xf:group>
+    			</xf:group>
+    		</xf:group>
+    		<xf:group style="height: 30px;" id=""></xf:group>
+    		<xf:group style="height: 100px;" id="">
+    			<xf:group class="lybox" id="" meta_snippetCategory="01_화면분할" meta_snippetKeyComponent="true"
+    				meta_snippetName="1_03 가변 3단 분할_width값 고정 33per" style="">
+    				<xf:group class="" id="" style=""></xf:group>
+    				<xf:group class="" id="" style=""></xf:group>
+    				<xf:group class="" id="" style="">
+    					<xf:group class="" id="" style="display: flex;    justify-content: center;    align-items: center;">
+    						<w2:textbox id="" label="취소"
+    							style="width:70px;height:70px;text-align:center;line-height:65px;font-size:20px;">
+    						</w2:textbox>
+    					</xf:group>
+    				</xf:group>
+    			</xf:group>
+    		</xf:group>
+    	</xf:group>
+    </body>
+</html>

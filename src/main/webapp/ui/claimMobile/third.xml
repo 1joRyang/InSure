@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="/InsWebApp/cm/css/claimPage.css" type="text/css"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare"
+    xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+    	<w2:type>DEFAULT</w2:type>
+    	<w2:buildDate />
+    	<xf:model>
+    		<xf:instance>
+    			<data xmlns="" />
+    		</xf:instance>
+    		<w2:dataCollection baseNode="map">
+    			<w2:dataList baseNode="list" repeatNode="map" id="dataList1" saveRemovedData="true">
+    				<w2:columnInfo>
+    					<w2:column dataType="text" name="라벨" id="label"></w2:column>
+    					<w2:column dataType="text" name="코드" id="code"></w2:column>
+    				</w2:columnInfo>
+    				<w2:data use="true">
+    					<w2:row>
+    						<label><![CDATA[감기]]></label>
+    						<code><![CDATA[1]]></code>
+    					</w2:row>
+    					<w2:row>
+    						<label><![CDATA[허리통증]]></label>
+    						<code><![CDATA[2]]></code>
+    					</w2:row>
+    					<w2:row>
+    						<label><![CDATA[장염]]></label>
+    						<code><![CDATA[3]]></code>
+    					</w2:row>
+    					<w2:row>
+    						<label><![CDATA[복통]]></label>
+    						<code><![CDATA[4]]></code>
+    					</w2:row>
+    					<w2:row>
+    						<label><![CDATA[해당하는 항목이 없어요(직접입력)]]></label>
+    						<code><![CDATA[5]]></code>
+    					</w2:row>
+    				</w2:data>
+    			</w2:dataList>
+    		</w2:dataCollection>
+    	</xf:model>
+    	<w2:leaf>true</w2:leaf>
+    	<w2:fileName>final_check.xml</w2:fileName>
+    	<w2:css src="/css/custom.css"></w2:css>
+    	<w2:js src="/js/final_check.js"></w2:js>
+    	<w2:engine-version>5.0.0</w2:engine-version>
+        <script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = function() {
+	
+};
+
+scwin.btnNext_onclick = function (e) {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/fourth.xml"
+};
+]]></script>
+    	<style type="text/css"><![CDATA[/* custom.css */
+
+/*
+  ======================================
+  Common Styles
+  ======================================
+*/
+.pageWrapper {
+    font-family: 'Malgun Gothic', 'Dotum', sans-serif;
+    background-color: #f7f7f7;
+}
+
+/* Header and Progress Bar */
+.pageWrapper > xf\:group:first-child > xf\:group:first-child {
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+#progressBar {
+    height: 100%;
+    background-color: #ffc107;
+    transition: width 0.5s ease-in-out;
+}
+
+.stepIndicatorContainer {
+    padding-top: 10px;
+}
+
+.progressBtn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    background-color: #fff;
+    color: #ccc;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.progressBtn.completed {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #fff;
+}
+
+.progressBtn.active {
+    background-color: #fff;
+    border-color: #ffc107;
+    color: #ffc107;
+}
+
+/* Scrollable Main Content Wrapper */
+#mainContentWrapper {
+    flex: 1; /* Take up all remaining space */
+    overflow-y: auto; /* Enable vertical scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Section titles */
+.sectionTitle {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Info Box */
+.infoBox {
+    width: 100%;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Info Row for key-value pairs */
+.infoRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.infoLabel {
+    font-weight: bold;
+    color: #555;
+    flex-shrink: 0;
+    margin-right: 15px;
+}
+
+.infoValue {
+    font-weight: 500;
+    color: #222;
+    text-align: right;
+}
+
+/* Text Button (e.g., '수정') */
+.textButton {
+    background-color: transparent;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Selection Buttons (e.g., '네/아니오') */
+.selectionBtn {
+    background-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    cursor: pointer;
+}
+
+.selectionBtn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.selectionBtn.selected {
+    border-color: #ffc107;
+    background-color: #fff8e1;
+}
+
+.selectionBtn.half {
+    flex: 1;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Fixed Bottom Button */
+.nextBtn {
+    width: 100%;
+    height: 65px;
+    background-color: #ffc107;
+    border-radius: 35px;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s;
+}
+
+.nextBtn:hover {
+    background-color: #ffb300;
+}
+
+/* Scroll to Top button */
+#scrollTopBtn {
+    z-index: 100; /* Ensure it's on top */
+    cursor: pointer;
+}
+
+/* Icon Styles (You must provide the actual image paths) */
+.icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.questionIcon { background-image: url('/images/question_icon.png'); width: 16px; height: 16px; }
+.arrowUpIcon { background-image: url('/images/arrow_up_icon.png'); }]]></style>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+        <xf:group class="sub_contents2" id="wrapper" style="">
+            <xf:group class="header-section" id="header" style="">
+                <w2:textbox class="step_tit" id="" label="청구상황" style="" tagname=""></w2:textbox>
+                <xf:group class="step" id="" style="">
+                    <xf:group id="" style="" tagname="ul">
+
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="✔" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="✔" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="current" id="" style="" tagname="li">
+                    		<w2:span id="" label="3" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="4" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="5" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="6" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="7" style=""></w2:span>
+                    	</xf:group>
+
+
+                    </xf:group>
+                </xf:group>
+            </xf:group>
+
+            <xf:group class="content-section" id="mainContent" style="margin:0 auto;">
+            	<w2:textbox class="question-text" id="" label="진단 내용을 선택해 주세요" style=""></w2:textbox>
+            	<w2:textbox id="" label="진단 내용 선택" style="width: 150px;height: 23px;font-weight:bold;"></w2:textbox>
+            	<xf:select1 id="" chooseOption="" style="height:39px;" submenuSize="auto" allOption="" disabled="false" direction="auto"
+            		appearance="minimal" disabledClass="w2selectbox_disabled" ref="/InsWebApp/insure/insMobile/claimFinal.xml">
+            		<xf:choices>
+            			<xf:itemset nodeset="data:dataList1">
+            				<xf:label ref="label"></xf:label>
+            				<xf:value ref="code"></xf:value>
+            			</xf:itemset>
+            		</xf:choices>
+            	</xf:select1>
+
+            	<xf:group style="flex: 1;" id=""></xf:group>
+            </xf:group>
+
+            <xf:group class="footer-section" id="footer" style="">
+                <w2:button class="next-button" id="btnNext" label="다음" ev:onclick="scwin.btnNext_onclick"></w2:button>
+            </xf:group>
+        </xf:group>
+    </body>
+</html>

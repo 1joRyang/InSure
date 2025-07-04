@@ -1,0 +1,118 @@
+@charset "UTF-8";
+
+/* ==================== 팝업 공통 스타일 ==================== */
+/* 팝업 전체 wrapper - 화면 하단에 위치하고 배경을 어둡게 만듭니다. */
+.popup-wrapper {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* 팝업을 하단으로 정렬 */
+    background-color: rgba(0, 0, 0, 0.5); /* 반투명 검은 배경 */
+    z-index: 1000; /* 다른 요소보다 위에 오도록 설정 */
+}
+
+/* 팝업 컨테이너 (흰색 부분) - 둥근 모서리와 내부 패딩 */
+.popup-container, .date-picker-container {
+    background-color: #fff;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 24px 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: 80vh; /* 화면 높이의 80%까지만 차지하도록 */
+    animation: slideUp 0.3s ease-out; /* 팝업 등장 애니메이션 */
+}
+
+/* 팝업 등장 애니메이션 (아래에서 위로) */
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+/* 팝업 헤더 */
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+}
+
+.popup-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    line-height: 1.5;
+}
+
+.popup-close-button {
+    cursor: pointer;
+    padding: 5px; /* 클릭 영역 확보 */
+}
+
+/* 팝업 내용 - 스크롤 가능하도록 설정 */
+.popup-content, .date-picker-content {
+    flex-grow: 1; /* 남은 공간을 모두 차지 */
+    padding-top: 10px;
+    overflow-y: auto; /* 내용이 길어지면 스크롤바 생성 */
+}
+
+/* 푸터 및 버튼 그룹 */
+.popup-footer {
+    padding-top: 24px;
+}
+.popup-footer.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+/* ==================== 동의 팝업 UI 스타일 ==================== */
+/* 전체 동의 체크박스 그룹 */
+.all-consent-checkbox {
+    padding: 16px;
+    background-color: #fff;
+    border: 2px solid #ffc107;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    position: relative;
+}
+.required-text {
+    color: #ffc107;
+    font-weight: bold;
+    margin-right: 4px;
+}
+.w2checkbox_item { display: flex; align-items: center; cursor: pointer; }
+.w2checkbox_item label { display: flex; align-items: center; font-size: 16px; font-weight: bold; color: #333; }
+.w2checkbox_item .w2checkbox_check { position: relative; width: 24px; height: 24px; border-radius: 6px; border: 2px solid #ccc; background-color: #fff; margin-right: 12px; box-sizing: border-box; }
+.w2checkbox_item.checked .w2checkbox_check { border-color: #ffc107; background-color: #ffc107; }
+.w2checkbox_item.checked .w2checkbox_check::after { content: ''; position: absolute; top: 50%; left: 50%; width: 6px; height: 12px; border: solid #fff; border-width: 0 3px 3px 0; transform: translate(-50%, -65%) rotate(45deg); }
+/* 개별 동의 항목 리스트 */
+.consent-items-list { display: flex; flex-direction: column; gap: 12px; padding-left: 20px; }
+.consent-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+.consent-item .w2checkbox_item label { font-weight: normal; }
+/* 화살표 아이콘 */
+.arrow-trigger { cursor: pointer; padding-left: 10px; }
+.arrow-icon { color: #aaa; font-weight: bold; font-size: 16px; }
+/* 동의 버튼 */
+.agree-button { width: 100%; height: 56px; background-color: #ffc107; color: #000; font-size: 18px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; transition: background-color 0.2s; }
+.agree-button.disabled { background-color: #f0f0f0; color: #ccc; cursor: not-allowed; }
+
+/* ==================== DatePicker 팝업 UI 스타일 ==================== */
+.date-picker-content { display: flex; justify-content: center; align-items: center; padding: 20px 0; }
+/* w2:datePicker (spinner type) 커스텀 스타일 */
+.custom-date-picker .w2datePicker_year_spinner,
+.custom-date-picker .w2datePicker_month_spinner,
+.custom-date-picker .w2datePicker_day_spinner { font-size: 20px; font-weight: bold; }
+.custom-date-picker .w2datePicker_year_label,
+.custom-date-picker .w2datePicker_month_label,
+.custom-date-picker .w2datePicker_day_label { font-size: 16px; color: #888; font-weight: normal; }
+.custom-date-picker .w2datePicker_selected_row { color: #333; font-weight: bold; background-color: #f7f7f7; }
+.custom-date-picker .w2datePicker_center_line { border-top: 1px solid #ffc107; border-bottom: 1px solid #ffc107; }
+/* 버튼 스타일 */
+.cancel-button { flex: 1; height: 56px; background-color: #f0f0f0; color: #555; font-size: 18px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; }
+.confirm-button { flex: 1; height: 56px; background-color: #ffc107; color: #000; font-size: 18px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; }
