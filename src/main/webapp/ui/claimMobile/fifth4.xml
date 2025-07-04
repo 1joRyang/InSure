@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="/InsWebApp/cm/css/claimPage.css" type="text/css"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare"
+    xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+    	<w2:type>DEFAULT</w2:type>
+    	<w2:buildDate />
+    	<xf:model>
+    		<xf:instance>
+    			<data xmlns="" />
+    		</xf:instance>
+    	</xf:model>
+    	<w2:leaf>true</w2:leaf>
+    	<w2:fileName>final_check.xml</w2:fileName>
+    	<w2:css src="/css/custom.css"></w2:css>
+    	<w2:js src="/js/final_check.js"></w2:js>
+    	<w2:engine-version>5.0.0</w2:engine-version>
+    	<script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = function() {
+	
+};
+
+scwin.btnNext_onclick = function (e) {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/sixth.xml"
+};
+
+// Camera Plugin 사진촬영
+scwin.btn_camera_onclick = function() {
+    var options = {
+        quality: 70,
+        destinationType: $h.camera.DestinationType.DATA_URL,
+        sourceType: $h.camera.PictureSourceType.CAMERA,
+        encodingType: $h.camera.EncodingType.JPEG,
+        mediaType: $h.camera.MediaType.PICTURE,
+        allowEdit: false,
+        saveToPhotoAlbum: true
+    };
+
+   $h.camera.capturePhoto(scwin.camera_callback,options);
+};
+
+// Camera Plugin 갤러리(사진 가져오기)
+scwin.btn_gallery_onclick = function() { 
+     var options = {
+        quality: 70,
+        destinationType: $h.camera.DestinationType.DATA_URL,
+        sourceType: $h.camera.PictureSourceType.PHOTOLIBRARY,
+        encodingType: $h.camera.EncodingType.JPEG,
+        mediaType: $h.camera.MediaType.PICTURE,
+        allowEdit: false,
+        correctOrientation: false
+    };
+
+    $h.camera.capturePhoto(scwin.camera_callback,options);
+};
+
+// 사진 선택 후 결과가 전달되는 함수
+scwin.camera_callback = function(r){
+
+    console.log("카메라/갤러리에서 받은 정보:" , r);
+
+    // 1. 이미지 데이터(base64) 추출
+    var imageData = "";
+    if(r.data && r.data.callbackURI){
+        //ios & 최신 버전
+        imageData = r.data.callbackURI;
+    } else if (r.data && r.data.image){
+        // 구형 Android
+        imageData = "data:image/jpeg;base64," + r.data.image;
+    }
+
+    // 2. 이미지 데이터 있을 경우에만 미리보기 생성
+    if(imageData){
+        // 하이브리드 앱 콜백 타이밍 문제를 해결학 위한 표준적인 방법
+        setTimeout(function(){
+
+            // 3. 부모 '컴포넌트 객체'를 ID로 찾기
+            var parentComponent = $p.getComponentById("previewBox");
+
+            if (parentComponent) {
+                // 4. 컴포넌트 객체에서 실제 'DOM 노드'를 가져오기
+                var parentNode = parentComponent.getGenerator();
+                console.log("parentNode:" ,parentNode);
+
+                // 5. [id] - 생성될 이미지의 고유 ID 생성
+                var newImageId = "preview_" + new Date().getTime();
+                console.log("newImageId:" ,newImageId);
+
+                // 6. [componentName] - 생성할 컴포넌트의 종류 지정
+                var componentName = "image";
+                console.log("componentName:" ,componentName);
+
+                // 7. [options] - 컴포넌트에 적용할 속성 정의
+                var imageOptions = {
+                    src:imageData,
+                    style:"width:100px; height:100px; margin:5px; border-radius:8px; object-fit:cover;"
+                };
+                console.log("imageOptions:" ,imageOptions);
+
+                // 6. [parent] - 4개의 인자를 모두 사용하여 함수 호출
+                // $p.dynamicCreate(id, componentName, options, parent)
+                $p.dynamicCreate(newImageId, componentName, imageOptions, parentNode);
+
+                // 7. 화면 변경사항 최종 반영
+                parentComponent.redraw();
+            } else {
+                console.error("부모영역 찾을 수 없음");
+            }                
+        }, 0);
+    }
+};
+]]></script>
+    	<style type="text/css"><![CDATA[/* custom.css */
+
+/*
+  ======================================
+  Common Styles
+  ======================================
+*/
+.pageWrapper {
+    font-family: 'Malgun Gothic', 'Dotum', sans-serif;
+    background-color: #f7f7f7;
+}
+
+/* Header and Progress Bar */
+.pageWrapper > xf\:group:first-child > xf\:group:first-child {
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+#progressBar {
+    height: 100%;
+    background-color: #ffc107;
+    transition: width 0.5s ease-in-out;
+}
+
+.stepIndicatorContainer {
+    padding-top: 10px;
+}
+
+.progressBtn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    background-color: #fff;
+    color: #ccc;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.progressBtn.completed {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #fff;
+}
+
+.progressBtn.active {
+    background-color: #fff;
+    border-color: #ffc107;
+    color: #ffc107;
+}
+
+/* Scrollable Main Content Wrapper */
+#mainContentWrapper {
+    flex: 1; /* Take up all remaining space */
+    overflow-y: auto; /* Enable vertical scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Section titles */
+.sectionTitle {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Info Box */
+.infoBox {
+    width: 100%;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Info Row for key-value pairs */
+.infoRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.infoLabel {
+    font-weight: bold;
+    color: #555;
+    flex-shrink: 0;
+    margin-right: 15px;
+}
+
+.infoValue {
+    font-weight: 500;
+    color: #222;
+    text-align: right;
+}
+
+/* Text Button (e.g., '수정') */
+.textButton {
+    background-color: transparent;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Selection Buttons (e.g., '네/아니오') */
+.selectionBtn {
+    background-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    cursor: pointer;
+}
+
+.selectionBtn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.selectionBtn.selected {
+    border-color: #ffc107;
+    background-color: #fff8e1;
+}
+
+.selectionBtn.half {
+    flex: 1;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Fixed Bottom Button */
+.nextBtn {
+    width: 100%;
+    height: 65px;
+    background-color: #ffc107;
+    border-radius: 35px;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s;
+}
+
+.nextBtn:hover {
+    background-color: #ffb300;
+}
+
+/* Scroll to Top button */
+#scrollTopBtn {
+    z-index: 100; /* Ensure it's on top */
+    cursor: pointer;
+}
+
+/* Icon Styles (You must provide the actual image paths) */
+.icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.questionIcon { background-image: url('/images/question_icon.png'); width: 16px; height: 16px; }
+.arrowUpIcon { background-image: url('/images/arrow_up_icon.png'); }]]></style>
+    	<w2:require as="udc_camera" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/camera.xml"></w2:require>
+    	<w2:require as="udc_gallery" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/gallery.xml"></w2:require>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+        <xf:group class="sub_contents2" id="wrapper" style="">
+            <xf:group class="header-section" id="header" style="">
+                <w2:textbox class="step_tit" id="" label="서류등록" style="" tagname=""></w2:textbox>
+                <xf:group class="step" id="" style="">
+                    <xf:group id="" style="" tagname="ul">
+
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="✔" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="✔" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="✔" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="✔" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="current" id="" style="" tagname="li">
+                    		<w2:span id="" label="5" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="6" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="7" style=""></w2:span>
+                    	</xf:group>
+                    </xf:group>
+                </xf:group>
+            </xf:group>
+
+            <xf:group class="content-section" id="mainContent" style="">
+                
+            	<w2:textbox class="question-text1" id="" label="고객님 준비하신 서류를" style=""></w2:textbox>
+            	<w2:textbox class="question-text" id="" label="등록해 주세요" style=""></w2:textbox>
+            	<xf:group class="infoSection">
+            			<w2:span style="" label="청구서류 등록" class="sectionTitle"></w2:span>
+            			<xf:group style="display: flex; gap: 10px; margin-top:10px;">
+            				<xf:trigger type="button" ev:onclick="scwin.btn_camera_onclick" style="flex:1;height:50px;border-radius:10px;" id="btn_camera" class="btn_cm">
+                                <xf:label><![CDATA[카메라 촬영]]></xf:label>
+                            </xf:trigger>
+                            <xf:trigger type="button" ev:onclick="scwin.btn_gallery_onclick" style="flex:1;height:50px;border-radius:10px;" id="btn_gallery" class="btn_cm">
+                                <xf:label><![CDATA[갤러리에서 선택]]></xf:label>
+                            </xf:trigger>
+
+            			</xf:group>
+            	</xf:group>
+
+            		<xf:group class="infoSection">
+            			<w2:span label="청구서류 첨부내역" class="sectionTitle"></w2:span>
+            			<xf:group class="infoBox" id="previewBox"></xf:group>
+            		</xf:group>
+            		<xf:group class="infoSection" style="">
+            			<w2:span style="" label="올바른 예시" class="sectionTitle"></w2:span>
+            			<xf:group style="display: flex; gap: 20px;">
+            				<xf:image src="../../images/insure/right1.JPG" style="width: 45%;height: 200px;" id=""></xf:image>
+            				<xf:image src="../../images/insure/right2.JPG" style="width: 45%;height: 200px;" id=""></xf:image>
+            				<xf:group style="height: 50px;"></xf:group>
+            			</xf:group>
+            		</xf:group>
+            		<xf:group class="infoSection" style="">
+            			<w2:span style="" label="잘못된 예시" class="sectionTitle"></w2:span>
+            			<xf:group style="display: flex; gap: 20px;">
+            				<xf:image id="" src="../../images/insure/fail1.JPG" style="width: 45%;height: 200px;"></xf:image>
+            				<xf:image id="" src="../../images/insure/fail2.JPG" style="width: 45%;height: 200px;"></xf:image>
+            				<xf:group style="height: 50px;"></xf:group>
+            			</xf:group>
+            		</xf:group>
+            		<xf:group class="infoSection" style="">
+            			<w2:span class="sectionTitle" label="유의사항"></w2:span>
+            			<xf:group class="infoBox">
+            				<xf:group style="width:363px;height:42px;display:flex;align-items:center;" id="">
+            					<xf:image src="../../images/insure/file.png" style="width:29px;height:32px;" id=""></xf:image>
+            					<w2:textbox id="" label="파일 10장씩, 최대 30장까지" style="width:181px;height:23px;"></w2:textbox>
+            				</xf:group>
+            				<xf:group id="" style="width:363px;height:42px;display:flex;align-items:center;">
+            					<xf:image id="" src="../../images/insure/picture.png" style="width:29px;height:32px;"></xf:image>
+            					<w2:textbox id="" label="확장자가 JPG, JPEG, PNG 파일만 등록" style="width:330px;height:23px;"></w2:textbox>
+            				</xf:group>
+            				<xf:group id="" style="width:363px;height:42px;display:flex;align-items:center;">
+            					<xf:image id="" src="../../images/insure/documents.png" style="width:29px;height:32px;"></xf:image>
+            					<w2:textbox id="" label="비급여 금액 진료비세부내역서 필수 제출" style="width:325px;height:23px;"></w2:textbox>
+            				</xf:group>
+            			</xf:group>
+            		</xf:group>
+            	</xf:group>
+
+
+            <xf:group class="footer-section" id="footer" style="">
+                <w2:button class="next-button" id="btnNext" label="다음" ev:onclick="scwin.btnNext_onclick"></w2:button>
+            </xf:group>
+        </xf:group>
+    </body>
+</html>

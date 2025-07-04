@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="/InsWebApp/cm/css/claimPage.css" type="text/css"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+            <w2:dataCollection baseNode="map"/>
+            <w2:workflowCollection/>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        <script lazy="false" type="text/javascript"><![CDATA[
+            scwin.onpageload = function() {
+                // Additional JS logic can go here if needed
+            };
+        ]]></script>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+        <xf:group class="pop_contents" id="pop_contents" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true"
+        	meta_snippetName="0_02 팝업페이지시작">
+        	<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
+        		style="">
+        		<w2:textbox class="pgt_tit" id="" label="보험금을 청구하려면 동의가 필요해요" style="" tagname=""></w2:textbox>
+        		<xf:group class="breadcrumb" id="" style="">
+        			<xf:group id="" style="" tagname="ul">
+        				<xf:group id="" style="" tagname="li">
+        				</xf:group>
+        			</xf:group>
+        		</xf:group>
+        		<xf:trigger class="btn_x" id="" style="" type="button">
+        			<xf:label></xf:label>
+        		</xf:trigger>
+        	</xf:group>
+
+        	<!-- Title Section -->
+
+        	<!-- Agreement Section -->
+        	<xf:group style="height:205px;" id="" class="agreement_section">
+        		<xf:group style="height:46px;display:flex;align-items:center;" id="" class="select_agreement">
+        			<xf:select selectedindex="-1" id="agreement_select" appearance="full" style="height:41px;font-weight:bolder;" cols=""
+        				rows="" ref="">
+        				<xf:choices>
+        					<xf:item>
+        						<xf:label><![CDATA[  [필수} 항목 전체 동의]]></xf:label>
+        						<xf:value><![CDATA[1]]></xf:value>
+        					</xf:item>
+        				</xf:choices>
+        			</xf:select>
+
+        		</xf:group>
+
+        		<!-- Agreement Items -->
+        		<xf:group style="height:48px;display:flex;justify-content:space-between;align-items:center;" id="" class="item1">
+        			<w2:textbox id="item1_label" label="1. 수집·이용에 관한 사항" style="width:196px;height:23px;" />
+        			<w2:textbox id="arrow1" label=">" style="width:18px;height:23px;" />
+        		</xf:group>
+        		<xf:group style="height:48px;display:flex;justify-content:space-between;align-items:center;" id="" class="item1">
+        			<w2:textbox id="item2_label" label="2. 제공에 관한 사항" style="width:196px;height:23px;" />
+        			<w2:textbox id="arrow2" label=">" style="width:18px;height:23px;" />
+        		</xf:group>
+        		<xf:group style="height:48px;display:flex;justify-content:space-between;align-items:center;" id="" class="item1">
+        			<w2:textbox id="item3_label" label="3. 조회에 관한 사항" style="width:196px;height:23px;" />
+        			<w2:textbox id="arrow3" label=">" style="width:18px;height:23px;" />
+        		</xf:group>
+        	</xf:group>
+
+        	<!-- Final Consent Section -->
+        	<xf:group style="height:44px;" id="final_consent_section"></xf:group>
+
+        	<xf:group style="height: 200px;" id="" class="consent_group">
+        		<w2:textbox class="consent_checkbox" label="동의" style="" />
+        	</xf:group>
+        </xf:group>
+    </body>
+</html>
