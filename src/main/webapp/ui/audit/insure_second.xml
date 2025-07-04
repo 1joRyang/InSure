@@ -231,15 +231,13 @@ scwin.grd_befClaim_oncellclick = function (rowIndex, columnIndex, columnId) {
 scwin.ipt_hcode1_onclick = function (e) {
     // openpopup 
     openHcodePopup("/InsWebApp/ui/audit/hcode1-popup.xml");
-    ipt_hcode1.setValue(localStorage.getItem("hcode1"));
 };
 
 scwin.ipt_hcode2_onclick = function (e) {
-    openHcodePopup("/InsWebApp/ui/audit/hcode2-popup.xml")
-    ipt_hcode2.setValue(localStorage.getItem("hcode2"));
+    openHcodePopup("/InsWebApp/ui/audit/hcode2-popup.xml");
 };
 
-function openHcodePopup(link) {
+function openHcodePopup(link, closeFunc) {
     requires("uiplugin.popup"); 
 	var winWid = $(window).width();
 	var winHei = $(window).height();
@@ -259,8 +257,8 @@ function openHcodePopup(link) {
 					"modal" : true, 
 					"useIFrame" : false,
 					"title" : "focusTest",
-					"useATagBtn" : true,
-					"frameMode" : "wframe"
+					"useATagBtn" : false,
+					"frameMode" : "wframe",
 				};
 
 	$p.openPopup(link, opts);

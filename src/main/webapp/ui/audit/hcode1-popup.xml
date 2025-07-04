@@ -16075,6 +16075,7 @@ scwin.ipt_hcode1_onkeydown = function (e) {
 };
 
 scwin.btn_confirm_onclick = function (e) {
+    $p.parent().ipt_hcode1.setValue(localStorage.getItem("hcode1"));
     $p.closePopup("mf_hcode_popup");
 };
 

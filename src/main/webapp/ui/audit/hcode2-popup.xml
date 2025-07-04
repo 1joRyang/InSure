@@ -10020,6 +10020,7 @@ scwin.btn_close_onclick = function (e) {
 
 scwin.btn_confirm_onclick = function (e) {
     // localStorage에 저장
+    $p.parent().ipt_hcode2.setValue(localStorage.getItem("hcode2"));
     $p.closePopup("mf_hcode_popup");
 };
 
