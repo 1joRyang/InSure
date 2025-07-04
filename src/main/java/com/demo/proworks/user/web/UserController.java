@@ -62,10 +62,15 @@ public class UserController {
     	String id = loginVo.getUserId();
     	String pw = loginVo.getPw();
     	
-    	System.out.println(">>>>> 1. 화면에서 입력받은 PIN: " + id);
-	    System.out.println(">>>>> 1. 화면에서 입력받은 ID: " + pw);
+
+    	Object[] params = {"USER", pw};
     	
-    	LoginInfo info = loginProcess.processLogin(request, id, pw);
+    	
+    	System.out.println(">>>>> 1. 화면에서 입력받은 id: " + id);
+	    System.out.println(">>>>> 1. 화면에서 입력받은 pw: " + pw);
+    	
+    	LoginInfo info = loginProcess.processLogin(request, id, params);
+
     	
     	AppLog.debug("- Login 정보 : " + info.toString());
     }
@@ -82,11 +87,17 @@ public class UserController {
     @ElDescription(sub = "간편비밀번호로그인", desc = "간편비밀번호로그인을 처리한다.")
     public void simpleLogin(SimpleLoginVo simpleloginVo, HttpServletRequest request) throws Exception {
 
+    	String id = simpleloginVo.getUserId();
     	String sp_pw = simpleloginVo.getSimplePw();
     	
-    	System.out.println(">>>>> 1. 화면에서 입력받은 PIN: " + sp_pw);
+    	Object[] params = {"SIMPLE", sp_pw};
     	
-    	LoginInfo info = loginProcess.processLogin(request, sp_pw);
+    	System.out.println(">>>>> 1. ID: " + id);
+	    System.out.println(">>>>> 1. 화면에서 입력받은 sp_pw: " + sp_pw);
+	    
+	    
+    	LoginInfo info = loginProcess.processLogin(request, id, params);
+
     	
     	AppLog.debug("- Login 정보 : " + info.toString());
     	

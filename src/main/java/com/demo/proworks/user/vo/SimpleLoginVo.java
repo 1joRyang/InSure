@@ -13,8 +13,23 @@ public class SimpleLoginVo extends com.demo.proworks.cmmn.ProworksCommVO {
     public SimpleLoginVo(){
     }
 
+    @ElDtoField(logicalName = "user_id", physicalName = "userId", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String userId;
+
     @ElDtoField(logicalName = "간편비밀번호", physicalName = "simplePw", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String simplePw;
+
+    @ElVoField(physicalName = "userId")
+    public String getUserId(){
+        String ret = this.userId;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "userId")
+    public void setUserId(String userId){
+        this.userId = userId;
+    }
+
 
     @ElVoField(physicalName = "simplePw")
     public String getSimplePw(){
@@ -31,6 +46,7 @@ public class SimpleLoginVo extends com.demo.proworks.cmmn.ProworksCommVO {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("SimpleLoginVo [");
+        sb.append("userId").append("=").append(userId).append(",");
         sb.append("simplePw").append("=").append(simplePw);
         sb.append("]");
         return sb.toString();
