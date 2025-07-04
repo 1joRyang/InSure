@@ -10,8 +10,7 @@
 			<w2:dataCollection baseNode="map">
 				<w2:dataMap baseNode="map" id="dma_logout">
 					<w2:keyInfo>
-						<w2:key dataType="text" name="id" id="id"></w2:key>
-						<w2:key dataType="text" name="pw" id="pw"></w2:key>
+						<w2:key dataType="text" name="아이디" id="id"></w2:key>
 					</w2:keyInfo>
 					<w2:data use="true">
 						<id><![CDATA[1111]]></id>
@@ -33,93 +32,103 @@
 		<script src="/InsWebApp/cm/js/swiper.min.js" type="text/javascript"></script>
 		<script lazy="false" type="text/javascript">
 			<![CDATA[
-scwin.onpageload = function () {
-    // Main 일 경우에 실행
-    //$("body").addClass("m_main");
+			scwin.onpageload = function () {
+				// Main 일 경우에 실행
+				//$("body").addClass("m_main");
+				
+				scwin.mbannerFn();
+				scwin.meventFn();
+			};
+			
+			scwin.mbannerFn = function () {
+				var mbanner = new Swiper('.swiper-container.grp_mbanner', {
+					initialSlide: 0,
+					loop: true,
+					direction: 'horizontal',
+					initialSlide: 0
+				});
+			
+			};
+			
+			scwin.meventFn = function () {
+				var mevent = new Swiper('.swiper-container.grp_mevent', {
+					initialSlide: 0,
+					loop: true,
+					direction: 'horizontal',
+					initialSlide: 0,
+					pagination: {
+					el: '.swiper-pagination',
+					type: 'bullets'
+					}
+				});
+			
+			};
+			
+			scwin.openCallback = function (result) {
+				console.log(result);
+			}
+			
+			scwin.downloadCallback = function (result) {
+				console.log(result);
+			}
+			
+			
+				// scwin.openWebAnchor_onclick = function () {
+				// 	options['url'] = 'https://wtech.inswave.kr/';
+				
+				// const options = {};
+				// options['url'] = 'http://192.168.152.161:8080/jsp/fileDownload.jsp';
+				// options['progress'] = true;
+				// options['open'] = true;
+				// options['notify'] = true;
+				// options['location'] = 'Download';
+				// options['requestType'] = 'POST';
+				// options['fileName'] = 'guide.pdf';
+				// options['dataType'] = 'application/json';
+				// options["data"] = {"saveName":"guide.pdf","filePath":"/pdf/guide.pdf"}
+				
+				// try {
+				//     $c.contents.fileDownload(scwin.downloadCallback, options);
+				// } catch(err) {
+				//     //error handling
+				// }
 
-    scwin.mbannerFn();
-    scwin.meventFn();
-};
-
-scwin.mbannerFn = function () {
-    var mbanner = new Swiper('.swiper-container.grp_mbanner', {
-        initialSlide: 0,
-        loop: true,
-        direction: 'horizontal',
-        initialSlide: 0
-    });
-
-};
-
-scwin.meventFn = function () {
-    var mevent = new Swiper('.swiper-container.grp_mevent', {
-        initialSlide: 0,
-        loop: true,
-        direction: 'horizontal',
-        initialSlide: 0,
-        pagination: {
-            el: '.swiper-pagination',
-            type: 'bullets'
-        }
-    });
-
-};
-
-scwin.openCallback = function (result) {
-    console.log(result);
-}
-
-scwin.downloadCallback = function (result) {
-    console.log(result);
-}
-
-
-// scwin.openWebAnchor_onclick = function () {
-// 	options['url'] = 'https://wtech.inswave.kr/';
-
-// const options = {};
-// options['url'] = 'http://192.168.152.161:8080/jsp/fileDownload.jsp';
-// options['progress'] = true;
-// options['open'] = true;
-// options['notify'] = true;
-// options['location'] = 'Download';
-// options['requestType'] = 'POST';
-// options['fileName'] = 'guide.pdf';
-// options['dataType'] = 'application/json';
-// options["data"] = {"saveName":"guide.pdf","filePath":"/pdf/guide.pdf"}
-
-// try {
-//     $c.contents.fileDownload(scwin.downloadCallback, options);
-// } catch(err) {
-//     //error handling
-// }
-
+// logout 처리		
 scwin.btn_logout_onclick = function (e) {
-    //서브 미션 생성 + 로그아웃 처리하기
-    //서브 미션 실행
-    // 서브미션 콜백 아래 로그인 페이지로 이동하기
-    //action URL = /InsWebApp/CmmnLogInFrm.pwkjson
-
+    /*
+        1. 서브미션 생성 - Logout 처리 action url : /InsWebApp/CmmLoginFrm.pwkjson
+        2. 서브미션 실행
+        3. 서브미션 콜백에서 아래 login 페이지로 이동하기 적용
+     */
     $c.sbm.execute(sbm_logout);
-
 };
 
 scwin.sbm_logout_submitdone = function (e) {
-    debugger;
-    // 정상 종료시 login 페이지로 이동  
-    let elHeader = e.responseJSON.elHeader;
-    if (elHeader.resSuc == true) {
+    // 정상 종료시 로그인 페이지 이동
+    if(e.responseJSON.elHeader.resSuc == true){
         $p.url("/InsWebApp/main/logIn.xml");
-    } else {
-        alert("실패");
+        alert("로그아웃되었습니다.");
     }
 };
-scwin.noti_sendPush = function (result) {
+
+scwin.udc_notification1_sendPush = function (result) {
     alert(JSON.stringify(result));
 };
-]]>
+
+scwin.udc_camera1_onCapture = function (result) {
+ // 이미지 결과에 대한 처리
+
+
+};
+
+
+scwin.udc_gallery1_openGallery = function (result) {
+
+};]]>
 		</script>
 		<w2:require as="udc_notification" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/notification.xml"></w2:require>
+		<w2:require as="udc_camera" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/camera.xml"></w2:require>
+		<w2:require as="udc_gallery" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/gallery.xml"></w2:require>
 	</head>
 	<body ev:onpageload="scwin.onpageload" class="mobile">
 		<xf:group id="" class="m_wrap">
@@ -133,16 +142,25 @@ scwin.noti_sendPush = function (result) {
 								<xf:group id="">
 									<w2:span class="fwb" id="span1" label="스마트폰, 태블릿PC" style=""></w2:span>
 								</xf:group>
-								<w2:textbox class="fwn" id="" label="법인용 금융 및&lt;br/&gt;서비스를 제공합니다" style="" escape="false"></w2:textbox>
+								<w2:textbox class="fwn" id="textbox1" label="법인용 금융 및&lt;br/&gt;서비스를 제공합니다" style="" escape="false" ev:onclick="scwin.textbox1_onclick"></w2:textbox>
 							</xf:group>
 							<w2:anchor class="btn_go" id="" outerDiv="false" style="">
 								<xf:label><![CDATA[ShortCut]]></xf:label>
 							</w2:anchor>
+							<w2:udc_camera popoverOptions="false" correctOrientation="false" saveToPhotoAlbum="true" allowedit="false"
+								mediaType="Picture" quality="100" sourceType="CAMERA" encodingType="jpeg" destinationType="FILE_URL"
+								style="width: 100px;height: 20px;" cameraDirection="Back" id="udc_camera1" ev:onCapture="scwin.udc_camera1_onCapture">
+							</w2:udc_camera>
+							<w2:udc_gallery sourceType="0" allowedit="false" encodingType="jpeg" destinationType="DATA_URL"
+								style="width: 100px;height: 50px;" mediaType="Picture" id="udc_gallery1" ev:openGallery="scwin.udc_gallery1_openGallery" quality="100">
+							</w2:udc_gallery>
 							<xf:trigger class="btn_cm" id="btn_logout" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true"
 								meta_snippetName="8_01 기본버튼" style="" type="button" ev:onclick="scwin.btn_logout_onclick">
 								<xf:label><![CDATA[로그아웃]]></xf:label>
 							</xf:trigger>
-							<w2:udc_notification style="width: 30px;height: 30px;" title="====제목====" message="전달내용 ---&gt;" id="noti" ev:sendPush="scwin.noti_sendPush"></w2:udc_notification>
+							<w2:udc_notification style="width: 30px;height: 30px;" title="제목 === &gt;&gt;&gt;" message="전달 내용 ===&gt;&gt;"
+								id="udc_notification1" ev:sendPush="scwin.udc_notification1_sendPush">
+							</w2:udc_notification>
 						</xf:group>
 					</xf:group>
 					<xf:group class="sec02" id="" style="" tagname="section">
