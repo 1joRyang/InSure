@@ -30,7 +30,6 @@ public class SimpleLoginVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.userId = userId;
     }
 
-
     @ElVoField(physicalName = "simplePw")
     public String getSimplePw(){
         String ret = this.simplePw;
