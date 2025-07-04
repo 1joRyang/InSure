@@ -1252,6 +1252,7 @@ div.exup_wrap {width:100%;padding:19px;border:0;box-sizing:border-box}
 .breadcrumb li:last-child::after {display:none}
 .breadcrumb + .btn_fav {margin-left:16px}
 
+
 /* title */
 .titbox {display:flex;flex:none;flex-wrap:wrap;align-items:center;position:relative;width:100%;min-height:14px;margin:0 0 8px;gap:8px;-webkit-gap:8px}
 .titbox h3 {display:inline-flex;position:relative;margin-right:4px;padding:0;font-size:16px}

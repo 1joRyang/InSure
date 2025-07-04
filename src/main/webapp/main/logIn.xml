@@ -39,12 +39,11 @@ scwin.btn_login_onclick = function (e) {
 };
 
 scwin.sbm_login_submitdone = function (e) {
-    // debugger;
     let elHeader = e.responseJSON.elHeader;
     if(elHeader != "" && elHeader != null && elHeader != "undefined") {	
         if(elHeader.resSuc == true) {
-            // location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/emp/empListView.xml"
-            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml"
+            //location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml"
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/first.xml"
         }else{
             dma_login.setEmptyValue();
             alert("로그인 정보를 확인하세요");
@@ -102,5 +101,6 @@ scwin.sbm_login_submitdone = function (e) {
     			</xf:group>
     		</xf:group>
     	</xf:group>
+        <w2:wframe style="" id="" class="m_footer" src="/InsWebApp/insure/common/m_footer.xml"></w2:wframe>
     </body>
 </html>

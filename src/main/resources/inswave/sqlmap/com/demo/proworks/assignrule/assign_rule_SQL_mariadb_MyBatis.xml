@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 배정규칙 관련 처리를 담당하는 Sql Mapper
+	@description : 배정규칙 관련 처리를 담당하는 Sql Mapper
+	@author      : hyunwoo
+	@since       : 2025/07/01
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/07/01              hyunwoo             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.assignrule">
+    <insert id="insertAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+    	<!-- 배정규칙를 등록한다. -->	
+    		
+        INSERT INTO ASSIGN_RULE   /* QueryID : com.demo.proworks.assignrule.insertAssignRule */
+        ( 
+            RULE_ID
+            <if test="keyword!= null"> , KEYWORD </if>
+            <if test="dept   != null"> , DEPT    </if>
+        )
+        VALUES  
+        ( 
+            #{rule_id}
+            <if test="keyword!= null"> , #{keyword} </if>
+            <if test="dept   != null"> , #{dept}    </if> 
+        )          
+    </insert>	
+	
+    <update id="updateAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+    	<!-- 배정규칙를 갱신한다. -->
+    	
+        UPDATE ASSIGN_RULE    /* QueryID : com.demo.proworks.assignrule.updateAssignRule */      
+      	  SET  
+                RULE_ID = #{rule_id}        	                       
+            <if test="keyword!= null"> , KEYWORD = #{keyword} </if>
+            <if test="dept   != null"> , DEPT    = #{dept}    </if>                 
+        WHERE   
+                RULE_ID = #{rule_id}
+    </update>
+	
+    <delete id="deleteAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+    	<!-- 배정규칙를 삭제한다. -->
+    	
+        DELETE FROM ASSIGN_RULE   /* QueryID : com.demo.proworks.assignrule.deleteAssignRule */ 
+        WHERE   
+                RULE_ID = #{rule_id}        
+    </delete>
+	
+    <select id="selectAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo" resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+    	<!-- 배정규칙를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.assignrule.selectAssignRule */
+            RULE_ID, KEYWORD, DEPT
+        FROM ASSIGN_RULE 
+        WHERE 
+                RULE_ID = #{rule_id}			
+    </select>
+	
+    <select id="selectListAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo" resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+    	<!-- 배정규칙 목록을 조회한다. -->
+           SELECT    /* QueryID : com.demo.proworks.assignrule.selectListAssignRule */
+               RULE_ID, KEYWORD, DEPT		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM ASSIGN_RULE
+                   WHERE  1=1    		
+	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo" resultType="long">
+    <!-- 배정규칙 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.assignrule.selectListCountAssignRule */
+             COUNT(*) totcnt  		                  
+         FROM ASSIGN_RULE
+         WHERE  1=1    		
+
+    </select>
+
+</mapper>
