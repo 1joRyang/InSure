@@ -63,9 +63,12 @@ scwin.onpageload = function() {
     // 페이지가 로드될 때 기본 빈 테이블 생성
     scwin.createEmptyTable();
     
-    // 서브테이블과 결과테이블 생성
-    //scwin.createSubTable();
-    //scwin.createResultTable();
+    let savedData = JSON.parse(localStorage.getItem('dateList') || '[]');
+
+    savedData.forEach(item => {
+        date_drop.addItem(item.imgIdx, item.dateRange);
+    });
+    date_drop.setSelectedIndex(0);
 };
 
 scwin.btn_ocr_onclick = function (e) {
@@ -118,16 +121,15 @@ scwin.btn_next_onclick = function (e) {
 };
 
 scwin.ipt_paid_onchange = function (info) {
-    setTotalPay(info.newValue);
+    setTotalPay();
 };
 
 scwin.ipt_pay_onchange = function (info) {
-    setTotalPay(info.newValue);
+    setTotalPay();
 };
 
-function setTotalPay(newValue) {
-    let total = Number(ipt_fianlpay.getValue());
-    total += Number(newValue);
+function setTotalPay() {
+    let total = Number(ipt_pay.getValue()) + Number(ipt_paid.getValue());
     ipt_fianlpay.setValue(total);
 
     calcuResultTableTotal();
@@ -143,10 +145,14 @@ scwin.sel_hospital_onchange = function (info) {
 
 // result table 산출금 계산 
 function calcuResultTableTotal() {
-    let value = Number(ipt_fianlpay.getValue()) - Number(ipt_hosp.getValue());
+    let value = Number(ipt_fianlpay.getValue()) - Number(ipt_excTotal.getValue()) - Number(ipt_hosp.getValue());
     console.log(value);
     ipt_result.setValue(value);
 }
+
+scwin.ipt_excTotal_onchange = function (info) {
+    calcuResultTableTotal();
+};
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
@@ -155,11 +161,8 @@ function calcuResultTableTotal() {
         		<w2:textbox class="pgt_tit" label="청구번호: " />
         		<w2:textbox class="pgt_tit" label="피보험자: " />
         		<xf:group class="btn_schbox">
-        			<xf:trigger id="btn_ocr" type="button" ev:onclick="scwin.btn_ocr_onclick">
-        				<xf:label><![CDATA[OCR]]></xf:label>
-        			</xf:trigger>
         		</xf:group>
-        		<xf:group class="schbox" id="" meta_snippetCategory="03_조회영역" meta_snippetKeyComponent="true" meta_snippetName="3_01 조회조건1행"
+        		<xf:group class="schbox" id="" meta_snippetCategory="03_조회영역" meta_snippetKeyComponent="true" meta_snippetName="3_02 조회조건2행"
         			style="">
         			<xf:group class="schbox_inner" id="" style="">
         				<xf:group adaptive="layout" adaptiveThreshold="768" class="w2tb tbl " id="" style="" tagname="table">
@@ -174,11 +177,29 @@ function calcuResultTableTotal() {
         					</xf:group>
         					<xf:group class="" id="" style="" tagname="tr">
         						<xf:group class="w2tb_th" style="" tagname="th">
-        							<w2:textbox class="" id="" label="조회조건" style=""></w2:textbox>
+        							<w2:textbox class="" id="" label="입통원일자" style=""></w2:textbox>
         						</xf:group>
         						<xf:group class="w2tb_td" style="" tagname="td">
-        							<xf:select1 allOption="true" appearance="minimal" chooseOption="" class="" direction="auto"
-        								disabled="false" disabledClass="w2selectbox_disabled" id="sel_hospital" ref="" renderType="" style="width:100px;" submenuSize="auto" ev:onchange="scwin.sel_hospital_onchange">
+        							<xf:select1 allOption="" appearance="minimal" chooseOption="" class="" direction="auto" disabled="false"
+        								disabledClass="w2selectbox_disabled" id="date_drop" ref="" renderType="" style="width:150px;" submenuSize="auto">
+        								<xf:choices></xf:choices>
+        							</xf:select1>
+        						</xf:group>
+        						<xf:group class="w2tb_th" style="" tagname="th">
+        							<w2:textbox class="req" id="" label="진료과/병원명" style=""></w2:textbox>
+        						</xf:group>
+        						<xf:group class="w2tb_td" id="" style="" tagname="td">
+        							<xf:input id="" style="width:150px;"></xf:input>
+        							<xf:input id="" style="width:150px;"></xf:input>
+        						</xf:group>
+        					</xf:group>
+        					<xf:group class="" id="" style="" tagname="tr">
+        						<xf:group class="w2tb_th" style="" tagname="th">
+        							<w2:textbox class="" id="" label="병원등급" style=""></w2:textbox>
+        						</xf:group>
+        						<xf:group class="w2tb_td" style="" tagname="td">
+        							<xf:select1 id="sel_hospital" chooseOption="" style="width:150px;" submenuSize="auto"
+        								allOption="" disabled="false" direction="auto" appearance="minimal" disabledClass="w2selectbox_disabled" ref="" ev:onchange="scwin.sel_hospital_onchange">
         								<xf:choices>
         									<xf:item>
         										<xf:label><![CDATA[1차]]></xf:label>
@@ -196,32 +217,16 @@ function calcuResultTableTotal() {
         							</xf:select1>
         						</xf:group>
         						<xf:group class="w2tb_th" style="" tagname="th">
-        							<w2:textbox class="" id="" label="조회조건" style=""></w2:textbox>
+        							<w2:textbox class="" id="" label="환자구분" style=""></w2:textbox>
         						</xf:group>
         						<xf:group class="w2tb_td" id="" style="" tagname="td">
-        							<xf:select1 appearance="full" cols="" disabled="" id="" ref="" renderType="radiogroup" rows=""
-        								selectedIndex="1" style="">
-        								<xf:choices>
-        									<xf:item>
-        										<xf:label><![CDATA[항목1]]></xf:label>
-        										<xf:value></xf:value>
-        									</xf:item>
-        									<xf:item>
-        										<xf:label><![CDATA[항목2]]></xf:label>
-        										<xf:value></xf:value>
-        									</xf:item>
-        									<xf:item>
-        										<xf:label><![CDATA[항목3]]></xf:label>
-        										<xf:value></xf:value>
-        									</xf:item>
-        								</xf:choices>
-        							</xf:select1>
+        							<xf:input id="" style="width:150px;"></xf:input>
         						</xf:group>
         					</xf:group>
         				</xf:group>
         			</xf:group>
         			<xf:group class="btn_schbox" id="" style="">
-        				<xf:trigger class="btn_cm sch" disabled="" escape="false" id="" style="" type="button">
+        				<xf:trigger class="btn_cm sch" disabled="" escape="false" id="btn_ocr" style="" type="button" ev:onclick="scwin.btn_ocr_onclick">
         					<xf:label><![CDATA[조회]]></xf:label>
         				</xf:trigger>
         			</xf:group>
@@ -335,7 +340,7 @@ function calcuResultTableTotal() {
         				<xf:group style="" tagname="tr">
         					<xf:group class="w2tb_td" style="" tagname="td">삭감항목총액</xf:group>
         					<xf:group class="w2tb_td" style="" tagname="td">
-        						<xf:input id="" style="width: 144px;height: 21px;" ref="data:dm_result.deducation_amt" class="readonly" readOnly="true" readOnlyClass="readonly"></xf:input>
+        						<xf:input id="ipt_excTotal" style="width: 144px;height: 21px;" ref="data:dm_result.deducation_amt" class="readonly" readOnly="true" readOnlyClass="readonly" ev:onchange="scwin.ipt_excTotal_onchange"></xf:input>
         					</xf:group>
         				</xf:group>
         				<xf:group style="" tagname="tr">

@@ -82,8 +82,10 @@ scwin.onpageload = function() {
 };
 
 scwin.btn_save_onclick = function (e) {
+    let excTotal = (Number(localStorage.getItem("excTotal")) || 0) + Number(ipt_cost.getValue());
     $c.sbm.execute(sbm_execInsert);
-    
+    $p.parent().ipt_excTotal.setValue(excTotal);
+    localStorage.setItem("excTotal", excTotal);
     $p.closePopup("mf_exc_popup");
 };
 
