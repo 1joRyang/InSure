@@ -117,4 +117,20 @@ public interface AssignRuleService {
 	 */
 	public List<EmpVo> getAvailableEmployeesByKeyword(String keyword) throws Exception;
 	
+	/**
+	 * 자동 배정 설정을 업데이트한다.
+	 *
+	 * @param autoAssignEnabled 자동 배정 활성화 여부 ("true" 또는 "false")
+	 * @throws Exception
+	 */
+	public void updateAutoAssignConfig(String autoAssignEnabled) throws Exception;
+	
+	/**
+	 * 자동 배정 설정을 조회한다.
+	 *
+	 * @return 자동 배정 활성화 여부 ("true" 또는 "false")
+	 * @throws Exception
+	 */
+	public String getAutoAssignConfig() throws Exception;
+	
 }

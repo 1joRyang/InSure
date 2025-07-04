@@ -353,4 +353,50 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 			throw new Exception("키워드별 배정 가능 직원 조회 중 오류 발생: " + e.getMessage(), e);
 		}
 	}
+	
+	/**
+	 * 자동 배정 설정을 업데이트한다.
+	 *
+	 * @process 1. 자동 배정 설정을 데이터베이스 또는 설정 파일에 저장
+	 * 
+	 * @param autoAssignEnabled 자동 배정 활성화 여부
+	 * @throws Exception
+	 */
+	@Transactional
+	public void updateAutoAssignConfig(String autoAssignEnabled) throws Exception {
+		try {
+			// 설정 정보를 데이터베이스에 저장 (예: 시스템 설정 테이블)
+			// 여기서는 간단하게 AssignRule 테이블에 설정 값을 저장하는 방식을 사용
+			assignRuleDAO.updateAutoAssignConfig(autoAssignEnabled);
+			
+		} catch (Exception e) {
+			throw new Exception("자동 배정 설정 업데이트 중 오류 발생: " + e.getMessage(), e);
+		}
+	}
+	
+	/**
+	 * 자동 배정 설정을 조회한다.
+	 *
+	 * @process 1. 데이터베이스 또는 설정 파일에서 자동 배정 설정 조회
+	 * 
+	 * @return 자동 배정 활성화 여부
+	 * @throws Exception
+	 */
+	public String getAutoAssignConfig() throws Exception {
+		try {
+			// 데이터베이스에서 설정 조회
+			String config = assignRuleDAO.getAutoAssignConfig();
+			
+			// 설정이 없으면 기본값 "false" 반환
+			if (config == null || config.trim().isEmpty()) {
+				return "false";
+			}
+			
+			return config;
+			
+		} catch (Exception e) {
+			// 오류 발생 시 기본값 반환
+			return "false";
+		}
+	}
 }

@@ -281,5 +281,67 @@ public class AssignRuleController {
         
         return result;
     }
+    
+    /**
+     * 자동 배정 설정을 업데이트한다.
+     *
+     * @param  assignRuleVo 자동 배정 설정 정보
+     * @return 업데이트 결과
+     * @throws Exception
+     */
+    @ElService(key="assignrule0007UpdateAutoConfig")
+    @RequestMapping(value="assignrule0007UpdateAutoConfig")
+    @ElDescription(sub="자동 배정 설정 업데이트", desc="자동 배정 활성화/비활성화 설정을 업데이트한다.")
+    public Map<String, Object> updateAutoAssignConfig(AssignRuleVo assignRuleVo) throws Exception {
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            // assignRuleVo의 keyword 필드를 autoAssignEnabled로 활용
+            String autoAssignEnabled = assignRuleVo.getKeyword();
+            if (autoAssignEnabled == null) {
+                result.put("success", false);
+                result.put("message", "자동 배정 설정 값이 필요합니다.");
+                return result;
+            }
+            
+            assignRuleService.updateAutoAssignConfig(autoAssignEnabled);
+            result.put("success", true);
+            result.put("message", "자동 배정 설정이 업데이트되었습니다.");
+            result.put("autoAssignEnabled", autoAssignEnabled);
+            
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+        
+        return result;
+    }
+    
+    /**
+     * 자동 배정 설정을 조회한다.
+     *
+     * @return 자동 배정 설정 정보
+     * @throws Exception
+     */
+    @ElService(key="assignrule0008GetAutoConfig")
+    @RequestMapping(value="assignrule0008GetAutoConfig")
+    @ElDescription(sub="자동 배정 설정 조회", desc="현재 자동 배정 활성화/비활성화 설정을 조회한다.")
+    public Map<String, Object> getAutoAssignConfig() throws Exception {
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            String autoAssignEnabled = assignRuleService.getAutoAssignConfig();
+            result.put("success", true);
+            result.put("autoAssignEnabled", autoAssignEnabled);
+            result.put("message", "자동 배정 설정 조회 성공");
+            
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+            result.put("autoAssignEnabled", "false"); // 기본값
+        }
+        
+        return result;
+    }
    
 }

@@ -204,5 +204,27 @@
     		ROUND(SUM(CASE WHEN EMP_NO IS NOT NULL AND EMP_NO != '' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as ASSIGNMENT_RATE
     	FROM CLAIM
     </select>
+    
+    <!-- 자동 배정 설정 업데이트 -->
+    <update id="updateAutoAssignConfig" parameterType="string">
+    	<!-- 자동 배정 설정을 업데이트한다. -->
+    	INSERT INTO ASSIGN_RULE   /* QueryID : com.demo.proworks.assignrule.updateAutoAssignConfig */
+    		(RULE_ID, KEYWORD, DEPT)
+    	VALUES 
+    		('AUTO_ASSIGN_CONFIG', 'AUTO_ASSIGN_ENABLED', #{autoAssignEnabled})
+    	ON DUPLICATE KEY UPDATE
+    		DEPT = #{autoAssignEnabled}
+    </update>
+    
+    <!-- 자동 배정 설정 조회 -->
+    <select id="getAutoAssignConfig" resultType="string">
+    	<!-- 자동 배정 설정을 조회한다. -->
+    	SELECT    /* QueryID : com.demo.proworks.assignrule.getAutoAssignConfig */
+    		DEPT as AUTO_ASSIGN_ENABLED
+    	FROM ASSIGN_RULE 
+    	WHERE RULE_ID = 'AUTO_ASSIGN_CONFIG' 
+    	  AND KEYWORD = 'AUTO_ASSIGN_ENABLED'
+    	LIMIT 1
+    </select>
 
 </mapper>

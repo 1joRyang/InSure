@@ -211,5 +211,26 @@ public class AssignRuleDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbs
     public Map<String, Object> selectAssignmentStatistics() throws ElException {
         return (Map<String, Object>) selectByPk("com.demo.proworks.assignrule.selectAssignmentStatistics", null);
     }
+    
+    /**
+     * 자동 배정 설정을 업데이트한다.
+     *  
+     * @param  autoAssignEnabled 자동 배정 활성화 여부
+     * @return 업데이트 건수
+     * @throws ElException
+     */
+    public int updateAutoAssignConfig(String autoAssignEnabled) throws ElException {
+        return update("com.demo.proworks.assignrule.updateAutoAssignConfig", autoAssignEnabled);
+    }
+    
+    /**
+     * 자동 배정 설정을 조회한다.
+     *  
+     * @return 자동 배정 활성화 여부
+     * @throws ElException
+     */
+    public String getAutoAssignConfig() throws ElException {
+        return (String) selectByPk("com.demo.proworks.assignrule.getAutoAssignConfig", null);
+    }
 
 }

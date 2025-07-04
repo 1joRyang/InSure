@@ -1,706 +1,722 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare"
-	xmlns:xf="http://www.w3.org/2002/xforms">
-	<head>
-		<w2:type>COMPONENT</w2:type>
-		<w2:buildDate />
-		<w2:MSA />
-		<xf:model>
-			<w2:dataCollection baseNode="map">
-				<w2:dataMap baseNode="map" id="dmp_assignRuleVo" style="">
-					<w2:keyInfo>
-						<w2:key dataType="text" id="pageIndex" name="페이지번호" defaultValue="1"></w2:key>
-						<w2:key dataType="text" id="pageSize" name="페이지사이즈" defaultValue="10"></w2:key>
-						<w2:key dataType="text" id="totalPageCount" name="페이지건수"></w2:key>
-					</w2:keyInfo>
-					<w2:data use="false"></w2:data>
-				</w2:dataMap>
-				<w2:dataList baseNode="list" id="dlt_assignRuleVoList" repeatNode="map" saveRemovedData="true" style="">
-					<w2:columnInfo>
-						<w2:column dataType="text" id="rule_id" name="rule_id"></w2:column>
-                        <w2:column dataType="text" id="keyword" name="keyword"></w2:column>
-                        <w2:column dataType="text" id="dept" name="dept"></w2:column>
-					</w2:columnInfo>
-				</w2:dataList>
-				<w2:dataMap baseNode="map" id="dmp_assignRuleVoDetail" style="">
-					<w2:keyInfo>
-						<w2:key dataType="text" id="rule_id" name="rule_id"></w2:key>
-                        <w2:key dataType="text" id="keyword" name="keyword"></w2:key>
-                        <w2:key dataType="text" id="dept" name="dept"></w2:key>
-					</w2:keyInfo>
-				</w2:dataMap>
-				<!-- 자동 배정 관련 데이터 -->
-				<w2:dataMap baseNode="map" id="dmp_autoAssign" style="">
-					<w2:keyInfo>
-						<w2:key dataType="text" id="claimNo" name="청구번호"></w2:key>
-						<w2:key dataType="text" id="keyword" name="키워드"></w2:key>
-					</w2:keyInfo>
-				</w2:dataMap>
-				<!-- 배정 결과 목록 -->
-				<w2:dataList baseNode="list" id="dlt_assignResults" repeatNode="map" style="">
-					<w2:columnInfo>
-						<w2:column dataType="text" id="resultMessage" name="결과메시지"></w2:column>
-					</w2:columnInfo>
-				</w2:dataList>
-			</w2:dataCollection>
-			<w2:workflowCollection></w2:workflowCollection>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+            <w2:dataCollection baseNode="map">
+                <!-- assignRuleVo를 위한 별도 dataMap 추가 -->
+                <w2:dataMap baseNode="map" id="dmp_assignRuleVo" style="">
+                    <w2:keyInfo>
+                        <w2:key dataType="text" id="rule_id" name="규칙ID"></w2:key>
+                        <w2:key dataType="text" id="keyword" name="키워드"></w2:key>
+                        <w2:key dataType="text" id="dept" name="부서명"></w2:key>
+                    </w2:keyInfo>
+                </w2:dataMap>
+                
+                <!-- 기존 modalData는 그대로 유지 -->
+                <w2:dataMap baseNode="map" id="dma_modalData">
+                    <w2:keyInfo>
+                        <w2:key dataType="text" id="keyword" name="키워드"/>
+                        <w2:key dataType="text" id="department" name="부서"/>
+                        <!-- 페이징을 위한 키 추가 -->
+                        <w2:key dataType="text" id="pageIndex" name="페이지번호" defaultValue="1"/>
+                        <w2:key dataType="text" id="pageSize" name="페이지사이즈" defaultValue="100"/>
+                    </w2:keyInfo>
+                </w2:dataMap>
+                
+                <!-- 부서 목록을 저장할 dataList -->
+                <w2:dataList baseNode="list" id="dlt_departmentList" saveRemovedData="true">
+                    <w2:columnInfo>
+                        <w2:column dataType="text" id="dept_id" name="부서ID"/>
+                        <w2:column dataType="text" id="dept_name" name="부서명"/>
+                    </w2:columnInfo>
+                </w2:dataList>
+                
+                <!-- 배정규칙 목록을 저장할 dataList 추가 -->
+                <w2:dataList baseNode="list" id="dlt_assignRuleList" saveRemovedData="true">
+                    <w2:columnInfo>
+                        <w2:column dataType="text" id="rule_id" name="규칙ID"/>
+                        <w2:column dataType="text" id="keyword" name="키워드"/>
+                        <w2:column dataType="text" id="dept" name="부서명"/>
+                    </w2:columnInfo>
+                </w2:dataList>
+            </w2:dataCollection>
+            
+            <!-- submission 수정 -->
+            <xf:submission id="sbm_selectDepartmentList" 
+                ref='data:json,{"id":"dma_modalData","key":"insDeptVo"}' 
+                target='data:json,{"id":"dlt_departmentList","key":"elData.insDeptVoList"}' 
+                action="/InsWebApp/insdept0001List.pwkjson" 
+                method="post" 
+                mediatype="application/json" 
+                encoding="UTF-8" 
+                instance="" 
+                replace="" 
+                errorHandler="" 
+                customHandler="" 
+                mode="asynchronous" 
+                processMsg="" 
+                ev:submit="" 
+                ev:submitdone="scwin.sbm_selectDepartmentList_submitdone" 
+                ev:submiterror="" 
+                abortTrigger="">
+            </xf:submission>
+            
+            <!-- 자동배정 규칙 저장 - 올바른 형식으로 수정 -->
+            <xf:submission id="sbm_saveAutoAssignRule" 
+                ref='data:json,{"id":"dmp_assignRuleVo","key":"assignRuleVo"}' 
+                target='data:json,dmp_assignRuleVo' 
+                action="/InsWebApp/assignrule0001Ins.pwkjson" 
+                method="post" 
+                mediatype="application/json" 
+                encoding="UTF-8" 
+                instance="" 
+                replace="" 
+                errorHandler="" 
+                customHandler="" 
+                mode="asynchronous" 
+                processMsg="" 
+                ev:submit="" 
+                ev:submitdone="scwin.sbm_saveAutoAssignRule_submitdone" 
+                ev:submiterror="" 
+                abortTrigger="">
+            </xf:submission>
+            
+            <!-- 자동배정 규칙 삭제 -->
+            <xf:submission id="sbm_deleteAutoAssignRule" 
+                ref='data:json,{"id":"dmp_assignRuleVo","key":"assignRuleVo"}' 
+                target='data:json,dmp_assignRuleVo' 
+                action="/InsWebApp/assignrule0001Del.pwkjson" 
+                method="post" 
+                mediatype="application/json" 
+                encoding="UTF-8" 
+                instance="" 
+                replace="" 
+                errorHandler="" 
+                customHandler="" 
+                mode="asynchronous" 
+                processMsg="" 
+                ev:submit="" 
+                ev:submitdone="scwin.sbm_deleteAutoAssignRule_submitdone" 
+                ev:submiterror="" 
+                abortTrigger="">
+            </xf:submission>
+            
+            <!-- 자동배정 규칙 목록 조회 -->
+            <xf:submission id="sbm_selectAssignRuleList" 
+                ref='data:json,{"id":"dmp_assignRuleVo","key":"assignRuleVo"}' 
+                target='data:json,{"id":"dlt_assignRuleList","key":"elData.assignRuleVoList"}' 
+                action="/InsWebApp/assignrule0001List.pwkjson" 
+                method="post" 
+                mediatype="application/json" 
+                encoding="UTF-8" 
+                instance="" 
+                replace="" 
+                errorHandler="" 
+                customHandler="" 
+                mode="asynchronous" 
+                processMsg="" 
+                ev:submit="" 
+                ev:submitdone="scwin.sbm_selectAssignRuleList_submitdone" 
+                ev:submiterror="" 
+                abortTrigger="">
+            </xf:submission>
+            
+            <w2:workflowCollection/>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        <style type="text/css"><![CDATA[
+            /* 기존 스타일 유지 */
+            .editing {
+                background-color: #fffbf0 !important;
+                border: 1px solid #ff9800 !important;
+            }
+            
+            #rule_container .rule_item:hover {
+                border-color: #4285f4;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            }
+            
+            .btn_cm {
+                background-color: #4285f4;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            
+            .btn_cm:hover {
+                background-color: #3367d6;
+            }
+            
+            .btn_delete {
+                background-color: #dc3545;
+            }
+            
+            .btn_delete:hover {
+                background-color: #c82333;
+            }
+            
+            select {
+                width: 250px;
+                padding: 5px;
+                border: 1px solid #ddd;
+                border-radius: 3px;
+                background-color: white;
+                cursor: pointer;
+            }
+            
+            select:focus {
+                outline: none;
+                border-color: #4285f4;
+            }
+            
+            /* 규칙 항목 내 텍스트 표시 스타일 추가 */
+            .rule_keyword {
+                font-size: 14px;
+                color: #333;
+                font-weight: 500;
+                display: inline-block;
+                margin-left: 5px;
+            }
+            
+            .rule_dept {
+                font-size: 13px;
+                color: #666;
+                display: inline-block;
+                margin-left: 5px;
+            }
+        ]]></style>
+        <script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = async function () {
+    // 부서 목록을 저장할 배열 초기화
+    scwin.departmentList = [
+        { value: "", text: "-- 부서를 선택하세요 --" }
+    ];
+    await scwin.loadDepartmentList();
+};
 
-			<!-- 기존 submission들 -->
-			<xf:submission id="sbm_selectAssignRuleVoList" ref='data:json,{"id":"dmp_assignRuleVo","key":"assignRuleVo"}'
-				target='data:json,{"id":"dlt_assignRuleVoList","key":"elData.assignRuleVoList"}' action="/InsWebApp/assignrule0001List.pwkjson" method="post"
-				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
-				processMsg="배정규칙 리스트를 조회 중입니다." ev:submit="" ev:submitdone="scwin.sbm_assignRuleList_submitdone" ev:submiterror="" abortTrigger="">
-			</xf:submission>
-			<xf:submission id="sbm_deleteAssignRuleVo" ref='data:json,{"id":"dmp_assignRuleVoDetail","key":"assignRuleVo"}' target="" action="/InsWebApp/assignrule0001Del.pwkjson" method="post"
-				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg=""
-				ev:submit="" ev:submitdone="scwin.sbm_deleteAssignRuleVo_submitdone" ev:submiterror="" abortTrigger="">
-			</xf:submission>
-			<xf:submission id="sbm_updateAssignRuleVo" ref='data:json,["dmp_assignRuleVoDetail",{"id":"dmp_assignRuleVoDetail","key":"assignRuleVo"}]' target="" action="/InsWebApp/assignrule0001Upd.pwkjson" method="post"
-				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg=""
-				ev:submit="" ev:submitdone="scwin.sbm_updateAssignRuleVo_submitdone" ev:submiterror="" abortTrigger="">
-			</xf:submission>
-			<xf:submission id="sbm_insertAssignRuleVo" ref='data:json,["dmp_assignRuleVoDetail",{"id":"dmp_assignRuleVoDetail","key":"assignRuleVo"}]' target="" action="/InsWebApp/assignrule0001Ins.pwkjson" method="post"
-				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg=""
-				ev:submit="" ev:submitdone="scwin.sbm_insertAssignRuleVo_submitdone" ev:submiterror="" abortTrigger="">
-			</xf:submission>
-			<xf:submission id="sbm_selectAssignRuleVo" ref="" target="" action="/InsWebApp/assignrule0001UpdView.pwkjson" method="post"
-				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
-				processMsg="배정규칙를 조회 중입니다." ev:submit="" ev:submitdone="scwin.sbm_selectAssignRuleVo_submitdone" ev:submiterror="" abortTrigger="">
-			</xf:submission>
-			
-			<!-- 자동 배정 관련 submission들 -->
-			<xf:submission id="sbm_assignSingleClaim" ref='data:json,{"id":"dmp_autoAssign","key":"assignRuleVo"}' target="" action="/InsWebApp/assignrule0004AssignClaim.pwkjson" method="post"
-				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
-				processMsg="청구를 자동 배정 중입니다." ev:submit="" ev:submitdone="scwin.sbm_assignSingleClaim_submitdone" ev:submiterror="" abortTrigger="">
-			</xf:submission>
-			<xf:submission id="sbm_assignAllClaims" ref='data:json,{}' target="" action="/InsWebApp/assignrule0005AssignAllClaims.pwkjson" method="post"
-				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
-				processMsg="모든 미배정 청구를 자동 배정 중입니다." ev:submit="" ev:submitdone="scwin.sbm_assignAllClaims_submitdone" ev:submiterror="" abortTrigger="">
-			</xf:submission>
-			<xf:submission id="sbm_findDeptByKeyword" ref='data:json,{"id":"dmp_autoAssign","key":"assignRuleVo"}' target="" action="/InsWebApp/assignrule0002FindDept.pwkjson" method="post"
-				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
-				processMsg="키워드로 부서를 조회 중입니다." ev:submit="" ev:submitdone="scwin.sbm_findDeptByKeyword_submitdone" ev:submiterror="" abortTrigger="">
-			</xf:submission>
-			<xf:submission id="sbm_getAvailableEmployees" ref='data:json,{"id":"dmp_autoAssign","key":"assignRuleVo"}' target="" action="/InsWebApp/assignrule0006GetAvailableEmployees.pwkjson" method="post"
-				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
-				processMsg="배정 가능한 직원 목록을 조회 중입니다." ev:submit="" ev:submitdone="scwin.sbm_getAvailableEmployees_submitdone" ev:submiterror="" abortTrigger="">
-			</xf:submission>
-		</xf:model>
-		<w2:layoutInfo></w2:layoutInfo>
-		<w2:publicInfo method="" />
-		<script lazy="false" type="text/javascript"><![CDATA[
-	scwin.onpageload = function() {
-		// 배정규칙 readOnly false
-		
-		// 버튼 숨김
-		btn_save.show("");   // 저장 버튼 
-		btn_edit.hide();     // 수정 버튼 제거
-		btn_delete.hide();   // 삭제 버튼 제거
-		
-		//search_box
-        var cptIbxName = $p.getComponentById("searchComp_1");
-        if(cptIbxName == undefined){
-			search_box.hide();
+// 부서 정보를 INSDEPT 테이블에서 조회하는 함수
+scwin.loadDepartmentList = async function () {
+    // 페이징 정보 설정
+    dma_modalData.set("pageIndex", "1");
+    dma_modalData.set("pageSize", "10"); // 충분히 큰 값으로 설정
+
+    // submission 호출
+    await $c.sbm.execute($p, sbm_selectDepartmentList);
+};
+
+// 부서 정보 조회 submission 완료 콜백 
+scwin.sbm_selectDepartmentList_submitdone = async function (e) {
+    // 전체 응답 데이터 확인
+    console.log("전체 응답 데이터:", e.responseJSON);
+
+    var elData = e.responseJSON.elData;
+    var elHeader = e.responseJSON.elHeader;
+
+    if (elHeader == null || elHeader == "" || elHeader == "undefined" || elHeader.resSuc == false) {
+        console.error("부서 정보 조회 실패:", elHeader ? elHeader.resMsg : "알 수 없는 오류");
+        return false;
+    }
+
+    // 부서 목록 초기화
+    scwin.departmentList = [{ value: "", text: "-- 부서를 선택하세요 --" }];
+
+    // 조회된 부서 정보를 departmentList에 추가
+    // dlt_departmentList에서 데이터 가져오기
+    var deptCount = dlt_departmentList.getRowCount();
+    console.log("조회된 부서 수:", deptCount);
+
+    for (var i = 0; i < deptCount; i++) {
+        var deptId = dlt_departmentList.getCellData(i, "dept_id");
+        var deptName = dlt_departmentList.getCellData(i, "dept_name");
+
+        if (deptId && deptName) {
+            scwin.departmentList.push({
+                value: deptId,
+                text: deptName
+            });
         }
-		
-		// 배정규칙 조회
-		scwin.btn_search_onclick();
-	};
+    }
 
-	/************************** 이벤트 함수 *************************/
-	
-	/**
-	 * 조회 버튼 클릭 이벤트
-	 */		   
-	scwin.btn_search_onclick = function(e) {
-		// PGAE번호 초기화
-		dmp_assignRuleVo.set("pageIndex","1");
-		pgl_assignRuleList.setSelectedIndex(1);
+    console.log("부서 목록 로드 완료:", scwin.departmentList);
 
-		// 서버통신 - 배정규칙 조회
-		$c.sbm.execute($p, sbm_selectAssignRuleVoList);
-	};
-	
-	scwin.sbm_assignRuleList_submitdone = function(e) {
-		// error 수신시
-		var elData = e.responseJSON.elData;
-		var elHeader  = e.responseJSON.elHeader;
-		if(elHeader == null || elHeader == "" || elHeader == "undefiend" || elHeader.resSuc == false) {
-			$c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
-			return false;
-		}
+    // 부서 목록 로드가 완료된 후에 규칙 목록을 조회
+    await scwin.loadExistingRules();
+};
 
-		// 배정규칙 dataMap 초기화
-		dmp_assignRuleVoDetail.setEmptyValue();
-		
-		// 배정규칙 readOnly false
-		grp_assignRuleInfo.setReadOnly(false);
-		
-		// 버튼 숨김
-		btn_save.show("");   // 저장 버튼
-		btn_edit.hide();     // 수정 버튼 제거
-		btn_delete.hide();   // 삭제 버튼 제거		
+// 기존 규칙 목록 조회
+scwin.loadExistingRules = async function () {
+    console.log("loadExistingRules 호출됨");
+    console.log("현재 departmentList:", scwin.departmentList);
 
-		// 총 레코드 수 업데이트
-        spn_listCnt.setLabel(elData.totalCount);
+    // dlt_assignRuleList 초기화 - 기존 데이터 모두 제거
+    dlt_assignRuleList.removeAll();
+
+    // 조회 조건 초기화
+    dmp_assignRuleVo.set("rule_id", "");
+    dmp_assignRuleVo.set("keyword", "");
+    dmp_assignRuleVo.set("dept", "");
+
+    // submission 호출
+    await $c.sbm.execute($p, sbm_selectAssignRuleList);
+};
+
+// 규칙 목록 조회 완료 콜백
+scwin.sbm_selectAssignRuleList_submitdone = async function (e) {
+    console.log("배정규칙 조회 응답:", e.responseJSON);
+
+    var elData = e.responseJSON.elData;
+    var elHeader = e.responseJSON.elHeader;
+
+    if (elHeader && elHeader.resSuc) {
+        // Generator의 기존 항목들을 모두 제거
+        rule_gen.removeAll();
+
+        // dlt_assignRuleList의 실제 데이터 확인
+        console.log("dlt_assignRuleList 전체 데이터:", dlt_assignRuleList.getAllJSON());
+
+        // 기존 규칙들을 Generator에 추가
+        var ruleCount = dlt_assignRuleList.getRowCount();
+        console.log("조회된 규칙 수:", ruleCount);
+
+        // 모든 규칙을 순차적으로 추가 (async/await 사용)
+        for (var i = 0; i < ruleCount; i++) {
+            var keyword = dlt_assignRuleList.getCellData(i, "keyword");
+            var dept = dlt_assignRuleList.getCellData(i, "dept");
+            var ruleId = dlt_assignRuleList.getCellData(i, "rule_id");
+
+            console.log("규칙 확인 - 키워드:", keyword, "부서:", dept, "ID:", ruleId);
+
+            if (keyword && dept) {  // 키워드와 부서가 있는 경우에만 추가
+                await scwin.addRuleToGenerator(keyword, dept, ruleId);
+            }
+        }
         
-        // 데이터를 그리드에 셋팅
-        dlt_assignRuleVoList.setJSON(elData.assignRuleVoList);
-        
-        // 페이지 네비게이터 업데이트
-        var totalPageCount = Math.ceil(elData.totalCount / dmp_assignRuleVo.get("pageSize"));
-        pgl_assignRuleList.setCount(totalPageCount);
-        
-        spn_registerFlag.setValue("등록");
+        console.log("모든 규칙 추가 완료");
+    }
+};
 
-		// 페이징 정보 업데이트
-        spn_totalPageCount.setValue(totalPageCount);
-        spn_pageIndex.setValue(dmp_assignRuleVo.get("pageIndex"));
-        pgl_assignRuleList.setSelectedIndex(dmp_assignRuleVo.get("pageIndex"));
-	};	
+// Generator에 규칙 추가하는 헬퍼 함수
+scwin.addRuleToGenerator = async function (keyword, deptName, ruleId) {
+    console.log("addRuleToGenerator 시작 - 현재 자식 수:", rule_gen.getChildrenCount());
 
-	/**
-	 * 페이지 번호 클릭 이벤트
-	 */
-	scwin.pgl_assignRuleList_onclick = function(idx) {
-		// 페이지 번호 세팅
-		dmp_assignRuleVo.set("pageIndex", idx);
-		 
-		// 서버통신 - 배정규칙 조회
-		$c.sbm.execute($p, sbm_selectAssignRuleVoList);
-	};
+    // Generator에 새 항목 추가 (인덱스 없이)
+    await rule_gen.insertChild();
 
-	// 배정규칙 clear
-	scwin.btn_reset_onclick = function(e) {
-		// 배정규칙 dataMap 초기화
-		dmp_assignRuleVoDetail.setEmptyValue();
-		// 배정규칙 readOnly false
-		grp_assignRuleInfo.setReadOnly(false);
+    var childCount = rule_gen.getChildrenCount();
+    console.log("insertChild 후 자식 수:", childCount);
 
-		btn_save.show("");   // 저장 버튼 생성
-		btn_edit.hide();     // 수정 버튼 제거
-		btn_delete.hide();   // 삭제 버튼 제거
-		
-		spn_registerFlag.setValue("등록");
-	};
+    // 마지막에 추가된 항목의 인덱스
+    var targetIndex = childCount - 1;
 
-	/**
-	 * 그리드 셀 클릭 이벤트
-	 */
-	scwin.grd_list_oncellclick = function(row,col,colId) {
-		dmp_assignRuleVoDetail.setJSON(dlt_assignRuleVoList.getRowJSON(row));
+    // await로 완료되었으므로 바로 접근 가능
+    var _keywordDisplay = rule_gen.getChild(targetIndex, "item_keyword_display");
+    var _deptDisplay = rule_gen.getChild(targetIndex, "item_dept_display");
+    var _editBtn = rule_gen.getChild(targetIndex, "item_edit");
+    var _deleteBtn = rule_gen.getChild(targetIndex, "item_delete");
+    var _ruleItem = rule_gen.getChild(targetIndex, "rule_item");
 
-		btn_save.hide(); 		// 저장 버튼 제거
-		btn_edit.show("");      // 수정 버튼 생성
-		btn_delete.show("");    // 삭제 버튼 생성
-		
-		spn_registerFlag.setValue("수정");
-	};
+    if (_keywordDisplay && _deptDisplay && _editBtn && _deleteBtn) {
+        // display 요소에 값 설정
+        await _keywordDisplay.setValue(keyword);
+        await _deptDisplay.setValue(deptName);
 
-	/**
-	 * 저장 버튼 클릭 이벤트
-	 */	
-	scwin.btn_save_onclick = function(e) {
-		// 유효성 체크
-		var valInfo = [
-			{ id: "rule_id", mandatory: true }
-		];
-		
-		if ($c.data.validateGroup(grp_assignRuleInfo, valInfo) === true) {
-			var promise = $c.win.confirm("저장하시겠습니까?");
-			promise.then(function(result) {  
-				if (result){
-					$c.sbm.execute(sbm_insertAssignRuleVo);
-				}
-			})
-		} 	
-	};
+        // 버튼과 rule_item에 규칙 정보 저장
+        _editBtn.setUserData("ruleId", ruleId || "");
+        _editBtn.setUserData("keyword", keyword);
+        _editBtn.setUserData("deptName", deptName);
+        _editBtn.setUserData("itemIndex", targetIndex);
 
-	/**
-	 * 사원정보 등록 콜백
-	 */
-	scwin.sbm_insertAssignRuleVo_submitdone = function(e) {
-		// error 수신시
-		var elHeader  = e.responseJSON.elHeader;
-		if(elHeader == null || elHeader == "" || elHeader == "undefiend" || elHeader.resSuc == false) {
-			$c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
-			return false;
-		}else{
-			// 등록되었습니다. msg 출력
-			$c.win.alert("등록되었습니다.");
-		}
-		
-		// 재조회
-		scwin.btn_search_onclick();
-	};
+        _deleteBtn.setUserData("ruleId", ruleId || "");
+        _deleteBtn.setUserData("keyword", keyword);
+        _deleteBtn.setUserData("deptName", deptName);
+        _deleteBtn.setUserData("itemIndex", targetIndex);
 
-	/**
-	 * 수정 버튼 클릭 이벤트
-	 */		
-	scwin.btn_edit_onclick = function(e) {
-		// 유효성 체크
-		var valInfo = [
-			{ id: "rule_id", mandatory: true }
-		];
-		
-		if ($c.data.validateGroup(grp_assignRuleInfo, valInfo) === true) {
-			var promise = $c.win.confirm("수정하시겠습니까?");
-			promise.then(function(result) {  
-				if (result){
-					$c.sbm.execute(sbm_updateAssignRuleVo);
-				}
-			})
-		} 
-	};
+        // rule_item에도 정보 저장
+        if (_ruleItem) {
+            _ruleItem.setUserData("ruleId", ruleId || "");
+            _ruleItem.setUserData("keyword", keyword);
+            _ruleItem.setUserData("deptName", deptName);
+        }
 
-	/**
-	 * 사원정보 수정 콜백
-	 */
-	scwin.sbm_updateAssignRuleVo_submitdone = function(e) {
-		// error 수신시
-		var elHeader  = e.responseJSON.elHeader;
-		if(elHeader == null || elHeader == "" || elHeader == "undefiend" || elHeader.resSuc == false) {
-			$c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
-			return false;
-		}else{
-			// 수정되었습니다. msg 출력
-			$c.win.alert("수정되었습니다.");
-		}
-		// 재조회
-		scwin.btn_search_onclick();
-	};
+    } else {
+        console.error("필요한 컴포넌트를 찾을 수 없습니다. 인덱스:", targetIndex);
+    }
+};
 
-	/**
-	 * 삭제 버튼 클릭 이벤트
-	 */		
-	scwin.btn_delete_onclick = function(e) {
-		// 유효성 체크
-		var valInfo = [
-			{ id: "rule_id", mandatory: true }
-		];
-		
-		if ($c.data.validateGroup(grp_assignRuleInfo, valInfo) === true) {
-			var promise = $c.win.confirm("삭제하시겠습니까?");
-			promise.then(function(result) {  
-				if (result){
-					$c.sbm.execute(sbm_deleteAssignRuleVo);
-				}
-			})
-		}	
-	};
+// 부서명을 부서ID로 가져오는 헬퍼 함수
+scwin.getDepartmentName = function (deptId) {
+    for (var i = 0; i < scwin.departmentList.length; i++) {
+        if (scwin.departmentList[i].value === deptId) {
+            return scwin.departmentList[i].text;
+        }
+    }
+    return deptId; // 찾지 못한 경우 ID 반환
+};
 
-	/**
-	 * 삭제 콜백
-	 */
-	scwin.sbm_deleteAssignRuleVo_submitdone = function(e) {
-		// error 수신시
-		var elHeader  = e.responseJSON.elHeader;
-		if(elHeader == null || elHeader == "" || elHeader == "undefiend" || elHeader.resSuc == false) {
-			$c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
-			return false;
-		}else{
-			// 삭제되었습니다. msg 출력
-			$c.win.alert("삭제되었습니다.");
-		}
-		
-		// 재조회
-		scwin.btn_search_onclick();
-	};
+// 부서ID를 부서명으로 가져오는 헬퍼 함수
+scwin.getDepartmentId = function (deptName) {
+    for (var i = 0; i < scwin.departmentList.length; i++) {
+        if (scwin.departmentList[i].text === deptName) {
+            return scwin.departmentList[i].value;
+        }
+    }
+    return ""; // 찾지 못한 경우 빈 문자열 반환
+};
 
-	/************************** 자동 배정 관련 함수 *************************/
-	
-	/**
-	 * 단일 청구 자동 배정 버튼 클릭 이벤트
-	 */
-	scwin.btn_assignSingleClaim_onclick = function(e) {
-		var claimNo = inp_claimNo.getValue();
-		if (!claimNo || claimNo.trim() === "") {
-			$c.win.alert("청구 번호를 입력해주세요.");
-			return;
-		}
-		
-		// claimNo를 keyword 필드에 설정 (Controller에서 keyword를 claimNo로 사용)
-		dmp_autoAssign.set("keyword", claimNo.trim());
-		
-		var promise = $c.win.confirm("청구번호 '" + claimNo + "'를 자동 배정하시겠습니까?");
-		promise.then(function(result) {
-			if (result) {
-				$c.sbm.execute($p, sbm_assignSingleClaim);
-			}
-		});
-	};
+// 추가 버튼 클릭 - 웹스퀘어 방식으로 수정
+scwin.add_rule_onclick = async function (e) {
+    scwin.showModal("add", null, null, null);
+};
 
-	/**
-	 * 단일 청구 자동 배정 콜백
-	 */
-	scwin.sbm_assignSingleClaim_submitdone = function(e) {
-		var response = e.responseJSON;
-		var elHeader = response.elHeader;
-		
-		if (elHeader && elHeader.resSuc === false) {
-			$c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
-			return;
-		}
-		
-		var result = response.elData || response;
-		if (result.success) {
-			$c.win.alert("배정 완료: " + result.message);
-			// 청구 번호 필드 초기화
-			inp_claimNo.setValue("");
-		} else {
-			$c.win.alert("배정 실패: " + result.message);
-		}
-	};
+// 수정 버튼 클릭 - 모달 팝업으로 변경
+scwin.item_edit_onclick = async function (e) {
 
-	/**
-	 * 전체 청구 일괄 배정 버튼 클릭 이벤트
-	 */
-	scwin.btn_assignAllClaims_onclick = function(e) {
-		var promise = $c.win.confirm("모든 미배정 청구를 자동 배정하시겠습니까?\n시간이 다소 소요될 수 있습니다.");
-		promise.then(function(result) {
-			if (result) {
-				$c.sbm.execute($p, sbm_assignAllClaims);
-			}
-		});
-	};
 
-	/**
-	 * 전체 청구 일괄 배정 콜백
-	 */
-	scwin.sbm_assignAllClaims_submitdone = function(e) {
-		var response = e.responseJSON;
-		var elHeader = response.elHeader;
-		
-		if (elHeader && elHeader.resSuc === false) {
-			$c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
-			return;
-		}
-		
-		var result = response.elData || response;
-		if (result.success && result.results) {
-			// 결과 목록을 그리드에 표시
-			var resultData = [];
-			for (var i = 0; i < result.results.length; i++) {
-				resultData.push({resultMessage: result.results[i]});
-			}
-			dlt_assignResults.setJSON(resultData);
-			
-			// 결과 표시 영역을 보이게 함
-			grp_assignResults.show();
-			
-			$c.win.alert("일괄 배정 완료!\n총 " + result.totalProcessed + "건 처리되었습니다.\n세부 결과는 아래 목록을 확인해주세요.");
-		} else {
-			$c.win.alert("일괄 배정 실패: " + result.message);
-		}
-	};
+    try {
+        // 저장된 데이터 가져오기
+        var ruleId = this.getUserData("ruleId");
+        var keyword = this.getUserData("keyword");
+        var deptName = this.getUserData("deptName");
 
-	/**
-	 * 키워드로 부서 찾기 버튼 클릭 이벤트
-	 */
-	scwin.btn_findDept_onclick = function(e) {
-		var keyword = inp_keyword.getValue();
-		if (!keyword || keyword.trim() === "") {
-			$c.win.alert("키워드를 입력해주세요.");
-			return;
-		}
-		
-		dmp_autoAssign.set("keyword", keyword.trim());
-		$c.sbm.execute($p, sbm_findDeptByKeyword);
-	};
+        // 모달 팝업 열기
+        scwin.showModal("edit", keyword, deptName, ruleId);
 
-	/**
-	 * 키워드로 부서 찾기 콜백
-	 */
-	scwin.sbm_findDeptByKeyword_submitdone = function(e) {
-		var response = e.responseJSON;
-		var elHeader = response.elHeader;
-		
-		if (elHeader && elHeader.resSuc === false) {
-			$c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
-			return;
-		}
-		
-		var result = response.elData || response;
-		if (result.success) {
-			$c.win.alert("부서 조회 성공!\n부서 ID: " + result.deptId);
-			spn_foundDeptId.setValue("부서 ID: " + result.deptId);
-		} else {
-			$c.win.alert("부서 조회 실패: " + result.message);
-			spn_foundDeptId.setValue("");
-		}
-	};
+    } catch (error) {
+        console.error("수정 버튼 처리 중 오류:", error);
+    }
+};
 
-	/**
-	 * 키워드로 배정 가능한 직원 조회 버튼 클릭 이벤트
-	 */
-	scwin.btn_getAvailableEmployees_onclick = function(e) {
-		var keyword = inp_keyword.getValue();
-		if (!keyword || keyword.trim() === "") {
-			$c.win.alert("키워드를 입력해주세요.");
-			return;
-		}
-		
-		dmp_autoAssign.set("keyword", keyword.trim());
-		$c.sbm.execute($p, sbm_getAvailableEmployees);
-	};
+// 통합된 모달 표시 함수
+scwin.showModal = function (mode, keyword, deptName, ruleId) {
+    // 기존 모달이 있으면 제거
+    if (document.getElementById('modalContainer')) {
+        document.getElementById('modalContainer').remove();
+    }
 
-	/**
-	 * 배정 가능한 직원 조회 콜백
-	 */
-	scwin.sbm_getAvailableEmployees_submitdone = function(e) {
-		var response = e.responseJSON;
-		var elHeader = response.elHeader;
-		
-		if (elHeader && elHeader.resSuc === false) {
-			$c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
-			return;
-		}
-		
-		var result = response.elData || response;
-		if (result.success && result.employees) {
-			var empInfo = "배정 가능한 직원 (" + result.totalCount + "명):\n";
-			for (var i = 0; i < result.employees.length; i++) {
-				var emp = result.employees[i];
-				empInfo += "- " + emp.ename + " (" + emp.empno + ")\n";
-			}
-			$c.win.alert(empInfo);
-		} else {
-			$c.win.alert("직원 조회 실패: " + result.message);
-		}
-	};
+    var modalTitle = mode === "add" ? "규칙 추가" : "규칙 수정";
+    var keywordValue = mode === "add" ? "" : keyword;
+    var deptId = mode === "add" ? "" : scwin.getDepartmentId(deptName);
 
-	/**
-	 * 배정 결과 목록 닫기
-	 */
-	scwin.btn_closeResults_onclick = function(e) {
-		grp_assignResults.hide();
-		dlt_assignResults.removeAll();
-	};
+    // 부서 옵션 HTML 생성
+    var departmentOptions = scwin.departmentList.map(function (dept) {
+        var selected = dept.value === deptId ? ' selected' : '';
+        return '<option value="' + dept.value + '"' + selected + '>' + dept.text + '</option>';
+    }).join('');
+
+    // 임시 div로 모달 생성
+    var modalContainer = document.createElement('div');
+    modalContainer.id = 'modalContainer';
+
+    var customModal = document.createElement('div');
+    customModal.id = 'customModal';
+    customModal.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; border:1px solid #ccc; padding:20px; z-index:9999; box-shadow:0 0 10px rgba(0,0,0,0.5); border-radius:5px; width:400px;';
+
+    customModal.innerHTML =
+        '<h3 style="margin-top:0;">' + modalTitle + '</h3>' +
+        '<div style="margin-bottom:15px;">' +
+        '<label style="display:inline-block; width:80px; font-weight:bold;">키워드:</label>' +
+        '<input type="text" id="modalKeyword" value="' + keywordValue + '" style="width:250px; padding:5px;" />' +
+        '</div>' +
+        '<div style="margin-bottom:15px;">' +
+        '<label style="display:inline-block; width:80px; font-weight:bold;">부서:</label>' +
+        '<select id="modalDepartment" style="width:262px; padding:5px;">' +
+        departmentOptions +
+        '</select>' +
+        '</div>' +
+        '<div style="text-align:center; margin-top:20px;">' +
+        '<button id="modalConfirmBtn" style="padding:8px 20px; margin-right:10px; cursor:pointer; background-color:#4285f4; color:white; border:none; border-radius:4px;">확인</button>' +
+        '<button id="modalCancelBtn" style="padding:8px 20px; cursor:pointer; background-color:#6c757d; color:white; border:none; border-radius:4px;">취소</button>' +
+        '</div>';
+
+    var modalBackdrop = document.createElement('div');
+    modalBackdrop.id = 'modalBackdrop';
+    modalBackdrop.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9998;';
+
+    modalContainer.appendChild(modalBackdrop);
+    modalContainer.appendChild(customModal);
+    document.body.appendChild(modalContainer);
+
+    // 이벤트 핸들러를 직접 함수로 정의 - async 추가
+    var confirmHandler = async function () {
+        var newKeyword = document.getElementById('modalKeyword').value;
+        var newDeptId = document.getElementById('modalDepartment').value;
+
+        if (!newKeyword || !newDeptId) {
+            alert("키워드와 부서를 모두 선택해주세요.");
+            return;
+        }
+
+        var newDeptName = scwin.getDepartmentName(newDeptId);
+
+        // 모달 닫기
+        document.getElementById('modalContainer').remove();
+
+        if (mode === "add") {
+            // 새 규칙을 즉시 화면에 추가 (await 사용)
+            await scwin.addRuleToGenerator(newKeyword, newDeptName, "");
+            
+            // 서버에 저장
+            scwin.saveAutoAssignRule(newKeyword, newDeptName);
+
+        } else {
+            // 기존 규칙 수정 - 화면 업데이트 추가
+            var childCount = rule_gen.getChildrenCount();
+            for (var i = 0; i < childCount; i++) {
+                var _editBtn = rule_gen.getChild(i, "item_edit");
+                if (_editBtn && _editBtn.getUserData("ruleId") === ruleId) {
+                    // 해당 항목의 display 요소 업데이트
+                    var _keywordDisplay = rule_gen.getChild(i, "item_keyword_display");
+                    var _deptDisplay = rule_gen.getChild(i, "item_dept_display");
+                    var _deleteBtn = rule_gen.getChild(i, "item_delete");
+
+                    if (_keywordDisplay && _deptDisplay) {
+                        await _keywordDisplay.setValue(newKeyword);
+                        await _deptDisplay.setValue(newDeptName);
+
+                        // 버튼의 userData도 업데이트
+                        _editBtn.setUserData("keyword", newKeyword);
+                        _editBtn.setUserData("deptName", newDeptName);
+                        _deleteBtn.setUserData("keyword", newKeyword);
+                        _deleteBtn.setUserData("deptName", newDeptName);
+                    }
+                    break;
+                }
+            }
+
+            // 서버에 저장
+            scwin.saveAutoAssignRule(newKeyword, newDeptName, ruleId);
+        }
+    };
+
+    var cancelHandler = function () {
+        document.getElementById('modalContainer').remove();
+    };
+
+    // 이벤트 리스너 추가
+    document.getElementById('modalConfirmBtn').addEventListener('click', confirmHandler);
+    document.getElementById('modalCancelBtn').addEventListener('click', cancelHandler);
+    document.getElementById('modalBackdrop').addEventListener('click', cancelHandler);
+
+    // 엔터 키 이벤트
+    document.getElementById('modalKeyword').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            document.getElementById('modalDepartment').focus();
+        }
+    });
+
+    document.getElementById('modalDepartment').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            confirmHandler();
+        }
+    });
+
+    // 키워드 입력란에 포커스
+    setTimeout(function () {
+        document.getElementById('modalKeyword').focus();
+    }, 100);
+};
+
+// 자동배정 규칙 저장 - 수정
+scwin.saveAutoAssignRule = async function (keyword, deptName, ruleId) {
+    // dmp_assignRuleVo에 값 설정
+    dmp_assignRuleVo.set("keyword", keyword);
+    dmp_assignRuleVo.set("dept", deptName); // 부서명을 dept 필드에 저장
+
+    if (ruleId) {
+        dmp_assignRuleVo.set("rule_id", ruleId); // 수정인 경우
+    } else {
+        dmp_assignRuleVo.set("rule_id", ""); // 신규인 경우
+    }
+
+    // submission 호출
+    await $c.sbm.execute($p, sbm_saveAutoAssignRule);
+};
+
+// 저장 완료 콜백
+scwin.sbm_saveAutoAssignRule_submitdone = function (e) {
+    var elHeader = e.responseJSON.elHeader;
+    var elData = e.responseJSON.elData;
+
+    if (elHeader == null || elHeader == "" || elHeader == "undefined" || elHeader.resSuc == false) {
+        $c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
+        return false;
+    } else {
+        // 성공 메시지만 표시하고 화면은 유지
+        $c.win.alert("저장이 완료되었습니다.");
+
+        // 서버에서 반환된 rule_id가 있으면 해당 버튼에 저장
+        if (elData && elData.assignRuleVo && elData.assignRuleVo.rule_id) {
+            var newRuleId = elData.assignRuleVo.rule_id;
+
+            // 가장 최근에 추가된 항목의 버튼들을 찾아서 rule_id 업데이트
+            var childCount = rule_gen.getChildrenCount();
+            if (childCount > 0) {
+                // 신규 추가된 항목 찾기 (rule_id가 없는 항목)
+                for (var i = 0; i < childCount; i++) {
+                    var _editBtn = rule_gen.getChild(i, "item_edit");
+                    var _deleteBtn = rule_gen.getChild(i, "item_delete");
+
+                    if (_editBtn && !_editBtn.getUserData("ruleId")) {
+                        // rule_id가 없는 항목이면 신규 추가된 항목
+                        _editBtn.setUserData("ruleId", newRuleId);
+                        _deleteBtn.setUserData("ruleId", newRuleId);
+
+                        console.log("신규 항목에 rule_id 설정:", newRuleId);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+};
+
+// 삭제 버튼 클릭
+scwin.item_delete_onclick = async function (e) {
+    // 삭제 확인 모달 스타일로 변경
+    var confirmModal = '<div id="deleteModal" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; border-radius:8px; padding:20px; z-index:9999; box-shadow:0 0 20px rgba(0,0,0,0.3); width:300px;">' +
+        '<h3 style="margin:0 0 15px 0; font-size:16px;">규칙 삭제</h3>' +
+        '<p style="margin:0 0 20px 0; color:#666; font-size:14px;">이 규칙을 삭제하시겠습니까?</p>' +
+        '<div style="text-align:right;">' +
+        '<button id="deleteCancel" style="padding:6px 15px; margin-right:10px; border:1px solid #ddd; background:white; border-radius:4px; cursor:pointer;">취소</button>' +
+        '<button id="deleteConfirm" style="padding:6px 15px; background:#dc3545; color:white; border:none; border-radius:4px; cursor:pointer;">삭제</button>' +
+        '</div>' +
+        '</div>' +
+        '<div id="deleteBackdrop" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9998;"></div>';
+
+    var modalDiv = document.createElement('div');
+    modalDiv.innerHTML = confirmModal;
+    document.body.appendChild(modalDiv);
+
+    var self = this;
+
+    document.getElementById('deleteConfirm').addEventListener('click', async function () {
+        try {
+            var ruleId = self.getUserData("ruleId");
+            var keyword = self.getUserData("keyword");
+            var deptName = self.getUserData("deptName");
+
+            console.log("삭제할 규칙 정보:", {
+                ruleId: ruleId,
+                keyword: keyword,
+                deptName: deptName
+            });
+
+            if (ruleId) {
+                // 서버에서 삭제 처리
+                await scwin.deleteAutoAssignRule(ruleId);
+
+                // rule_id로 해당 항목 찾아서 제거
+                var childCount = rule_gen.getChildrenCount();
+                for (var i = 0; i < childCount; i++) {
+                    var _editBtn = rule_gen.getChild(i, "item_edit");
+                    if (_editBtn && _editBtn.getUserData("ruleId") === ruleId) {
+                        rule_gen.removeChild(i);
+                        console.log("삭제 완료 - 인덱스:", i, "ID:", ruleId);
+                        break;
+                    }
+                }
+            } else {
+                // 신규 추가했다가 저장 전에 삭제하는 경우
+                var index = self.getGeneratedIndex();
+                if (index !== undefined && index !== -1) {
+                    rule_gen.removeChild(index);
+                    console.log("신규 항목 삭제 완료 - 인덱스:", index);
+                }
+            }
+
+            // 모달 닫기
+            modalDiv.remove();
+        } catch (error) {
+            console.error("삭제 처리 중 오류:", error);
+        }
+    });
+
+    document.getElementById('deleteCancel').addEventListener('click', function () {
+        modalDiv.remove();
+    });
+
+    document.getElementById('deleteBackdrop').addEventListener('click', function () {
+        modalDiv.remove();
+    });
+};
+
+// 자동배정 규칙 삭제 - 수정
+scwin.deleteAutoAssignRule = async function (ruleId) {
+    dmp_assignRuleVo.set("rule_id", ruleId);
+    dmp_assignRuleVo.set("keyword", "");
+    dmp_assignRuleVo.set("dept", "");
+
+    await $c.sbm.execute($p, sbm_deleteAutoAssignRule);
+};
+
+// 삭제 완료 콜백
+scwin.sbm_deleteAutoAssignRule_submitdone = function (e) {
+    var elHeader = e.responseJSON.elHeader;
+
+    if (elHeader == null || elHeader == "" || elHeader == "undefined" || elHeader.resSuc == false) {
+        $c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
+        return false;
+    } else {
+        // 성공 메시지만 표시 (화면은 이미 업데이트됨)
+        $c.win.alert("삭제가 완료되었습니다.");
+    }
+};
+
 ]]></script>
-	</head>
-	<body ev:onpageload="scwin.onpageload">
-		<xf:group class="sub_contents " id="" style="">
-			<xf:group class="pgtbox" id="" style="">
-				<w2:textbox class="pgt_tit" id="" label="배정규칙 관리 및 자동배정" style="" tagname="" />
-			</xf:group>
-			<xf:group class="schbox" id="search_box" style="">
-				<xf:group class="schbox_inner" id="" style="">
-					<xf:group adaptive="layout" adaptiveThreshold="1200" class="w2tb tbl" id="" style="width:Infinity%;" tagname="table">
-						<w2:attributes>
-							<w2:summary />
-						</w2:attributes>
-						<xf:group tagname="colgroup">
-						</xf:group>
-						<xf:group class="" id="" style="" tagname="tr">
-							<xf:group class="" id="" style="" tagname="tr">
-							</xf:group>
-						</xf:group>
-					</xf:group>
-				</xf:group>
-				<xf:group class="btn_schbox" id="" style="">
-					<xf:trigger class="btn_cm sch" disabled="" escape="false" id="btn_search" style="" type="button" ev:onclick="scwin.btn_search_onclick" localeRef="COMMON_BUTTON_00001">
-						<xf:label><![CDATA[조회]]></xf:label>
-					</xf:trigger>
-				</xf:group>
-			</xf:group>
-			
-			<!-- 자동 배정 기능 영역 -->
-			<xf:group class="titbox" id="" style="">
-				<xf:group id="" tagname="h3" style="">
-					<w2:textbox class="" id="" label="자동 배정 기능" style=""></w2:textbox>
-				</xf:group>
-			</xf:group>
-			<xf:group class="tblbox" id="" style="margin-bottom: 20px;">
-				<xf:group adaptive="layout" adaptiveThreshold="600" class="w2tb tbl" id="" style="" tagname="table">
-					<w2:attributes>
-						<w2:summary />
-					</w2:attributes>
-					<xf:group tagname="colgroup">
-						<xf:group style="width:150px;" tagname="col" />
-						<xf:group style="" tagname="col" />
-						<xf:group style="width:150px;" tagname="col" />
-						<xf:group style="" tagname="col" />
-					</xf:group>
-					<xf:group style="" tagname="tr">
-						<xf:group class="w2tb_th" style="" tagname="th">
-							<w2:textbox class="" id="" label="청구번호 배정" ref="" style="" userData2=""/>
-						</xf:group>
-						<xf:group class="w2tb_td" style="" tagname="td">
-							<xf:group style="display: flex; align-items: center;">
-								<xf:input class="" id="inp_claimNo" placeholder="청구번호 입력" style="width:200px; margin-right: 10px;" ref=""/>
-								<xf:trigger class="btn_cm" id="btn_assignSingleClaim" style="" type="button" ev:onclick="scwin.btn_assignSingleClaim_onclick">
-									<xf:label><![CDATA[단일 배정]]></xf:label>
-								</xf:trigger>
-							</xf:group>
-						</xf:group>
-						<xf:group class="w2tb_th" style="" tagname="th">
-							<w2:textbox class="" id="" label="일괄 배정" ref="" style="" userData2=""/>
-						</xf:group>
-						<xf:group class="w2tb_td" style="" tagname="td">
-							<xf:trigger class="btn_cm save" id="btn_assignAllClaims" style="" type="button" ev:onclick="scwin.btn_assignAllClaims_onclick">
-								<xf:label><![CDATA[전체 미배정 청구 자동배정]]></xf:label>
-							</xf:trigger>
-						</xf:group>
-					</xf:group>
-					<xf:group style="" tagname="tr">
-						<xf:group class="w2tb_th" style="" tagname="th">
-							<w2:textbox class="" id="" label="키워드 테스트" ref="" style="" userData2=""/>
-						</xf:group>
-						<xf:group class="w2tb_td" style="" tagname="td">
-							<xf:group style="display: flex; align-items: center;">
-								<xf:input class="" id="inp_keyword" placeholder="키워드 입력" style="width:200px; margin-right: 10px;" ref=""/>
-								<xf:trigger class="btn_cm" id="btn_findDept" style="margin-right: 5px;" type="button" ev:onclick="scwin.btn_findDept_onclick">
-									<xf:label><![CDATA[부서찾기]]></xf:label>
-								</xf:trigger>
-								<xf:trigger class="btn_cm" id="btn_getAvailableEmployees" style="" type="button" ev:onclick="scwin.btn_getAvailableEmployees_onclick">
-									<xf:label><![CDATA[직원조회]]></xf:label>
-								</xf:trigger>
-							</xf:group>
-						</xf:group>
-						<xf:group class="w2tb_th" style="" tagname="th">
-							<w2:textbox class="" id="" label="조회 결과" ref="" style="" userData2=""/>
-						</xf:group>
-						<xf:group class="w2tb_td" style="" tagname="td">
-							<w2:span id="spn_foundDeptId" label="" style="font-weight: bold; color: #0066cc;"></w2:span>
-						</xf:group>
-					</xf:group>
-				</xf:group>
-			</xf:group>
-			
-			<!-- 배정 결과 표시 영역 (초기에는 숨김) -->
-			<xf:group class="titbox" id="grp_assignResults" style="display: none;">
-				<xf:group id="" tagname="h3" style="">
-					<w2:textbox class="" id="" label="배정 결과" style=""></w2:textbox>
-				</xf:group>
-				<xf:group class="rt" id="" style="">
-					<xf:trigger class="btn_cm" id="btn_closeResults" style="" type="button" ev:onclick="scwin.btn_closeResults_onclick">
-						<xf:label><![CDATA[닫기]]></xf:label>
-					</xf:trigger>
-				</xf:group>
-			</xf:group>
-			<xf:group adaptiveThreshold="" class="gvwbox" id="grp_assignResultsGrid" style="display: none;">
-				<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dlt_assignResults"
-					defaultCellHeight="26" focusMode="row" id="grd_assignResults" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 200px;"
-					visibleRowNum="8" readOnly="true">
-					<w2:caption style="" id="caption3" value="배정 결과 목록"></w2:caption>
-					<w2:header style="" id="header3">
-						<w2:row style="" id="row5">
-							<w2:column width="100%" inputType="text" style="" id="column4" value="배정 결과 메시지" displayMode="label"></w2:column>
-						</w2:row>
-					</w2:header>
-					<w2:gBody style="" id="gBody3">
-						<w2:row style="" id="row6">
-							<w2:column width="100%" inputType="text" style="" id="resultMessage" value="" displayMode="label"></w2:column>
-						</w2:row>
-					</w2:gBody>
-				</w2:gridView>
-			</xf:group>
-
-			<!-- 기존 배정규칙 목록 영역 -->
-			<xf:group class="titbox" id="" style="">
-				<xf:group class="count" id="">
-					<w2:span id="" label="총" localeRef="COMMON_LABEL_00002" style=""></w2:span>
-    				<w2:span class="num" id="spn_listCnt" label="0" ref="" style=""></w2:span>
-    				<w2:span id="" label="건" localeRef="COMMON_LABEL_00003" style=""></w2:span>
-    			</xf:group>
-			</xf:group>
-			<xf:group adaptiveThreshold="" class="gvwbox" id="" style="">
-				<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dlt_assignRuleVoList"
-					defaultCellHeight="26" focusMode="row" id="grd_list" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 150px;"
-					visibleRowNum="10" ev:oncellclick="scwin.grd_list_oncellclick" readOnly="true">
-					<w2:caption style="" id="caption2" value="this is a grid caption."></w2:caption>
-					<w2:header style="" id="header2">
-						<w2:row style="" id="row3">
-							<w2:column width="70" inputType="text" style="" id="column1" value="rule_id" displayMode="label" localeRef="AssignRule_COLNAME_00001"></w2:column>
-                            <w2:column width="70" inputType="text" style="" id="column2" value="keyword" displayMode="label" localeRef="AssignRule_COLNAME_00002"></w2:column>
-                            <w2:column width="70" inputType="text" style="" id="column3" value="dept" displayMode="label" localeRef="AssignRule_COLNAME_00003"></w2:column>
-						</w2:row>
-					</w2:header>
-					<w2:gBody style="" id="gBody2">
-						<w2:row style="" id="row4">
-							<w2:column width="70" inputType="text" style="" id="rule_id" value="" displayMode="label"></w2:column>
-                            <w2:column width="70" inputType="text" style="" id="keyword" value="" displayMode="label"></w2:column>
-                            <w2:column width="70" inputType="text" style="" id="dept" value="" displayMode="label"></w2:column>
-						</w2:row>
-					</w2:gBody>
-				</w2:gridView>
-			</xf:group>
-			<xf:group class="pglbox" id="" style="">
-				<w2:pageList class="pgl" displayButtonType="display" displayFormat="#" id="pgl_assignRuleList" pageSize="5" pagingType="0"
-					style="" ev:onclick="scwin.pgl_assignRuleList_onclick">
-				</w2:pageList>	
-				<xf:group class="pgl_count" id="" style="display: none;">
-    				<w2:span class="num" id="spn_pageIndex" label="0" ref="data:dma_assignRuleVo.pageIndex" style=""></w2:span>
-    				<w2:span id="span1" label="/" style=""></w2:span>
-    				<w2:span id="spn_totalPageCount" label="0" ref="data:dma_assignRuleVo.totalPageCount" style=""></w2:span>
-    				<w2:span id="span2" label="페이지" localeRef="COMMON_LABEL_00005" style=""></w2:span>
-    			</xf:group>		
-			</xf:group>
-			<xf:group class="titbox" id="" style="">
-                <xf:group id="" tagname="h3" style="">
-    				<w2:textbox class="" id="" label="배정규칙" localeRef="" style=""></w2:textbox>
-    				<w2:textbox class="" id="" label="(" style=""></w2:textbox>
-    				<w2:textbox class="" id="spn_registerFlag" label="등록" localeRef="COMMON_LABEL_00006" style=""></w2:textbox>
-    				<w2:textbox class="" id="" label=")" style=""></w2:textbox>
-    			</xf:group>
-
-				<xf:group class="rt" id="" style="">
-					<xf:trigger class="btn_cm refresh" id="btn_reset" style="" type="button" localeRef="COMMON_BUTTON_00002"
-	    					ev:onclick="scwin.btn_reset_onclick">
-	    					<xf:label><![CDATA[초기화]]></xf:label>
-					</xf:trigger>
-					<xf:trigger class="btn_cm save" id="btn_save" style="" type="button" localeRef="COMMON_BUTTON_00003" ev:onclick="scwin.btn_save_onclick">
-	    					<xf:label><![CDATA[저장]]></xf:label>
-					</xf:trigger>
-					<xf:trigger class="btn_cm save" id="btn_edit" style="" type="button" localeRef="COMMON_BUTTON_00003" ev:onclick="scwin.btn_edit_onclick">
-						<xf:label><![CDATA[저장]]></xf:label>
-					</xf:trigger>
-					<xf:trigger class="btn_cm delete" ev:onclick="scwin.btn_delete_onclick" id="btn_delete" localeRef="COMMON_BUTTON_00004"
-						style="" type="button">
-						<xf:label><![CDATA[삭제]]></xf:label>
-					</xf:trigger>
-				</xf:group>
-			</xf:group>
-			<xf:group class="tblbox" id="grp_assignRuleInfo" style="">
-				<xf:group adaptive="layout" adaptiveThreshold="600" class="w2tb tbl" id="" style="" tagname="table">
-					<w2:attributes>
-						<w2:summary />
-					</w2:attributes>
-					<xf:group tagname="colgroup">
-						<xf:group style="width:150px;" tagname="col" />
-						<xf:group style="" tagname="col" />
-						<xf:group style="width:150px;" tagname="col" />
-						<xf:group style="" tagname="col" />
-					</xf:group>
-					<xf:group style="" tagname="tr">
-						<xf:group class="w2tb_th" style="" tagname="th">
-                            <w2:textbox class="" id="" label="rule_id" ref="" style="" userData2="" localeRef="AssignRule_COLNAME_00001"/>
-                        </xf:group>
-                        <xf:group class="w2tb_td" style="" tagname="td">
-                            <xf:input class="" id="" placeholder="" style="width:100%;" ref="data:dmp_assignRuleVoDetail.rule_id"/>
-                        </xf:group>
-                        <xf:group class="w2tb_th" style="" tagname="th">
-                            <w2:textbox class="" id="" label="keyword" ref="" style="" userData2="" localeRef="AssignRule_COLNAME_00002"/>
-                        </xf:group>
-                        <xf:group class="w2tb_td" style="" tagname="td">
-                            <xf:input class="" id="" placeholder="" style="width:100%;" ref="data:dmp_assignRuleVoDetail.keyword"/>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+        <!-- 기존 body 내용 유지 -->
+        <xf:group class="sub_contents" id="" style="">
+            <xf:group class="pgtbox" id="" style="">
+                <w2:textbox class="pgt_tit" id="" label="자동배정 설정" style="" tagname=""/>
+            </xf:group>
+            
+            <xf:group class="titbox" id="" style="">
+                <w2:textbox class="" id="" label="현재 적용 중인 규칙" style="" tagname="h4"/>
+            </xf:group>
+            
+            <!-- Generator를 위한 별도 컨테이너 영역 -->
+            <xf:group id="rule_container" style="width:100%; padding:20px; background-color:#f8f9fa;">
+                <w2:generator id="rule_gen" style="width:100%;">
+                    <xf:group id="rule_item" style="width:100%; margin-bottom:15px; padding:20px; border:1px solid #e0e0e0; border-radius:8px; background-color:#ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); box-sizing:border-box;">
+                        <xf:group style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+                            <xf:group style="flex:1; min-width:0; padding-right:10px;">
+                                <xf:group style="margin-bottom:10px;">
+                                    <w2:textbox label="키워드 : " style="display:inline-block; font-size:13px; color:#666; margin-bottom:5px;"/>
+                                    <w2:span id="item_keyword_display" label="" class="rule_keyword"/>
+                                </xf:group>
+                                <xf:group style="display:flex; align-items:flex-start;">
+                                    <w2:span label="•" style="font-size:12px; color:#999; margin-right:5px; margin-top:2px;"/>
+                                    <xf:group style="flex:1;">
+                                        <w2:span id="item_dept_display" label="" class="rule_dept"/>
+                                    </xf:group>
+                                </xf:group>
+                            </xf:group>
+                            <xf:group style="display:flex; align-items:center; flex-shrink:0;">
+                                <xf:trigger class="btn_cm" ev:onclick="scwin.item_edit_onclick" id="item_edit" style="width:50px; height:30px; margin-right:5px; font-size:13px;" type="button">
+                                    <xf:label><![CDATA[수정]]></xf:label>
+                                </xf:trigger>
+                                <xf:trigger class="btn_cm btn_delete" ev:onclick="scwin.item_delete_onclick" id="item_delete" style="width:50px; height:30px; font-size:13px;" type="button">
+                                    <xf:label><![CDATA[삭제]]></xf:label>
+                                </xf:trigger>
+                            </xf:group>
                         </xf:group>
                     </xf:group>
-                    <xf:group style="" tagname="tr">
-                        <xf:group class="w2tb_th" style="" tagname="th">
-                            <w2:textbox class="" id="" label="dept" ref="" style="" userData2="" localeRef="AssignRule_COLNAME_00003"/>
-                        </xf:group>
-                        <xf:group class="w2tb_td" style="" tagname="td">
-                            <xf:input class="" id="" placeholder="" style="width:100%;" ref="data:dmp_assignRuleVoDetail.dept"/>
-                        </xf:group>
-                        <xf:group class="w2tb_th" style="" tagname="th">
-                            <w2:textbox class="" id="" label="" ref="" style="" userData2="" />
-                        </xf:group>
-                        <xf:group class="w2tb_td" style="" tagname="td">
-                        </xf:group>
-					</xf:group>
-				</xf:group>
-			</xf:group>
-		</xf:group>
-	</body>
+                </w2:generator>
+            </xf:group>
+            
+            <!-- 추가 버튼 -->
+            <xf:group id="button_area" style="width:100%; text-align:right; padding:0 20px;">
+                <xf:trigger class="btn_cm" ev:onclick="scwin.add_rule_onclick" id="add_rule" style="width:100px; height:35px;" type="button">
+                    <xf:label><![CDATA[규칙 추가]]></xf:label>
+                </xf:trigger>
+            </xf:group>
+        </xf:group>
+    </body>
 </html>
