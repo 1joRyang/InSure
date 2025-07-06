@@ -3,7 +3,7 @@ package com.demo.proworks.assignrule.service;
 import java.util.List;
 
 import com.demo.proworks.assignrule.vo.AssignRuleVo;
-import com.demo.proworks.emp.vo.EmpVo;
+import com.demo.proworks.employee.vo.EmployeeVo;
 
 /**  
  * @subject     : 배정규칙 관련 처리를 담당하는 인터페이스
@@ -115,7 +115,7 @@ public interface AssignRuleService {
 	 * @return 배정 가능한 직원 목록
 	 * @throws Exception
 	 */
-	public List<EmpVo> getAvailableEmployeesByKeyword(String keyword) throws Exception;
+	public List<EmployeeVo> getAvailableEmployeesByKeyword(String keyword) throws Exception;
 	
 	/**
 	 * 자동 배정 설정을 업데이트한다.
@@ -132,5 +132,22 @@ public interface AssignRuleService {
 	 * @throws Exception
 	 */
 	public String getAutoAssignConfig() throws Exception;
+	
+	/**
+	 * 여러 청구를 일괄로 자동 배정한다 (배치 처리용).
+	 *
+	 * @return 배정 결과 메시지
+	 * @throws Exception
+	 */
+	public String runAutoAssignmentBatch() throws Exception;
+	
+	/**
+	 * 특정 청구 유형에 따른 배정 가능한 부서와 직원을 미리 보기한다.
+	 *
+	 * @param claimType 청구 유형
+	 * @return 배정 예상 정보 Map
+	 * @throws Exception
+	 */
+	public java.util.Map<String, Object> previewAssignment(String claimType) throws Exception;
 	
 }

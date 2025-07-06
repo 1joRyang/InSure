@@ -9,7 +9,7 @@ import com.inswave.elfw.exception.ElException;
 import com.demo.proworks.assignrule.vo.AssignRuleVo;
 import com.demo.proworks.assignrule.dao.AssignRuleDAO;
 import com.demo.proworks.claim.vo.ClaimVo;
-import com.demo.proworks.emp.vo.EmpVo;
+import com.demo.proworks.employee.vo.EmployeeVo;
 
 /**  
  * @subject     : 배정규칙 관련 처리를 담당하는 DAO
@@ -187,9 +187,9 @@ public class AssignRuleDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbs
      * @return 직원 목록
      * @throws ElException
      */
-    public List<EmpVo> selectEmployeesByDeptId(String deptId) throws ElException {
-        return (List<EmpVo>) list("com.demo.proworks.assignrule.selectEmployeesByDeptId", deptId);
-    }
+     public List<EmployeeVo> selectEmployeesByDeptId(String deptId) throws ElException {
+     return (List<EmployeeVo>) list("com.demo.proworks.assignrule.selectEmployeesByDeptId", deptId);
+     }
     
     /**
      * 청구 배정을 위한 모든 정보를 한번에 조회한다.
@@ -231,6 +231,40 @@ public class AssignRuleDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbs
      */
     public String getAutoAssignConfig() throws ElException {
         return (String) selectByPk("com.demo.proworks.assignrule.getAutoAssignConfig", null);
+    }
+
+    /**
+     * 🔥 부서별 재직중인 직원 수 조회
+     *  
+     * @param deptId 부서 ID
+     * @return 재직중인 직원 수
+     * @throws ElException
+     */
+    public int selectDeptEmployeeCount(String deptId) throws ElException {
+        try {
+            Object countObj = selectByPk("com.demo.proworks.assignrule.selectDeptEmployeeCount", deptId);
+            if (countObj == null) {
+                return 0;
+            }
+            
+            // 🔥 안전한 타입 변환
+            if (countObj instanceof Long) {
+                return ((Long) countObj).intValue();
+            } else if (countObj instanceof Integer) {
+                return (Integer) countObj;
+            } else if (countObj instanceof String) {
+                try {
+                    return Integer.parseInt((String) countObj);
+                } catch (NumberFormatException e) {
+                    return 0;
+                }
+            } else {
+                return 0;
+            }
+        } catch (Exception e) {
+            System.err.println("[ERROR] 부서별 직원 수 조회 오류: " + e.getMessage());
+            return 0;
+        }
     }
 
 }

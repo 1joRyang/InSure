@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.demo.proworks.assignrule.service.AssignRuleService;
 import com.demo.proworks.assignrule.vo.AssignRuleVo;
 import com.demo.proworks.assignrule.vo.AssignRuleListVo;
-import com.demo.proworks.emp.vo.EmpVo;
+import com.demo.proworks.employee.vo.EmployeeVo;
 
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
@@ -268,7 +268,7 @@ public class AssignRuleController {
                 return result;
             }
             
-            List<EmpVo> employees = assignRuleService.getAvailableEmployeesByKeyword(keyword);
+            List<EmployeeVo> employees = assignRuleService.getAvailableEmployeesByKeyword(keyword);
             result.put("success", true);
             result.put("employees", employees);
             result.put("totalCount", employees.size());
@@ -342,6 +342,54 @@ public class AssignRuleController {
         }
         
         return result;
+    }
+    
+    /**
+     * 배치 자동 배정을 실행한다.
+     *
+     * @return 배치 배정 결과
+     * @throws Exception
+     */
+    @ElService(key="assignrule0009RunBatch")
+    @RequestMapping(value="assignrule0009RunBatch")
+    @ElDescription(sub="배치 자동 배정 실행", desc="모든 미배정 청구를 일괄적으로 자동 배정한다.")
+    public Map<String, Object> runAutoAssignmentBatch() throws Exception {
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            String batchResult = assignRuleService.runAutoAssignmentBatch();
+            result.put("success", true);
+            result.put("message", batchResult);
+            
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+        
+        return result;
+    }
+    
+    /**
+     * 청구 유형별 배정 미리보기를 제공한다.
+     *
+     * @param  assignRuleVo 배정규칙 (keyword 필드를 claimType으로 사용)
+     * @return 배정 미리보기 결과
+     * @throws Exception
+     */
+    @ElService(key="assignrule0010PreviewAssignment")
+    @RequestMapping(value="assignrule0010PreviewAssignment")
+    @ElDescription(sub="청구 유형별 배정 미리보기", desc="특정 청구 유형에 대한 배정 예상 정보를 조회한다.")
+    public Map<String, Object> previewAssignment(AssignRuleVo assignRuleVo) throws Exception {
+        String claimType = assignRuleVo.getKeyword(); // keyword 필드를 claimType으로 활용
+        
+        if (claimType == null || claimType.trim().isEmpty()) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", false);
+            result.put("message", "청구 유형을 입력해주세요.");
+            return result;
+        }
+        
+        return assignRuleService.previewAssignment(claimType);
     }
    
 }

@@ -1,230 +1,115 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper      
-    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<!--
-	@subject     : 배정규칙 관련 처리를 담당하는 Sql Mapper
-	@description : 배정규칙 관련 처리를 담당하는 Sql Mapper
-	@author      : hyunwoo
-	@since       : 2025/07/01
-	@modification
-	===========================================================
-	DATE              AUTHOR             DESC
-	===========================================================
-	2025/07/01              hyunwoo             최초 생성
- -->
 <mapper namespace="com.demo.proworks.assignrule">
-    <insert id="insertAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo">
-    	<!-- 배정규칙를 등록한다. -->	
-    		
-        INSERT INTO ASSIGN_RULE   /* QueryID : com.demo.proworks.assignrule.insertAssignRule */
-        ( 
-            RULE_ID
-            <if test="keyword!= null"> , KEYWORD </if>
-            <if test="dept   != null"> , DEPT    </if>
-        )
-        VALUES  
-        ( 
-            #{rule_id}
-            <if test="keyword!= null"> , #{keyword} </if>
-            <if test="dept   != null"> , #{dept}    </if> 
-        )          
-    </insert>	
-	
-    <update id="updateAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo">
-    	<!-- 배정규칙를 갱신한다. -->
-    	
-        UPDATE ASSIGN_RULE    /* QueryID : com.demo.proworks.assignrule.updateAssignRule */      
-      	  SET  
-                RULE_ID = #{rule_id}        	                       
-            <if test="keyword!= null"> , KEYWORD = #{keyword} </if>
-            <if test="dept   != null"> , DEPT    = #{dept}    </if>                 
-        WHERE   
-                RULE_ID = #{rule_id}
-    </update>
-	
-    <delete id="deleteAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo">
-    	<!-- 배정규칙를 삭제한다. -->
-    	
-        DELETE FROM ASSIGN_RULE   /* QueryID : com.demo.proworks.assignrule.deleteAssignRule */ 
-        WHERE   
-                RULE_ID = #{rule_id}        
-    </delete>
-	
-    <select id="selectAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo" resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
-    	<!-- 배정규칙를 상세 조회한다. -->	
-        SELECT     /* QueryID : com.demo.proworks.assignrule.selectAssignRule */
-            RULE_ID, KEYWORD, DEPT
-        FROM ASSIGN_RULE 
-        WHERE 
-                RULE_ID = #{rule_id}			
-    </select>
-	
-    <select id="selectListAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo" resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
-    	<!-- 배정규칙 목록을 조회한다. -->
-           SELECT    /* QueryID : com.demo.proworks.assignrule.selectListAssignRule */
-               RULE_ID, KEYWORD, DEPT		       
-           FROM (
-               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
-               FROM (				
-                   SELECT 
-                       *  		                  
-                   FROM ASSIGN_RULE
-                   WHERE  1=1    		
-	     																														
-               ) S, (SELECT @ROWNUM := 0) TMP
-           ) A
-            WHERE PAGE = #{pageIndex}
-    </select>
-	
-    <select id="selectListCountAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo" resultType="long">
-    <!-- 배정규칙 목록의 카운트를 조회한다. -->
-    
-         SELECT    /* QueryID : com.demo.proworks.assignrule.selectListCountAssignRule */
-             COUNT(*) totcnt  		                  
-         FROM ASSIGN_RULE
-         WHERE  1=1    		
 
-    </select>
-    
-    <!-- ====================== 청구 자동 배정 관련 쿼리 ====================== -->
-    
-    <select id="selectAssignRuleByKeyword" parameterType="string" resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
-    	<!-- 키워드로 배정규칙을 조회한다. -->
-    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectAssignRuleByKeyword */
-    		RULE_ID, KEYWORD, DEPT
-    	FROM ASSIGN_RULE 
-    	WHERE KEYWORD = #{keyword}
-    	ORDER BY RULE_ID
-    	LIMIT 1
-    </select>
-    
-    <select id="selectDeptIdByDeptName" parameterType="string" resultType="string">
-    	<!-- 부서명으로 부서 ID를 조회한다. -->
-    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectDeptIdByDeptName */
-    		DEPT_ID
-    	FROM INS_DEPT 
-    	WHERE DEPT_NAME = #{deptName}
-    	LIMIT 1
-    </select>
-    
-    <select id="selectEmployeeByDeptId" parameterType="string" resultType="int">
-    	<!-- 부서 ID로 직원 번호를 조회한다. -->
-    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectEmployeeByDeptId */
-    		EMPNO
-    	FROM EMP 
-    	WHERE DEPTNO = #{deptId}
-    	ORDER BY EMPNO
-    	LIMIT 1
-    </select>
-    
-    <select id="selectClaimForAssignment" parameterType="string" resultType="com.demo.proworks.claim.vo.ClaimVo">
-    	<!-- 배정을 위한 청구 정보를 조회한다. -->
-    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectClaimForAssignment */
-    		CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, 
-    		CLAIM_TYPE, DISEASE_CODE, DATE_OF_ACCIDENT
-    	FROM CLAIM 
-    	WHERE CLAIM_NO = #{claimNo}
-    </select>
-    
-    <update id="updateClaimAssignment" parameterType="map">
-    	<!-- 청구에 담당자를 배정한다. -->
-    	UPDATE CLAIM    /* QueryID : com.demo.proworks.assignrule.updateClaimAssignment */
-    	SET EMP_NO = #{empNo}
-    	WHERE CLAIM_NO = #{claimNo}
-    </update>
-    
-    <select id="selectUnassignedClaims" resultType="com.demo.proworks.claim.vo.ClaimVo">
-    	<!-- 미배정 청구 목록을 조회한다. -->
-    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectUnassignedClaims */
-    		CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, 
-    		CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT
-    	FROM CLAIM 
-    	WHERE (EMP_NO IS NULL OR EMP_NO = '')
-    	ORDER BY RECEIPT_DATE DESC
-    </select>
-    
-    <select id="selectAllAssignRules" resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
-    	<!-- 모든 배정규칙을 조회한다. -->
-    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectAllAssignRules */
-    		RULE_ID, KEYWORD, DEPT
-    	FROM ASSIGN_RULE 
-    	ORDER BY RULE_ID
-    </select>
-    
-    <select id="selectKeywordMatchingRules" parameterType="string" resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
-    	<!-- 청구 내용에서 키워드가 매칭되는 배정규칙들을 조회한다. -->
-    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectKeywordMatchingRules */
-    		RULE_ID, KEYWORD, DEPT
-    	FROM ASSIGN_RULE 
-    	WHERE #{claimType} LIKE CONCAT('%', KEYWORD, '%')
-    	ORDER BY RULE_ID
-    	LIMIT 1
-    </select>
-    
-    <select id="selectEmployeesByDeptId" parameterType="string" resultType="com.demo.proworks.emp.vo.EmpVo">
-    	<!-- 부서 ID로 모든 직원을 조회한다. -->
-    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectEmployeesByDeptId */
-    		EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO, DNAME
-    	FROM EMP 
-    	WHERE DEPTNO = #{deptId}
-    	ORDER BY EMPNO
-    </select>
-    
-    <!-- 청구 자동 배정을 위한 통합 쿼리 -->
-    <select id="selectClaimAssignmentInfo" parameterType="string" resultType="map">
-    	<!-- 청구 배정을 위한 모든 정보를 한번에 조회한다. -->
-    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectClaimAssignmentInfo */
-    		c.CLAIM_NO,
-    		c.CLAIM_TYPE,
-    		c.EMP_NO as CURRENT_EMP_NO,
-    		ar.KEYWORD,
-    		ar.DEPT as DEPT_NAME,
-    		id.DEPT_ID,
-    		e.EMPNO as ASSIGNED_EMP_NO,
-    		e.ENAME as ASSIGNED_EMP_NAME
-    	FROM CLAIM c
-    	CROSS JOIN ASSIGN_RULE ar
-    	LEFT JOIN INS_DEPT id ON ar.DEPT = id.DEPT_NAME
-    	LEFT JOIN EMP e ON id.DEPT_ID = e.DEPTNO
-    	WHERE c.CLAIM_NO = #{claimNo}
-    	  AND c.CLAIM_TYPE LIKE CONCAT('%', ar.KEYWORD, '%')
-    	ORDER BY ar.RULE_ID, e.EMPNO
-    	LIMIT 1
-    </select>
-    
-    <!-- 배정 통계 조회 -->
-    <select id="selectAssignmentStatistics" resultType="map">
-    	<!-- 배정 통계를 조회한다. -->
-    	SELECT    /* QueryID : com.demo.proworks.assignrule.selectAssignmentStatistics */
-    		COUNT(*) as TOTAL_CLAIMS,
-    		SUM(CASE WHEN EMP_NO IS NOT NULL AND EMP_NO != '' THEN 1 ELSE 0 END) as ASSIGNED_CLAIMS,
-    		SUM(CASE WHEN EMP_NO IS NULL OR EMP_NO = '' THEN 1 ELSE 0 END) as UNASSIGNED_CLAIMS,
-    		ROUND(SUM(CASE WHEN EMP_NO IS NOT NULL AND EMP_NO != '' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as ASSIGNMENT_RATE
-    	FROM CLAIM
-    </select>
-    
-    <!-- 자동 배정 설정 업데이트 -->
-    <update id="updateAutoAssignConfig" parameterType="string">
-    	<!-- 자동 배정 설정을 업데이트한다. -->
-    	INSERT INTO ASSIGN_RULE   /* QueryID : com.demo.proworks.assignrule.updateAutoAssignConfig */
-    		(RULE_ID, KEYWORD, DEPT)
-    	VALUES 
-    		('AUTO_ASSIGN_CONFIG', 'AUTO_ASSIGN_ENABLED', #{autoAssignEnabled})
-    	ON DUPLICATE KEY UPDATE
-    		DEPT = #{autoAssignEnabled}
-    </update>
-    
-    <!-- 자동 배정 설정 조회 -->
-    <select id="getAutoAssignConfig" resultType="string">
-    	<!-- 자동 배정 설정을 조회한다. -->
-    	SELECT    /* QueryID : com.demo.proworks.assignrule.getAutoAssignConfig */
-    		DEPT as AUTO_ASSIGN_ENABLED
-    	FROM ASSIGN_RULE 
-    	WHERE RULE_ID = 'AUTO_ASSIGN_CONFIG' 
-    	  AND KEYWORD = 'AUTO_ASSIGN_ENABLED'
-    	LIMIT 1
-    </select>
+	<insert id="insertAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+		INSERT INTO ASSIGN_RULE (RULE_ID, KEYWORD, DEPT)
+		VALUES (#{rule_id}, #{keyword}, #{dept})
+	</insert>
+
+	<update id="updateAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+		UPDATE ASSIGN_RULE
+		SET KEYWORD = #{keyword}, DEPT = #{dept}
+		WHERE RULE_ID = #{rule_id}
+	</update>
+
+	<delete id="deleteAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+		DELETE FROM ASSIGN_RULE WHERE RULE_ID = #{rule_id}
+	</delete>
+
+	<select id="selectAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo"
+		resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+		SELECT RULE_ID, KEYWORD, DEPT FROM ASSIGN_RULE WHERE RULE_ID = #{rule_id}
+	</select>
+
+	<select id="selectListAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo"
+		resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+		SELECT RULE_ID, KEYWORD, DEPT FROM ASSIGN_RULE ORDER BY RULE_ID
+	</select>
+
+	<select id="selectListCountAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo" resultType="long">
+		SELECT COUNT(*) FROM ASSIGN_RULE
+	</select>
+
+	<select id="selectAssignRuleByKeyword" parameterType="string" resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+		SELECT RULE_ID, KEYWORD, DEPT FROM ASSIGN_RULE WHERE KEYWORD = #{keyword} ORDER BY RULE_ID LIMIT 1
+	</select>
+
+	<select id="selectDeptIdByDeptName" parameterType="string" resultType="string">
+	<!-- 	SELECT DEPT_ID FROM INS_DEPT WHERE DEPT_NAME = #{deptName} LIMIT 1 -->
+		SELECT DEPT_ID FROM INS_DEPT
+		WHERE DEPT_NAME = #{deptName}
+	</select>
+
+	<select id="selectEmployeeByDeptId" parameterType="string" resultType="int">
+		SELECT EMP_NO FROM EMPLOYEE WHERE DEPT_ID = #{deptId} ORDER BY EMP_NO LIMIT 1
+	</select>
+
+	<update id="updateClaimAssignment" parameterType="map">
+		UPDATE CLAIM SET EMP_NO = #{empNo} WHERE CLAIM_NO = #{claimNo}
+	</update>
+
+	<select id="selectUnassignedClaims" resultType="com.demo.proworks.claim.vo.ClaimVo">
+		SELECT CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO
+		FROM CLAIM
+		WHERE (EMP_NO IS NULL OR EMP_NO = '')
+		ORDER BY RECEIPT_DATE DESC
+	</select>
+
+	<select id="selectAllAssignRules" resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
+		SELECT RULE_ID, KEYWORD, DEPT FROM ASSIGN_RULE ORDER BY RULE_ID
+	</select>
+
+	<select id="selectEmployeesByDeptId" parameterType="string" resultType="com.demo.proworks.emp.vo.EmpVo">
+		SELECT EMP_NO, EMP_NAME, STATUS, DEPT_ID, ROLE
+		FROM EMPLOYEE
+		WHERE DEPT_ID = #{deptId}
+	</select>
+
+	<update id="updateAutoAssignConfig" parameterType="string">
+		INSERT INTO ASSIGN_RULE (RULE_ID, KEYWORD, DEPT)
+		VALUES ('AUTO_ASSIGN_CONFIG', 'AUTO_ASSIGN_ENABLED', #{autoAssignEnabled})
+		ON DUPLICATE KEY UPDATE DEPT = #{autoAssignEnabled}
+	</update>
+
+	<select id="getAutoAssignConfig" resultType="string">
+		SELECT DEPT FROM ASSIGN_RULE
+		WHERE RULE_ID = 'AUTO_ASSIGN_CONFIG' AND KEYWORD = 'AUTO_ASSIGN_ENABLED'
+		LIMIT 1
+	</select>
+
+	<!-- 🔥 체구 배정 정보 종합 조회 (한 번의 쿼리로 모든 정보 획득) -->
+	<select id="selectClaimAssignmentInfo" parameterType="string" resultType="hashmap">
+		SELECT /* QueryID : com.demo.proworks.assignrule.selectClaimAssignmentInfo */
+			c.CLAIM_NO,
+			c.CLAIM_TYPE,
+			c.EMP_NO as CURRENT_EMP_NO,
+			ar.DEPT as ASSIGN_DEPT_NAME,
+			id.DEPT_ID as TARGET_DEPT_ID
+		FROM CLAIM c
+		LEFT JOIN ASSIGN_RULE ar ON c.CLAIM_TYPE = ar.KEYWORD
+		LEFT JOIN INS_DEPT id ON ar.DEPT = id.DEPT_NAME
+		WHERE c.CLAIM_NO = #{claimNo}
+	</select>
+
+	<!-- 🔥 부서별 재직중인 직원 수 조회 -->
+	<select id="selectDeptEmployeeCount" parameterType="string" resultType="java.lang.Integer">
+		SELECT /* QueryID : com.demo.proworks.assignrule.selectDeptEmployeeCount */
+			CAST(COUNT(*) AS SIGNED) as count
+		FROM EMPLOYEE
+		WHERE DEPT_ID = #{deptId}
+		  AND STATUS = '재직중'
+	</select>
+
+	<!-- 🔥 체구서 정보 조회 (배정용) -->
+	<select id="selectClaimForAssignment" parameterType="string" resultType="com.demo.proworks.claim.vo.ClaimVo">
+		SELECT /* QueryID : com.demo.proworks.assignrule.selectClaimForAssignment */
+			CLAIM_NO as claim_no,
+			CLAIM_TYPE as claim_type,
+			EMP_NO as emp_no
+		FROM CLAIM
+		WHERE CLAIM_NO = #{claimNo}
+	</select>
 
 </mapper>
