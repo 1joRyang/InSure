@@ -715,21 +715,40 @@ scwin.testBatchAssignment_onclick = async function () {
     }
 };
 
-// 배치 자동 배정 완료 콜백
 scwin.sbm_runAutoAssignmentBatch_submitdone = function (e) {
-    var elData = e.responseJSON.elData;
-    var elHeader = e.responseJSON.elHeader;
-
-    if (elHeader && elHeader.resSuc) {
+    console.log("배치 배정 응답 전체:", e.responseJSON);
+    
+    var responseData = e.responseJSON;
+    
+    // 서버에서 직접 success와 message를 반환하는 경우
+    if (responseData && typeof responseData.success !== 'undefined') {
+        if (responseData.success === true) {
+            $c.win.alert("배치 배정 완료\n" + responseData.message);
+        } else {
+            $c.win.alert("배치 배정 실패\n" + (responseData.message || "알 수 없는 오류"));
+        }
+        return;
+    }
+    
+    // WebSquare 표준 응답 구조 처리 (elHeader가 있는 경우)
+    var elData = responseData.elData;
+    var elHeader = responseData.elHeader;
+    
+    if (elHeader && elHeader.resSuc === true) {
         if (elData && elData.success) {
             $c.win.alert("배치 배정 완료\n" + elData.message);
         } else {
-            $c.win.alert("배치 배정 실패\n" + (elData.message || "알 수 없는 오류"));
+            $c.win.alert("배치 배정 실패\n" + (elData ? elData.message : "알 수 없는 오류"));
         }
+    } else if (elHeader && elHeader.resSuc === false) {
+        $c.win.alert("배치 배정 실패\n에러코드: " + (elHeader.resCode || "N/A") + "\n에러메시지: " + (elHeader.resMsg || "알 수 없는 오류"));
     } else {
-        $c.win.alert("배치 배정 오류\n" + (elHeader ? elHeader.resMsg : "서버 오류"));
+        // 예상치 못한 응답 구조
+        console.error("예상치 못한 서버 응답 구조:", responseData);
+        $c.win.alert("서버 응답 구조를 인식할 수 없습니다.");
     }
 };
+
 
 // 청구 유형 미리보기 테스트
 scwin.testPreviewAssignment_onclick = async function () {

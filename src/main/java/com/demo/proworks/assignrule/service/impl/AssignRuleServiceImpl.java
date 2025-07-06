@@ -457,7 +457,7 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 	 * @process 1. 미배정 청구 목록을 조회한다. 2. 각 청구에 대해 claim_type 기반 자동 배정을 수행한다. 3. 배정 결과를
 	 *          요약해서 반환한다.
 	 * 
-	 * @return 배정 결과 메시지
+	 * @return 배정 결과 맵 (success, message, stats 포함)
 	 * @throws Exception
 	 */
 	@Transactional
@@ -469,16 +469,24 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 			int failCount = 0;
 
 			for (String result : results) {
-				if (result.contains("배정 완료")) {
+				if (result.contains("배정 완료") || result.contains("자동 배정 완료")) {
 					successCount++;
 				} else {
 					failCount++;
 				}
 			}
 
-			return String.format("배치 배정 완료 - 성공: %d건, 실패: %d건, 총: %d건", successCount, failCount, results.size());
+			// 🔥 성공적으로 처리되었다면 정상 메시지 반환 (예외 던지지 않음)
+			String resultMessage = String.format("배치 배정 완료 - 성공: %d건, 실패: %d건, 총: %d건", 
+					successCount, failCount, results.size());
+			
+			System.out.println("[INFO] " + resultMessage);
+			return resultMessage;
 
 		} catch (Exception e) {
+			System.err.println("[ERROR] 배치 자동 배정 중 오류 발생: " + e.getMessage());
+			e.printStackTrace();
+			// 🔥 여기서 예외를 다시 던지면 ProWorks에서 오류로 처리할 수 있음
 			throw new Exception("배치 자동 배정 중 오류 발생: " + e.getMessage(), e);
 		}
 	}
