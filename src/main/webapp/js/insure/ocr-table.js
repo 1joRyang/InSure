@@ -450,25 +450,24 @@ function calculateMainTableTotal() {
 		for (let i = 3; i < rows.length; i++) { // 헤더 3개 행 제외
 			const firstCell = rows[i].cells[rows[i].cells.length - 8]; 
 		    if (firstCell && firstCell.textContent.includes('합계')) {
-		                for (let j = 0; j < 7; j++) { // col2~col8
-		                    if (j !== 3 && j !== 6) { // 제외항목 컬럼(col5, col8) 제외
-		                        const cellIndex = rows[i].cells.length - 7 + j;
-		                        if (cellIndex < rows[i].cells.length) {
-		                            const cellValue = parseFloat(rows[i].cells[cellIndex].textContent) || 0;
-		                            total += cellValue;
-									if (j !== 1) {
-										patientTotal += cellValue;
-									}
-									console.log(cellValue);
-		                        }
-		                    }
+				for (let j = 0; j < 7; j++) { // col2~col8
+					if (j !== 3 && j !== 6) { // 제외항목 컬럼(col5, col8) 제외
+						const cellIndex = rows[i].cells.length - 7 + j;
+		                if (cellIndex < rows[i].cells.length - 2) {
+							const cellValue = parseFloat(rows[i].cells[cellIndex].textContent) || 0;
+		                    total += cellValue;
+							if (j !== 1) {
+								patientTotal += cellValue;
+							}
+							console.log(cellValue);
 		                }
+		            }
+		        }
 		    }
 			if (firstCell && firstCell.textContent.includes("상한액초과금")) {
 				const overLimitValueText = rows[i].cells[rows[i].cells.length - 7].textContent.trim();
 				const overLimitValue = parseFloat(overLimitValueText.replace(/,/g, '')) || 0;
 				patientTotal -= overLimitValue;
-				
 			}
         }
     }
@@ -554,8 +553,8 @@ function updateColumnTotal(colIndex) {
         if (!labelCell) continue;
 
         if (labelCell.textContent.trim() === '합계') {
-            totalRow = row; // 합계행은 저장만 하고 나중에 처리
-            continue;
+            totalRow = row; 
+            break;
         }
 
         if (targetCell) {

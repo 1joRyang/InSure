@@ -413,7 +413,6 @@ function extractClaimItemData(treatmentId, claimNo) {
         			</xf:trigger>
         		</xf:group>
         	</xf:group>
-        	<xf:group style="width: 100%;height: 600px;" id="gr_table"></xf:group>
         </xf:group>
     </body>
 </html>
