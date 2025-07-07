@@ -139,15 +139,15 @@ if (typeof com === 'undefined') {
 
 // HTTP 통신 함수
 if (!com.executeHttpSubmission) {
-    com.executeHttpSubmission = function(options) {
+    com.executeHttpSubmission = function (options) {
         var xhr = new XMLHttpRequest();
         xhr.open(options.method || "GET", options.action, true);
-        
+
         if (options.mediatype) {
             xhr.setRequestHeader("Content-Type", options.mediatype);
         }
-        
-        xhr.onreadystatechange = function() {
+
+        xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
                     if (options.success) {
@@ -166,14 +166,14 @@ if (!com.executeHttpSubmission) {
                 }
             }
         };
-        
+
         xhr.send(options.requestData || null);
     };
 }
 
 // 로딩 표시 함수
 if (!com.showLoading) {
-    com.showLoading = function(show) {
+    com.showLoading = function (show) {
         if (window.$p && $p.showLoading) {
             if (show) {
                 $p.showLoading();
@@ -185,14 +185,14 @@ if (!com.showLoading) {
 }
 
 if (!com.hideLoading) {
-    com.hideLoading = function() {
+    com.hideLoading = function () {
         com.showLoading(false);
     };
 }
 
 // 알림 함수
 if (!com.alert) {
-    com.alert = function(message) {
+    com.alert = function (message) {
         if (window.$p && $p.alert) {
             $p.alert(message);
         } else {
@@ -221,46 +221,46 @@ scwin.classifiedDocuments = {
     unclassified: []
 };
 
-scwin.onpageload = function() {
+scwin.onpageload = function () {
     // 초기화
     scwin.initPage();
 };
 
 // 페이지 초기화
-scwin.initPage = function() {
+scwin.initPage = function () {
     // 결과 영역 숨기기
     grp_result.hide();
-    
+
     // 전달 버튼 숨기기
     btn_transfer.hide();
-    
+
     // 샘플 폴더 경로 설정 (선택사항)
     // ibx_folderPath.setValue("C:\\document_classifier_api\\test_images");
 };
 
 // 폴더 분류 버튼 클릭
-scwin.btn_classify_onclick = function() {
+scwin.btn_classify_onclick = function () {
     var folderPath = ibx_folderPath.getValue();
-    
+
     if (!folderPath || folderPath.trim() === "") {
         com.alert("폴더 경로를 입력해주세요.");
         return;
     }
-    
+
     // API 호출
     scwin.classifyFolder(folderPath);
 };
 
 // 폴더 분류 API 호출
-scwin.classifyFolder = function(folderPath) {
+scwin.classifyFolder = function (folderPath) {
     // 로딩 표시
     com.showLoading(true);
-    
+
     // 결과 영역 초기화
     grp_result.hide();
     btn_transfer.hide();
     dlt_fileResults.removeAll();
-    
+
     // 분류된 문서 정보 초기화
     scwin.classifiedDocuments = {
         deathCertificates: [],
@@ -268,12 +268,12 @@ scwin.classifyFolder = function(folderPath) {
         surgeryCertificates: [],
         unclassified: []
     };
-    
+
     // API URL 설정
-    var apiUrl = scwin.API_CONFIG.useApi === 'spring' 
+    var apiUrl = scwin.API_CONFIG.useApi === 'spring'
         ? scwin.API_CONFIG.springApiUrl + '/classify-folder'
         : scwin.API_CONFIG.pythonApiUrl + '/classify-folder';
-    
+
     // API 호출
     com.executeHttpSubmission({
         action: apiUrl,
@@ -282,39 +282,39 @@ scwin.classifyFolder = function(folderPath) {
         requestData: JSON.stringify({
             "folder_path": folderPath
         }),
-        success: function(e) {
+        success: function (e) {
             var response = JSON.parse(e.responseText);
             scwin.displayResult(response);
         },
-        error: function(e) {
+        error: function (e) {
             com.hideLoading();
             var errorMsg = "문서 분류 중 오류가 발생했습니다.";
-            
+
             try {
                 var errorResponse = JSON.parse(e.responseText);
                 if (errorResponse.error) {
                     errorMsg = errorResponse.error;
                 }
-            } catch(ex) {
+            } catch (ex) {
                 errorMsg = "서버 연결 오류가 발생했습니다.";
             }
-            
+
             com.alert(errorMsg);
         }
     });
 };
 
 // 결과 표시
-scwin.displayResult = function(data) {
+scwin.displayResult = function (data) {
     // 로딩 숨기기
     // com.hideLoading();
-    
+
     // DataMap에 기본 정보 설정
     dma_folderInfo.set("folderPath", data.folder_path);
     dma_folderInfo.set("totalFiles", data.total_files);
     dma_folderInfo.set("processedFiles", data.processed_files);
     dma_folderInfo.set("highestPriorityDocument", data.highest_priority_document);
-    
+
     // 문서 유형별 개수 설정
     if (data.document_counts) {
         dma_folderInfo.set("deathCertCount", data.document_counts["사망진단서"] || 0);
@@ -322,14 +322,14 @@ scwin.displayResult = function(data) {
         dma_folderInfo.set("surgeryCertCount", data.document_counts["수술확인서"] || 0);
         dma_folderInfo.set("unclassifiedCount", data.document_counts["미분류"] || 0);
     }
-    
+
     // 최우선 문서 스타일 설정
     scwin.setPriorityStyle(data.highest_priority_document);
-    
+
     // DataList에 파일별 결과 설정 및 문서 유형별 분류
     if (data.results && data.results.length > 0) {
         var gridData = [];
-        
+
         for (var i = 0; i < data.results.length; i++) {
             var item = data.results[i];
             var fileInfo = {
@@ -340,11 +340,11 @@ scwin.displayResult = function(data) {
                 confidence: item.confidence ? (item.confidence * 100) : 0,
                 keywords: item.found_keywords ? item.found_keywords.join(", ") : ""
             };
-            
+
             gridData.push(fileInfo);
-            
+
             // 문서 유형별로 분류하여 저장
-            switch(item.document_type) {
+            switch (item.document_type) {
                 case "사망진단서":
                     scwin.classifiedDocuments.deathCertificates.push(fileInfo);
                     break;
@@ -358,35 +358,35 @@ scwin.displayResult = function(data) {
                     scwin.classifiedDocuments.unclassified.push(fileInfo);
             }
         }
-        
+
         dlt_fileResults.setJSON(gridData);
     }
-    
+
     // 전달 데이터 준비
     scwin.prepareTransferData(data);
-    
+
     // 결과 영역 표시
     grp_result.show();
-    
+
     // 분류된 문서가 있으면 전달 버튼 표시
     if (data.processed_files > 0) {
         btn_transfer.show();
     }
-    
+
     // 처리 완료 메시지
     com.alert("문서 분류가 완료되었습니다.\n최우선 문서: " + data.highest_priority_document);
 };
 
 // 전달 데이터 준비
-scwin.prepareTransferData = function(data) {
+scwin.prepareTransferData = function (data) {
     var now = new Date();
-    var dateStr = now.getFullYear() + "-" + 
-                  String(now.getMonth() + 1).padStart(2, '0') + "-" + 
-                  String(now.getDate()).padStart(2, '0') + " " +
-                  String(now.getHours()).padStart(2, '0') + ":" +
-                  String(now.getMinutes()).padStart(2, '0') + ":" +
-                  String(now.getSeconds()).padStart(2, '0');
-    
+    var dateStr = now.getFullYear() + "-" +
+        String(now.getMonth() + 1).padStart(2, '0') + "-" +
+        String(now.getDate()).padStart(2, '0') + " " +
+        String(now.getHours()).padStart(2, '0') + ":" +
+        String(now.getMinutes()).padStart(2, '0') + ":" +
+        String(now.getSeconds()).padStart(2, '0');
+
     // 전달할 데이터 설정
     dma_transferData.set("folderPath", data.folder_path);
     dma_transferData.set("classificationDate", dateStr);
@@ -397,15 +397,15 @@ scwin.prepareTransferData = function(data) {
 };
 
 // 최우선 문서 스타일 설정
-scwin.setPriorityStyle = function(documentType) {
+scwin.setPriorityStyle = function (documentType) {
     // 모든 스타일 초기화
     div_priority.removeClass("priority_death");
     div_priority.removeClass("priority_disability");
     div_priority.removeClass("priority_surgery");
     div_priority.removeClass("priority_unclassified");
-    
+
     // 문서 유형에 따른 스타일 적용
-    switch(documentType) {
+    switch (documentType) {
         case "사망진단서":
             div_priority.addClass("priority_death");
             break;
@@ -421,9 +421,9 @@ scwin.setPriorityStyle = function(documentType) {
 };
 
 // 결과 전달 버튼 클릭
-scwin.btn_transfer_onclick = function() {
+scwin.btn_transfer_onclick = function () {
     com.showLoading(true);
-    
+
     // 전달할 데이터 구성
     var transferData = {
         folderPath: dma_transferData.get("folderPath"),
@@ -444,23 +444,23 @@ scwin.btn_transfer_onclick = function() {
             unclassifiedCount: dma_folderInfo.get("unclassifiedCount")
         }
     };
-    
+
     // 다른 시스템으로 데이터 전송
     com.executeHttpSubmission({
         action: scwin.API_CONFIG.targetSystemUrl,
         method: "post",
         mediatype: "application/json",
         requestData: JSON.stringify(transferData),
-        success: function(e) {
+        success: function (e) {
             com.hideLoading();
             com.alert("분류 결과가 성공적으로 전달되었습니다.");
-            
+
             // 부모 창이나 다른 페이지로 이동이 필요한 경우
             // window.parent.postMessage(transferData, '*');
             // 또는
             // location.href = "/nextPage?data=" + encodeURIComponent(JSON.stringify(transferData));
         },
-        error: function(e) {
+        error: function (e) {
             com.hideLoading();
             com.alert("결과 전달 중 오류가 발생했습니다.");
         }
@@ -468,11 +468,11 @@ scwin.btn_transfer_onclick = function() {
 };
 
 // 문서 유형별 상세 보기
-scwin.showDocumentsByType = function(documentType) {
+scwin.showDocumentsByType = function (documentType) {
     var documents = [];
     var title = "";
-    
-    switch(documentType) {
+
+    switch (documentType) {
         case "death":
             documents = scwin.classifiedDocuments.deathCertificates;
             title = "사망진단서 목록";
@@ -486,41 +486,41 @@ scwin.showDocumentsByType = function(documentType) {
             title = "수술확인서 목록";
             break;
     }
-    
+
     if (documents.length === 0) {
         com.alert("해당 유형의 문서가 없습니다.");
         return;
     }
-    
+
     // 팝업이나 다이얼로그로 상세 목록 표시
-    var fileList = documents.map(function(doc) {
+    var fileList = documents.map(function (doc) {
         return doc.filename + " (신뢰도: " + doc.confidence.toFixed(1) + "%)";
     }).join("\n");
-    
+
     com.alert(title + ":\n\n" + fileList);
 };
 
 // 엔터키 입력 시 분류 실행
-scwin.ibx_folderPath_onkeyup = function(e) {
+scwin.ibx_folderPath_onkeyup = function (e) {
     if (e.keyCode === 13) { // Enter key
         scwin.btn_classify_onclick();
     }
 };
 
 // 초기화 버튼 클릭
-scwin.btn_reset_onclick = function() {
+scwin.btn_reset_onclick = function () {
     // 입력 필드 초기화
     ibx_folderPath.setValue("");
-    
+
     // 결과 영역 숨기기
     grp_result.hide();
     btn_transfer.hide();
-    
+
     // 데이터 초기화
     dma_folderInfo.removeAll();
     dma_transferData.removeAll();
     dlt_fileResults.removeAll();
-    
+
     // 분류된 문서 정보 초기화
     scwin.classifiedDocuments = {
         deathCertificates: [],
@@ -531,7 +531,7 @@ scwin.btn_reset_onclick = function() {
 };
 
 // WebSquare 페이지 간 데이터 전달 (옵션)
-scwin.transferToWebSquarePage = function() {
+scwin.transferToWebSquarePage = function () {
     // WebSquare의 페이지 이동 방식
     if (window.$p && $p.frame) {
         var param = {
@@ -544,10 +544,59 @@ scwin.transferToWebSquarePage = function() {
                 surgeryCount: dma_folderInfo.get("surgeryCertCount")
             }
         };
-        
+
         // 프레임 내 페이지 이동
         $p.frame.go("/nextPage.xml", param);
     }
+};
+
+
+//=========================================================================================================================
+
+scwin.openpopup_onclick = function (e) {
+    // 팝업 화면에 데이터를 전달 (dataObject를 통해 전달 가능)
+    var jsnPopupData = {
+        "type" : "json", // 데이터 유형. "json"을 권장
+        "name" : "exam_param",  // 데이터를 가져오기 위한 파라미터 이름으로 팝업 화면에서 $p.getParameter("exam_param")로 추출할 수 있음
+        "data" : { 
+            "Personal Info" : { "Name": "Lee", "Age": 50, "Married" : false}, 
+            "Region": "Seoul"
+        } // 실제 전달할 데이터
+    };
+
+    // 팝업 생성 옵션 지정
+    var options = {
+        id: "exam_popup",
+        type: "wframePopup",
+        width: "500px",
+        height: "500px",
+        top: "300px",
+        left: "200px",
+        popupName: "팝업 예제",
+        modal: true,
+        closeAction: "scwin.popup_closeAction", // [선택] 팝업의 닫기 버튼을 클릭했을 때 실행할 함수명
+        dataObject: jsnPopupData
+    };
+
+    // 팝업 생성
+    $p.openPopup("/result.xml", options);
+
+    // 팝업 생성 옵션의 closeAction 함수 정의 예시
+    scwin.popup_closeAction = function (argRuntimeID, argJsnInfo) {
+        // argRuntimeID : 팝업의 실행 시점 아이디
+        // argJsnInfo : 팝업의 부가 정보를 담은 JSON 객체
+        // argJsnInfo.isCloseButtonClick : [true, false] 팝업의 닫기 버튼을 클릭해서 호출되었는지의 여부
+        return true; //팝업 닫기 (반환 값이 true인 경우만 팝업이 닫힘)
+    };
+
+    // 팝업창에서 전달받은 데이터를 반환받기
+    var jsnParamData = $p.getParameter("exam_param");
+    // 반환 값 예시)
+    // { 
+    //     "Personal Info" : { "Name": "Lee", "Age": 50, "Married" : false}, 
+    //     "Region": "Seoul"
+    // };
+
 };
 ]]></script>
     </head>
@@ -672,6 +721,10 @@ scwin.transferToWebSquarePage = function() {
         			</w2:gridView>
         		</xf:group>
         	</xf:group>
+        	<xf:trigger class="btn_cm" id="openpopup" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true" meta_snippetName="8_01 기본버튼"
+        		style="" type="button" ev:onclick="scwin.openpopup_onclick">
+        		<xf:label><![CDATA[팝업예시]]></xf:label>
+        	</xf:trigger>
         </xf:group>
     </body>
 </html>

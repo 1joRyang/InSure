@@ -97,24 +97,25 @@
     </select>
 	
     <select id="selectListClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo" resultType="com.demo.proworks.claim.vo.ClaimVo">
-    	<!-- 청구 목록을 조회한다. -->
-           SELECT    /* QueryID : com.demo.proworks.claim.selectListClaim */
-               CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT		       
-           FROM (
-               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
-               FROM (				
-                   SELECT 
-                       *  		                  
-                   FROM CLAIM
-                   WHERE  1=1    		
-                        <if test="SC_receipt_date != null and SC_receipt_date != ''">
-                             AND RECEIPT_DATE like '%${SC_receipt_date}%'
-                        </if>
-                        <if test="SC_ID != null and SC_ID != ''">
-                             AND ID like '%${SC_ID}%'
-                        </if>	     																														
-               ) S, (SELECT @ROWNUM := 0) TMP
-           ) A
+    <!-- 청구 목록을 조회한다. 🔥 캐시 우회를 위한 임시 수정 -->
+    SELECT    /* QueryID : com.demo.proworks.claim.selectListClaim NOCACHE */
+    CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT,
+        NOW() as CACHE_BUSTER		       
+    FROM (
+    SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+    FROM (				
+    SELECT 
+        *  		                  
+    FROM CLAIM
+    WHERE  1=1    		
+    <if test="SC_receipt_date != null and SC_receipt_date != ''">
+         AND RECEIPT_DATE like '%${SC_receipt_date}%'
+    </if>
+    <if test="SC_ID != null and SC_ID != ''">
+         AND ID like '%${SC_ID}%'
+             </if>	     																																																							
+        ) S, (SELECT @ROWNUM := 0) TMP
+    ) A
             WHERE PAGE = #{pageIndex}
     </select>
 	

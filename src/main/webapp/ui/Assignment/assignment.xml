@@ -124,6 +124,46 @@
                 abortTrigger="">
             </xf:submission>
             
+            <!-- 배치 자동 배정 실행 -->
+            <xf:submission id="sbm_runAutoAssignmentBatch" 
+             ref='data:json,{}' 
+                target='data:json,dmp_assignRuleVo' 
+                action="/InsWebApp/assignrule0009RunBatch.pwkjson" 
+                method="post" 
+                mediatype="application/json" 
+                encoding="UTF-8" 
+                instance="" 
+                replace="" 
+                errorHandler="" 
+                customHandler="" 
+                mode="asynchronous" 
+                processMsg="" 
+                ev:submit="" 
+                ev:submitdone="scwin.sbm_runAutoAssignmentBatch_submitdone" 
+                ev:submiterror="" 
+                abortTrigger="">
+            </xf:submission>
+            
+            <!-- 청구 유형별 배정 미리보기 -->
+            <xf:submission id="sbm_previewAssignment" 
+                ref='data:json,{"id":"dmp_assignRuleVo","key":"assignRuleVo"}' 
+                target='data:json,dmp_assignRuleVo' 
+                action="/InsWebApp/assignrule0010PreviewAssignment.pwkjson" 
+                method="post" 
+                mediatype="application/json" 
+                encoding="UTF-8" 
+                instance="" 
+                replace="" 
+                errorHandler="" 
+                customHandler="" 
+                mode="asynchronous" 
+                processMsg="" 
+                ev:submit="" 
+                ev:submitdone="scwin.sbm_previewAssignment_submitdone" 
+                ev:submiterror="" 
+                abortTrigger="">
+            </xf:submission>
+            
             <w2:workflowCollection/>
         </xf:model>
         <w2:layoutInfo/>
@@ -668,6 +708,88 @@ scwin.sbm_deleteAutoAssignRule_submitdone = function (e) {
     }
 };
 
+// 배치 자동 배정 테스트 버튼 클릭
+scwin.testBatchAssignment_onclick = async function () {
+    if (confirm("미배정 청구들을 일괄로 자동 배정하시겠습니까?")) {
+        await $c.sbm.execute($p, sbm_runAutoAssignmentBatch);
+    }
+};
+
+scwin.sbm_runAutoAssignmentBatch_submitdone = function (e) {
+    console.log("배치 배정 응답 전체:", e.responseJSON);
+    
+    var responseData = e.responseJSON;
+    
+    // 서버에서 직접 success와 message를 반환하는 경우
+    if (responseData && typeof responseData.success !== 'undefined') {
+        if (responseData.success === true) {
+            $c.win.alert("배치 배정 완료\n" + responseData.message);
+        } else {
+            $c.win.alert("배치 배정 실패\n" + (responseData.message || "알 수 없는 오류"));
+        }
+        return;
+    }
+    
+    // WebSquare 표준 응답 구조 처리 (elHeader가 있는 경우)
+    var elData = responseData.elData;
+    var elHeader = responseData.elHeader;
+    
+    if (elHeader && elHeader.resSuc === true) {
+        if (elData && elData.success) {
+            $c.win.alert("배치 배정 완료\n" + elData.message);
+        } else {
+            $c.win.alert("배치 배정 실패\n" + (elData ? elData.message : "알 수 없는 오류"));
+        }
+    } else if (elHeader && elHeader.resSuc === false) {
+        $c.win.alert("배치 배정 실패\n에러코드: " + (elHeader.resCode || "N/A") + "\n에러메시지: " + (elHeader.resMsg || "알 수 없는 오류"));
+    } else {
+        // 예상치 못한 응답 구조
+        console.error("예상치 못한 서버 응답 구조:", responseData);
+        $c.win.alert("서버 응답 구조를 인식할 수 없습니다.");
+    }
+};
+
+
+// 청구 유형 미리보기 테스트
+scwin.testPreviewAssignment_onclick = async function () {
+    var claimType = prompt("청구 유형을 입력하세요 (예: 비용, 사고, 방문처치)");
+    
+    if (claimType && claimType.trim() !== "") {
+        // dmp_assignRuleVo에 설정
+        dmp_assignRuleVo.set("keyword", claimType.trim());
+        dmp_assignRuleVo.set("dept", "");
+        dmp_assignRuleVo.set("rule_id", "");
+        
+        await $c.sbm.execute($p, sbm_previewAssignment);
+    }
+};
+
+// 청구 유형 미리보기 완료 콜백
+scwin.sbm_previewAssignment_submitdone = function (e) {
+    var elData = e.responseJSON.elData;
+    var elHeader = e.responseJSON.elHeader;
+
+    if (elHeader && elHeader.resSuc && elData) {
+        if (elData.success) {
+            var message = "배정 미리보기 결과\n\n";
+            message += "청구 유형: " + elData.claimType + "\n";
+            message += "매칭 키워드: " + elData.matchedKeyword + "\n";
+            message += "배정 부서: " + elData.deptName + "\n";
+            message += "가능 직원 수: " + elData.employeeCount + "명\n\n";
+            
+            if (elData.primaryAssignee) {
+                message += "우선 배정 대상: " + elData.primaryAssignee.ename + " (" + elData.primaryAssignee.empno + ")";
+            }
+            
+            $c.win.alert(message);
+        } else {
+            $c.win.alert("미리보기 실패\n" + (elData.message || "알 수 없는 오류"));
+        }
+    } else {
+        $c.win.alert("미리보기 오류\n" + (elHeader ? elHeader.resMsg : "서버 오류"));
+    }
+};
+
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
@@ -682,7 +804,7 @@ scwin.sbm_deleteAutoAssignRule_submitdone = function (e) {
             </xf:group>
             
             <!-- Generator를 위한 별도 컨테이너 영역 -->
-            <xf:group id="rule_container" style="width:100%; background-color:#f8f9fa;">
+            <xf:group id="rule_container" style="width:100%; padding:20px; background-color:#f8f9fa;">
                 <w2:generator id="rule_gen" style="width:100%;">
                     <xf:group id="rule_item" style="width:100%; margin-bottom:15px; padding:20px; border:1px solid #e0e0e0; border-radius:8px; background-color:#ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); box-sizing:border-box;">
                         <xf:group style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
@@ -711,8 +833,14 @@ scwin.sbm_deleteAutoAssignRule_submitdone = function (e) {
                 </w2:generator>
             </xf:group>
             
-            <!-- 추가 버튼 -->
-            <xf:group id="button_area" style="width:100%; text-align:right;">
+            <!-- 추가 버튼 및 테스트 버튼 -->
+            <xf:group id="button_area" style="width:100%; text-align:right; padding:0 20px;">
+                <xf:trigger class="btn_cm" ev:onclick="scwin.testPreviewAssignment_onclick" id="test_preview" style="width:120px; height:35px; margin-right:10px; background-color:#17a2b8;" type="button">
+                    <xf:label><![CDATA[배정 미리보기]]></xf:label>
+                </xf:trigger>
+                <xf:trigger class="btn_cm" ev:onclick="scwin.testBatchAssignment_onclick" id="test_batch" style="width:120px; height:35px; margin-right:10px; background-color:#28a745;" type="button">
+                    <xf:label><![CDATA[일괄 자동배정]]></xf:label>
+                </xf:trigger>
                 <xf:trigger class="btn_cm" ev:onclick="scwin.add_rule_onclick" id="add_rule" style="width:100px; height:35px;" type="button">
                     <xf:label><![CDATA[규칙 추가]]></xf:label>
                 </xf:trigger>
