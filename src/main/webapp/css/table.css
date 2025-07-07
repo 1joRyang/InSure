@@ -41,3 +41,8 @@ th, td {
   z-index: 1;
   background: #f2f2f2;
 }
+.readonly {
+	cursor: not-allowed;
+	background-color: white;
+	color: black;
+}
