@@ -79,12 +79,19 @@ scwin.onpageload = function() {
     dm_excitems.set("item_id", itemId);
     dm_excitems.set("treatment_id", treatmentId);
     dm_excitems.set("claim_no", claimNo);
+
+    //localStorage.removeItem("exc");
 };
 
 scwin.btn_save_onclick = function (e) {
+    console.log(scwin.exclusionData);
+    let itemId = localStorage.getItem('itemId');
+    let excId = localStorage.getItem('excId');
     let excTotal = (Number(localStorage.getItem("excTotal")) || 0) + Number(ipt_cost.getValue());
-    $c.sbm.execute(sbm_execInsert);
+    //$c.sbm.execute(sbm_execInsert);
     $p.parent().ipt_excTotal.setValue(excTotal);
+    //localStorage.setItem("exc", ipt_cost.getValue());
+    //scwin.exclusionData[`${itemId}_${excId}`] = ipt_cost.getValue();
     localStorage.setItem("excTotal", excTotal);
     $p.closePopup("mf_exc_popup");
 };
