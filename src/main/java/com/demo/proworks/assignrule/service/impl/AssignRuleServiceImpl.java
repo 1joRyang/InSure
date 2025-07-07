@@ -353,8 +353,7 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 	public List<String> assignAllUnassignedClaims() throws Exception {
 		try {
 			// 미배정 청구 조회 (emp_no가 null이거나 빈값인 청구들)
-			ClaimVo searchVo = new ClaimVo();
-			List<ClaimVo> unassignedClaims = claimDAO.selectListClaim(searchVo);
+			List<ClaimVo> unassignedClaims = assignRuleDAO.selectUnassignedClaims();
 
 			List<String> results = new java.util.ArrayList<String>();
 
@@ -463,6 +462,57 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 	@Transactional
 	public String runAutoAssignmentBatch() throws Exception {
 		try {
+			// 🔥 디버깅을 위한 직접 SQL 실행
+			System.out.println("[DEBUG] 🔥 미배정 청구 조회 시작");
+			
+			// 🔥 1단계: 전체 청구 수 확인 (강제로 새로운 쿼리)
+			try {
+				// 직접 SQL로 COUNT 확인
+				long totalCount = assignRuleDAO.selectListCountAssignRule(new AssignRuleVo()); // 임시로 사용
+				System.out.println("[DEBUG] DB에서 직접 COUNT 조회 시도");
+			} catch (Exception e) {
+				System.out.println("[DEBUG] COUNT 조회 오류: " + e.getMessage());
+			}
+			
+			List<ClaimVo> allClaims = claimDAO.selectListClaim(new ClaimVo());
+			System.out.println("[DEBUG] 전체 청구 수: " + (allClaims != null ? allClaims.size() : 0));
+			
+			// 🔥 각 청구의 상세 정보 출력
+			if (allClaims != null) {
+				for (ClaimVo claim : allClaims) {
+					System.out.println(String.format("[DEBUG] 청구 상세 - NO: %s, TYPE: %s, EMP_NO: %s", 
+							claim.getClaim_no(), claim.getClaim_type(), claim.getEmp_no()));
+				}
+			}
+			
+			// 🔥 2단계: 미배정 청구 조회
+			List<ClaimVo> unassignedClaims = assignRuleDAO.selectUnassignedClaims();
+			System.out.println("[DEBUG] 미배정 청구 수: " + (unassignedClaims != null ? unassignedClaims.size() : 0));
+			
+			// 🔥 3단계: 각 청구의 EMP_NO 상태 확인
+			if (allClaims != null && allClaims.size() > 0) {
+				for (int i = 0; i < Math.min(allClaims.size(), 10); i++) { // 최대 10건만 확인
+					ClaimVo claim = allClaims.get(i);
+					String empNo = claim.getEmp_no();
+					String status = "UNKNOWN";
+					
+					if (empNo == null) {
+						status = "NULL";
+					} else if (empNo.trim().isEmpty()) {
+						status = "EMPTY_OR_WHITESPACE";
+					} else {
+						status = "HAS_VALUE(" + empNo + ")";
+					}
+					
+					System.out.println(String.format("[DEBUG] 청구 %s: EMP_NO = %s", 
+							claim.getClaim_no(), status));
+				}
+			}
+			
+			// 🔥 4단계: 배정규칙 확인
+			List<AssignRuleVo> assignRules = assignRuleDAO.selectAllAssignRules();
+			System.out.println("[DEBUG] 배정규칙 수: " + (assignRules != null ? assignRules.size() : 0));
+			
 			List<String> results = assignAllUnassignedClaims();
 
 			int successCount = 0;

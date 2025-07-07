@@ -29,21 +29,24 @@
 	</select>
 
 	<select id="selectListCountAssignRule" parameterType="com.demo.proworks.assignrule.vo.AssignRuleVo" resultType="long">
-		SELECT COUNT(*) FROM ASSIGN_RULE
+		SELECT COUNT(*) FROM
+		ASSIGN_RULE
 	</select>
 
 	<select id="selectAssignRuleByKeyword" parameterType="string" resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
-		SELECT RULE_ID, KEYWORD, DEPT FROM ASSIGN_RULE WHERE KEYWORD = #{keyword} ORDER BY RULE_ID LIMIT 1
+		SELECT RULE_ID, KEYWORD, DEPT FROM ASSIGN_RULE 
+		WHERE LOWER(KEYWORD) LIKE CONCAT('%', LOWER(#{keyword}), '%')
 	</select>
 
 	<select id="selectDeptIdByDeptName" parameterType="string" resultType="string">
-	<!-- 	SELECT DEPT_ID FROM INS_DEPT WHERE DEPT_NAME = #{deptName} LIMIT 1 -->
+		<!-- SELECT DEPT_ID FROM INS_DEPT WHERE DEPT_NAME = #{deptName} LIMIT 1 -->
 		SELECT DEPT_ID FROM INS_DEPT
 		WHERE DEPT_NAME = #{deptName}
 	</select>
 
 	<select id="selectEmployeeByDeptId" parameterType="string" resultType="int">
-		SELECT EMP_NO FROM EMPLOYEE WHERE DEPT_ID = #{deptId} ORDER BY EMP_NO LIMIT 1
+		SELECT EMP_NO FROM EMPLOYEE WHERE DEPT_ID = #{deptId} ORDER BY
+		EMP_NO LIMIT 1
 	</select>
 
 	<update id="updateClaimAssignment" parameterType="map">
@@ -56,7 +59,6 @@
 		WHERE (EMP_NO IS NULL OR EMP_NO = '')
 		ORDER BY RECEIPT_DATE DESC
 	</select>
-
 	<select id="selectAllAssignRules" resultType="com.demo.proworks.assignrule.vo.AssignRuleVo">
 		SELECT RULE_ID, KEYWORD, DEPT FROM ASSIGN_RULE ORDER BY RULE_ID
 	</select>
@@ -69,45 +71,51 @@
 
 	<update id="updateAutoAssignConfig" parameterType="string">
 		INSERT INTO ASSIGN_RULE (RULE_ID, KEYWORD, DEPT)
-		VALUES ('AUTO_ASSIGN_CONFIG', 'AUTO_ASSIGN_ENABLED', #{autoAssignEnabled})
+		VALUES ('AUTO_ASSIGN_CONFIG',
+		'AUTO_ASSIGN_ENABLED', #{autoAssignEnabled})
 		ON DUPLICATE KEY UPDATE DEPT = #{autoAssignEnabled}
 	</update>
 
 	<select id="getAutoAssignConfig" resultType="string">
 		SELECT DEPT FROM ASSIGN_RULE
-		WHERE RULE_ID = 'AUTO_ASSIGN_CONFIG' AND KEYWORD = 'AUTO_ASSIGN_ENABLED'
+		WHERE RULE_ID = 'AUTO_ASSIGN_CONFIG' AND KEYWORD =
+		'AUTO_ASSIGN_ENABLED'
 		LIMIT 1
 	</select>
 
-	<!-- 🔥 체구 배정 정보 종합 조회 (한 번의 쿼리로 모든 정보 획득) -->
+	<!-- 🔥 청구 배정 정보 종합 조회 (한 번의 쿼리로 모든 정보 획득) -->
 	<select id="selectClaimAssignmentInfo" parameterType="string" resultType="hashmap">
-		SELECT /* QueryID : com.demo.proworks.assignrule.selectClaimAssignmentInfo */
-			c.CLAIM_NO,
-			c.CLAIM_TYPE,
-			c.EMP_NO as CURRENT_EMP_NO,
-			ar.DEPT as ASSIGN_DEPT_NAME,
-			id.DEPT_ID as TARGET_DEPT_ID
+		SELECT
+		c.CLAIM_NO,
+		c.CLAIM_TYPE,
+		c.EMP_NO as CURRENT_EMP_NO,
+		ar.DEPT as ASSIGN_DEPT_NAME,
+		id.DEPT_ID as TARGET_DEPT_ID
 		FROM CLAIM c
-		LEFT JOIN ASSIGN_RULE ar ON c.CLAIM_TYPE = ar.KEYWORD
-		LEFT JOIN INS_DEPT id ON ar.DEPT = id.DEPT_NAME
+		LEFT JOIN ASSIGN_RULE ar
+		ON TRIM(LOWER(c.CLAIM_TYPE)) = TRIM(LOWER(ar.KEYWORD))
+		LEFT JOIN INS_DEPT id
+		ON TRIM(LOWER(ar.DEPT)) = TRIM(LOWER(id.DEPT_NAME))
 		WHERE c.CLAIM_NO = #{claimNo}
 	</select>
 
 	<!-- 🔥 부서별 재직중인 직원 수 조회 -->
 	<select id="selectDeptEmployeeCount" parameterType="string" resultType="java.lang.Integer">
-		SELECT /* QueryID : com.demo.proworks.assignrule.selectDeptEmployeeCount */
-			CAST(COUNT(*) AS SIGNED) as count
+		SELECT /* QueryID :
+		com.demo.proworks.assignrule.selectDeptEmployeeCount */
+		CAST(COUNT(*) AS SIGNED) as count
 		FROM EMPLOYEE
 		WHERE DEPT_ID = #{deptId}
-		  AND STATUS = '재직중'
+		AND STATUS = '재직중'
 	</select>
 
 	<!-- 🔥 체구서 정보 조회 (배정용) -->
 	<select id="selectClaimForAssignment" parameterType="string" resultType="com.demo.proworks.claim.vo.ClaimVo">
-		SELECT /* QueryID : com.demo.proworks.assignrule.selectClaimForAssignment */
-			CLAIM_NO as claim_no,
-			CLAIM_TYPE as claim_type,
-			EMP_NO as emp_no
+		SELECT /* QueryID :
+		com.demo.proworks.assignrule.selectClaimForAssignment */
+		CLAIM_NO as claim_no,
+		CLAIM_TYPE as claim_type,
+		EMP_NO as emp_no
 		FROM CLAIM
 		WHERE CLAIM_NO = #{claimNo}
 	</select>

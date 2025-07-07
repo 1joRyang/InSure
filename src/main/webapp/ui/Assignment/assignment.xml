@@ -126,7 +126,7 @@
             
             <!-- 배치 자동 배정 실행 -->
             <xf:submission id="sbm_runAutoAssignmentBatch" 
-                ref='data:json,{}' 
+             ref='data:json,{}' 
                 target='data:json,dmp_assignRuleVo' 
                 action="/InsWebApp/assignrule0009RunBatch.pwkjson" 
                 method="post" 
