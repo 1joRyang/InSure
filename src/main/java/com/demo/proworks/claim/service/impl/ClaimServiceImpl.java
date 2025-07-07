@@ -6,12 +6,14 @@ import javax.annotation.Resource;
 
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.demo.proworks.claim.service.ClaimService;
 import com.demo.proworks.claim.vo.ClaimNClaimResultVo;
 import com.demo.proworks.claim.vo.ClaimUserVo;
 import com.demo.proworks.claim.vo.ClaimVo;
 import com.demo.proworks.claim.dao.ClaimDAO;
+import com.demo.proworks.assignrule.service.AssignRuleService;
 
 /**  
  * @subject     : 청구 관련 처리를 담당하는 ServiceImpl
@@ -30,6 +32,9 @@ public class ClaimServiceImpl implements ClaimService {
 
     @Resource(name="claimDAO")
     private ClaimDAO claimDAO;
+	
+    @Resource(name="assignRuleServiceImpl")
+    private AssignRuleService assignRuleService;
 	
 	@Resource(name = "messageSource")
 	private MessageSource messageSource;
@@ -91,13 +96,39 @@ public class ClaimServiceImpl implements ClaimService {
      *
      * @process
      * 1. 청구를 등록 처리 한다.
+     * 2. 자동 배정 설정이 활성화된 경우 자동으로 배정을 실행한다.
      * 
      * @param  claimVo 청구 ClaimVo
      * @return 번호
      * @throws Exception
      */
+	@Transactional
 	public int insertClaim(ClaimVo claimVo) throws Exception {
-		return claimDAO.insertClaim(claimVo);	
+		// 1. 청구 데이터 등록
+		int result = claimDAO.insertClaim(claimVo);
+		
+		// 2. 등록이 성공한 경우 자동 배정 실행
+		if (result > 0 && claimVo.getClaim_no() != null) {
+			try {
+				// 자동 배정 설정 확인
+				String autoAssignEnabled = assignRuleService.getAutoAssignConfig();
+				
+				// 자동 배정이 활성화된 경우에만 실행
+				if ("true".equals(autoAssignEnabled)) {
+					// 신규 청구에 대해 자동 배정 실행
+					String assignResult = assignRuleService.assignEmployeeToClaim(claimVo.getClaim_no());
+					
+					// 배정 결과 로그 (필요시 추가 처리)
+					System.out.println("[자동 배정] " + assignResult);
+				}
+			} catch (Exception e) {
+				// 자동 배정 실패 시에도 청구 등록은 유지하고 로그만 남김
+				System.err.println("[자동 배정 실패] 청구번호: " + claimVo.getClaim_no() + ", 오류: " + e.getMessage());
+				e.printStackTrace();
+			}
+		}
+		
+		return result;
 	}
 	
     /**

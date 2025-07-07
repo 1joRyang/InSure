@@ -9,10 +9,9 @@
 			<w2:dataCollection baseNode="map">
 				<w2:dataMap baseNode="map" id="dmp_assignRuleVo" style="">
 					<w2:keyInfo>
-						
 						<w2:key dataType="text" id="pageIndex" name="페이지번호" defaultValue="1"></w2:key>
 						<w2:key dataType="text" id="pageSize" name="페이지사이즈" defaultValue="10"></w2:key>
-						<w2:key dataType="text" id="totalPageCount" name="페이지건수" ></w2:key>
+						<w2:key dataType="text" id="totalPageCount" name="페이지건수"></w2:key>
 					</w2:keyInfo>
 					<w2:data use="false"></w2:data>
 				</w2:dataMap>
@@ -21,7 +20,6 @@
 						<w2:column dataType="text" id="rule_id" name="rule_id"></w2:column>
                         <w2:column dataType="text" id="keyword" name="keyword"></w2:column>
                         <w2:column dataType="text" id="dept" name="dept"></w2:column>
-                       
 					</w2:columnInfo>
 				</w2:dataList>
 				<w2:dataMap baseNode="map" id="dmp_assignRuleVoDetail" style="">
@@ -29,12 +27,18 @@
 						<w2:key dataType="text" id="rule_id" name="rule_id"></w2:key>
                         <w2:key dataType="text" id="keyword" name="keyword"></w2:key>
                         <w2:key dataType="text" id="dept" name="dept"></w2:key>
-                       
+					</w2:keyInfo>
+				</w2:dataMap>
+				<!-- 자동 배정 설정 데이터 -->
+				<w2:dataMap baseNode="map" id="dmp_autoAssignConfig" style="">
+					<w2:keyInfo>
+						<w2:key dataType="text" id="autoAssignEnabled" name="자동배정활성화" defaultValue="false"></w2:key>
 					</w2:keyInfo>
 				</w2:dataMap>
 			</w2:dataCollection>
 			<w2:workflowCollection></w2:workflowCollection>
 
+			<!-- 기존 submission들 -->
 			<xf:submission id="sbm_selectAssignRuleVoList" ref='data:json,{"id":"dmp_assignRuleVo","key":"assignRuleVo"}'
 				target='data:json,{"id":"dlt_assignRuleVoList","key":"elData.assignRuleVoList"}' action="/InsWebApp/assignrule0001List.pwkjson" method="post"
 				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
@@ -56,6 +60,16 @@
 				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
 				processMsg="배정규칙를 조회 중입니다." ev:submit="" ev:submitdone="scwin.sbm_selectAssignRuleVo_submitdone" ev:submiterror="" abortTrigger="">
 			</xf:submission>
+			
+			<!-- 자동 배정 설정 관련 submission들 -->
+			<xf:submission id="sbm_updateAutoAssignConfig" ref='data:json,{"id":"dmp_autoAssignConfig","key":"autoAssignConfig"}' target="" action="/InsWebApp/assignrule0007UpdateAutoConfig.pwkjson" method="post"
+				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
+				processMsg="자동 배정 설정을 업데이트 중입니다." ev:submit="" ev:submitdone="scwin.sbm_updateAutoAssignConfig_submitdone" ev:submiterror="" abortTrigger="">
+			</xf:submission>
+			<xf:submission id="sbm_getAutoAssignConfig" ref='data:json,{}' target='data:json,{"id":"dmp_autoAssignConfig","key":"elData.autoAssignConfig"}' action="/InsWebApp/assignrule0008GetAutoConfig.pwkjson" method="post"
+				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
+				processMsg="자동 배정 설정을 조회 중입니다." ev:submit="" ev:submitdone="scwin.sbm_getAutoAssignConfig_submitdone" ev:submiterror="" abortTrigger="">
+			</xf:submission>
 		</xf:model>
 		<w2:layoutInfo></w2:layoutInfo>
 		<w2:publicInfo method="" />
@@ -68,16 +82,14 @@
 		btn_edit.hide();     // 수정 버튼 제거
 		btn_delete.hide();   // 삭제 버튼 제거
 		
-		/////////////////////////////////////////////
-		// 페이지 크기 설정 영역 / 웹관리자 화면 page 생성 시 주석 해제
-		/////////////////////////////////////////////
-		//sel_pageSize.setValue("10");
-		
 		//search_box
         var cptIbxName = $p.getComponentById("searchComp_1");
         if(cptIbxName == undefined){
 			search_box.hide();
         }
+		
+		// 자동 배정 설정 조회
+		scwin.loadAutoAssignConfig();
 		
 		// 배정규칙 조회
 		scwin.btn_search_onclick();
@@ -86,16 +98,81 @@
 	/************************** 이벤트 함수 *************************/
 	
 	/**
+	 * 자동 배정 설정 로드
+	 */
+	scwin.loadAutoAssignConfig = function() {
+		$c.sbm.execute($p, sbm_getAutoAssignConfig);
+	};
+	
+	/**
+	 * 자동 배정 설정 조회 콜백
+	 */
+	scwin.sbm_getAutoAssignConfig_submitdone = function(e) {
+		var elData = e.responseJSON.elData;
+		var elHeader = e.responseJSON.elHeader;
+		
+		if(elHeader == null || elHeader == "" || elHeader == "undefined" || elHeader.resSuc == false) {
+			// 기본값 설정 (수동)
+			dmp_autoAssignConfig.set("autoAssignEnabled", "false");
+		}
+		
+		// 자동 배정 모드 UI 업데이트
+		scwin.updateAutoAssignUI();
+	};
+	
+	/**
+	 * 자동 배정 UI 업데이트
+	 */
+	scwin.updateAutoAssignUI = function() {
+		var isAutoEnabled = dmp_autoAssignConfig.get("autoAssignEnabled") === "true";
+		
+		// 자동/수동 모드 표시 업데이트
+		if (isAutoEnabled) {
+			spn_autoAssignMode.setValue("자동");
+			spn_autoAssignMode.removeClass("status-manual");
+			spn_autoAssignMode.addClass("status-auto");
+		} else {
+			spn_autoAssignMode.setValue("수동");
+			spn_autoAssignMode.removeClass("status-auto");
+			spn_autoAssignMode.addClass("status-manual");
+		}
+	};
+	
+	/**
+	 * 자동 배정 모드 토글
+	 */
+	scwin.btn_toggleAutoAssign_onclick = function(e) {
+		var currentMode = dmp_autoAssignConfig.get("autoAssignEnabled");
+		var newMode = (currentMode === "true") ? "false" : "true";
+		var modeText = (newMode === "true") ? "자동" : "수동";
+		
+		var promise = $c.win.confirm("자동 배정 모드를 '" + modeText + "'으로 변경하시겠습니까?");
+		promise.then(function(result) {
+			if (result) {
+				dmp_autoAssignConfig.set("autoAssignEnabled", newMode);
+				$c.sbm.execute($p, sbm_updateAutoAssignConfig);
+			}
+		});
+	};
+	
+	/**
+	 * 자동 배정 설정 업데이트 콜백
+	 */
+	scwin.sbm_updateAutoAssignConfig_submitdone = function(e) {
+		var elHeader = e.responseJSON.elHeader;
+		if(elHeader == null || elHeader == "" || elHeader == "undefined" || elHeader.resSuc == false) {
+			$c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
+			return false;
+		} else {
+			$c.win.alert("자동 배정 설정이 변경되었습니다.");
+			scwin.updateAutoAssignUI();
+		}
+	};
+	
+	/**
 	 * 조회 버튼 클릭 이벤트
-	 * @date
-	 * @memberOf
-	 * @param 
-	 * @returns
-	 * @author 
-	 * @example
 	 */		   
 	scwin.btn_search_onclick = function(e) {
-	
 		// PGAE번호 초기화
 		dmp_assignRuleVo.set("pageIndex","1");
 		pgl_assignRuleList.setSelectedIndex(1);
@@ -105,7 +182,6 @@
 	};
 	
 	scwin.sbm_assignRuleList_submitdone = function(e) {
-
 		// error 수신시
 		var elData = e.responseJSON.elData;
 		var elHeader  = e.responseJSON.elHeader;
@@ -145,22 +221,10 @@
 
 	/**
 	 * 페이지 번호 클릭 이벤트
-	 * @date
-	 * @memberOf
-	 * @param 
-	 * @returns 
-	 * @author 
-	 * @example
 	 */
 	scwin.pgl_assignRuleList_onclick = function(idx) {
-	
 		// 페이지 번호 세팅
 		dmp_assignRuleVo.set("pageIndex", idx);
-		
-		/////////////////////////////////////////////
-		// 페이지 크기 설정 영역 / 웹관리자 화면 page 생성 시 주석 해제
-		/////////////////////////////////////////////
-		//dmp_assignRuleVo.set("pageSize", sel_pageSize.getValue());
 		 
 		// 서버통신 - 배정규칙 조회
 		$c.sbm.execute($p, sbm_selectAssignRuleVoList);
@@ -168,7 +232,6 @@
 
 	// 배정규칙 clear
 	scwin.btn_reset_onclick = function(e) {
-	
 		// 배정규칙 dataMap 초기화
 		dmp_assignRuleVoDetail.setEmptyValue();
 		// 배정규칙 readOnly false
@@ -183,15 +246,8 @@
 
 	/**
 	 * 그리드 셀 클릭 이벤트
-	 * @date
-	 * @memberOf
-	 * @param 
-	 * @returns 
-	 * @author 
-	 * @example
 	 */
 	scwin.grd_list_oncellclick = function(row,col,colId) {
-
 		dmp_assignRuleVoDetail.setJSON(dlt_assignRuleVoList.getRowJSON(row));
 
 		btn_save.hide(); 		// 저장 버튼 제거
@@ -203,19 +259,11 @@
 
 	/**
 	 * 저장 버튼 클릭 이벤트
-	 * @date
-	 * @memberOf
-	 * @param 
-	 * @returns
-	 * @author 
-	 * @example
 	 */	
 	scwin.btn_save_onclick = function(e) {
-		
 		// 유효성 체크
 		var valInfo = [
 			{ id: "rule_id", mandatory: true }
-           
 		];
 		
 		if ($c.data.validateGroup(grp_assignRuleInfo, valInfo) === true) {
@@ -230,15 +278,8 @@
 
 	/**
 	 * 사원정보 등록 콜백
-	 * @date 
-	 * @memberOf
-	 * @param 
-	 * @returns 
-	 * @author 
-	 * @example
 	 */
 	scwin.sbm_insertAssignRuleVo_submitdone = function(e) {
-		
 		// error 수신시
 		var elHeader  = e.responseJSON.elHeader;
 		if(elHeader == null || elHeader == "" || elHeader == "undefiend" || elHeader.resSuc == false) {
@@ -255,19 +296,11 @@
 
 	/**
 	 * 수정 버튼 클릭 이벤트
-	 * @date
-	 * @memberOf
-	 * @param 
-	 * @returns 
-	 * @author 
-	 * @example
 	 */		
 	scwin.btn_edit_onclick = function(e) {
-		
 		// 유효성 체크
 		var valInfo = [
 			{ id: "rule_id", mandatory: true }
-           
 		];
 		
 		if ($c.data.validateGroup(grp_assignRuleInfo, valInfo) === true) {
@@ -282,15 +315,8 @@
 
 	/**
 	 * 사원정보 수정 콜백
-	 * @date 
-	 * @memberOf
-	 * @param 
-	 * @returns 
-	 * @author 
-	 * @example
 	 */
 	scwin.sbm_updateAssignRuleVo_submitdone = function(e) {
-
 		// error 수신시
 		var elHeader  = e.responseJSON.elHeader;
 		if(elHeader == null || elHeader == "" || elHeader == "undefiend" || elHeader.resSuc == false) {
@@ -306,19 +332,11 @@
 
 	/**
 	 * 삭제 버튼 클릭 이벤트
-	 * @date
-	 * @memberOf
-	 * @param 
-	 * @returns 
-	 * @author 
-	 * @example
 	 */		
 	scwin.btn_delete_onclick = function(e) {
-		
 		// 유효성 체크
 		var valInfo = [
 			{ id: "rule_id", mandatory: true }
-           
 		];
 		
 		if ($c.data.validateGroup(grp_assignRuleInfo, valInfo) === true) {
@@ -333,15 +351,8 @@
 
 	/**
 	 * 삭제 콜백
-	 * @date 
-	 * @memberOf
-	 * @param 
-	 * @returns 
-	 * @author 
-	 * @example
 	 */
 	scwin.sbm_deleteAssignRuleVo_submitdone = function(e) {
-	
 		// error 수신시
 		var elHeader  = e.responseJSON.elHeader;
 		if(elHeader == null || elHeader == "" || elHeader == "undefiend" || elHeader.resSuc == false) {
@@ -360,8 +371,66 @@
 	<body ev:onpageload="scwin.onpageload">
 		<xf:group class="sub_contents " id="" style="">
 			<xf:group class="pgtbox" id="" style="">
-				<w2:textbox class="pgt_tit" id="" label="배정규칙" style="" tagname="" />
+				<w2:textbox class="pgt_tit" id="" label="자동배정 설정" style="" tagname="" />
 			</xf:group>
+			
+			<!-- 현재 적용 중인 자동 배정 규칙 영역 -->
+			<xf:group class="titbox" id="" style="">
+				<xf:group id="" tagname="h3" style="">
+					<w2:textbox class="" id="" label="현재 적용 중인 자동 배정 규칙" style=""></w2:textbox>
+				</xf:group>
+			</xf:group>
+			<xf:group class="tblbox" id="" style="margin-bottom: 20px;">
+				<xf:group adaptive="layout" adaptiveThreshold="600" class="w2tb tbl" id="" style="" tagname="table">
+					<w2:attributes>
+						<w2:summary />
+					</w2:attributes>
+					<xf:group tagname="colgroup">
+						<xf:group style="width:150px;" tagname="col" />
+						<xf:group style="" tagname="col" />
+					</xf:group>
+					<xf:group style="" tagname="tr">
+						<xf:group class="w2tb_th" style="" tagname="th">
+				<w2:textbox class="" id="" label="키워드 : &quot;검보법&quot;, &quot;손해&quot;, &quot;의료비&quot;" ref="" style="" userData2=""/>
+
+                            
+						</xf:group>
+						<xf:group class="w2tb_td" style="" tagname="td">
+							<w2:textbox class="" id="" label="의료비 접수 실무자에게 자동 배정" style="color: #333; font-weight: normal;"/>
+						</xf:group>
+					</xf:group>
+					<xf:group style="" tagname="tr">
+						<xf:group class="w2tb_th" style="" tagname="th">
+							<w2:textbox class="" id="" label="키워드 : &quot;입원,&quot;수술" ref="" style="" userData2=""/>
+
+						</xf:group>
+						<xf:group class="w2tb_td" style="" tagname="td">
+							<w2:textbox class="" id="" label="의료비 접수 실무자에게 자동 배정" style="color: #333; font-weight: normal;"/>
+						</xf:group>
+					</xf:group>
+				</xf:group>
+			</xf:group>
+			
+			<!-- 자동 배정 모드 토글 섹션 -->
+			<xf:group class="titbox" id="" style="">
+				<xf:group id="" tagname="h3" style="">
+					<w2:textbox class="" id="" label="자동 배정 모드" style=""></w2:textbox>
+				</xf:group>
+				<xf:group class="rt" id="" style="">
+					<w2:span id="spn_autoAssignMode" label="수동" style="margin-right: 10px; padding: 5px 10px; border-radius: 4px; font-weight: bold;" class="status-manual"/>
+					<xf:trigger class="btn_cm toggle" id="btn_toggleAutoAssign" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px;" type="button" ev:onclick="scwin.btn_toggleAutoAssign_onclick">
+						<xf:label><![CDATA[모드 변경]]></xf:label>
+					</xf:trigger>
+				</xf:group>
+			</xf:group>
+			
+			<!-- 새 규칙 추가 버튼 -->
+			<xf:group class="btn_group" id="" style="text-align: center; margin-bottom: 20px;">
+				<xf:trigger class="btn_cm add" id="btn_addRule" style="background-color: #4a90e2; color: white; padding: 8px 20px; border: none; border-radius: 4px;" type="button">
+					<xf:label><![CDATA[새 규칙 추가]]></xf:label>
+				</xf:trigger>
+			</xf:group>
+
 			<xf:group class="schbox" id="search_box" style="">
 				<xf:group class="schbox_inner" id="" style="">
 					<xf:group adaptive="layout" adaptiveThreshold="1200" class="w2tb tbl" id="" style="width:Infinity%;" tagname="table">
@@ -369,48 +438,10 @@
 							<w2:summary />
 						</w2:attributes>
 						<xf:group tagname="colgroup">
-							
 						</xf:group>
 						<xf:group class="" id="" style="" tagname="tr">
 							<xf:group class="" id="" style="" tagname="tr">
-								
 							</xf:group>
-							<!-- 페이지 크기 설정 영역 / 웹관리자 화면 page 생성 시 주석 해제-->
-							<!--xf:group class="w2tb_th" style="" tagname="th">
-								<w2:textbox id="" label="페이지 크기" localeRef="COMMON_LABEL_00001" ref="" style="" userData2=""></w2:textbox>
-							</xf:group>
-							<xf:group class="w2tb_td" style="" tagname="td">
-    							<xf:select1 allOption="" appearance="minimal" chooseOption="" direction="auto" disabled="false"
-    								disabledClass="w2selectbox_disabled" id="sel_pageSize" ref="data:dmp_assignRuleVo.pageSize" renderType="native"
-    								style="width: 80px;" submenuSize="auto" useItemLocale="false">
-    								<xf:choices>
-    									<xf:item>
-    										<xf:label><![CDATA[5]]></xf:label>
-    										<xf:value><![CDATA[5]]></xf:value>
-    									</xf:item>
-    									<xf:item>
-    										<xf:label><![CDATA[10]]></xf:label>
-    										<xf:value><![CDATA[10]]></xf:value>
-    									</xf:item>
-    									<xf:item>
-    										<xf:label><![CDATA[20]]></xf:label>
-    										<xf:value><![CDATA[20]]></xf:value>
-    									</xf:item>
-    									<xf:item>
-    										<xf:label><![CDATA[30]]></xf:label>
-    										<xf:value><![CDATA[30]]></xf:value>
-    									</xf:item>
-    									<xf:item>
-    										<xf:label><![CDATA[50]]></xf:label>
-    										<xf:value><![CDATA[50]]></xf:value>
-    									</xf:item>
-    									<xf:item>
-    										<xf:label><![CDATA[100]]></xf:label>
-    										<xf:value><![CDATA[100]]></xf:value>
-    									</xf:item>
-    								</xf:choices>
-    							</xf:select1>
-    						</xf:group-->
 						</xf:group>
 					</xf:group>
 				</xf:group>
@@ -420,6 +451,8 @@
 					</xf:trigger>
 				</xf:group>
 			</xf:group>
+
+			<!-- 배정규칙 목록 영역 -->
 			<xf:group class="titbox" id="" style="">
 				<xf:group class="count" id="">
 					<w2:span id="" label="총" localeRef="COMMON_LABEL_00002" style=""></w2:span>
@@ -437,7 +470,6 @@
 							<w2:column width="70" inputType="text" style="" id="column1" value="rule_id" displayMode="label" localeRef="AssignRule_COLNAME_00001"></w2:column>
                             <w2:column width="70" inputType="text" style="" id="column2" value="keyword" displayMode="label" localeRef="AssignRule_COLNAME_00002"></w2:column>
                             <w2:column width="70" inputType="text" style="" id="column3" value="dept" displayMode="label" localeRef="AssignRule_COLNAME_00003"></w2:column>
-                           
 						</w2:row>
 					</w2:header>
 					<w2:gBody style="" id="gBody2">
@@ -445,7 +477,6 @@
 							<w2:column width="70" inputType="text" style="" id="rule_id" value="" displayMode="label"></w2:column>
                             <w2:column width="70" inputType="text" style="" id="keyword" value="" displayMode="label"></w2:column>
                             <w2:column width="70" inputType="text" style="" id="dept" value="" displayMode="label"></w2:column>
-                           
 						</w2:row>
 					</w2:gBody>
 				</w2:gridView>
@@ -527,5 +558,17 @@
 				</xf:group>
 			</xf:group>
 		</xf:group>
+		
+		<!-- CSS for auto-assign mode styling -->
+		<style>
+			.status-auto {
+				background-color: #28a745;
+				color: white;
+			}
+			.status-manual {
+				background-color: #6c757d;
+				color: white;
+			}
+		</style>
 	</body>
 </html>
