@@ -96,24 +96,28 @@ scwin.onpageload = function() {
     scwin.createEmptyTable();
 
     // 제외항목
-    // todo : 전체 제외항목 리스트 조회해서 아래에 넣기
-    // updateExclusionCell를 사용해서 제외항목 저장/수정/삭제 수정....
     dm_getExc.set("claim_no", localStorage.getItem("claimNo"));
     dm_getExc.set("treatment_id", localStorage.getItem("treatmentId"));
     $c.sbm.execute(sbm_getExcList, {"elData": dm_getExc.getJSON()});
 };
 
 scwin.sbm_getExcList_submitdone = function (e) {
-    scwin.exclusionData = dl_excList.getAllJSON();
+    let excArray = dl_excList.getAllJSON();
     let excTotal = 0;
-    scwin.exclusionData.forEach(item => {
+    excArray.forEach(item => {
         if (item.item_id != null && item.exc_id != null && item.exc_cost !== undefined) {
             excTotal += Number(item.exc_cost);
+
+            const key = `${item.item_id}_${item.exc_id}`;
+            scwin.exclusionData[key] = item.exc_cost;
+
             scwin.updateExclusionCell(item.item_id, item.exc_id, item.exc_cost);
         }
     });
     ipt_excTotal.setValue(excTotal);
     localStorage.setItem("excTotal", excTotal);
+    scwin.updateColumnTotal(3);
+    scwin.updateColumnTotal(8);
 };
 
 scwin.updateExclusionCell = function(rowIndex, colIndex, newValue) {
@@ -137,6 +141,8 @@ scwin.updateExclusionCell = function(rowIndex, colIndex, newValue) {
     // 스타일 및 기타 표시 유지
     targetCell.style.backgroundColor = '#fff3cd';
     targetCell.style.cursor = 'pointer';
+    
+    scwin.updateColumnTotal(colIndex);
 }
 
 
@@ -163,7 +169,6 @@ scwin.btn_ocr_onclick = function (e) {
         { "col1": "CD필름", "col2": 0, "col3": 0, "col4": 0, "col5": 0, "col6": 0 },
     ];
     
-    // 수정된 헤더 - 실제 받아오는 데이터 헤더
     let headers = ["본인부담금", "공단부담금", "전액본인부담", "선택진료료", "선택진료료 외"];
     
     let result = {
@@ -182,7 +187,7 @@ scwin.btn_ocr_onclick = function (e) {
 
 scwin.btn_before_onclick = function (e) {
     // 이전 화면으로
-    
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_second.xml"
 };
 
 scwin.btn_next_onclick = function (e) {

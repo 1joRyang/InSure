@@ -14,10 +14,8 @@ scwin.createEmptyTable = function() {
                     col2: 0,  // 본인부담금
                     col3: 0,  // 공단부담금
                     col4: 0,  // 전액본인부담
-                    col5: 0,  // 제외항목 (첫 번째)
                     col6: 0,  // 선택진료료
                     col7: 0,  // 선택진료료 외
-                    col8: 0   // 제외항목 (두 번째)
                 });
                 rowIndex++;
             });
@@ -46,10 +44,8 @@ scwin.createTable = function (result) {
             col2: 0,  // 본인부담금
             col3: 0,  // 공단부담금
             col4: 0,  // 전액본인부담
-            col5: 0,  // 제외항목 (첫 번째)
             col6: 0,  // 선택진료료
             col7: 0,  // 선택진료료 외
-            col8: 0   // 제외항목 (두 번째)
         });
     });
     
@@ -62,7 +58,6 @@ scwin.createTable = function (result) {
             targetRow.col2 = row.col2 || 0;
             targetRow.col3 = row.col3 || 0;
             targetRow.col4 = row.col4 || 0;
-            // col5는 제외항목이므로 0 유지
             targetRow.col6 = row.col5 || 0;  // 원래 col5를 col6으로
             targetRow.col7 = row.col6 || 0;  // 원래 col6을 col7로
             // col8도 제외항목이므로 0 유지
@@ -116,8 +111,6 @@ scwin.createTable = function (result) {
     // 계층 구조 테이블 생성 함수 호출
     createHierarchicalTable(processedData);
     
-    // 진료비총액 업데이트
-    //setTimeout(updateTotalAmount, 200);
 }
 
 // 플랫 리스트 생성 (기존 코드와의 호환성을 위해)
@@ -325,20 +318,24 @@ createHierarchicalTable = function (processedData) {
                     
                     // 제외항목 컬럼인지 확인 (colIndex 5, 8이 제외항목 = headerIndex 3, 6)
                     if (headerIndex === 3 || headerIndex === 6) {
-                        // 제외항목 컬럼 - 모달 열기
-                        const key = `${dataIndex}_${headerIndex}`;
-                        if (scwin.exclusionData[key] && scwin.exclusionData[key].trim()) {
-                            td.textContent = scwin.exclusionData[key];
-                        } else {
-                            td.textContent = cellValue;
-                        }
-                        
-                        td.style.backgroundColor = '#fff3cd';
-                        td.style.cursor = 'pointer';
-                        
-                        // 제외항목 클릭 이벤트
-                        td.addEventListener('click', createExclusionClickHandler(dataIndex, headerIndex, td));
-                        
+						// 제외항목 컬럼 - 모달 열기
+						const key = `${dataIndex}_${headerIndex}`;
+						    
+						let displayValue = cellValue; 
+						    
+						// exclusionData에 해당 키의 데이터가 있으면 우선 사용
+						if (scwin.exclusionData && scwin.exclusionData[key] && scwin.exclusionData[key].trim()) {
+						    displayValue = scwin.exclusionData[key];
+						}
+						    
+						td.textContent = displayValue;
+						    
+						td.style.backgroundColor = '#fff3cd';
+						td.style.cursor = 'pointer';
+						    
+						// 제외항목 클릭 이벤트
+						td.addEventListener('click', createExclusionClickHandler(dataIndex, headerIndex, td));
+						    
                     } else {
                         // 수정 가능한 컬럼
                         td.textContent = cellValue;
@@ -370,6 +367,13 @@ createHierarchicalTable = function (processedData) {
 
     // 테이블을 컨테이너에 추가
     tableContainer.appendChild(table);
+	
+	for (let i=0; i<8; i++){
+		scwin.updateColumnTotal(i);
+	}
+	
+		
+	calculateMainTableTotal();
 }
 
 
@@ -439,7 +443,7 @@ function findMostSimilarRowName(col1Value, rowName) {
     return { name: mostSimilar, similarity: maxSimilarity };
 }
 
-// 서브테이블계산
+// 서브테이블계산 
 function calculateMainTableTotal() {
     let total = 0;
 	let patientTotal = 0
@@ -454,12 +458,13 @@ function calculateMainTableTotal() {
 				for (let j = 0; j < 7; j++) { // col2~col8
 					if (j !== 3 && j !== 6) { // 제외항목 컬럼(col5, col8) 제외
 						const cellIndex = rows[i].cells.length - 7 + j;
-		                if (cellIndex < rows[i].cells.length - 2) {
+		                if (cellIndex < rows[i].cells.length - 1) {
 							const cellValue = parseFloat(rows[i].cells[cellIndex].textContent) || 0;
 		                    total += cellValue;
 							if (j !== 1) {
 								patientTotal += cellValue;
 							}
+							console.log(total, patientTotal);
 		                }
 		            }
 		        }
@@ -482,7 +487,7 @@ function saveCellValue(td, input, rowIndex, colIndex) {
     
     console.log(`Row ${rowIndex}, Col ${colIndex} 값 변경: ${newValue}`);
     
-	updateColumnTotal(colIndex);
+	scwin.updateColumnTotal(colIndex);
 	
 	calculateMainTableTotal();
 }
@@ -516,21 +521,16 @@ function openExclusionModal(rowIndex, colIndex, td) {
 					closeAction: function() {
 						let newValue = localStorage.getItem("exc");
 						scwin.updateExclusionCell(rowIndex, colIndex, newValue);
+						scwin.exclusionData[key] = newValue;
+						localStorage.removeItem("exc");
 						return true;
 					}
 				};
 				
 	$p.openPopup("/InsWebApp/ui/audit/exec-popup.xml", opts);
-
 }
 
-scwin.closePopup = function() {
-	let newValue = localStorage.getItem("exc");
-	alert(newValue);
-	return true;
-}
-
-function updateColumnTotal(colIndex) {
+scwin.updateColumnTotal = function (colIndex) {
 	colIndex += 1;
     const mainTable = document.querySelector('#tableContainer table');
     if (!mainTable) return;
