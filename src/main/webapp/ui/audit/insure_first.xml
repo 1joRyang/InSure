@@ -13,8 +13,16 @@
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
         <script lazy="false" type="text/javascript"><![CDATA[
+
+
+
 scwin.onpageload = function() {
-	// todo: img 리스트 조회
+    // todo: img 리스트 조회
+
+
+
+
+    
 };
 
 scwin.btn_next_onclick = function (e) {
@@ -31,8 +39,37 @@ scwin.btn_img_def_onclick = function (e) {
 };
 
 scwin.btn_change_onclick = function (e) {
-    // todo: 처리자 변경
+    // 담당자 변경 팝업 호출
+    openChangeAssigneePopup("/InsWebApp/ui/assignment/change-assignee-popup.xml");
 };
+
+// 담당자 변경 팝업 함수
+function openChangeAssigneePopup(link) {
+    requires("uiplugin.popup"); 
+    var winWid = $(window).width();
+    var winHei = $(window).height();
+    var popWid = 600;  // 담당자 변경 팝업에 적합한 크기
+    var popHei = 350;
+    var sumLeft = (winWid - popWid) / 2;
+    var sumTop = (winHei - popHei) / 2;
+                    
+    var opts = {
+        "id" : "change_assignee_popup",
+        "type" : "litewindow",
+        "width" : popWid + "px",
+        "height" : popHei + "px",
+        "top" : sumTop, 
+        "left" : sumLeft,
+        "popupName" : "담당자 변경",
+        "modal" : true, 
+        "useIFrame" : false,
+        "title" : "담당자 변경",
+        "useATagBtn" : false,
+        "frameMode" : "wframe",
+    };
+
+    $p.openPopup(link, opts);
+}
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
