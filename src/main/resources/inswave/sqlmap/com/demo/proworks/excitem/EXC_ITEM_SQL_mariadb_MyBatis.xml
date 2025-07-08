@@ -15,6 +15,17 @@
 	2025/07/03              Inswave             최초 생성
  -->
 <mapper namespace="com.demo.proworks.excitem">
+
+	<select id="selectExcItemListR" parameterType="com.demo.proworks.excitem.vo.ExcItemVo" resultType="com.demo.proworks.excitem.vo.ExcItemVo">
+    	<!-- 제외항목를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.excitem.selectExcItem */
+            EXC_ID, ITEM_ID, TREATMENT_ID, CLAIM_NO, EXC_REASON, EXC_COST, EXC_CATEGORY
+        FROM EXC_ITEM 
+        WHERE  
+         TREATMENT_ID = #{treatment_id}
+         AND CLAIM_NO     = #{claim_no}    
+    </select>
+	
     <insert id="insertExcItem" parameterType="com.demo.proworks.excitem.vo.ExcItemVo">
     	<!-- 제외항목를 등록한다. -->	
     		

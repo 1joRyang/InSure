@@ -1,3 +1,4 @@
+
 // 페이지 로드 시 빈 테이블 생성 함수
 scwin.createEmptyTable = function() {
     // 빈 데이터 생성 - 계층 구조 기반
@@ -336,7 +337,7 @@ createHierarchicalTable = function (processedData) {
                         td.style.cursor = 'pointer';
                         
                         // 제외항목 클릭 이벤트
-                        td.addEventListener('click', createExclusionClickHandler(dataIndex, headerIndex, cellValue));
+                        td.addEventListener('click', createExclusionClickHandler(dataIndex, headerIndex, td));
                         
                     } else {
                         // 수정 가능한 컬럼
@@ -373,9 +374,9 @@ createHierarchicalTable = function (processedData) {
 
 
 // 제외항목 클릭 핸들러 생성 함수 
-function createExclusionClickHandler(rowIndex, colIndex, cellValue) {
+function createExclusionClickHandler(rowIndex, colIndex, td) {
     return function() {
-        openExclusionModal(rowIndex, colIndex, cellValue);
+        openExclusionModal(rowIndex, colIndex, td);
     };
 }
 
@@ -459,7 +460,6 @@ function calculateMainTableTotal() {
 							if (j !== 1) {
 								patientTotal += cellValue;
 							}
-							console.log(cellValue);
 		                }
 		            }
 		        }
@@ -476,34 +476,25 @@ function calculateMainTableTotal() {
 	ipt_tableTotalminus.setValue(patientTotal);
 }
 
-// 기존 saveCellValue 함수 수정 - 실시간 업데이트 추가
 function saveCellValue(td, input, rowIndex, colIndex) {
     const newValue = parseFloat(input.value) || 0;
     td.textContent = newValue;
     
     console.log(`Row ${rowIndex}, Col ${colIndex} 값 변경: ${newValue}`);
     
-    // 실시간으로 진료비총액 업데이트
-    //setTimeout(updateTotalAmount, 100); // 약간의 지연을 두어 DOM 업데이트 후 실행
-	//td.setValue(newValue);
 	updateColumnTotal(colIndex);
 	
 	calculateMainTableTotal();
 }
 
 // 제외항목 모달 열기 함수
-function openExclusionModal(rowIndex, colIndex, currentValue) {
+function openExclusionModal(rowIndex, colIndex, td) {
 	const key = `${rowIndex}_${colIndex}`;
-	const existingDetails = scwin.exclusionData[key] || '';
-
-	console.log(key);
+	
 	localStorage.setItem('itemId', rowIndex);
 	localStorage.setItem('excId', colIndex);
 	// todo: treatmentId localStorage 저장..
 	localStorage.setItem("treatmentId", 1);
-	
-	// 기존 제외항목 데이터 가져오기
-	$c.sbm.execute();
 	
 	requires("uiplugin.popup"); 
 	var winWid = $(window).width();
@@ -512,29 +503,32 @@ function openExclusionModal(rowIndex, colIndex, currentValue) {
 	var popHei = 600;
 	var sumLeft = (winWid - popWid) / 2;
 	var sumTop = (winHei - popHei) / 2;
-					
+	
 	var opts = {
-					"id" : "exc_popup",
-					"type" : "litewindow",
-					"width" : popWid + "px",
-					"height" : popHei + "px",
-					"top" : sumTop, 
-					"left" : sumLeft,
-					"popupName" : `제외항목 ${key}`,
-					"modal" : true, 
-					"useIFrame" : false,
-					"title" : "focusTest",
-					"useATagBtn" : true,
-					"frameMode" : "wframe",
+					id : "exc_popup",
+					width : popWid + "px",
+					height : popHei + "px",
+					top : sumTop, 
+					left : sumLeft,
+					popupName : `제외항목 ${key}`,
+					modal : true, 
+					type : "wframePopup", 
+					closeAction: function() {
+						let newValue = localStorage.getItem("exc");
+						scwin.updateExclusionCell(rowIndex, colIndex, newValue);
+						return true;
+					}
 				};
+				
 	$p.openPopup("/InsWebApp/ui/audit/exec-popup.xml", opts);
-    
-   // todo: 제외항목 값 업데이트
-   //exclusionData[key] = localStorage.getItem("exc");
+
 }
 
-// 제외항목 데이터를 저장할 전역 객체
-scwin.exclusionData = {};
+scwin.closePopup = function() {
+	let newValue = localStorage.getItem("exc");
+	alert(newValue);
+	return true;
+}
 
 function updateColumnTotal(colIndex) {
 	colIndex += 1;

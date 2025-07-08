@@ -8,68 +8,137 @@
         <w2:buildDate/>
         <w2:MSA/>
         <xf:model>
-            <w2:dataCollection baseNode="map">
-            	<w2:dataMap baseNode="map" id="dm_sub">
-            		<w2:keyInfo>
-            			<w2:key dataType="text" name="진료비총액" id="total_medical_fee"></w2:key>
-            			<w2:key dataType="text" name="환자부담총액" id="total_patient_payment"></w2:key>
-            			<w2:key dataType="text" name="이미납부한금액" id="amount_paid"></w2:key>
-            			<w2:key dataType="text" name="납부할금액" id="due_amt"></w2:key>
-            			<w2:key dataType="text" name="납부한금액" id="due_pay"></w2:key>
-            		</w2:keyInfo>
-            	</w2:dataMap>
-            	<w2:dataMap baseNode="map" id="dm_result">
-            		<w2:keyInfo>
-            			<w2:key dataType="text" name="최종수납액" id="final_due"></w2:key>
-            			<w2:key dataType="text" name="병원공제금" id="hospital_prepaid"></w2:key>
-            			<w2:key dataType="text" name="삭감항목금액" id="deducation_amt"></w2:key>
-            			<w2:key dataType="text" name="산출금" id="refund_amt"></w2:key>
-            		</w2:keyInfo>
-            	</w2:dataMap>
-            	<w2:dataList baseNode="list" repeatNode="map" id="dl_result" saveRemovedData="true">
-            		<w2:columnInfo>
-            			<w2:column dataType="text" name="구분" id="col1"></w2:column>
-            			<w2:column dataType="text" name="금액산정내용" id="col2"></w2:column>
-            		</w2:columnInfo>
-            		<w2:data use="true">
-            			<w2:row>
-            				<col1><![CDATA[최종수납]]></col1>
-            				<col2><![CDATA[0]]></col2>
-            			</w2:row>
-            			<w2:row>
-            				<col1><![CDATA[병원공제금]]></col1>
-            				<col2><![CDATA[0]]></col2>
-            			</w2:row>
-            			<w2:row>
-            				<col1><![CDATA[삭감항목총액]]></col1>
-            				<col2><![CDATA[0]]></col2>
-            			</w2:row>
-            			<w2:row>
-            				<col1><![CDATA[산출금]]></col1>
-            				<col2><![CDATA[0]]></col2>
-            			</w2:row>
-            		</w2:data>
-            	</w2:dataList>
-            </w2:dataCollection>
-            <w2:workflowCollection/>
+        	<w2:dataCollection baseNode="map">
+        		<w2:dataMap baseNode="map" id="dm_sub">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="진료비총액" id="total_medical_fee"></w2:key>
+        				<w2:key dataType="text" name="환자부담총액" id="total_patient_payment"></w2:key>
+        				<w2:key dataType="text" name="이미납부한금액" id="amount_paid"></w2:key>
+        				<w2:key dataType="text" name="납부할금액" id="due_amt"></w2:key>
+        				<w2:key dataType="text" name="납부한금액" id="due_pay"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dm_result">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="최종수납액" id="final_due"></w2:key>
+        				<w2:key dataType="text" name="병원공제금" id="hospital_prepaid"></w2:key>
+        				<w2:key dataType="text" name="삭감항목금액" id="deducation_amt"></w2:key>
+        				<w2:key dataType="text" name="산출금" id="refund_amt"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_result" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="구분" id="col1"></w2:column>
+        				<w2:column dataType="text" name="금액산정내용" id="col2"></w2:column>
+        			</w2:columnInfo>
+        			<w2:data use="true">
+        				<w2:row>
+        					<col1><![CDATA[최종수납]]></col1>
+        					<col2><![CDATA[0]]></col2>
+        				</w2:row>
+        				<w2:row>
+        					<col1><![CDATA[병원공제금]]></col1>
+        					<col2><![CDATA[0]]></col2>
+        				</w2:row>
+        				<w2:row>
+        					<col1><![CDATA[삭감항목총액]]></col1>
+        					<col2><![CDATA[0]]></col2>
+        				</w2:row>
+        				<w2:row>
+        					<col1><![CDATA[산출금]]></col1>
+        					<col2><![CDATA[0]]></col2>
+        				</w2:row>
+        			</w2:data>
+        		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dm_getExc">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="청구번호" id="claim_no"></w2:key>
+        				<w2:key dataType="text" name="진료ID" id="treatment_id"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_excList" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="exc_id" id="exc_id"></w2:column>
+        				<w2:column dataType="text" name="item_id" id="item_id"></w2:column>
+        				<w2:column dataType="text" name="treatment_id" id="treatment_id"></w2:column>
+        				<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+        				<w2:column dataType="text" name="exc_reason" id="exc_reason"></w2:column>
+        				<w2:column dataType="text" name="exc_cost" id="exc_cost"></w2:column>
+        				<w2:column dataType="text" name="exc_category" id="exc_category"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dmp_excItemVo">
+        			<w2:keyInfo></w2:keyInfo>
+        		</w2:dataMap>
+        	</w2:dataCollection>
+        	<w2:workflowCollection />
+        	<xf:submission id="sbm_getExcList" action="/InsWebApp/EXCITEMListR.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dmp_excItemVo","key":"excItemVo"}'
+        		target='data:json,{"id":"dl_excList","key":"excItemVoList"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getExcList_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/ocr-table.js" scopeVariable="" type="text/javascript"></script>
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/ocr-tableStruc.js" scopeVariable="" type="text/javascript"></script>
-        <script lazy="false" type="text/javascript"><![CDATA[// 페이지 로드 시 모든 테이블 생성
+        <script lazy="false" type="text/javascript"><![CDATA[scwin.exclusionData = {};
+
 scwin.onpageload = function() {
-    // todo: 테이블 불러와서 넣기
-    // 페이지가 로드될 때 기본 빈 테이블 생성
-    scwin.createEmptyTable();
-    
     let savedData = JSON.parse(localStorage.getItem('dateList') || '[]');
 
     savedData.forEach(item => {
         date_drop.addItem(item.imgIdx, item.dateRange);
     });
     date_drop.setSelectedIndex(0);
+
+    // todo: 테이블 불러와서 넣기
+    // 페이지가 로드될 때 기본 빈 테이블 생성 or 테이블 정보 불러와서 넣기(있으면)
+    scwin.createEmptyTable();
+
+    // 제외항목
+    // todo : 전체 제외항목 리스트 조회해서 아래에 넣기
+    // updateExclusionCell를 사용해서 제외항목 저장/수정/삭제 수정....
+    dm_getExc.set("claim_no", localStorage.getItem("claimNo"));
+    dm_getExc.set("treatment_id", localStorage.getItem("treatmentId"));
+    $c.sbm.execute(sbm_getExcList, {"elData": dm_getExc.getJSON()});
 };
+
+scwin.sbm_getExcList_submitdone = function (e) {
+    scwin.exclusionData = dl_excList.getAllJSON();
+    let excTotal = 0;
+    scwin.exclusionData.forEach(item => {
+        if (item.item_id != null && item.exc_id != null && item.exc_cost !== undefined) {
+            excTotal += Number(item.exc_cost);
+            scwin.updateExclusionCell(item.item_id, item.exc_id, item.exc_cost);
+        }
+    });
+    ipt_excTotal.setValue(excTotal);
+    localStorage.setItem("excTotal", excTotal);
+};
+
+scwin.updateExclusionCell = function(rowIndex, colIndex, newValue) {
+    const mainTable = document.querySelector('#tableContainer table');
+    if (!mainTable) return;
+
+    const rows = mainTable.rows;
+    const dataRowIndex = 3 + Number(rowIndex); // 헤더 3줄 제외
+    const targetRow = rows[dataRowIndex];
+
+    if (!targetRow) return;
+
+    const cellIndex = targetRow.cells.length - 8 + Number(colIndex) + 1;
+    const targetCell = targetRow.cells[cellIndex];
+   
+    if (!targetCell) return;
+
+    // 값 반영
+    targetCell.textContent = newValue;
+
+    // 스타일 및 기타 표시 유지
+    targetCell.style.backgroundColor = '#fff3cd';
+    targetCell.style.cursor = 'pointer';
+}
+
 
 scwin.btn_ocr_onclick = function (e) {
     // OCR 버튼 클릭 시 OCR 결과를 받아서 테이블을 동적으로 업데이트
@@ -154,7 +223,7 @@ scwin.ipt_excTotal_onchange = function (info) {
 };
 
 scwin.date_drop_onchange = function (info) {
-    // 바뀔때마다 저장 + 바뀐 애들 있으면 가져오기
+    // todo: 바뀔때마다 저장 + 바뀐 애들 있으면 가져오기
 
 };
 
@@ -188,6 +257,8 @@ function extractClaimItemData(treatmentId, claimNo) {
 
     return data;
 }
+
+
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
@@ -310,8 +381,8 @@ function extractClaimItemData(treatmentId, claimNo) {
         				<xf:group tagname="tr" style="">
         					<xf:group tagname="td" style="" class="w2tb_td">환자부담총액</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
-        						<xf:input id="ipt_tableTotalminus" style="width: 144px;height: 21px;" readOnly="true" readOnlyClass="readonly"
-        							ref="data:dm_sub.total_patient_payment">
+        						<xf:input id="ipt_tableTotalminus" style="width: 144px;height: 21px;" readOnly="true"
+        							readOnlyClass="readonly" ref="data:dm_sub.total_patient_payment">
         						</xf:input>
         					</xf:group>
         				</xf:group>

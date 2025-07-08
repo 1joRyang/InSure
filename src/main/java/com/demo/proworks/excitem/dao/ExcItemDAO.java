@@ -23,6 +23,13 @@ import com.demo.proworks.excitem.dao.ExcItemDAO;
 @Repository("excItemDAO")
 public class ExcItemDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstractDAO {
 
+	/**
+	 * 하나의 영수증에 대한 제외항목 조회
+	 */
+	public List<ExcItemVo> selectListExcItemR(ExcItemVo vo) throws ElException {      	
+        return (List<ExcItemVo>)list("com.demo.proworks.excitem.selectExcItemListR", vo);
+    }
+
     /**
      * 제외항목 상세 조회한다.
      *  
