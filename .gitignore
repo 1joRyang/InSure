@@ -8,7 +8,7 @@ _webpack_
 ### Java ###
 # Compiled class file
 *.class
-
+*.classpath
 # Log file
 *.log
 
