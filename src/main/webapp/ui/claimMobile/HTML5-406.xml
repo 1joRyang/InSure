@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head meta_screenName="HTML5-406">
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+            <w2:dataCollection baseNode="map"/>
+            <w2:workflowCollection/>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+		<script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = function() {
+	if(typeof $h == "object"){
+        $h.dismissScreen();
+    }
+};
+
+// Camera Plugin 사진촬영
+scwin.btn_camera_onclick = function() {
+    var options = {
+        quality: 70,
+        destinationType: $h.camera.DestinationType.DATA_URL,
+        sourceType: $h.camera.PictureSourceType.CAMERA,
+        encodingType: $h.camera.EncodingType.JPEG,
+        mediaType: $h.camera.MediaType.PICTURE,
+        allowEdit: false,
+        saveToPhotoAlbum: true
+    };
+
+   $h.camera.capturePhoto(scwin.camera_callback,options);
+};
+
+
+scwin.camera_callback = function(r){
+    if(typeof r.data.callbackURI != "undefined"){
+        //iOS
+        imgResult.setSrc(r.data.callbackURI);
+    } else {
+        //Android
+        imgResult.setSrc(r.data.image);
+    }
+};
+
+
+// Camera Plugin 갤러리(사진 가져오기)
+scwin.btn_gallery_onclick = function() { 
+     var options = {
+        quality: 70,
+        destinationType: $h.camera.DestinationType.DATA_URL,
+        sourceType: $h.camera.PictureSourceType.PHOTOLIBRARY,
+        encodingType: $h.camera.EncodingType.JEPG,
+        mediaType: $h.camera.MediaType.PICTURE,
+        allowEdit: false,
+        correctOrientation: false
+    };
+
+    $h.camera.capturePhoto(scwin.camera_callback,options);
+};
+
+
+// 사진업로드
+// 웹스퀘어에 upload.wq를 사용하여 이미지 업로드
+// 업로드위치는 websquare.xml에 upload 설정에 따라 바뀜
+// 업로드된 이미지를 출력하려면 scwin.UploadCallback 수정필요
+scwin.btn_upload_onclick = function(e) {
+	var imgPath = imgResult.render.getAttribute("src");
+    
+    if(imgPath != ""){
+        var blob = scwin.dataURItoBlob(imgPath);
+        var params = {
+        	"filename":"image1.jpg",
+        	"blob":blob
+        };
+		scwin.uploadImg(scwin.UploadCallback,params);
+    }
+};
+
+scwin.uploadImg = function(callback,param){
+    var xhr = new XMLHttpRequest();
+    var actionUrl = "/websquare/upload.wq"
+    xhr.open("POST",actionUrl);
+
+    var formData = new FormData();
+    formData.append("FileData", param.blob , param.filename);
+    xhr.onerror = callback;
+    xhr.onreadystatechange = function() {
+        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+            callback(xhr.responseText);
+        }
+    }
+    xhr.send(formData);
+};
+
+// convert base64Str to Blob
+scwin.dataURItoBlob = function(dataURI){
+    var byteString = atob(dataURI.split(',')[1]);
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+
+    var bb = new Blob([ab]);
+    return bb;
+};
+
+// upload callback
+scwin.UploadCallback = function(r){
+	var str =  r.split('("')[1].split('")')[0];
+    var retXml = WebSquare.xml.parse(str);
+    var key = WebSquare.xml.getValue( retXml , "ret/key" );
+    var fileNm = WebSquare.xml.getValue( retXml , "ret/storedFileList" );
+    alert("result:"+fileNm);
+    // 업로드 확인 용이나 tomcat 설정이나 프로젝트 설정에 따라 바로 보이지않을 수 있음. 다이나믹웹 프로젝트를 refresh해야 업로드 결과를 확인할 수 있음.
+    //imgUpload.setSrc(key.replace('/Users/changok/eclipse/runtime-com.inswave.matrix.product/mre/WebContent', '') + "/" +fileNm);
+};
+    
+]]></script>
+	</head>
+	<body ev:onpageload="scwin.onpageload">
+		<xf:group id="" class="sub_contents">
+			<xf:group class="tbbox" id="">
+				<xf:group adaptive="layout" adaptiveThreshold="800" class="w2tb tb" id="" style="width:100%;" tagname="table">
+					<w2:attributes>
+						<w2:summary></w2:summary>
+					</w2:attributes>
+					<xf:group tagname="caption"></xf:group>
+					<xf:group tagname="colgroup">
+						<xf:group style="width:140px;" tagname="col"></xf:group>
+						<xf:group style="" tagname="col"></xf:group>
+					</xf:group>
+					<xf:group tagname="tr">
+						<xf:group class="w2tb_th" tagname="th">
+							<w2:attributes>
+								<w2:scope>row</w2:scope>
+							</w2:attributes>
+							<w2:textbox class="" id="" label="API" style="color:#333"></w2:textbox>
+						</xf:group>
+						<xf:group class="w2tb_td" tagname="td">
+							<w2:attributes></w2:attributes>
+							<xf:trigger type="button" ev:onclick="scwin.btn_camera_onclick" outerDiv="false" style="width:100px;"
+								id="btn_camera" class="btn_cm">
+								<xf:label><![CDATA[사진촬영]]></xf:label>
+							</xf:trigger>
+							<xf:trigger type="button" ev:onclick="scwin.btn_gallery_onclick" outerDiv="false" style="width:100px;"
+								id="btn_gallery" class="btn_cm">
+								<xf:label><![CDATA[갤러리]]></xf:label>
+							</xf:trigger>
+							<xf:trigger class="btn_cm" ev:onclick="scwin.btn_upload_onclick" id="btn_upload" type="button" outerDiv="false"
+								style="width:100px;">
+								<xf:label><![CDATA[업로드]]></xf:label>
+							</xf:trigger>
+						</xf:group>
+					</xf:group>
+					<xf:group tagname="tr">
+						<xf:group class="w2tb_th" tagname="th">
+							<w2:attributes>
+								<w2:scope>row</w2:scope>
+							</w2:attributes>
+							<w2:textbox class="" id="" label="이미지" style="color:#333"></w2:textbox>
+						</xf:group>
+						<xf:group class="w2tb_td" tagname="td">
+							<w2:attributes></w2:attributes>
+							<xf:image src="" style="width: 45%;margin-top:10px;margin-right:8%;" id="imgResult"></xf:image>
+						</xf:group>
+					</xf:group>
+					<xf:group tagname="tr">
+						<xf:group class="w2tb_th" tagname="th">
+							<w2:attributes>
+								<w2:scope>row</w2:scope>
+							</w2:attributes>
+							<w2:textbox class="" id="" label="업로드된 이미지" style="color:#333"></w2:textbox>
+						</xf:group>
+						<xf:group class="w2tb_td" tagname="td">
+							<w2:attributes></w2:attributes>
+							<xf:image src="" style="width: 45%;margin-top:10px;margin-right:8%;" id="imgUpload"></xf:image>
+						</xf:group>
+					</xf:group>
+				</xf:group>
+			</xf:group>
+		</xf:group>
+	</body>
+</html>

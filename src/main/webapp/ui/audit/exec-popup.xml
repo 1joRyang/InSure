@@ -8,38 +8,60 @@
         <w2:MSA/>
         <xf:model>
         	<w2:dataCollection baseNode="map">
-        		<w2:dataMap baseNode="map" id="dm_exec">
-        			<w2:keyInfo>
-        				<w2:key dataType="text" name="사유" id="exec_reason"></w2:key>
-        				<w2:key dataType="text" name="금액" id="exec_cost"></w2:key>
-        				<w2:key dataType="text" name="카테고리" id="exec_category"></w2:key>
-        			</w2:keyInfo>
-        		</w2:dataMap>
         		<w2:dataList baseNode="list" repeatNode="map" id="dl_execlist" saveRemovedData="true">
         			<w2:columnInfo>
         				<w2:column dataType="text" name="내용" id="content"></w2:column>
         			</w2:columnInfo>
         			<w2:data use="true">
         				<w2:row>
-        					<content><![CDATA[치과치료 및 한방치료에서 발생한 국민건강보험법상 요양급여에 해당하지 않는 비급여 의료비]]></content>
+        					<content><![CDATA[치과, 한방치료 비급여 의료비]]></content>
         				</w2:row>
         				<w2:row>
-        					<content><![CDATA[건강검진, 예방접종, 인공유산. 다만, 회사가 보상하는 질병 치료를 목적으로 하는 경우에는 보상]]></content>
+        					<content><![CDATA[국민건강보험공단으로부터 환급이 가능한 금액]]></content>
         				</w2:row>
         				<w2:row>
-        					<content><![CDATA[영양제, 종합비타민제, 호르몬 투여, 보신용 투약, 친자 확인을 위한 진단, 불임검사, 불임수술, 불임복원술, 보조생식술(체내, 체외 인공수정을 포함합니다), 성장촉진과 관련된 비용 등에 소요된 비용. 다만, 회사가 보상하는 질병 치료를 목적으로 하는 경우에는 보상]]></content>
+        					<content><![CDATA[건강검진, 예방접종, 인공유산]]></content>
         				</w2:row>
         				<w2:row>
-        					<content><![CDATA[의치, 의수족, 의안, 안경, 콘택트렌즈, 보청기, 목발, 팔걸이(Arm Sling), 보조기 등 진료재료의 구입 및 대체비용]]></content>
+        					<content><![CDATA[영양제, 종합비타민제, 호르몬 투여, 보신용 투약 등]]></content>
         				</w2:row>
         				<w2:row>
-        					<content><![CDATA[진료와 무관한 제비용(TV시청료, 전화료, 제증명료 등), 의사의 임상적 소견과 관련없는 검사비용]]></content>
+        					<content><![CDATA[단순피로, 권태, 여드름, 주근깨, 점, 사마귀 등]]></content>
+        				</w2:row>
+        				<w2:row>
+        					<content><![CDATA[보조기, 보장구, 안경, 렌즈 등 진료 재료구입비]]></content>
+        				</w2:row>
+        				<w2:row>
+        					<content><![CDATA[외모개선 목적의 치료로 인하여 발생한 의료비]]></content>
+        				</w2:row>
+        				<w2:row>
+        					<content><![CDATA[제비용(TV시청료, 전화료, 제증명료 등)]]></content>
+        				</w2:row>
+        				<w2:row>
+        					<content><![CDATA[산재보험에서 보상받는 의료비]]></content>
+        				</w2:row>
+        				<w2:row>
+        					<content><![CDATA[인간면역바이러스(HIV)감염으로 인한 치료비]]></content>
+        				</w2:row>
+        				<w2:row>
+        					<content><![CDATA[해외 소재 의료기관에서 발생한 의료비]]></content>
         				</w2:row>
         			</w2:data>
         		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dm_excitems">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="exc_id" id="exc_id"></w2:key>
+        				<w2:key dataType="text" name="item_id" id="item_id"></w2:key>
+        				<w2:key dataType="text" name="treatment_id" id="treatment_id"></w2:key>
+        				<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
+        				<w2:key dataType="text" name="exc_reason" id="exc_reason"></w2:key>
+        				<w2:key dataType="text" name="exc_cost" id="exc_cost"></w2:key>
+        				<w2:key dataType="text" name="exc_category" id="exc_category"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
-        	<xf:submission id="sbm_execInsert" action="" method="post" mediatype="application/json" ref="" target="" encoding="UTF-8"
+        	<xf:submission id="sbm_execInsert" action="/InsWebApp/EXCITEMIns.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_excitems","key":"elData"}' target="" encoding="UTF-8"
         		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
@@ -48,16 +70,30 @@
         <w2:publicInfo method=""/>
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
-	
+	let itemId = localStorage.getItem('itemId');
+    let excId = localStorage.getItem('excId');
+    let treatmentId = localStorage.getItem("treatmentId");
+    let claimNo = localStorage.getItem("claimNo");
+
+    dm_excitems.set("exc_id", excId);
+    dm_excitems.set("item_id", itemId);
+    dm_excitems.set("treatment_id", treatmentId);
+    dm_excitems.set("claim_no", claimNo);
+
+    //localStorage.removeItem("exc");
 };
 
 scwin.btn_save_onclick = function (e) {
-    let reason = ipt_reason.getValue();
-    let category = ipt_category.getValue();
-    let cost = ipt_cost.getValue();
-    console.log(reason, category, cost);
-    // todo: EXEC_ITEM 테이블에 저장
-    // todo : 모달 닫기
+    console.log(scwin.exclusionData);
+    let itemId = localStorage.getItem('itemId');
+    let excId = localStorage.getItem('excId');
+    let excTotal = (Number(localStorage.getItem("excTotal")) || 0) + Number(ipt_cost.getValue());
+    //$c.sbm.execute(sbm_execInsert);
+    $p.parent().ipt_excTotal.setValue(excTotal);
+    //localStorage.setItem("exc", ipt_cost.getValue());
+    //scwin.exclusionData[`${itemId}_${excId}`] = ipt_cost.getValue();
+    localStorage.setItem("excTotal", excTotal);
+    $p.closePopup("mf_exc_popup");
 };
 
 scwin.grd_exec_oncellclick = function (rowIndex, columnIndex, columnId) {
@@ -65,7 +101,7 @@ scwin.grd_exec_oncellclick = function (rowIndex, columnIndex, columnId) {
 };
 
 scwin.btn_close_onclick = function (e) {
-    // todo : 모달 닫기
+    $p.closePopup("mf_exc_popup");
 };
 ]]></script>
     </head>
@@ -76,7 +112,7 @@ scwin.btn_close_onclick = function (e) {
     			meta_snippetName="6_02 그리드_순번_상태" style="">
     			<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dl_execlist" focusMode="row" id="grd_exec"
     				keepDefaultColumnWidth="true" rowNumHeaderValue="No" rowNumVisible="true" rowNumWidth="50" rowStatusVisible="false"
-    				rowStatusWidth="50" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 250px;" ev:oncellclick="scwin.grd_exec_oncellclick">
+    				rowStatusWidth="50" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 350px;" ev:oncellclick="scwin.grd_exec_oncellclick">
     				<w2:caption id="caption2" style="" value="this is a grid caption."></w2:caption>
     				<w2:header id="header2" style="">
     					<w2:row id="row3" style="">
@@ -98,25 +134,25 @@ scwin.btn_close_onclick = function (e) {
     			meta_snippetName="1_03 가변 3단 분할_width값 고정 33per" style="">
     			<xf:group style="" id="" class="">
     				<w2:textbox style="width: 150px;height: 23px;" id="" label="카테고리"></w2:textbox>
-    				<xf:input ref="data:dm_offset.exec_category" meta_snippetCategory="10_입력폼" meta_snippetName="10_07 Inputbox_100per"
+    				<xf:input ref="data:dm_excitems.exc_category" meta_snippetCategory="10_입력폼" meta_snippetName="10_07 Inputbox_100per"
     					meta_snippetKeyComponent="true" style="width:100%;" id="ipt_category" placeholder="" class="">
     				</xf:input>
     			</xf:group>
     			<xf:group class="" id="" style="">
     				<w2:textbox style="width: 150px;height: 23px;" id="" label="사유"></w2:textbox>
     				<xf:input class="" id="ipt_reason" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    					meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_offset.exec_reason">
+    					meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_excitems.exc_reason">
     				</xf:input>
     			</xf:group>
     			<xf:group class="" id="" style="">
     				<w2:textbox style="width: 150px;height: 23px;" id="" label="금액"></w2:textbox>
     				<xf:input class="" id="ipt_cost" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    					meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_offset.exec_cost">
+    					meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_excitems.exc_cost">
     				</xf:input>
     			</xf:group>
     		</xf:group>
     		<xf:group class="btnbox" id="" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true" meta_snippetName="8_05 팝업전체제어버튼"
-    			style="">
+    			style="margin-top: 50px">
     			<xf:group class="rt" id="" style="">
     				<xf:trigger style="" id="btn_close" type="button" class="btn_cm " ev:onclick="scwin.btn_close_onclick">
     					<xf:label><![CDATA[취소]]></xf:label>

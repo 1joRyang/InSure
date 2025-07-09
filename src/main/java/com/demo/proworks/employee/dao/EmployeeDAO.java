@@ -88,5 +88,77 @@ public class EmployeeDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstr
     public int deleteEmployee(EmployeeVo vo) throws ElException {
         return delete("com.demo.proworks.employee.deleteEmployee", vo);
     }
+//==============================================================================
+
+	public List<EmployeeVo> selectListEmployeeForRule(EmployeeVo employeeVo) {
+		return (List<EmployeeVo>) list("com.demo.proworks.employee.selectListEmployeeForRule", employeeVo);
+	}
+
+	/**
+	 * @param deptId 부서 ID
+	 * @param status 재직 상태
+	 * @return 해당 조건의 직원 목록
+	 * @throws ElException
+	 */
+	public List<EmployeeVo> selectEmployeesByDeptAndStatus(String deptId, String status) throws ElException {
+		EmployeeVo searchVo = new EmployeeVo();
+		searchVo.setDeptId(deptId);
+		searchVo.setStatus(status);
+		return (List<EmployeeVo>) list("com.demo.proworks.employee.selectEmployeesByDeptAndStatus", searchVo);
+	}
+
+	/**
+	 * 
+	 * @param deptId 부서 ID
+	 * @return 마지막 배정된 직원 번호
+	 * @throws ElException
+	 */
+	public Integer selectLastAssignedEmployeeInDept(String deptId) throws ElException {
+		try {
+			Object empNoObj = selectByPk("com.demo.proworks.employee.selectLastAssignedEmployeeInDept", deptId);
+			if (empNoObj == null) {
+				return null;
+			}
+			
+
+			if (empNoObj instanceof Long) {
+				return ((Long) empNoObj).intValue();
+			} else if (empNoObj instanceof Integer) {
+				return (Integer) empNoObj;
+			} else if (empNoObj instanceof String) {
+				try {
+					return Integer.parseInt((String) empNoObj);
+				} catch (NumberFormatException e) {
+					return null;
+				}
+			} else {
+				return null;
+			}
+		} catch (Exception e) {
+			System.err.println("[ERROR] 마지막 배정 직원 조회 오류: " + e.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * 
+	 * @param employeeVo 검색 조건 (deptId, lastEmpNo 포함)
+	 * @return 다음 배정할 직원
+	 * @throws ElException
+	 */
+	public EmployeeVo selectNextEmployeeForAssignment(EmployeeVo employeeVo) throws ElException {
+		return (EmployeeVo) selectByPk("com.demo.proworks.employee.selectNextEmployeeForAssignment", employeeVo);
+	}
+
+	/**
+	 * 
+	 * @param deptId 부서 ID
+	 * @return 부서의 첫 번째 직원
+	 * @throws ElException
+	 */
+	public EmployeeVo selectFirstEmployeeInDept(String deptId) throws ElException {
+		return (EmployeeVo) selectByPk("com.demo.proworks.employee.selectFirstEmployeeInDept", deptId);
+	}
+
 
 }
