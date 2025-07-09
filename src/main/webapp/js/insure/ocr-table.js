@@ -612,10 +612,6 @@ function editCell(td, rowIndex, colIndex, currentValue) {
     input.addEventListener('blur', function() {
         saveCellValue(td, input, rowIndex, colIndex);
     });
-	
-	// todo: 합계행 저장
-	
-	// todo: 진료비 총액, 환자부담 총액 저장
 
 }
 
