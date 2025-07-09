@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 정산정보 관련 처리를 담당하는 Sql Mapper
+	@description : 정산정보 관련 처리를 담당하는 Sql Mapper
+	@author      : Inswave
+	@since       : 2025/07/08
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/07/08              Inswave             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.settlement">
+    <insert id="insertSettlement" parameterType="com.demo.proworks.settlement.vo.SettlementVo">
+    	<!-- 정산정보를 등록한다. -->	
+    		
+        INSERT INTO SETTLEMENT   /* QueryID : com.demo.proworks.settlement.insertSettlement */
+        ( 
+            TREATMENT_ID
+            , CLAIM_NO
+            <if test="final_due       != null"> , FINAL_DUE        </if>
+            <if test="hospital_prepaid!= null"> , HOSPITAL_PREPAID </if>
+            <if test="deducation_amt  != null"> , DEDUCATION_AMT   </if>
+            <if test="refund_amt      != null"> , REFUND_AMT       </if>
+        )
+        VALUES  
+        ( 
+            #{treatment_id}
+            , #{claim_no}
+            <if test="final_due       != null"> , #{final_due}        </if>
+            <if test="hospital_prepaid!= null"> , #{hospital_prepaid} </if>
+            <if test="deducation_amt  != null"> , #{deducation_amt}   </if>
+            <if test="refund_amt      != null"> , #{refund_amt}       </if> 
+        )          
+    </insert>	
+	
+    <update id="updateSettlement" parameterType="com.demo.proworks.settlement.vo.SettlementVo">
+    	<!-- 정산정보를 갱신한다. -->
+    	
+        UPDATE SETTLEMENT    /* QueryID : com.demo.proworks.settlement.updateSettlement */      
+      	  SET  
+                TREATMENT_ID     = #{treatment_id}    
+         ,  CLAIM_NO         = #{claim_no}                	                       
+            <if test="final_due       != null"> , FINAL_DUE        = #{final_due}        </if>
+            <if test="hospital_prepaid!= null"> , HOSPITAL_PREPAID = #{hospital_prepaid} </if>
+            <if test="deducation_amt  != null"> , DEDUCATION_AMT   = #{deducation_amt}   </if>
+            <if test="refund_amt      != null"> , REFUND_AMT       = #{refund_amt}       </if>                 
+        WHERE   
+                TREATMENT_ID     = #{treatment_id}    
+         AND CLAIM_NO         = #{claim_no}        
+    </update>
+	
+    <delete id="deleteSettlement" parameterType="com.demo.proworks.settlement.vo.SettlementVo">
+    	<!-- 정산정보를 삭제한다. -->
+    	
+        DELETE FROM SETTLEMENT   /* QueryID : com.demo.proworks.settlement.deleteSettlement */ 
+        WHERE   
+                TREATMENT_ID     = #{treatment_id}    
+         AND CLAIM_NO         = #{claim_no}                
+    </delete>
+	
+    <select id="selectSettlement" parameterType="com.demo.proworks.settlement.vo.SettlementVo" resultType="com.demo.proworks.settlement.vo.SettlementVo">
+    	<!-- 정산정보를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.settlement.selectSettlement */
+            FINAL_DUE, HOSPITAL_PREPAID, DEDUCATION_AMT, REFUND_AMT, TREATMENT_ID, CLAIM_NO
+        FROM SETTLEMENT 
+        WHERE 
+                TREATMENT_ID     = #{treatment_id}    
+         AND CLAIM_NO         = #{claim_no}        			
+    </select>
+	
+    <select id="selectListSettlement" parameterType="com.demo.proworks.settlement.vo.SettlementVo" resultType="com.demo.proworks.settlement.vo.SettlementVo">
+    	<!-- 정산정보 목록을 조회한다. -->
+           SELECT    /* QueryID : com.demo.proworks.settlement.selectListSettlement */
+               FINAL_DUE, HOSPITAL_PREPAID, DEDUCATION_AMT, REFUND_AMT, TREATMENT_ID, CLAIM_NO		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM SETTLEMENT
+                   WHERE  1=1    		
+                        <if test="SC_treatment_id != null and SC_treatment_id != ''">
+                             AND TREATMENT_ID like '%${SC_treatment_id}%'
+                        </if>
+                        <if test="SC_claim_no != null and SC_claim_no != ''">
+                             AND CLAIM_NO like '%${SC_claim_no}%'
+                        </if>	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountSettlement" parameterType="com.demo.proworks.settlement.vo.SettlementVo" resultType="long">
+    <!-- 정산정보 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.settlement.selectListCountSettlement */
+             COUNT(*) totcnt  		                  
+         FROM SETTLEMENT
+         WHERE  1=1    		
+            <if test="SC_treatment_id != null and SC_treatment_id != ''">
+                 AND TREATMENT_ID like '%${SC_treatment_id}%'
+            </if>
+            <if test="SC_claim_no != null and SC_claim_no != ''">
+                 AND CLAIM_NO like '%${SC_claim_no}%'
+            </if>
+    </select>
+
+</mapper>

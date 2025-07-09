@@ -31,6 +31,15 @@ public class ExcItemServiceImpl implements ExcItemService {
 	
 	@Resource(name = "messageSource")
 	private MessageSource messageSource;
+	
+	/**
+	 * 하나의 영수증에 대한 제외항목 조회
+	 */
+	public List<ExcItemVo> selectListExcItemR(ExcItemVo excItemVo) throws Exception {
+		List<ExcItemVo> list = excItemDAO.selectListExcItemR(excItemVo);	
+	
+		return list;
+	}
 
     /**
      * 제외항목 목록을 조회합니다.

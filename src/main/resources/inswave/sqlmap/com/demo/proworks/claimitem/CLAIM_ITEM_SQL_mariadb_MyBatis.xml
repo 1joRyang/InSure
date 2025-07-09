@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 청구 아이템들 관련 처리를 담당하는 Sql Mapper
+	@description : 청구 아이템들 관련 처리를 담당하는 Sql Mapper
+	@author      : Inswave
+	@since       : 2025/07/08
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/07/08              Inswave             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.claimitem">
+    <insert id="insertClaimItem" parameterType="com.demo.proworks.claimitem.vo.ClaimItemVo">
+    	<!-- 청구 아이템들를 등록한다. -->	
+    		
+        INSERT INTO CLAIM_ITEM   /* QueryID : com.demo.proworks.claimitem.insertClaimItem */
+        ( 
+            ITEM_ID
+            , TREATMENT_ID
+            , CLAIM_NO
+            <if test="item_name   != null"> , ITEM_NAME    </if>
+            <if test="patient_amt != null"> , PATIENT_AMT  </if>
+            <if test="insur_amt   != null"> , INSUR_AMT    </if>
+            <if test="full_amt    != null"> , FULL_AMT     </if>
+            <if test="select_fee  != null"> , SELECT_FEE   </if>
+            <if test="select_disc != null"> , SELECT_DISC  </if>
+        )
+        VALUES  
+        ( 
+            #{item_id}
+            , #{treatment_id}
+            , #{claim_no}
+            <if test="item_name   != null"> , #{item_name}    </if>
+            <if test="patient_amt != null"> , #{patient_amt}  </if>
+            <if test="insur_amt   != null"> , #{insur_amt}    </if>
+            <if test="full_amt    != null"> , #{full_amt}     </if>
+            <if test="select_fee  != null"> , #{select_fee}   </if>
+            <if test="select_disc != null"> , #{select_disc}  </if> 
+        )          
+    </insert>	
+	
+    <update id="updateClaimItem" parameterType="com.demo.proworks.claimitem.vo.ClaimItemVo">
+    	<!-- 청구 아이템들를 갱신한다. -->
+    	
+        UPDATE CLAIM_ITEM    /* QueryID : com.demo.proworks.claimitem.updateClaimItem */      
+      	  SET  
+                ITEM_ID      = #{item_id}     
+         ,  TREATMENT_ID = #{treatment_id}
+         ,  CLAIM_NO     = #{claim_no}            	                       
+            <if test="item_name   != null"> , ITEM_NAME    = #{item_name}    </if>
+            <if test="patient_amt != null"> , PATIENT_AMT  = #{patient_amt}  </if>
+            <if test="insur_amt   != null"> , INSUR_AMT    = #{insur_amt}    </if>
+            <if test="full_amt    != null"> , FULL_AMT     = #{full_amt}     </if>
+            <if test="select_fee  != null"> , SELECT_FEE   = #{select_fee}   </if>
+            <if test="select_disc != null"> , SELECT_DISC  = #{select_disc}  </if>                 
+        WHERE   
+                ITEM_ID      = #{item_id}     
+         AND TREATMENT_ID = #{treatment_id}
+         AND CLAIM_NO     = #{claim_no}    
+    </update>
+	
+    <delete id="deleteClaimItem" parameterType="com.demo.proworks.claimitem.vo.ClaimItemVo">
+    	<!-- 청구 아이템들를 삭제한다. -->
+    	
+        DELETE FROM CLAIM_ITEM   /* QueryID : com.demo.proworks.claimitem.deleteClaimItem */ 
+        WHERE   
+                ITEM_ID      = #{item_id}     
+         AND TREATMENT_ID = #{treatment_id}
+         AND CLAIM_NO     = #{claim_no}            
+    </delete>
+	
+    <select id="selectClaimItem" parameterType="com.demo.proworks.claimitem.vo.ClaimItemVo" resultType="com.demo.proworks.claimitem.vo.ClaimItemVo">
+    	<!-- 청구 아이템들를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.claimitem.selectClaimItem */
+            ITEM_ID, TREATMENT_ID, CLAIM_NO, ITEM_NAME, PATIENT_AMT, INSUR_AMT, FULL_AMT, SELECT_FEE, SELECT_DISC
+        FROM CLAIM_ITEM 
+        WHERE 
+                ITEM_ID      = #{item_id}     
+         AND TREATMENT_ID = #{treatment_id}
+         AND CLAIM_NO     = #{claim_no}    			
+    </select>
+	
+    <select id="selectListClaimItem" parameterType="com.demo.proworks.claimitem.vo.ClaimItemVo" resultType="com.demo.proworks.claimitem.vo.ClaimItemVo">
+    	<!-- 청구 아이템들 목록을 조회한다. -->
+           SELECT    /* QueryID : com.demo.proworks.claimitem.selectListClaimItem */
+               ITEM_ID, TREATMENT_ID, CLAIM_NO, ITEM_NAME, PATIENT_AMT, INSUR_AMT, FULL_AMT, SELECT_FEE, SELECT_DISC		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM CLAIM_ITEM
+                   WHERE  1=1    		
+                        <if test="SC_treatment_id != null and SC_treatment_id != ''">
+                             AND TREATMENT_ID like '%${SC_treatment_id}%'
+                        </if>
+                        <if test="SC_claim_no != null and SC_claim_no != ''">
+                             AND CLAIM_NO like '%${SC_claim_no}%'
+                        </if>	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountClaimItem" parameterType="com.demo.proworks.claimitem.vo.ClaimItemVo" resultType="long">
+    <!-- 청구 아이템들 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.claimitem.selectListCountClaimItem */
+             COUNT(*) totcnt  		                  
+         FROM CLAIM_ITEM
+         WHERE  1=1    		
+            <if test="SC_treatment_id != null and SC_treatment_id != ''">
+                 AND TREATMENT_ID like '%${SC_treatment_id}%'
+            </if>
+            <if test="SC_claim_no != null and SC_claim_no != ''">
+                 AND CLAIM_NO like '%${SC_claim_no}%'
+            </if>
+    </select>
+
+</mapper>

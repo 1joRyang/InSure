@@ -61,7 +61,16 @@
         		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
-        	<xf:submission id="sbm_execInsert" action="/InsWebApp/EXCITEMIns.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_excitems","key":"elData"}' target="" encoding="UTF-8"
+        	<xf:submission id="sbm_excInsert" action="/InsWebApp/EXCITEMIns.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,{"id":"dm_excitems","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getExc" action="/InsWebApp/EXCITEMUpdView.pwkjson" method="post" mediatype="application/json" ref=""
+        		target='data:json,{"id":"dm_excitems","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+        		mode="asynchronous" processMsg="로딩 중..." ev:submit="" ev:submitdone="scwin.sbm_getExc_submitdone" ev:submiterror=""
+        		abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_excUpdate" action="/InsWebApp/EXCITEMUpd.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_excitems","key":"elData"}' target="" encoding="UTF-8"
         		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
@@ -70,6 +79,7 @@
         <w2:publicInfo method=""/>
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
+    scwin.excTotal = Number(localStorage.getItem("excTotal")) || 0;
 	let itemId = localStorage.getItem('itemId');
     let excId = localStorage.getItem('excId');
     let treatmentId = localStorage.getItem("treatmentId");
@@ -80,20 +90,35 @@ scwin.onpageload = function() {
     dm_excitems.set("treatment_id", treatmentId);
     dm_excitems.set("claim_no", claimNo);
 
-    //localStorage.removeItem("exc");
+    $c.sbm.execute(sbm_getExc, {"elData": dm_excitems.getJSON()});
+};
+
+scwin.sbm_getExc_submitdone = function (e) {
+    let cost = dm_excitems.getJSON().exc_cost
+    if (cost === "") {
+        btn_edit.hide();
+    } else {
+        btn_save.hide();
+        scwin.excTotal -= Number(ipt_cost.getValue());
+    }
+};
+
+scwin.btn_edit_onclick = function (e) {
+    $c.sbm.execute(sbm_excUpdate);
+    scwin.excTotal += Number(ipt_cost.getValue());
+    $p.parent().ipt_excTotal.setValue(scwin.excTotal);
+    localStorage.setItem("excTotal", scwin.excTotal);
+    localStorage.setItem("exc", ipt_cost.getValue());
+    $p.closePopup();
 };
 
 scwin.btn_save_onclick = function (e) {
-    console.log(scwin.exclusionData);
-    let itemId = localStorage.getItem('itemId');
-    let excId = localStorage.getItem('excId');
-    let excTotal = (Number(localStorage.getItem("excTotal")) || 0) + Number(ipt_cost.getValue());
-    //$c.sbm.execute(sbm_execInsert);
-    $p.parent().ipt_excTotal.setValue(excTotal);
-    //localStorage.setItem("exc", ipt_cost.getValue());
-    //scwin.exclusionData[`${itemId}_${excId}`] = ipt_cost.getValue();
-    localStorage.setItem("excTotal", excTotal);
-    $p.closePopup("mf_exc_popup");
+    $c.sbm.execute(sbm_excInsert);
+    scwin.excTotal += Number(ipt_cost.getValue());
+    $p.parent().ipt_excTotal.setValue(scwin.excTotal);
+    localStorage.setItem("excTotal", scwin.excTotal);
+    localStorage.setItem("exc", ipt_cost.getValue());
+    $p.closePopup();
 };
 
 scwin.grd_exec_oncellclick = function (rowIndex, columnIndex, columnId) {
@@ -101,8 +126,10 @@ scwin.grd_exec_oncellclick = function (rowIndex, columnIndex, columnId) {
 };
 
 scwin.btn_close_onclick = function (e) {
-    $p.closePopup("mf_exc_popup");
+    $p.closePopup();
 };
+
+
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
@@ -158,6 +185,9 @@ scwin.btn_close_onclick = function (e) {
     					<xf:label><![CDATA[취소]]></xf:label>
     				</xf:trigger>
     				<xf:trigger class="btn_cm pt" id="btn_save" style="" type="button" ev:onclick="scwin.btn_save_onclick">
+    					<xf:label><![CDATA[저장]]></xf:label>
+    				</xf:trigger>
+    				<xf:trigger class="btn_cm pt" id="btn_edit" style="" type="button" ev:onclick="scwin.btn_edit_onclick">
     					<xf:label><![CDATA[저장]]></xf:label>
     				</xf:trigger>
     			</xf:group>

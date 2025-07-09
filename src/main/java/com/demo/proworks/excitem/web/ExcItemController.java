@@ -14,6 +14,7 @@ import com.demo.proworks.excitem.vo.ExcItemListVo;
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
 import com.inswave.elfw.annotation.ElValidator;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**  
  * @subject     : 제외항목 관련 처리를 담당하는 컨트롤러
@@ -34,6 +35,22 @@ public class ExcItemController {
     @Resource(name = "excItemServiceImpl")
     private ExcItemService excItemService;
 	
+	/**
+     * 하나의 영수증에 대한 제외항목 조회
+     *
+     * @param  excItemVo 제외항목
+     * @return 목록조회 결과
+     * @throws Exception
+     */
+    @ElService(key = "EXCITEMListR")
+    @RequestMapping(value = "EXCITEMListR")    
+    @ElDescription(sub = "하나의 영수증에 대한 제외항목 조회", desc = "페이징처리없음")               
+    public List<ExcItemVo> selectListExcItemR(ExcItemVo excItemVo) throws Exception {    	   	
+
+        List<ExcItemVo> excItemList = excItemService.selectListExcItem(excItemVo);                  
+
+        return excItemList;            
+    }  
     
     /**
      * 제외항목 목록을 조회합니다.

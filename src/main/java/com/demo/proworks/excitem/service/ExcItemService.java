@@ -17,6 +17,11 @@ import com.demo.proworks.excitem.vo.ExcItemVo;
  * 
  */
 public interface ExcItemService {
+
+	/**
+	 * 하나의 영수증에 대한 제외항목 조회
+	 */
+	public List<ExcItemVo> selectListExcItemR(ExcItemVo excItemVo) throws Exception;
 	
     /**
      * 제외항목 페이징 처리하여 목록을 조회한다.

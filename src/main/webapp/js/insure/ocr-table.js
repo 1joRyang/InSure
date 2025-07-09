@@ -1,3 +1,4 @@
+
 // 페이지 로드 시 빈 테이블 생성 함수
 scwin.createEmptyTable = function() {
     // 빈 데이터 생성 - 계층 구조 기반
@@ -13,10 +14,8 @@ scwin.createEmptyTable = function() {
                     col2: 0,  // 본인부담금
                     col3: 0,  // 공단부담금
                     col4: 0,  // 전액본인부담
-                    col5: 0,  // 제외항목 (첫 번째)
                     col6: 0,  // 선택진료료
                     col7: 0,  // 선택진료료 외
-                    col8: 0   // 제외항목 (두 번째)
                 });
                 rowIndex++;
             });
@@ -45,10 +44,8 @@ scwin.createTable = function (result) {
             col2: 0,  // 본인부담금
             col3: 0,  // 공단부담금
             col4: 0,  // 전액본인부담
-            col5: 0,  // 제외항목 (첫 번째)
             col6: 0,  // 선택진료료
             col7: 0,  // 선택진료료 외
-            col8: 0   // 제외항목 (두 번째)
         });
     });
     
@@ -61,7 +58,6 @@ scwin.createTable = function (result) {
             targetRow.col2 = row.col2 || 0;
             targetRow.col3 = row.col3 || 0;
             targetRow.col4 = row.col4 || 0;
-            // col5는 제외항목이므로 0 유지
             targetRow.col6 = row.col5 || 0;  // 원래 col5를 col6으로
             targetRow.col7 = row.col6 || 0;  // 원래 col6을 col7로
             // col8도 제외항목이므로 0 유지
@@ -115,8 +111,6 @@ scwin.createTable = function (result) {
     // 계층 구조 테이블 생성 함수 호출
     createHierarchicalTable(processedData);
     
-    // 진료비총액 업데이트
-    //setTimeout(updateTotalAmount, 200);
 }
 
 // 플랫 리스트 생성 (기존 코드와의 호환성을 위해)
@@ -324,20 +318,24 @@ createHierarchicalTable = function (processedData) {
                     
                     // 제외항목 컬럼인지 확인 (colIndex 5, 8이 제외항목 = headerIndex 3, 6)
                     if (headerIndex === 3 || headerIndex === 6) {
-                        // 제외항목 컬럼 - 모달 열기
-                        const key = `${dataIndex}_${headerIndex}`;
-                        if (scwin.exclusionData[key] && scwin.exclusionData[key].trim()) {
-                            td.textContent = scwin.exclusionData[key];
-                        } else {
-                            td.textContent = cellValue;
-                        }
-                        
-                        td.style.backgroundColor = '#fff3cd';
-                        td.style.cursor = 'pointer';
-                        
-                        // 제외항목 클릭 이벤트
-                        td.addEventListener('click', createExclusionClickHandler(dataIndex, headerIndex, cellValue));
-                        
+						// 제외항목 컬럼 - 모달 열기
+						const key = `${dataIndex}_${headerIndex}`;
+						    
+						let displayValue = cellValue; 
+						    
+						// exclusionData에 해당 키의 데이터가 있으면 우선 사용
+						if (scwin.exclusionData && scwin.exclusionData[key] && scwin.exclusionData[key].trim()) {
+						    displayValue = scwin.exclusionData[key];
+						}
+						    
+						td.textContent = displayValue;
+						    
+						td.style.backgroundColor = '#fff3cd';
+						td.style.cursor = 'pointer';
+						    
+						// 제외항목 클릭 이벤트
+						td.addEventListener('click', createExclusionClickHandler(dataIndex, headerIndex, td));
+						    
                     } else {
                         // 수정 가능한 컬럼
                         td.textContent = cellValue;
@@ -369,13 +367,20 @@ createHierarchicalTable = function (processedData) {
 
     // 테이블을 컨테이너에 추가
     tableContainer.appendChild(table);
+	
+	for (let i=0; i<8; i++){
+		scwin.updateColumnTotal(i);
+	}
+	
+		
+	calculateMainTableTotal();
 }
 
 
 // 제외항목 클릭 핸들러 생성 함수 
-function createExclusionClickHandler(rowIndex, colIndex, cellValue) {
+function createExclusionClickHandler(rowIndex, colIndex, td) {
     return function() {
-        openExclusionModal(rowIndex, colIndex, cellValue);
+        openExclusionModal(rowIndex, colIndex, td);
     };
 }
 
@@ -438,7 +443,7 @@ function findMostSimilarRowName(col1Value, rowName) {
     return { name: mostSimilar, similarity: maxSimilarity };
 }
 
-// 서브테이블계산
+// 서브테이블계산 
 function calculateMainTableTotal() {
     let total = 0;
 	let patientTotal = 0
@@ -450,25 +455,24 @@ function calculateMainTableTotal() {
 		for (let i = 3; i < rows.length; i++) { // 헤더 3개 행 제외
 			const firstCell = rows[i].cells[rows[i].cells.length - 8]; 
 		    if (firstCell && firstCell.textContent.includes('합계')) {
-		                for (let j = 0; j < 7; j++) { // col2~col8
-		                    if (j !== 3 && j !== 6) { // 제외항목 컬럼(col5, col8) 제외
-		                        const cellIndex = rows[i].cells.length - 7 + j;
-		                        if (cellIndex < rows[i].cells.length) {
-		                            const cellValue = parseFloat(rows[i].cells[cellIndex].textContent) || 0;
-		                            total += cellValue;
-									if (j !== 1) {
-										patientTotal += cellValue;
-									}
-									console.log(cellValue);
-		                        }
-		                    }
+				for (let j = 0; j < 7; j++) { // col2~col8
+					if (j !== 3 && j !== 6) { // 제외항목 컬럼(col5, col8) 제외
+						const cellIndex = rows[i].cells.length - 7 + j;
+		                if (cellIndex < rows[i].cells.length - 1) {
+							const cellValue = parseFloat(rows[i].cells[cellIndex].textContent) || 0;
+		                    total += cellValue;
+							if (j !== 1) {
+								patientTotal += cellValue;
+							}
+							console.log(total, patientTotal);
 		                }
+		            }
+		        }
 		    }
 			if (firstCell && firstCell.textContent.includes("상한액초과금")) {
 				const overLimitValueText = rows[i].cells[rows[i].cells.length - 7].textContent.trim();
 				const overLimitValue = parseFloat(overLimitValueText.replace(/,/g, '')) || 0;
 				patientTotal -= overLimitValue;
-				
 			}
         }
     }
@@ -477,34 +481,25 @@ function calculateMainTableTotal() {
 	ipt_tableTotalminus.setValue(patientTotal);
 }
 
-// 기존 saveCellValue 함수 수정 - 실시간 업데이트 추가
 function saveCellValue(td, input, rowIndex, colIndex) {
     const newValue = parseFloat(input.value) || 0;
     td.textContent = newValue;
     
     console.log(`Row ${rowIndex}, Col ${colIndex} 값 변경: ${newValue}`);
     
-    // 실시간으로 진료비총액 업데이트
-    //setTimeout(updateTotalAmount, 100); // 약간의 지연을 두어 DOM 업데이트 후 실행
-	//td.setValue(newValue);
-	updateColumnTotal(colIndex);
+	scwin.updateColumnTotal(colIndex);
 	
 	calculateMainTableTotal();
 }
 
 // 제외항목 모달 열기 함수
-function openExclusionModal(rowIndex, colIndex, currentValue) {
+function openExclusionModal(rowIndex, colIndex, td) {
 	const key = `${rowIndex}_${colIndex}`;
-	const existingDetails = scwin.exclusionData[key] || '';
-
-	console.log(key);
+	
 	localStorage.setItem('itemId', rowIndex);
 	localStorage.setItem('excId', colIndex);
 	// todo: treatmentId localStorage 저장..
 	localStorage.setItem("treatmentId", 1);
-	
-	// 기존 제외항목 데이터 가져오기
-	$c.sbm.execute();
 	
 	requires("uiplugin.popup"); 
 	var winWid = $(window).width();
@@ -513,31 +508,29 @@ function openExclusionModal(rowIndex, colIndex, currentValue) {
 	var popHei = 600;
 	var sumLeft = (winWid - popWid) / 2;
 	var sumTop = (winHei - popHei) / 2;
-					
+	
 	var opts = {
-					"id" : "exc_popup",
-					"type" : "litewindow",
-					"width" : popWid + "px",
-					"height" : popHei + "px",
-					"top" : sumTop, 
-					"left" : sumLeft,
-					"popupName" : `제외항목 ${key}`,
-					"modal" : true, 
-					"useIFrame" : false,
-					"title" : "focusTest",
-					"useATagBtn" : true,
-					"frameMode" : "wframe",
+					id : "exc_popup",
+					width : popWid + "px",
+					height : popHei + "px",
+					top : sumTop, 
+					left : sumLeft,
+					popupName : `제외항목 ${key}`,
+					modal : true, 
+					type : "wframePopup", 
+					closeAction: function() {
+						let newValue = localStorage.getItem("exc");
+						scwin.updateExclusionCell(rowIndex, colIndex, newValue);
+						scwin.exclusionData[key] = newValue;
+						localStorage.removeItem("exc");
+						return true;
+					}
 				};
+				
 	$p.openPopup("/InsWebApp/ui/audit/exec-popup.xml", opts);
-    
-   // todo: 제외항목 값 업데이트
-   //exclusionData[key] = localStorage.getItem("exc");
 }
 
-// 제외항목 데이터를 저장할 전역 객체
-scwin.exclusionData = {};
-
-function updateColumnTotal(colIndex) {
+scwin.updateColumnTotal = function (colIndex) {
 	colIndex += 1;
     const mainTable = document.querySelector('#tableContainer table');
     if (!mainTable) return;
@@ -554,8 +547,8 @@ function updateColumnTotal(colIndex) {
         if (!labelCell) continue;
 
         if (labelCell.textContent.trim() === '합계') {
-            totalRow = row; // 합계행은 저장만 하고 나중에 처리
-            continue;
+            totalRow = row; 
+            break;
         }
 
         if (targetCell) {
@@ -619,10 +612,6 @@ function editCell(td, rowIndex, colIndex, currentValue) {
     input.addEventListener('blur', function() {
         saveCellValue(td, input, rowIndex, colIndex);
     });
-	
-	// todo: 합계행 저장
-	
-	// todo: 진료비 총액, 환자부담 총액 저장
 
 }
 
