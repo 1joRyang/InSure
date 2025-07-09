@@ -527,7 +527,7 @@ function openExclusionModal(rowIndex, colIndex, td) {
 					}
 				};
 				
-	$p.openPopup("/InsWebApp/ui/audit/exec-popup.xml", opts);
+	$p.openPopup("/InsWebApp/ui/audit/exc-popup.xml", opts);
 }
 
 scwin.updateColumnTotal = function (colIndex) {

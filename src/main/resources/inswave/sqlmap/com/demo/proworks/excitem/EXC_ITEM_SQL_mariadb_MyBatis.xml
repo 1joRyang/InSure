@@ -21,7 +21,7 @@
         SELECT    /* QueryID : com.demo.proworks.excitem.selectListExcItem */
                EXC_ID, ITEM_ID, TREATMENT_ID, CLAIM_NO, EXC_REASON, EXC_COST, EXC_CATEGORY		       
            FROM (
-               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / 100 ) AS PAGE
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
                FROM (				
                    SELECT 
                        *  		                  
@@ -118,6 +118,7 @@
                ) S, (SELECT @ROWNUM := 0) TMP
            ) A
             WHERE PAGE = #{pageIndex}
+            
     </select>
 	
     <select id="selectListCountExcItem" parameterType="com.demo.proworks.excitem.vo.ExcItemVo" resultType="long">
