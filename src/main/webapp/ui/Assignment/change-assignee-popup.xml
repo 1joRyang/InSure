@@ -303,9 +303,7 @@ scwin.btn_cancel_onclick = function(e) {
     $p.closePopup();
 };
 
-scwin.btn_save_onclick = function(e) {
-    console.log("저장 버튼 눌렀음 ㅇㅇ");
-    
+scwin.btn_save_onclick = function(e) {    
     const claimNo = dm_change.get("claim_no");
     const newAssignee = dm_change.get("new_assignee");
     const department = dm_change.get("department");
