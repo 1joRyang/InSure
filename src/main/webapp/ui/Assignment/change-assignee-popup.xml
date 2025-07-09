@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare"
+	xmlns:xf="http://www.w3.org/2002/xforms">
+	<head>
+		<w2:type>COMPONENT</w2:type>
+		<w2:buildDate />
+		<w2:MSA />
+		<xf:model>
+			<w2:dataCollection baseNode="map">
+				<w2:dataMap baseNode="map" id="dm_change">
+					<w2:keyInfo>
+						<w2:key id="claim_no" name="claim_no" dataType="text" />
+						<w2:key id="current_assignee" name="current_assignee" dataType="text" />
+						<w2:key id="new_assignee" name="new_assignee" dataType="text" />
+						<w2:key id="department" name="department" dataType="text" />
+					</w2:keyInfo>
+				</w2:dataMap>
+				<!-- 부서 조회를 위한 dataMap -->
+				<w2:dataMap baseNode="map" id="dmp_deptVo">
+					<w2:keyInfo>
+						<w2:key id="dept_id" name="dept_id" dataType="text" />
+						<w2:key id="dept_name" name="dept_name" dataType="text" />
+						<w2:key id="pageSize" name="pageSize" dataType="text" />
+						<w2:key id="pageIndex" name="pageIndex" dataType="text" />
+					</w2:keyInfo>
+				</w2:dataMap>
+				<!-- 직원 조회를 위한 dataMap -->
+				<w2:dataMap baseNode="map" id="dmp_empVo">
+					<w2:keyInfo>
+						<w2:key id="empNo" name="empNo" dataType="text" />
+						<w2:key id="empName" name="empName" dataType="text" />
+						<w2:key id="deptId" name="deptId" dataType="text" />
+						<w2:key id="status" name="status" dataType="text" />
+						<w2:key id="pageSize" name="pageSize" dataType="text" />
+						<w2:key id="pageIndex" name="pageIndex" dataType="text" />
+					</w2:keyInfo>
+				</w2:dataMap>
+				<!-- 담당자 변경을 위한 dataMap -->
+				<w2:dataMap baseNode="map" id="dmp_assignVo">
+					<w2:keyInfo>
+						<w2:key id="keyword" name="keyword" dataType="text" />
+					</w2:keyInfo>
+				</w2:dataMap>
+				<!-- 부서 목록을 저장할 dataList -->
+				<w2:dataList baseNode="list" id="dlt_departments" saveRemovedData="true">
+					<w2:columnInfo>
+						<w2:column id="dept_id" name="dept_id" dataType="text" />
+						<w2:column id="dept_name" name="dept_name" dataType="text" />
+					</w2:columnInfo>
+				</w2:dataList>
+				<!-- 직원 목록을 저장할 dataList -->
+				<w2:dataList baseNode="list" id="dlt_employees" saveRemovedData="true">
+					<w2:columnInfo>
+						<w2:column id="empNo" name="empNo" dataType="text" />
+						<w2:column id="empName" name="empName" dataType="text" />
+						<w2:column id="deptId" name="deptId" dataType="text" />
+						<w2:column id="status" name="status" dataType="text" />
+					</w2:columnInfo>
+				</w2:dataList>
+			</w2:dataCollection>
+			<w2:workflowCollection></w2:workflowCollection>
+			<!-- 부서 목록 조회 submission -->
+			<xf:submission id="sbm_getDepartments" ref='data:json,{"id":"dmp_deptVo","key":"insDeptVo"}'
+				target='data:json,{"id":"dlt_departments","key":"elData.insDeptVoList"}' action="/InsWebApp/insdept0001List.pwkjson" method="post"
+				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
+				processMsg="부서 목록을 조회하고 있습니다..." ev:submit="" ev:submitdone="scwin.sbm_getDepartments_submitdone"
+				ev:submiterror="scwin.sbm_getDepartments_submiterror" abortTrigger="">
+			</xf:submission>
+
+			<!-- 직원 목록 조회 submission -->
+			<!-- <xf:submission id="sbm_getEmployees" ref='data:json,{"id":"dmp_empVo","key":"employeeVo"}'
+				target='data:json,{"id":"dlt_employees","key":"elData.employeeVoList"}' action="/InsWebApp/EmployeeList.pwkjson" method="post"
+				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
+				processMsg="직원 목록을 조회하고 있습니다..." ev:submit="" ev:submitdone="scwin.sbm_getEmployees_submitdone"
+				ev:submiterror="scwin.sbm_getEmployees_submiterror" abortTrigger="">
+				</xf:submission> -->
+
+			<!-- 현재 담당자 조회 submission -->
+			<xf:submission id="sbm_getCurrentAssignee" ref='data:json,{"id":"dmp_empVo","key":"employeeVo"}'
+				target='data:json,dmp_empVo' action="/InsWebApp/EmployeeUpdView.pwkjson" method="post" mediatype="application/json" encoding="UTF-8"
+				instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+				ev:submitdone="scwin.sbm_getCurrentAssignee_submitdone" ev:submiterror="scwin.sbm_getCurrentAssignee_submiterror" abortTrigger="">
+			</xf:submission>
+
+			<!-- 담당자 변경 submission -->
+			<xf:submission id="sbm_updateAssignee" ref='data:json,{"id":"dmp_assignVo","key":"assignRuleVo"}'
+				target='data:json,dmp_assignVo' action="/InsWebApp/assignrule0004AssignClaim.pwkjson" method="post" mediatype="application/json"
+				encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="담당자를 변경하고 있습니다..." ev:submit=""
+				ev:submitdone="scwin.sbm_updateAssignee_submitdone" ev:submiterror="scwin.sbm_updateAssignee_submiterror" abortTrigger="">
+			</xf:submission>
+
+			<xf:submission id="sbm_getEmployees" action="/InsWebApp/EmployeeList.pwkjson" method="post" mediatype="application/json"
+				ref='data:json,{"id":"dmp_empVo","key":"employeeVo"}' target='data:json,{"id":"dlt_employees","key":"elData.employeeVoList"}'
+				encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getEmployees_submitdone"
+				ev:submiterror="" abortTrigger="">
+			</xf:submission>
+		</xf:model>
+		<w2:layoutInfo />
+		<w2:publicInfo method="" />
+		<script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = function() {
+    // 개발 단계: localStorage에서 청구번호 가져오기
+    let claimNo = null;
+    
+    try {
+        // localStorage에서 claimNo 조회
+        claimNo = localStorage.getItem("claimNo");
+        
+        if (!claimNo || claimNo === "null" || claimNo === "") {
+            // localStorage에 없으면 기본값 설정
+            claimNo = "a52d8406-5629-11f0-b4f3-bc2411231130";
+        } else {
+            console.log("localStorage에서 청구번호 로드:", claimNo);
+        }
+    } catch (e) {
+        // localStorage 접근 실패 시 기본값 사용
+        console.warn("localStorage 접근 실패, 기본값 사용:", e);
+        claimNo = "a52d8406-5629-11f0-b4f3-bc2411231130";
+    }
+    
+    // 청구번호 설정
+    dm_change.set("claim_no", claimNo);
+    
+    // 현재 담당자 정보도 localStorage에서 가져오기 시도
+    scwin.loadCurrentAssigneeFromStorage();
+    
+    // 부서 목록 조회
+    scwin.loadDepartments();
+
+    scwin.loadEmployees();
+};
+
+scwin.loadCurrentAssigneeFromStorage = function() {
+    try {
+        const currentAssignee = localStorage.getItem("currentAssignee");
+        if (currentAssignee && currentAssignee !== "null" && currentAssignee !== "") {
+            dm_change.set("current_assignee", currentAssignee);
+        } else {
+            dm_change.set("current_assignee", "홍길동");
+        }
+    } catch (e) {
+        console.warn("localStorage에서 현재 담당자 조회 실패:", e);
+        dm_change.set("current_assignee", "홍길동");
+    }
+};
+
+scwin.loadDepartments = function() {
+    try {
+        // 페이징 정보 설정
+        dmp_deptVo.set("pageIndex", "1");
+        dmp_deptVo.set("pageSize", "100");
+        
+        // submission 호출
+        $c.sbm.execute($p, sbm_getDepartments);
+    } catch (e) {
+        console.error("부서 목록 조회 오류:", e);
+        $c.win.alert("부서 목록 조회 중 오류가 발생했습니다.");
+    }
+};
+
+// 부서 목록 조회 완료 콜백
+scwin.sbm_getDepartments_submitdone = function(e) {
+    console.log("부서 목록 조회 응답:", e.responseJSON);
+    
+    var elData = e.responseJSON.elData;
+    var elHeader = e.responseJSON.elHeader;
+
+    if (elHeader == null || elHeader == "" || elHeader == "undefined" || elHeader.resSuc == false) {
+        console.error("부서 정보 조회 실패:", elHeader ? elHeader.resMsg : "알 수 없는 오류");
+        $c.win.alert("부서 목록을 불러올 수 없습니다.");
+        return false;
+    }
+
+    // InsDeptController는 InsDeptListVo를 반환하므로 insDeptVoList 사용
+    if (elData && elData.insDeptVoList) {
+        console.log("조회된 부서 수:", elData.insDeptVoList.length);
+        
+        // 기본값을 빈 값으로 설정 (선택 안함)
+        sel_department.setValue("");
+        dm_change.set("department", "");
+        
+        // 직원 목록도 초기화
+        dlt_employees.removeAll();
+        sel_assignee.setValue("");
+        dm_change.set("new_assignee", "");
+    } else {
+        console.error("부서 목록 데이터가 없습니다.");
+        $c.win.alert("부서 목록을 불러올 수 없습니다.");
+    }
+};
+
+scwin.sbm_getDepartments_submiterror = function(e) {
+    console.error("부서 목록 조회 오류:", e);
+    $c.win.alert("부서 목록 조회 중 오류가 발생했습니다.");
+};
+
+scwin.loadEmployees = function(deptId) {
+    try {
+        // Employee 서비스를 통해 직원 목록 조회 (해당 부서의 재직중인 직원)
+        dmp_empVo.set("deptId", deptId);
+        dmp_empVo.set("status", "재직중");
+        
+        // *** 중요: pageSize와 pageIndex 설정 추가 ***
+        dmp_empVo.set("pageSize", "100");  // 기본값 설정
+        dmp_empVo.set("pageIndex", "1");   // 기본값 설정
+        
+        // submission 호출
+        $c.sbm.execute($p, sbm_getEmployees);
+    } catch (e) {
+        console.error("직원 목록 조회 오류:", e);
+        $c.win.alert("직원 목록 조회 중 오류가 발생했습니다.");
+    }
+};
+
+// 직원 목록 조회 완료 콜백
+scwin.sbm_getEmployees_submitdone = function(e) {
+    console.log("직원 목록 조회 응답:", e.responseJSON);
+    
+    var elData = e.responseJSON.elData;
+    var elHeader = e.responseJSON.elHeader;
+    
+    if (elHeader && elHeader.resSuc && elData && elData.employeeVoList) {
+        console.log("조회된 직원 수:", elData.employeeVoList.length);
+        
+        
+        
+        // 기본값을 빈 값으로 설정 (선택 안함)
+        sel_assignee.setValue("");
+        dm_change.set("new_assignee", "");
+    } else {
+        if (elHeader && elHeader.resSuc) {
+            console.log("해당 부서에 재직중인 직원이 없습니다.");
+        }
+    }
+};
+
+scwin.sbm_getEmployees_submiterror = function(e) {
+    console.error("직원 목록 조회 오류:", e);
+    $c.win.alert("직원 목록 조회 중 오류가 발생했습니다.");
+};
+
+scwin.loadCurrentAssignee = function() {
+    try {
+        // 현재 담당자 정보 조회 시도
+        const currentEmpNo = "E001"; // 기본값 또는 부모 창에서 전달받은 값
+        
+        if (currentEmpNo && currentEmpNo !== "null" && currentEmpNo !== "") {
+            // 현재 담당자 번호가 있으면 해당 직원 정보 조회
+            dmp_empVo.set("empNo", currentEmpNo);
+            dmp_empVo.set("empName", "");
+            dmp_empVo.set("deptId", "");
+            dmp_empVo.set("status", "");
+            
+            $c.sbm.execute($p, sbm_getCurrentAssignee);
+        } else {
+            // 현재 담당자 정보가 없으면 기본값 "홍길동" 설정
+            dm_change.set("current_assignee", "홍길동");
+        }
+    } catch (e) {
+        console.error("현재 담당자 조회 오류:", e);
+        dm_change.set("current_assignee", "홍길동");
+    }
+};
+
+scwin.sbm_getCurrentAssignee_submitdone = function(e) {
+    console.log("현재 담당자 조회 응답:", e.responseJSON);
+    
+    var elData = e.responseJSON.elData;
+    var elHeader = e.responseJSON.elHeader;
+    
+    if (elHeader && elHeader.resSuc && elData && elData.empName) {
+        // 현재 담당자 이름 설정
+        dm_change.set("current_assignee", elData.empName);
+    } else {
+        // 조회 실패 시 기본값 설정
+        dm_change.set("current_assignee", "홍길동");
+    }
+};
+
+scwin.sbm_getCurrentAssignee_submiterror = function(e) {
+    // 오류 발생 시 기본값 설정
+    dm_change.set("current_assignee", "홍길동");
+    console.warn("현재 담당자 조회 실패, 기본값 설정:", e);
+};
+
+/* scwin.sel_department_onchange = function(e) {
+    const selectedDept = sel_department.getValue();
+    dm_change.set("department", selectedDept);
+    
+    // 선택된 부서의 직원 목록 로드
+    if (selectedDept) {
+        scwin.loadEmployees(selectedDept);
+    }
+}; */
+
+scwin.sel_assignee_onchange = function(e) {
+    const selectedAssignee = sel_assignee.getValue();
+    dm_change.set("new_assignee", selectedAssignee);
+};
+
+scwin.btn_cancel_onclick = function(e) {
+    // 팝업 닫기
+    $p.closePopup();
+};
+
+scwin.btn_save_onclick = function(e) {    
+    const claimNo = dm_change.get("claim_no");
+    const newAssignee = dm_change.get("new_assignee");
+    const department = dm_change.get("department");
+    console.log(claimNo);
+/*     if (!newAssignee) {
+        $c.win.alert("변경할 담당자를 선택해주세요.")
+        return;
+    }
+    
+    if (!department) {
+        $c.win.alert("부서를 선택해주세요.");
+        return;
+    } */
+    
+    try {
+        // 담당자 변경 처리 - assignrule0004AssignClaim 서비스 호출
+        dmp_assignVo.set("keyword", claimNo);
+        
+        // submission 호출
+        $c.sbm.execute($p, sbm_updateAssignee);
+    } catch (e) {
+        console.error("담당자 변경 오류:", e);
+        $c.win.alert("담당자 변경 중 오류가 발생했습니다.");
+    }
+};
+
+scwin.sbm_updateAssignee_submitdone = function(e) {
+    console.log("담당자 변경 응답:", e.responseJSON);
+    
+    var responseData = e.responseJSON;
+    
+    // 서버에서 직접 success와 message를 반환하는 경우
+    if (responseData && typeof responseData.success !== 'undefined') {
+        if (responseData.success === true) {
+            $c.win.alert("담당자가 변경되었습니다.\n" + responseData.message);
+            $p.closePopup();
+        } else {
+            const errorMessage = responseData.message || "담당자 변경 중 오류가 발생했습니다.";
+            $c.win.alert("담당자 변경에 실패했습니다.\n" + errorMessage);
+        }
+        return;
+    }
+    
+    // WebSquare 표준 응답 구조 처리 (elHeader가 있는 경우)
+    var elData = responseData.elData;
+    var elHeader = responseData.elHeader;
+    
+    if (elHeader && elHeader.resSuc === true) {
+        if (elData && elData.success) {
+            $c.win.alert("담당자가 변경되었습니다.\n" + elData.message);
+        } else {
+            $c.win.alert("담당자가 변경되었습니다.");
+        }
+        $p.closePopup();
+    } else if (elHeader && elHeader.resSuc === false) {
+        $c.win.alert("담당자 변경에 실패했습니다.\n에러코드: " + (elHeader.resCode || "N/A") + "\n에러메시지: " + (elHeader.resMsg || "알 수 없는 오류"));
+    } else {
+        console.error("예상치 못한 서버 응답 구조:", responseData);
+        $c.win.alert("서버 응답 구조를 인식할 수 없습니다.");
+    }
+};
+
+scwin.sbm_updateAssignee_submiterror = function(e) {
+    $c.win.alert("담당자 변경 중 서버 오류가 발생했습니다.");
+    console.error("Assignment update error:", e);
+};
+
+// 부서명을 부서ID로 가져오는 헬퍼 함수
+scwin.getDepartmentName = function(deptId) {
+    var deptCount = dlt_departments.getRowCount();
+    for (var i = 0; i < deptCount; i++) {
+        if (dlt_departments.getCellData(i, "dept_id") === deptId) {
+            return dlt_departments.getCellData(i, "dept_name");
+        }
+    }
+    return deptId; // 찾지 못한 경우 ID 반환
+};
+
+// 부서ID를 부서명으로 가져오는 헬퍼 함수
+scwin.getDepartmentId = function(deptName) {
+    var deptCount = dlt_departments.getRowCount();
+    for (var i = 0; i < deptCount; i++) {
+        if (dlt_departments.getCellData(i, "dept_name") === deptName) {
+            return dlt_departments.getCellData(i, "dept_id");
+        }
+    }
+    return ""; // 찾지 못한 경우 빈 문자열 반환
+};
+]]></script>
+	</head>
+	<body ev:onpageload="scwin.onpageload">
+		<!-- 전체 페이지를 가운데 정렬하는 컨테이너 -->
+		<xf:group style="padding-left: 20px;padding-right: 20px;">
+			<xf:group style="margin-bottom: 15px;">
+				<w2:textbox style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;" label="청구 번호"></w2:textbox>
+				<w2:input ref="data:dm_change.claim_no"
+					style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #f8f9fa; box-sizing: border-box;"
+					readOnly="true" id="ipt_claim_no">
+				</w2:input>
+			</xf:group>
+			<xf:group style="margin-bottom: 15px;">
+				<w2:textbox style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;" label="현재 담당자"></w2:textbox>
+				<w2:input ref="data:dm_change.current_assignee"
+					style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #f8f9fa; box-sizing: border-box;"
+					readOnly="true" id="ipt_current_assignee">
+				</w2:input>
+			</xf:group>
+			<xf:group style="display: flex; gap: 15px; margin-bottom: 30px;">
+				<xf:group style="flex: 1;">
+					<w2:textbox style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;" label="부서"></w2:textbox>
+					<xf:select1 submenuSize="auto" ev:onchange="scwin.sel_department_onchange" chooseOption="true" allOption="" ref=""
+						appearance="minimal" disabledClass="w2selectbox_disabled" disabled="false" style="width: 100%;" id="sel_department" renderType=""
+						class="" direction="auto" chooseOptionLabel="부서">
+						<xf:choices>
+							<xf:itemset nodeset="data:dlt_departments">
+								<xf:label ref="dept_name"></xf:label>
+								<xf:value ref="dept_id"></xf:value>
+							</xf:itemset>
+						</xf:choices>
+					</xf:select1>
+				</xf:group>
+				<xf:group style="flex: 1;">
+					<w2:textbox style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;" label="변경 담당자"></w2:textbox>
+					<xf:select1 submenuSize="auto" ev:onchange="scwin.sel_assignee_onchange" chooseOption="true" allOption="" ref=""
+						appearance="minimal" disabledClass="w2selectbox_disabled" disabled="false" style="width: 100%;" id="sel_assignee" renderType=""
+						class="" direction="auto" chooseOptionLabel="담당자">
+						<xf:choices>
+							<xf:itemset nodeset="data:dlt_employees">
+								<xf:label ref="empName"></xf:label>
+								<xf:value ref="empNo"></xf:value>
+							</xf:itemset>
+						</xf:choices>
+					</xf:select1>
+				</xf:group>
+			</xf:group>
+			<xf:group style="text-align: right;; margin-top: 20px;">
+				<w2:button ev:onclick="scwin.btn_cancel_onclick"
+					style="width: 90px; height: 40px; margin-right: 15px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;"
+					id="btn_cancel">
+					취소
+				</w2:button>
+				<w2:button ev:onclick="scwin.btn_save_onclick"
+					style="width: 90px; height: 40px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;"
+					id="btn_save">
+					저장
+				</w2:button>
+			</xf:group>
+		</xf:group>
+	</body>
+</html>
