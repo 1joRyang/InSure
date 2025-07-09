@@ -12,7 +12,11 @@
 
         	<w2:dataCollection baseNode="map">
         		<w2:dataMap baseNode="map" id="dataMap1">
-        			<w2:keyInfo></w2:keyInfo>
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="name1" id="key1"></w2:key>
+        				<w2:key dataType="text" name="name2" id="key2"></w2:key>
+        				<w2:key dataType="text" name="name3" id="key3"></w2:key>
+        			</w2:keyInfo>
         		</w2:dataMap>
         	</w2:dataCollection>
 
