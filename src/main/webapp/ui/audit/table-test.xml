@@ -202,7 +202,6 @@ scwin.updateExclusionCell = function(rowIndex, colIndex, newValue) {
 scwin.btn_ocr_onclick = function (e) {
     // OCR 버튼 클릭 시 OCR 결과를 받아서 테이블을 동적으로 업데이트
     
-
     /**
     // 이미지 보냈을 때
     let formData = new FormData();
