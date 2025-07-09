@@ -12,6 +12,8 @@ import com.inswave.elfw.util.ElBeanUtils;
 
 import com.demo.proworks.emp.service.EmpService;
 import com.demo.proworks.emp.vo.EmpVo;
+import com.demo.proworks.user.service.UserService;
+import com.demo.proworks.user.vo.UserVo;
 
 /**  
  * @Class Name : ProworksSessionDataAdapter.java
@@ -54,9 +56,12 @@ public class ProworksSessionDataAdapter extends SessionDataAdapter {
 	@Override
 	public ProworksUserHeader setSessionData(HttpServletRequest request, String id, Object... obj) throws AdapterException{
 		
+		/*
 		// 로그인 후에 id 기반으로 세션 정보를 세팅하여 반환한다.		
 		ProworksUserHeader userHeader = new ProworksUserHeader();
 		userHeader.setUserId( id );
+		
+		
 
 		// 사용자 세션을 UserHeader 에 설정 (샘플 예제)
 		try{
@@ -82,6 +87,58 @@ public class ProworksSessionDataAdapter extends SessionDataAdapter {
 		}
 		
 		return userHeader;
-	}
+		*/
+		
+		
+		
+		// 로그인 후에 id 기반으로 세션 정보를 세팅하여 반환한다.		
+		ProworksUserHeader userHeader = new ProworksUserHeader();
+		userHeader.setUserId( id );
+		
+		
+		
+		// 로그인 시 사용했던 '로그인 타입'을 가져옵니다.
+		// ※ 이 값을 LoginAdapter에서 SessionDataAdapter로 넘기는 방법이 필요할 수 있습니다.
+		// 가장 쉬운 방법은 로그인 성공 직후 세션에 임시로 저장했다가 여기서 꺼내 쓰는 것입니다.
+		String loginType = (String) request.getSession().getAttribute("loginTypeForSession");
+		
+		
+		try {
+        if ("USER".equals(loginType)) {
+            UserService userService = (UserService) ElBeanUtils.getBean("userServiceImpl");
+            UserVo userVoParam = new UserVo();
+            userVoParam.setUserId(id);
+            UserVo resUserVo = userService.selectUser(userVoParam);
+            
+            if (resUserVo == null) throw new AdapterException("세션 정보를 생성할 사용자가 없습니다. ID: " + id);
+
+            userHeader.setTestUserName(resUserVo.getUserName());
+            userHeader.setUserRole("USER"); 
+
+        } else if ("EMPLOYEE".equals(loginType)) { // 관리자 로그인 타입
+            EmpService empService = (EmpService) ElBeanUtils.getBean("empServiceImpl");
+            EmpVo empVo = new EmpVo();
+            empVo.setEmpno(Integer.parseInt(id));
+            EmpVo resEmpVo = empService.selectEmp(empVo);
+            
+            if (resEmpVo == null) throw new AdapterException("세션 정보를 생성할 관리자가 없습니다. ID: " + id);
+
+            userHeader.setTestUserName(resEmpVo.getEname()); // 관리자 이름 설정
+            userHeader.setUserRole("ADMIN");
+        }
+        
+        AppLog.debug("세션 생성 완료. 사용자: " + userHeader.getTestUserName() + ", 역할: " + userHeader.getUserRole());
+
+		} catch (Exception e) {
+	        AppLog.error("setSessionData Error", e);
+	        throw new AdapterException("세션 데이터 생성 중 오류가 발생했습니다.");
+		} finally {
+        
+			request.getSession().removeAttribute("loginTypeForSession");
+		}
+
+		return userHeader;
+		
+		}
 
 }

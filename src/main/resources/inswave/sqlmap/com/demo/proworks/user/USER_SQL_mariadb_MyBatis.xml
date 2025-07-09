@@ -15,6 +15,15 @@
 	2025/07/01              임소희             최초 생성
  -->
 <mapper namespace="com.demo.proworks.user">
+
+	<select id="selectPasswordByUserId" parameterType="String" resultType="String">
+        SELECT 
+               PW as pw
+          FROM USER
+         WHERE USER_ID = #{userId}
+    </select>
+
+
     <insert id="insertUser" parameterType="com.demo.proworks.user.vo.UserVo">
     	<!-- 사용자정보를 등록한다. -->	
     		

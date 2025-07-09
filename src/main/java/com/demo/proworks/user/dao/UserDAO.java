@@ -23,6 +23,17 @@ import com.demo.proworks.user.dao.UserDAO;
 @Repository("userDAO")
 public class UserDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstractDAO {
 
+	/**
+     * 사용자 ID로 암호화된 비밀번호를 직접 조회합니다.
+     * @param userId
+     * @return String 암호화된 비밀번호
+     * @throws ElException
+     */
+	public String selectPasswordByUserId(String userId) {
+        // selectByPk 메소드를 사용하고, 결과를 String으로 형변환(casting)합니다.
+        return (String) selectByPk("com.demo.proworks.user.selectPasswordByUserId", userId);
+    }
+
     /**
      * 사용자정보 상세 조회한다.
      *  

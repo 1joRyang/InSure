@@ -11,6 +11,8 @@ import com.demo.proworks.user.service.UserService;
 import com.demo.proworks.user.vo.UserVo;
 import com.demo.proworks.user.dao.UserDAO;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 /**  
  * @subject     : 사용자정보 관련 처리를 담당하는 ServiceImpl
  * @description	: 사용자정보 관련 처리를 담당하는 ServiceImpl
@@ -31,6 +33,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Resource(name = "messageSource")
 	private MessageSource messageSource;
+	
+	@Resource(name = "passwordEncoder")
+    private PasswordEncoder passwordEncoder;
 
     /**
      * 사용자정보 목록을 조회합니다.
@@ -76,7 +81,7 @@ public class UserServiceImpl implements UserService {
      */
 	public UserVo selectUser(UserVo userVo) throws Exception {
 		UserVo resultVO = userDAO.selectUser(userVo);			
-        
+        System.out.println(resultVO);
         return resultVO;
 	}
 	
@@ -140,7 +145,10 @@ public class UserServiceImpl implements UserService {
      * @throws Exception
      */
 	public int insertUser(UserVo userVo) throws Exception {
-		return userDAO.insertUser(userVo);	
+        // DB에 저장하기 전, 비밀번호를 암호화합니다.
+        String encodedPassword = passwordEncoder.encode(userVo.getPw());
+        userVo.setPw(encodedPassword);
+        return userDAO.insertUser(userVo);
 	}
 	
     /**
@@ -153,7 +161,11 @@ public class UserServiceImpl implements UserService {
      * @return 번호
      * @throws Exception
      */
-	public int updateUser(UserVo userVo) throws Exception {				
+	public int updateUser(UserVo userVo) throws Exception {		
+	
+		// DB에 저장하기 전, 비밀번호를 암호화합니다.
+        String encodedPassword = passwordEncoder.encode(userVo.getPw());
+        userVo.setPw(encodedPassword);
 		return userDAO.updateUser(userVo);	   		
 	}
 

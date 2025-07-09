@@ -19,11 +19,13 @@
    
     <!-- EL Controller Interceptor -->
     <bean id="controllerInterceptorAdvice" class="com.inswave.elfw.intercept.ElControllerInterceptor" />          
-    <aop:config>        
- 		<aop:pointcut id="controllerInterceptorPointcut" expression="execution(* com.demo..*Controller.*(..))" /> 		
-        <aop:advisor advice-ref="controllerInterceptorAdvice"
-            pointcut-ref="controllerInterceptorPointcut" id="controllerInterceptorAdvisor" order="0"/>
-    </aop:config>        
+	<aop:config>        
+	    <aop:pointcut id="controllerInterceptorPointcut" 
+	        expression="execution(* com.demo..*Controller.*(..)) and !execution(* com.demo.proworks.user.web.UserController.login(..)) and !execution(* com.demo.proworks.user.web.UserController.simpleLogin(..))" />
+	
+	    <aop:advisor advice-ref="controllerInterceptorAdvice"
+	        pointcut-ref="controllerInterceptorPointcut" id="controllerInterceptorAdvisor" order="0"/>
+	</aop:config>      
 
 	<!-- EL Common Controller -->
 	<bean id="elCommController" class="com.inswave.elfw.web.ElCommController"/>

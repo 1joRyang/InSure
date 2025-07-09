@@ -16,41 +16,55 @@
     				</w2:keyInfo>
     			</w2:dataMap>
     			<w2:dataMap baseNode="map" id="dma_login_response">
-    				<w2:keyInfo></w2:keyInfo>
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="아이디" id="id"></w2:key>
+    				</w2:keyInfo>
     			</w2:dataMap>
     		</w2:dataCollection>
     		<w2:workflowCollection />
-    		<xf:submission id="sbm_UserLogin" action="/InsWebApp/UserLogin.pwkjson" method="post" mediatype="application/json" ref="" target='data:json,[{"id":"dma_login_request","key":"elData"},{"id":"dma_login_response","key":"elData"}]' encoding="UTF-8"
-    			instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_UserLogin_submitdone"
+    		<xf:submission id="sbm_UserLogin" action="/InsWebApp/UserLogin.pwkjson" method="post" mediatype="application/json" ref='data:json,[{"id":"dma_login_request","key":"elData"},{"id":"dma_login_response","key":"elData"}]' target='' encoding="UTF-8"
+    			instance="" replace="" errorHandler="scwin.sbm_UserLogin_submiterror" customHandler="" mode="asynchronous" processMsg="false" ev:submit="" ev:submitdone="scwin.sbm_UserLogin_submitdone"
     			ev:submiterror="" abortTrigger="">
     		</xf:submission>
     	</xf:model>
     	<w2:layoutInfo />
     	<w2:publicInfo method="" />
-    	<script lazy="false" type="text/javascript"><![CDATA[
-scwin.onpageload = function() {
-	
+    	<script lazy="false" type="text/javascript"><![CDATA[scwin.onpageload = function() {
+    
 };
 
 scwin.sbm_UserLogin_submitdone = function (e) {
-    let elHeader = e.responseJSON.elHeader;
-    if(elHeader != "" && elHeader != null && elHeader != "undefined") {	
-        if(elHeader.resSuc == true) {
-            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml"
-        }else{
-            dma_login_request.setEmptyValue();
-            alert("로그인 정보를 확인하세요");
+    var customerId = null;
+    
+    try {
+       
+        // 서버 응답에서 직접 접근
+        if (!customerId && e && e.responseJSON) {
+            if (e.responseJSON.dma_login_response) {
+                customerId = e.responseJSON.dma_login_response.id;
+            }
         }
+        
+        if (customerId) {
+            localStorage.setItem("id", customerId);
+        } else {
+            alert("사용자 정보를 받아오는 데 실패했습니다. 관리자에게 문의하세요.");
+            return;
+        }
+        
+    } catch (error) {
+        alert("로그인 처리 중 오류가 발생했습니다.");
+        return;
     }
+    
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml";
 };
 
 scwin.login_btn_onclick = function (e) {
     dma_login_request.set("loginType", "USER");
-    
     var reqData = {"elData":dma_login_request.getJSON()};
     $c.sbm.execute(sbm_UserLogin, reqData);
-};
-]]></script>
+};]]></script>
     	<w2:require as="udc_notification" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/notification.xml"></w2:require>
     </head>
     <body ev:onpageload="scwin.onpageload">
@@ -89,7 +103,7 @@ scwin.login_btn_onclick = function (e) {
     						meta_snippetName="10_16 출력텍스트" style="">
     					</w2:span>
 
-    					<xf:input id="" style="width:144px; height:21px; " ref="data:dma_UserLogin.userId"></xf:input>
+    					<xf:input id="" style="width:144px; height:21px; " ref="data:dma_login_request.userId"></xf:input>
     				</xf:group>
     			</xf:group>
     			<xf:group tagname="tr">
@@ -98,7 +112,7 @@ scwin.login_btn_onclick = function (e) {
     					<w2:span id="" label="비밀번호" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
     						meta_snippetName="10_16 출력텍스트" style="">
     					</w2:span>
-    					<xf:secret id="" style="width:144px; height:21px; " ref="data:dma_UserLogin.pw"></xf:secret>
+    					<xf:secret id="" style="width:144px; height:21px; " ref="data:dma_login_request.pw"></xf:secret>
     				</xf:group>
     			</xf:group>
     		</xf:group>
