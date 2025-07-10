@@ -11,7 +11,18 @@
     		<xf:instance>
     			<data xmlns="" />
     		</xf:instance>
-
+    		<w2:dataCollection baseNode="map">
+    			<w2:dataMap baseNode="map" id="elData">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="name1" id="insimagefileVoList"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    		</w2:dataCollection>
+    		<xf:submission id="submission1" action="/InsWebApp/submitClaim.pwkjson" method="post" mediatype="application/json"
+    			ref='data:json,{"id":"elData","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+    			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.submission1_submitdone"
+    			ev:submiterror="scwin.submission1_submiterror" abortTrigger="">
+    		</xf:submission>
     	</xf:model>
     	<w2:leaf>true</w2:leaf>
     	<w2:fileName>final_check.xml</w2:fileName>
@@ -46,8 +57,64 @@ scwin.onpageload = function() {
     }
 };
 
-scwin.btnNext_onclick = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/fourth.xml"
+scwin.dataURItoBlob = function(dataURI){
+    var byteString = atob(dataURI.split(',')[1]);
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < byteString.length; i++){
+        ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab],{type:mimeString});
+};
+
+scwin.btnNext_onclick = function () {
+    
+    // 1. 화면에 표시된 모든 이미지 데이터 다시 수집
+    var attachmentBox = document.querySelector('[id$="attachmentBox"]');
+    var images = attachmentBox.querySelectorAll('img');
+    if(images.length === 0){
+        alert("첨부된 서류가 없음");
+        return;
+    }
+
+    // 1. FormData객체 생성
+    var formData = new FormData();
+
+    // 2. 이미지 Blob변환 후 FormData 추가
+    images.forEach(function(img,index){
+        var blob = scwin.dataURItoBlob(img.src);
+        //"files"이름으로 각 파일 Blob 추가
+        formData.append("files", blob, "image" + index + ".jpg");
+    });
+
+    // 3. 부가적인 텍스트 데이터 추가
+    formData.append("claim_type", "실손보험청구");
+
+    // 4. fetch API로 FormData전송
+    // Content-Type 헤더는 FormData 사용 시 브라우저가 자동으로 설정
+    fetch("/InsWebApp/submitClaim.pwkjson",{
+        method: 'POST',
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data=>{
+        console.log("전송 성공: ", data);
+        alert("성공접수");
+    })
+    .catch(error=>{
+        console.error("전송 실패: ", error);
+        alert("접수중오류발생");
+    });
+};
+
+
+scwin.submission1_submitdone = function (e) {
+    console.log("개별 서류 접수 성공: ", e);
+};
+
+scwin.submission1_submiterror = function (e) {
+    console.error("개별 서류 접수 실패: ", e);
 };
 ]]></script>
     	<style type="text/css"><![CDATA[/* custom.css */
@@ -259,7 +326,7 @@ scwin.btnNext_onclick = function (e) {
                 </xf:group>
             </xf:group>
 
-            <xf:group class="content-section" id="mainContent" style="margin:0 auto;" ev:onclick="scwin.btnNext_onclick">
+            <xf:group class="content-section" id="mainContent" style="margin:0 auto;">
             	<w2:textbox class="question-text" id="" label="신청 내용을 확인해 주세요" style=""></w2:textbox>
             	
         			<xf:group class="infoSection">
@@ -315,7 +382,7 @@ scwin.btnNext_onclick = function (e) {
 
 
             <xf:group class="footer-section" id="footer" style="">
-                <w2:button class="next-button" id="btnNext" label="청구" ev:onclick="scwin.onClickNext()"></w2:button>
+                <w2:button class="next-button" id="btnNext" label="청구" ev:onclick="scwin.btnNext_onclick"></w2:button>
             </xf:group>
         </xf:group>
     </body>
