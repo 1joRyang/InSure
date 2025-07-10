@@ -27,7 +27,7 @@
 						<w2:key id="patient_name" name="환자명" dataType="text" defaultValue="홍길동"></w2:key>
 						<w2:key id="hospital_name" name="병원명" dataType="text" defaultValue="서울대학교병원"></w2:key>
 						<w2:key id="treatment_date" name="진료일" dataType="text" defaultValue="2025-01-15"></w2:key>
-						<w2:key id="reviewer" name="심사역" dataType="text" defaultValue="김심사"></w2:key>
+						<w2:key id="emp_name" name="심사역" dataType="text" defaultValue="김심사"></w2:key>
 						<w2:key id="status" name="상태" dataType="text" defaultValue="심사중"></w2:key>
 						<w2:key id="generated_memo" name="생성된메모" dataType="text"></w2:key>
 						<w2:key id="receipt_no" name="접수번호" dataType="text"></w2:key>
@@ -101,6 +101,15 @@
 						<w2:key id="resultCode" name="결과코드" dataType="text"></w2:key>
 					</w2:keyInfo>
 				</w2:dataMap>
+                
+                <!-- FastAPI 요청용 데이터맵 추가 -->
+                <w2:dataMap baseNode="map" id="dma_apiRequest">
+                    <w2:keyInfo>
+                        <w2:key id="settlement" name="정산데이터" dataType="object"></w2:key>
+                        <w2:key id="excluded_items" name="제외항목목록" dataType="array"></w2:key>
+                        <w2:key id="hospital_type" name="병원타입" dataType="text"></w2:key>
+                    </w2:keyInfo>
+                </w2:dataMap>
 			</w2:dataCollection>
 			<w2:workflowCollection />
 
@@ -112,14 +121,14 @@
 			</xf:submission>
 
 			<!-- 정산정보 단건 조회 -->
-			<xf:submission id="sbm_selectSettlement" ref='data:json,dma_search'
-				target='data:json,{"id":"dma_settlementInfo","key":"settlementVo"}' action="/InsWebApp/SETTLEMENTUpdView.pwkjson" method="post"
-				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_selectSettlement_submitdone">
+			<xf:submission id="sbm_selectSettlement" ref='data:json,{"id":"dma_search","key":"settlementVo"}'
+				target='data:json,{"id":"dma_settlementInfo","key":"elData"}' action="/InsWebApp/SETTLEMENTUpdView.pwkjson" method="post"
+				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_selectSettlement_submitdone"
+				ev:submiterror="scwin.sbm_selectSettlement_submiterror">
 			</xf:submission>
-
 			<!-- 제외항목 목록 조회 - EXCITEMListR 사용 -->
 			<xf:submission id="sbm_selectExcludedItems" ref='data:json,{"id":"dma_search","key":"excItemVo"}'
-				target='data:json,{"id":"dlt_excludedItems","key":"elData"}' action="/InsWebApp/EXCITEMListR.pwkjson" method="post"
+				target='data:json,{"id":"dlt_excludedItems","key":"excitemVoList"}' action="/InsWebApp/EXCITEMListR.pwkjson" method="post"
 				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_selectExcludedItems_submitdone"
 				ev:submiterror="scwin.sbm_selectExcludedItems_submiterror">
 			</xf:submission>
@@ -130,7 +139,7 @@
 			</xf:submission>
 
 			<!-- 심사메모 생성 - 전체 경로 지정 -->
-			<xf:submission id="sbm_generateMemo" ref='data:json,dma_search' target='data:json,dma_apiResponse'
+			<xf:submission id="sbm_generateMemo" ref='data:json,dma_search' target='data:json,{"id":"dma_apiResponse","key":"elData"}'
 				action="/InsWebApp/SETTLEMENTMemoGenerate.pwkjson" method="post" mediatype="application/json" mode="asynchronous"
 				ev:submitdone="scwin.sbm_generateMemo_submitdone" ev:submiterror="scwin.sbm_generateMemo_submiterror">
 			</xf:submission>
@@ -139,6 +148,7 @@
 			<xf:submission id="sbm_updateSettlement" ref='data:json,dma_settlementInfo' target='data:json,dma_result'
 				action="/InsWebApp/SETTLEMENTUpd.pwkjson" method="post" mediatype="application/json" mode="asynchronous">
 			</xf:submission>
+
 		</xf:model>
 		<w2:layoutInfo />
 		<w2:publicInfo method="" />
@@ -414,7 +424,7 @@ scwin.searchSettlementData = function() {
 // 정산 목록 조회 완료 콜백
 scwin.sbm_settlementList_submitdone = function(e) {
     console.log("=== 정산 목록 조회 완료 ===");
-    console.log("응답 데이터:", e);
+    console.log("정산 목록:", e);
     
     // error 수신시
     var elData = e.responseJSON ? e.responseJSON.elData : null;
@@ -455,6 +465,12 @@ scwin.sbm_settlementList_submitdone = function(e) {
             // dma_settlementInfo에 데이터 설정
             dma_settlementInfo.setJSON(rowData);
             
+            // dma_search가 제대로 설정되어 있는지 확인
+            if (!dma_search.get("treatment_id") || !dma_search.get("claim_no")) {
+                dma_search.set("treatment_id", rowData.treatment_id);
+                dma_search.set("claim_no", rowData.claim_no);
+            }
+            
             // 추가 필드 설정 (테스트용 더미 데이터)
             if (!dma_settlementInfo.get("patient_name")) {
                 dma_settlementInfo.set("patient_name", "홍길동");
@@ -473,7 +489,7 @@ scwin.sbm_settlementList_submitdone = function(e) {
             }
             
             // 단건 조회로 상세 정보 가져오기
-            scwin.selectSettlementDetail();
+            scwin.sbm_selectSettlement();
             
         } else {
             scwin.showLoading(false);
@@ -486,7 +502,7 @@ scwin.sbm_settlementList_submitdone = function(e) {
                 dma_search.set("claim_no", firstRow.claim_no);
                 dma_settlementInfo.setJSON(firstRow);
                 
-                scwin.selectSettlementDetail();
+                scwin.sbm_selectSettlement();
             }
         }
     } else {
@@ -496,12 +512,24 @@ scwin.sbm_settlementList_submitdone = function(e) {
 };
 
 // 정산 상세 조회
-scwin.selectSettlementDetail = function() {
+scwin.sbm_selectSettlement = function(e) {
     console.log("정산 상세 조회 시작");
+    
+    // 파라미터 확인
+    var treatmentId = dma_search.get("treatment_id");
+    var claimNo = dma_search.get("claim_no");
+    
+    console.log("상세 조회 파라미터 - treatment_id:", treatmentId, "claim_no:", claimNo);
+    
+    if (!treatmentId || !claimNo) {
+        console.error("정산 상세 조회 실패 - 필수 파라미터 누락");
+        alert("치료ID와 청구번호가 필요합니다.");
+        scwin.showLoading(false);
+        return;
+    }
     
     $p.executeSubmission("sbm_selectSettlement");
 };
-
 // 정산 상세 조회 완료 콜백
 scwin.sbm_selectSettlement_submitdone = function(e) {
     console.log("=== 정산 상세 조회 완료 ===");
@@ -515,9 +543,11 @@ scwin.sbm_selectSettlement_submitdone = function(e) {
 };
 
 // 제외 항목 조회
-scwin.searchExcludedItems = function() {
+scwin.searchExcludedItems = function(e) {
     console.log("제외 항목 조회 시작");
-    
+    console.log(e);
+    console.log(dlt_excludedItems.getTotalRow()); // 실제 행 수 확인
+    console.log(dlt_excludedItems.getAllJSON()); // 전체 데이터 확인
     var treatmentId = dma_search.get("treatment_id");
     var claimNo = dma_search.get("claim_no");
     
@@ -533,7 +563,6 @@ scwin.searchExcludedItems = function() {
     $p.executeSubmission("sbm_selectExcludedItems");
 };
 
-// 제외항목 조회 성공 콜백
 // 제외항목 조회 성공 콜백
 scwin.sbm_selectExcludedItems_submitdone = function(e) {
     console.log("=== 제외항목 조회 완료 ===");
@@ -669,89 +698,7 @@ scwin.sbm_selectExcludedItems_submiterror = function(e) {
     scwin.searchInsuranceProducts();
 };
 
-// 테스트용 제외항목 데이터 설정
-scwin.setTestExcludedItems = function() {
-    console.log("테스트용 제외항목 데이터 설정");
-    
-    var treatmentId = dma_search.get("treatment_id");
-    var claimNo = dma_search.get("claim_no");
-    
-    var testExcludedItems = [
-        {
-            exc_id: "EXC001",
-            item_id: "ITEM001",
-            treatment_id: treatmentId,
-            claim_no: claimNo,
-            exc_reason: "일반병실료 차액 - 비급여 항목",
-            exc_cost: "50000",
-            exc_category: "CAT01",
-            category_name: "비급여"
-        },
-        {
-            exc_id: "EXC002",
-            item_id: "ITEM002",
-            treatment_id: treatmentId,
-            claim_no: claimNo,
-            exc_reason: "연간 한도 초과분",
-            exc_cost: "30000",
-            exc_category: "CAT02",
-            category_name: "한도초과"
-        },
-        {
-            exc_id: "EXC003",
-            item_id: "ITEM003",
-            treatment_id: treatmentId,
-            claim_no: claimNo,
-            exc_reason: "면책금액",
-            exc_cost: "10000",
-            exc_category: "CAT03",
-            category_name: "면책금"
-        }
-    ];
-    
-    dlt_excludedItems.setJSON(testExcludedItems);
-};
 
-// 보험상품 조회
-scwin.searchInsuranceProducts = function() {
-    console.log("보험상품 조회 시작");
-    
-    $p.executeSubmission("sbm_selectInsuranceProducts", {
-        success: function(e) {
-            scwin.showLoading(false);
-            console.log("보험상품 조회 성공");
-            
-            // 테스트용 더미 데이터 추가
-            if (dlt_insuranceProducts.getRowCount() === 0) {
-                var testProducts = [
-                    {
-                        productCode: "INS-2025-001",
-                        coverage: "실손의료보험",
-                        contractor: "홍길동",
-                        insuranceAmount: "1000000",
-                        claimAmount: "500000",
-                        paymentAmount: "400000",
-                        status: "심사중"
-                    },
-                    {
-                        productCode: "INS-2025-002",
-                        coverage: "암보험",
-                        contractor: "홍길동",
-                        insuranceAmount: "500000",
-                        claimAmount: "300000",
-                        paymentAmount: "250000",
-                        status: "심사중"
-                    }
-                ];
-                dlt_insuranceProducts.setJSON(testProducts);
-            }
-        },
-        error: function(e) {
-            scwin.showLoading(false);
-            console.log("보험상품 조회 실패 - 화면은 정상 표시");
-        }
-    });
-};
 
 // 금액 표시 업데이트
 scwin.updateAmountDisplay = function() {
@@ -836,7 +783,7 @@ scwin.grd_excludedItems_oncelldblclick = function(row, col) {
 };
 
 // FastAPI 심사메모 생성
-scwin.generateMemoFromAPI = function() {
+/* scwin.generateMemoFromAPI = function() {
     var treatmentId = dma_search.get("treatment_id");
     var claimNo = dma_search.get("claim_no");
     
@@ -852,7 +799,109 @@ scwin.generateMemoFromAPI = function() {
     
     // submission 실행
     $p.executeSubmission("sbm_generateMemo");
+}; */
+
+// FastAPI 심사메모 생성 - 올바른 데이터 구조로 전송
+scwin.generateMemoFromAPI = function() {
+    var treatmentId = dma_search.get("treatment_id");
+    var claimNo = dma_search.get("claim_no");
+    
+    console.log("심사메모 생성 - treatment_id:", treatmentId, "claim_no:", claimNo);
+    
+    if (!treatmentId || !claimNo) {
+        alert("치료ID와 청구번호를 확인해주세요.");
+        return;
+    }
+    
+    // FastAPI가 원하는 데이터 구조 생성
+    var requestData = scwin.prepareFastAPIRequestData();
+    
+    if (!requestData) {
+        alert("요청 데이터 준비에 실패했습니다.");
+        return;
+    }
+    
+    console.log("FastAPI 요청 데이터:", JSON.stringify(requestData, null, 2));
+    
+    // 로딩 표시
+    scwin.showLoading(true);
+    
+    // 새로운 DataMap에 요청 데이터 설정
+    var dma_apiRequest = WebSquare.ModelUtil.getInstanceModel("dma_apiRequest");
+    if (!dma_apiRequest) {
+        // DataMap이 없으면 임시로 생성
+        dma_apiRequest = WebSquare.ModelUtil.createDataMap("dma_apiRequest");
+    }
+    
+    // 요청 데이터를 DataMap에 설정
+    dma_apiRequest.setJSON(requestData);
+    
+    // submission 실행 (수정된 ref 사용)
+    $p.executeSubmission("sbm_generateMemo", {
+        ref: 'data:json,dma_apiRequest',
+        target: 'data:json,{"id":"dma_apiResponse","key":"elData"}'
+    });
 };
+
+// FastAPI 요청 데이터 준비 함수
+scwin.prepareFastAPIRequestData = function() {
+    try {
+        // 1. Settlement 데이터 준비
+        var settlementData = {
+            settlement_id: parseInt(dma_settlementInfo.get("settlement_id") || "1"),
+            final_due: parseInt(dma_settlementInfo.get("final_due") || "0"),
+            hospital_prepaid: parseInt(dma_settlementInfo.get("hospital_prepaid") || "0"),
+            deducation_amt: parseInt(dma_settlementInfo.get("deducation_amt") || "0"),
+            refund_amt: parseInt(dma_settlementInfo.get("refund_amt") || "0"),
+            treatment_id: parseInt(dma_search.get("treatment_id")),
+            claim_no: parseInt(dma_search.get("claim_no").replace(/-/g, '').substring(0, 8), 16) // UUID를 숫자로 변환
+        };
+        
+        // 2. Excluded Items 데이터 준비
+        var excludedItems = [];
+        var rowCount = dlt_excludedItems.getRowCount();
+        
+        for (var i = 0; i < rowCount; i++) {
+            var item = {
+                exc_id: parseInt(dlt_excludedItems.getCellData(i, "exc_id") || i + 1),
+                item_id: parseInt(dlt_excludedItems.getCellData(i, "item_id") || "0"),
+                treatment_id: parseInt(dma_search.get("treatment_id")),
+                claim_no: parseInt(dma_search.get("claim_no").replace(/-/g, '').substring(0, 8), 16),
+                exc_reason: dlt_excludedItems.getCellData(i, "exc_reason") || "",
+                exc_cost: parseInt(dlt_excludedItems.getCellData(i, "exc_cost") || "0"),
+                exc_category: dlt_excludedItems.getCellData(i, "exc_category") || ""
+            };
+            excludedItems.push(item);
+        }
+        
+        // 3. 병원 타입 결정 (로직에 따라 수정 필요)
+        var hospitalType = "병원급"; // 기본값
+        
+        // 병원명에 따라 타입 결정 (예시)
+        var hospitalName = dma_settlementInfo.get("hospital_name");
+        if (hospitalName) {
+            if (hospitalName.includes("의원") || hospitalName.includes("클리닉")) {
+                hospitalType = "의원급";
+            } else if (hospitalName.includes("종합병원") || hospitalName.includes("대학병원")) {
+                hospitalType = "종합전문";
+            }
+        }
+        
+        // 4. 최종 요청 데이터 구성
+        var requestData = {
+            settlement: settlementData,
+            excluded_items: excludedItems,
+            hospital_type: hospitalType
+        };
+        
+        return requestData;
+        
+    } catch (error) {
+        console.error("요청 데이터 준비 오류:", error);
+        return null;
+    }
+};
+
 
 // 심사메모 생성 성공 콜백
 scwin.sbm_generateMemo_submitdone = function(e) {
@@ -1004,7 +1053,7 @@ scwin.refreshData = function() {
 };
 
 // 테스트 데이터 저장
-scwin.saveTestData = function() {
+/* scwin.saveTestData = function() {
     var treatmentId = dma_search.get("treatment_id");
     var claimNo = dma_search.get("claim_no");
     
@@ -1015,10 +1064,10 @@ scwin.saveTestData = function() {
     } else {
         alert("저장할 데이터가 없습니다.");
     }
-};
+}; */
 
 // 테스트 데이터 로드
-scwin.loadTestData = function() {
+/* scwin.loadTestData = function() {
     var treatmentId = localStorage.getItem("treatment_id");
     var claimNo = localStorage.getItem("claim_no");
     
@@ -1033,6 +1082,26 @@ scwin.loadTestData = function() {
         }
     } else {
         alert("저장된 데이터가 없습니다.");
+    }
+}; */
+// 4. 정산 상세 조회 오류 처리 콜백 추가
+scwin.sbm_selectSettlement_submiterror = function(e) {
+    console.error("=== 정산 상세 조회 오류 ===");
+    console.error("오류 객체:", e);
+    
+    scwin.showLoading(false);
+    
+    // 목록에서 가져온 데이터가 이미 있으므로 계속 진행
+    if (dma_settlementInfo.get("final_due")) {
+        console.log("목록 데이터로 계속 진행");
+        
+        // 금액 표시 업데이트
+        scwin.updateAmountDisplay();
+        
+        // 제외항목 조회
+        scwin.searchExcludedItems();
+    } else {
+        alert("정산 상세 정보 조회에 실패했습니다.");
     }
 };
 ]]></script>
@@ -1069,7 +1138,7 @@ scwin.loadTestData = function() {
 					</xf:group>
 					<xf:group id="">
 						<w2:span id="" label="환자명: " style="color:#666;"></w2:span>
-						<w2:span id="" ref="data:dma_settlementInfo.patient_name" style="font-weight:bold;"></w2:span>
+						<w2:span id="" ref="data:elData.patient_name" style="font-weight:bold;"></w2:span>
 					</xf:group>
 					<xf:group id="">
 						<w2:span id="" label="병원명: " style="color:#666;"></w2:span>
@@ -1081,7 +1150,7 @@ scwin.loadTestData = function() {
 					</xf:group>
 					<xf:group id="">
 						<w2:span id="" label="심사역: " style="color:#666;"></w2:span>
-						<w2:span id="" ref="data:dma_settlementInfo.reviewer" style="font-weight:bold;"></w2:span>
+						<w2:span id="" ref="data:elData.reviewer" style="font-weight:bold;"></w2:span>
 					</xf:group>
 					<xf:group id="">
 						<w2:span id="spn_receiptNo" style="color:#2196F3;font-weight:bold;"></w2:span>
@@ -1101,9 +1170,9 @@ scwin.loadTestData = function() {
 
 					<!-- 정산 정보 상세 -->
 					<w2:textbox class="section_title" id="" label="정산 정보 상세"></w2:textbox>
-					<xf:group id="" style="margin-bottom:20px;background-color:#f9f9f9;padding:15px;border-radius:4px;">
+					<xf:group id="" style="margin-bottom:20px;background-color: #f9f9f9;padding:15px;border-radius:4px;">
 						<xf:group class="info_row" id="">
-							<w2:span class="info_label" id="" label="치료ID"></w2:span>
+							<w2:span class="info_label" id="" label="진료 ID"></w2:span>
 							<w2:span class="info_value" id="" ref="data:dma_settlementInfo.treatment_id"></w2:span>
 						</xf:group>
 						<xf:group class="info_row" id="">
@@ -1112,42 +1181,34 @@ scwin.loadTestData = function() {
 						</xf:group>
 						<xf:group class="info_row" id="">
 							<w2:span class="info_label" id="" label="최종 수납액"></w2:span>
-							<w2:span class="info_value" id="">
-								<w2:span ref="data:dma_settlementInfo.final_due" dataType="number" displayFormat="#,###"></w2:span>
+							<w2:span class="info_value" id="" ref="data:dma_settlementInfo.final_due" displayFormat="#,###">
+								<w2:span id="spn_final_due" ref="data:dma_settlementInfo.final_due" dataType="number" displayFormatter="#,###"></w2:span>
 								<w2:span label="원"></w2:span>
 							</w2:span>
+
 						</xf:group>
 						<xf:group class="info_row" id="">
 							<w2:span class="info_label" id="" label="병원 공제금"></w2:span>
-							<w2:span class="info_value" id="">
-								<w2:span ref="data:dma_settlementInfo.hospital_prepaid" dataType="number" displayFormat="#,###"></w2:span>
+							<w2:span class="info_value" id="" ref="data:dma_settlementInfo.hospital_prepaid" displayFormat="#,###">
+								<w2:span ref="data:dma_settlementInfo.hospital_prepaid"  dataType="number" displayFormatter="#,###"></w2:span>
 								<w2:span label="원"></w2:span>
 							</w2:span>
 						</xf:group>
 						<xf:group class="info_row" id="">
 							<w2:span class="info_label" id="" label="삭감 항목 금액"></w2:span>
-							<w2:span class="info_value" id="">
-								<w2:span ref="data:dma_settlementInfo.deducation_amt" dataType="number" displayFormat="#,###"></w2:span>
+							<w2:span class="info_value" id="" ref="data:dma_settlementInfo.deducation_amt" dataType="number" displayFormat="#,###">
+								<w2:span ref="data:dma_settlementInfo.deducation_amt"  dataType="number" displayFormatter="#,###"></w2:span>
 								<w2:span label="원"></w2:span>
 							</w2:span>
 						</xf:group>
 						<xf:group class="info_row" id="">
 							<w2:span class="info_label" id="" label="산출금(지급예정)"></w2:span>
-							<w2:span class="info_value" id="">
-								<w2:span ref="data:dma_settlementInfo.refund_amt" dataType="number" displayFormat="#,###"></w2:span>
+							<w2:span class="info_value" id="" ref="data:dma_settlementInfo.refund_amt" displayFormat="#,###">
+								<w2:span ref="data:dma_settlementInfo.refund_amt"  dataType="number" displayFormatter="#,###"></w2:span>
 								<w2:span label="원"></w2:span>
 							</w2:span>
 						</xf:group>
-						<xf:group class="info_row" id="">
-							<w2:span class="info_label" id="" label="병원 구분"></w2:span>
-							<w2:span class="info_value" id="">
-								<w2:span id="" label="병원급"></w2:span>
-							</w2:span>
-						</xf:group>
-						<xf:group class="info_row" id="">
-							<w2:span class="info_label" id="" label="상태"></w2:span>
-							<w2:span class="info_value" id="" ref="data:dma_settlementInfo.status"></w2:span>
-						</xf:group>
+
 					</xf:group>
 
 					<!-- 제외 항목 섹션 -->
@@ -1159,7 +1220,7 @@ scwin.loadTestData = function() {
 						</xf:group>
 
 						<w2:gridView id="grd_excludedItems" style="height:150px;" dataList="data:dlt_excludedItems" autoFit="allColumn"
-							readOnly="true" ev:oncelldblclick="scwin.grd_excludedItems_oncelldblclick">
+							readOnly="true" ev:oncelldblclick="scwin.grd_excludedItems_oncelldblclick" visibleRowNum="20">
 							<w2:caption style="" id="caption1" value="제외 항목 목록"></w2:caption>
 							<w2:header style="" id="header1">
 								<w2:row style="" id="row1">
