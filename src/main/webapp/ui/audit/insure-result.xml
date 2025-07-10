@@ -158,27 +158,27 @@
              
             }
             
-            .header_section {
+    <!--         .header_section {
                 background-color: white;
                 padding: 20px;
                 border-radius: 8px;
                 margin-bottom: 20px;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             }
-            
+             
             .main_content {
                 display: flex;
                 gap: 20px;
             }
-            
-            .left_panel {
+             
+             .left_panel {
                 flex: 1;
                 background-color: white;
                 padding: 20px;
                 border-radius: 8px;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             }
-            
+             
             .right_panel {
                 width: 500px;
                 background-color: white;
@@ -187,13 +187,13 @@
                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             }
             
-            .info_row {
+             .info_row {
                 display: flex;
                 justify-content: space-between;
                 margin-bottom: 10px;
                 padding: 8px 0;
                 border-bottom: 1px solid #eee;
-            }
+            } 
             
             .info_label {
                 color: #666;
@@ -205,7 +205,7 @@
                 font-weight: bold;
             }
             
-            .amount_display {
+             .amount_display {
                 text-align: center;
                 padding: 30px;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -213,19 +213,19 @@
                 border-radius: 8px;
                 margin-bottom: 20px;
             }
-            
-            .amount_number {
+             
+             .amount_number {
                 font-size: 36px;
                 font-weight: bold;
                 margin-bottom: 10px;
-            }
+            } 
             
-            .amount_desc {
+             .amount_desc {
                 font-size: 14px;
                 opacity: 0.9;
             }
-            
-            .memo_textarea {
+             
+             .memo_textarea {
                 width: 100%;
                 min-height: 200px;
                 padding: 15px;
@@ -236,14 +236,14 @@
                 font-size: 14px;
                 line-height: 1.6;
             }
-            
+             -->
             .button_group {
                 display: flex;
                 gap: 10px;
                 margin-top: 20px;
             }
             
-            .btn_primary {
+            <!-- .btn_primary {
                 flex: 1;
                 padding: 12px 20px;
                 background-color: #4CAF50;
@@ -255,12 +255,12 @@
                 cursor: pointer;
                 transition: background-color 0.3s;
             }
-            
+             -->
             .btn_primary:hover {
                 background-color: #45a049;
             }
             
-            .btn_secondary {
+            <!-- .btn_secondary {
                 flex: 1;
                 padding: 12px 20px;
                 background-color: white;
@@ -271,13 +271,13 @@
                 cursor: pointer;
                 transition: all 0.3s;
             }
-            
+             -->
             .btn_secondary:hover {
                 background-color: #f5f5f5;
                 border-color: #999;
             }
             
-            .btn_generate {
+            <!-- .btn_generate {
                 background-color: #2196F3;
                 color: white;
                 padding: 12px 24px;
@@ -286,36 +286,36 @@
                 font-size: 16px;
                 font-weight: bold;
                 cursor: pointer;
-                transition: background-color 0.3s;
-            }
+                transition: background-color 0.3s; -->
+            <!-- } -->
             
             .btn_generate:hover {
                 background-color: #1976D2;
             }
             
-            .excluded_items_section {
+            <!-- .excluded_items_section {
                 margin-top: 20px;
                 padding: 15px;
                 background-color: #fff3cd;
                 border: 1px solid #ffeaa7;
                 border-radius: 4px;
-            }
+            } -->
             
-            .section_title {
+            <!-- .section_title {
                 font-size: 16px;
                 font-weight: bold;
                 margin-bottom: 15px;
                 color: #333;
             }
-            
-            .status_badge {
+             -->
+            <!-- .status_badge {
                 display: inline-block;
                 padding: 4px 12px;
                 border-radius: 12px;
                 font-size: 12px;
                 font-weight: bold;
             }
-            
+             -->
             .status_pending {
                 background-color: #FFF3E0;
                 color: #F57C00;
@@ -1279,11 +1279,11 @@ scwin.sbm_selectSettlement_submiterror = function(e) {
 	<body ev:onpageload="scwin.onpageload">
 		<xf:group class="container" id="" style="padding: 20px;                background-color: #f5f5f5;">
 			<!-- 헤더 영역 -->
-			<xf:group class="header_section" id="">
+			<xf:group class="header_section" id="" style="background-color: white;                padding: 20px;                border-radius: 8px;                margin-bottom: 20px;                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
 				<xf:group id="" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
 					<w2:textbox id="" label="보험금 정산 심사" style="font-size:24px;font-weight:bold;"></w2:textbox>
 					<xf:group id="" style="display:flex;align-items:center;gap:10px;">
-						<w2:span class="status_badge status_pending" id="spn_status" ref="data:dma_settlementInfo.status"></w2:span>
+						<w2:span class="status_badge status_pending" id="spn_status" ref="data:dma_settlementInfo.status" style="display: inline-block;                padding: 4px 12px;                border-radius: 12px;                font-size: 12px;                font-weight: bold;"></w2:span>
 						<xf:trigger type="button" id="btn_refresh" ev:onclick="scwin.refreshData" style="padding:4px 12px;font-size:12px;">
 							<xf:label>새로고침</xf:label>
 						</xf:trigger>
@@ -1329,25 +1329,25 @@ scwin.sbm_selectSettlement_submiterror = function(e) {
 			</xf:group>
 
 			<!-- 메인 컨텐츠 영역 -->
-			<xf:group class="main_content" id="">
+			<xf:group class="main_content" id="" style="display: flex;                gap: 20px;">
 				<!-- 왼쪽 패널 -->
-				<xf:group class="left_panel" id="">
+				<xf:group class="left_panel" id="" style="flex: 1;                background-color: white;                padding: 20px;                border-radius: 8px;                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
 					<!-- 금액 표시 영역 -->
-					<xf:group class="amount_display" id="">
-						<w2:textbox class="amount_number" id="txt_amountNumber" label=""></w2:textbox>
-						<w2:textbox class="amount_desc" id="txt_amountDesc" label=""></w2:textbox>
+					<xf:group class="amount_display" id="" style="text-align: center;                padding: 30px;                background: #d9e3f0;                color: black;                border-radius: 8px;                margin-bottom: 20px;">
+						<w2:textbox class="amount_number" id="txt_amountNumber" label="" style="font-size: 36px;                font-weight: bold;                margin-bottom: 10px;"></w2:textbox>
+						<w2:textbox class="amount_desc" id="txt_amountDesc" label="" style="font-size: 14px;                opacity: 0.9;"></w2:textbox>
 					</xf:group>
 
 					<!-- 정산 정보 상세 -->
-					<w2:textbox class="section_title" id="" label="정산 정보 상세"></w2:textbox>
+					<w2:textbox class="section_title" id="" label="정산 정보 상세" style="font-size: 16px;                font-weight: bold;                margin-bottom: 15px;                color: #333;"></w2:textbox>
 					<xf:group id="" style="margin-bottom:20px;background-color: #f9f9f9;padding:15px;border-radius:4px;">
-						<xf:group class="info_row" id="">
-							<w2:span class="info_label" id="" label="진료 ID"></w2:span>
-							<w2:span class="info_value" id="" ref="data:dma_settlementInfo.treatment_id"></w2:span>
+						<xf:group class="info_row" id="" style="display: flex;                justify-content: space-between;                margin-bottom: 10px;                padding: 8px 0;                border-bottom: 1px solid #eee;">
+							<w2:span class="info_label" id="" label="진료 ID" style="color: #666;                font-weight: 500;"></w2:span>
+							<w2:span class="info_value" id="" ref="data:dma_settlementInfo.treatment_id" style="color: #333;                font-weight: bold;"></w2:span>
 						</xf:group>
 						<xf:group class="info_row" id="">
-							<w2:span class="info_label" id="" label="청구번호"></w2:span>
-							<w2:span class="info_value" id="" ref="data:dma_settlementInfo.claim_no"></w2:span>
+							<w2:span class="info_label" id="" label="청구번호" style="color: #666;                font-weight: 500;"></w2:span>
+							<w2:span class="info_value" id="" ref="data:dma_settlementInfo.claim_no" style="color: #333;                font-weight: bold;"></w2:span>
 						</xf:group>
 						<xf:group class="info_row" id="">
 							<w2:span class="info_label" id="" label="최종 수납액"></w2:span>
@@ -1382,7 +1382,7 @@ scwin.sbm_selectSettlement_submiterror = function(e) {
 					</xf:group>
 
 					<!-- 제외 항목 섹션 -->
-					<xf:group class="excluded_items_section" id="">
+					<xf:group class="excluded_items_section" id="" style="margin-top: 20px;                padding: 15px;                background-color: #d9e3f0;                border: 1px solid #ffeaa7;                border-radius: 4px;">
 						<w2:textbox class="section_title" id="" label="비보상 제외 항목"></w2:textbox>
 						<xf:group id="" style="margin-bottom:10px;">
 							<w2:span id="" label="총 제외 금액: " style="color:#666;"></w2:span>
@@ -1440,12 +1440,12 @@ scwin.sbm_selectSettlement_submiterror = function(e) {
 				</xf:group>
 
 				<!-- 오른쪽 패널 -->
-				<xf:group class="right_panel" id="">
+				<xf:group class="right_panel" id="" style="width: 500px;                background-color: white;                padding: 20px;                border-radius: 8px;                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
 					<w2:textbox class="section_title" id="" label="심사 메모"></w2:textbox>
 
 					<!-- 메모 생성 버튼 -->
 					<xf:group id="" style="margin-bottom:15px;">
-						<xf:trigger class="btn_generate" id="btn_generateMemo" type="button" style="width:100%;"
+						<xf:trigger class="btn_generate" id="btn_generateMemo" type="button" style="background-color: #2196F3;                color: white;                padding: 12px 24px;                border: none;                border-radius: 4px;                font-size: 16px;                font-weight: bold;                cursor: pointer;                transition: background-color 0.3s;"
 							ev:onclick="scwin.generateMemoFromAPI">
 							<xf:label>AI 심사메모 생성</xf:label>
 						</xf:trigger>
@@ -1453,14 +1453,14 @@ scwin.sbm_selectSettlement_submiterror = function(e) {
 
 					<!-- 메모 입력 영역 -->
 					<xf:textarea class="memo_textarea" id="txt_examMemo" ref="data:dma_settlementInfo.generated_memo"
-						placeholder="심사메모 생성 버튼을 클릭하여 AI가 자동으로 생성한 메모를 확인하세요."></xf:textarea>
+						placeholder="심사메모 생성 버튼을 클릭하여 AI가 자동으로 생성한 메모를 확인하세요." style="width: 100%;                min-height: 200px;                padding: 15px;                border: 1px solid #ddd;                border-radius: 4px;                resize: vertical;                font-family: 'Noto Sans KR', sans-serif;                font-size: 14px;                line-height: 1.6;"></xf:textarea>
 
 					<!-- 메모 관련 버튼 -->
-					<xf:group class="button_group" id="">
-						<xf:trigger class="btn_secondary" id="btn_reset" type="button" ev:onclick="scwin.btn_reset_onclick">
+					<xf:group class="button_group" id="" style="display: flex;                gap: 10px;                margin-top: 20px;">
+						<xf:trigger class="btn_secondary" id="btn_reset" type="button" ev:onclick="scwin.btn_reset_onclick" style="flex: 1;                padding: 12px 20px;                background-color: white;                color: #333;                border: 1px solid #ddd;                border-radius: 4px;                font-size: 14px;                cursor: pointer;                transition: all 0.3s;">
 							<xf:label>초기화</xf:label>
 						</xf:trigger>
-						<xf:trigger class="btn_primary" id="btn_save" type="button" ev:onclick="scwin.btn_save_onclick">
+						<xf:trigger class="btn_primary" id="btn_save" type="button" ev:onclick="scwin.btn_save_onclick" style="flex: 1;                padding: 12px 20px;                background-color: #4CAF50;                color: white;                border: none;                border-radius: 4px;                font-size: 14px;                font-weight: bold;                cursor: pointer;                transition: background-color 0.3s;">
 							<xf:label>메모 저장</xf:label>
 						</xf:trigger>
 					</xf:group>
