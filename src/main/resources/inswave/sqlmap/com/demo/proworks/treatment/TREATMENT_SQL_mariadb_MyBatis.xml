@@ -72,7 +72,7 @@
             TREATMENT_ID, CLAIM_NO, DEPARTMENT, TREATMENT_DATE, PATIENT_TYPE, HOSPITAL_NAME, HOSPITAL_GRADE
         FROM TREATMENT 
         WHERE 
-                TREATMENT_ID   = #{treatment_id}  
+                TREATMENT_DATE   = #{treatment_date}  
          AND CLAIM_NO       = #{claim_no}      			
     </select>
 	

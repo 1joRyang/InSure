@@ -70,7 +70,8 @@ public class TreatmentController {
     @RequestMapping(value="TREATMENTUpdView") 
     @ElDescription(sub = "진료정보 갱신 폼을 위한 조회", desc = "진료정보 갱신 폼을 위한 조회를 한다.")    
     public TreatmentVo selectTreatment(TreatmentVo treatmentVo) throws Exception {
-    	TreatmentVo selectTreatmentVo = treatmentService.selectTreatment(treatmentVo);    	    
+    	TreatmentVo selectTreatmentVo = treatmentService.selectTreatment(treatmentVo);  
+    	System.out.println("hi============" + selectTreatmentVo);  	    
 		
         return selectTreatmentVo;
     } 
