@@ -87,7 +87,7 @@ public class UserController {
 	    if (info.isSuc()) {
 	    
 	    	try {
-		        // 1. 세션에서 "userHeader" 키로 ProworksUserHeader 객체를 가져옵니다.
+		     
 		        ProworksUserHeader userHeader = (ProworksUserHeader) request.getSession().getAttribute("userHeader");
 		        
 		        // DB에서 사용자 정보 조회
@@ -98,13 +98,16 @@ public class UserController {
 	            
 	            if (userInfo != null) {
 	                int customerId = userInfo.getId(); // DB에서 가져온 실제 id 값
+	                String userIdString = userInfo.getUserId();
 	                
 	                System.out.println(">>>>> DB에서 조회한 사용자 ID: " + customerId);
+	                System.out.println(">>>>> DB에서 조회한 사용자 userId: " + userIdString);
 	                
 	                // 응답 JSON 생성
 	                Map<String, Object> elData = new HashMap<>();
-	                Map<String, Integer> responseMap = new HashMap<>();
+	                Map<String, Object> responseMap = new HashMap<>();
 	                responseMap.put("id", customerId);
+	                responseMap.put("userId", userIdString);
 	                elData.put("dma_login_response", responseMap);
 	
 	                ObjectMapper mapper = new ObjectMapper();
@@ -220,7 +223,9 @@ public class UserController {
     @ElDescription(sub = "간편 비밀번호 로그인", desc = "간편 비밀번호 로그인을 한다.")               
     public void simpleLogin(SimpleLoginVo simpleLoginVo, HttpServletRequest request, HttpServletResponse response) throws Exception {
 	    String user_id = simpleLoginVo.getUserId();
-	    String simple_pw = simpleLoginVo.getSimplePw(); // 간단 비밀번호 필드
+	    String simple_pw = simpleLoginVo.getSimplePw();
+	    
+	    
 	    
 	    System.out.println(">>>>> 1. 화면에서 입력받은 id: " + user_id);
 	    System.out.println(">>>>> 1. 화면에서 입력받은 simple_pw: " + simple_pw);
@@ -228,7 +233,10 @@ public class UserController {
     try {
         // 2. 로직 최적화: 비밀번호 검증을 먼저 수행합니다.
         // 이 메서드가 '사용자 없음'과 '비밀번호 틀림'을 모두 처리해줍니다.
-        boolean isSimplePasswordValid = userService.checkSimplePassword(user_id, simplePw);
+        boolean isSimplePasswordValid = userService.checkSimplePassword(user_id, simple_pw);
+        
+        System.out.println(isSimplePasswordValid);
+        
 
         if (isSimplePasswordValid) {
             // 비밀번호 검증 성공!

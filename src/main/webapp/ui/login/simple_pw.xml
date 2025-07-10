@@ -8,11 +8,16 @@
     	<w2:MSA />
     	<xf:model>
     		<w2:dataCollection baseNode="map">
+    			<w2:dataMap baseNode="map" id="dma_login_request">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="간편로그인사용자" id="userId"></w2:key>
+    					<w2:key dataType="text" name="간단비밀번호" id="simplePw"></w2:key>
+    					<w2:key dataType="text" name="간편로그인타입" id="loginType"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
     			<w2:dataMap baseNode="map" id="dma_login_response">
     				<w2:keyInfo>
-    					<w2:key dataType="text" name="간편로그인타입" id="sp_loginType"></w2:key>
-    					<w2:key dataType="text" name="간편로그인사용자" id="sp_id"></w2:key>
-    					<w2:key dataType="text" name="간단비밀번호" id="sp_pw"></w2:key>
+    					<w2:key dataType="text" name="아이디" id="id"></w2:key>
     				</w2:keyInfo>
     			</w2:dataMap>
     		</w2:dataCollection>
@@ -25,78 +30,25 @@
     	<w2:layoutInfo />
     	<w2:publicInfo method="" />
     	<script lazy="false" type="text/javascript"><![CDATA[scwin.onpageload = function() {
-    scwin.password = "";
-    
-    // WebSquare에서 세션 데이터 가져오는 방법들
-    scwin.currentUserId = null;
-    
-    console.log("=== 세션 데이터 찾기 시작 ===");
-    
-    try {
-        // 방법 1: WebSquare 세션 접근 시도 (안전하게)
-        if (typeof $p !== 'undefined' && $p.getParameter) {
-            scwin.currentUserId = $p.getParameter("id");
-            console.log("방법1 ($p.getParameter): ", scwin.currentUserId);
-        }
-        
-        // 방법 2: 상위 프레임에서 세션 접근
-        if (!scwin.currentUserId && typeof $p !== 'undefined' && $p.top) {
-            try {
-                scwin.currentUserId = $p.top().scwin.userId || $p.top().scwin.id;
-                console.log("방법2 ($p.top): ", scwin.currentUserId);
-            } catch (e) {
-                console.log("방법2 실패:", e.message);
-            }
-        }
-        
-        // 방법 3: 전역 변수에서 확인
-        if (!scwin.currentUserId) {
-            scwin.currentUserId = window.userId || window.sessionUserId || window.currentUserId || window.id;
-            console.log("방법3 (전역변수): ", scwin.currentUserId);
-        }
-        
-        // 방법 4: 로컬 스토리지 확인
-        if (!scwin.currentUserId && typeof localStorage !== 'undefined') {
-            scwin.currentUserId = localStorage.getItem("userId") || localStorage.getItem("id");
-            console.log("방법4 (localStorage): ", scwin.currentUserId);
-        }
-        
-        // 방법 5: 세션 스토리지 확인
-        if (!scwin.currentUserId && typeof sessionStorage !== 'undefined') {
-            scwin.currentUserId = sessionStorage.getItem("userId") || sessionStorage.getItem("id");
-            console.log("방법5 (sessionStorage): ", scwin.currentUserId);
-        }
-        
-        // 방법 6: 쿠키에서 직접 파싱
-        if (!scwin.currentUserId && typeof document !== 'undefined' && document.cookie) {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.startsWith('userId=')) {
-                    scwin.currentUserId = cookie.substring(7);
-                    break;
-                } else if (cookie.startsWith('id=')) {
-                    scwin.currentUserId = cookie.substring(3);
-                    break;
-                }
-            }
-            console.log("방법6 (쿠키): ", scwin.currentUserId);
-        }
-        
-        console.log("=== 최종 찾은 사용자 ID: ", scwin.currentUserId, " ===");
-        
-    } catch (error) {
-        console.error("세션 데이터 가져오기 실패:", error);
-    }
-    
-    // 사용자 ID가 없으면 로그인 화면으로 리다이렉트
+    // 1. URL이 아닌 로컬 스토리지에서 "id" 키로 저장된 값을 가져옵니다.
+    const storedId = localStorage.getItem("userId");
+
+    // 2. scwin.currentUserId 변수에 저장합니다.
+    scwin.currentUserId = storedId;
+
+    // 3. ID가 제대로 저장되었는지 확인합니다.
+    console.log("로컬 스토리지에서 가져온 사용자 ID:", scwin.currentUserId);
+
+    // 4. 만약 ID가 없다면 에러 처리를 합니다.
     if (!scwin.currentUserId) {
-        alert("세션이 만료되었습니다. 다시 로그인해주세요.");
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/login.xml";
+        alert("사용자 정보를 가져올 수 없습니다. 다시 로그인해주세요.");
         return;
     }
-    
-    console.log("최종 사용자 ID:", scwin.currentUserId);
+
+    // 5. 비밀번호와 UI를 초기화합니다.
+    scwin.password = "";
+    scwin.updateCircles();
+
 };
 
 scwin.button1_onclick = function (e) {
@@ -157,11 +109,11 @@ scwin.addDigit = function(digit) {
 scwin.performSimpleLogin = function() {
     try {
         // 간편 로그인 데이터 설정
-        dma_login_response.set("sp_loginType", "SIMPLE");  // 로그인 타입 설정
-        dma_login_response.set("sp_id", scwin.currentUserId);  // 사용자 ID 설정
-        dma_login_response.set("sp_pw", scwin.password);   // 간편 비밀번호 설정
+        dma_login_request.set("loginType", "SIMPLE");  // 로그인 타입 설정
+        dma_login_request.set("userId", scwin.currentUserId);  // 사용자 ID 설정
+        dma_login_request.set("simplePw", scwin.password);   // 간편 비밀번호 설정
         
-        let reqData = { "elData": dma_login_response.getJSON() };
+        let reqData = { "elData": dma_login_request.getJSON() };
         
         console.log("간편 로그인 요청 데이터:", reqData);
         
@@ -207,117 +159,33 @@ scwin.resetPassword = function() {
 };
 
 scwin.sbm_SimpleLogin_submitdone = function (e) {
-    console.log("간편 로그인 응답 전체:", e);
-    console.log("응답 타입:", typeof e);
-    
+    var customerId = null;
+
     try {
-        let isSuccess = false;
-        let responseData = null;
-        
-        // 응답 데이터 구조 파악
-        if (e.responseJSON) {
-            responseData = e.responseJSON;
-            console.log("responseJSON:", responseData);
-        } else if (e.responseText) {
-            try {
-                responseData = JSON.parse(e.responseText);
-                console.log("responseText 파싱:", responseData);
-            } catch (parseError) {
-                console.log("responseText 파싱 실패:", e.responseText);
-            }
+        // 서버 응답에서 customerId를 찾아봅니다 (로그인 성공의 증거)
+        if (e && e.responseJSON && e.responseJSON.dma_login_response) {
+            customerId = e.responseJSON.dma_login_response.id;
         }
-        
-        // 다양한 응답 구조 체크
-        if (responseData) {
-            // 방법 1: elHeader 구조
-            if (responseData.elHeader && responseData.elHeader.resSuc === true) {
-                isSuccess = true;
-                console.log("성공 확인 (elHeader)");
-            }
-            // 방법 2: 직접 success 필드
-            else if (responseData.success === true || responseData.resSuc === true) {
-                isSuccess = true;
-                console.log("성공 확인 (직접 필드)");
-            }
-            // 방법 3: result 구조
-            else if (responseData.result && responseData.result.success === true) {
-                isSuccess = true;
-                console.log("성공 확인 (result)");
-            }
-            // 방법 4: data 구조
-            else if (responseData.data && responseData.data.success === true) {
-                isSuccess = true;
-                console.log("성공 확인 (data)");
-            }
-            // 방법 5: status 체크
-            else if (responseData.status === "success" || responseData.status === "ok") {
-                isSuccess = true;
-                console.log("성공 확인 (status)");
-            }
-            // 방법 6: code 체크
-            else if (responseData.code === "200" || responseData.code === 200) {
-                isSuccess = true;
-                console.log("성공 확인 (code)");
-            }
-        }
-        
-        // HTTP 상태 코드로도 체크
-        if (!isSuccess && e.status && (e.status === 200 || e.status === "200")) {
-            // 200 상태이면서 에러 메시지가 없으면 성공으로 간주
-            if (!responseData || !responseData.error) {
-                isSuccess = true;
-                console.log("성공 확인 (HTTP 200)");
-            }
-        }
-        
-        if (isSuccess) {
-            console.log("간편 로그인 성공");
+
+        // ✅ 로그인 성공 시 (customerId를 받아왔을 때)
+        if (customerId) {
+            localStorage.setItem("id", customerId);
+
+            // 성공했으므로 메인 페이지로 이동합니다.
             location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml";
+
+        // ❌ 로그인 실패 시
         } else {
-            console.log("간편 로그인 실패");
-            console.log("실패 응답 데이터:", responseData);
-            
-            dma_login_response.setEmptyValue();
-            scwin.resetPassword();
-            
-            // 에러 메시지 추출
-            let errorMessage = "간편 비밀번호가 일치하지 않습니다.";
-            if (responseData) {
-                if (responseData.message) {
-                    errorMessage = responseData.message;
-                } else if (responseData.error) {
-                    errorMessage = responseData.error;
-                } else if (responseData.elHeader && responseData.elHeader.resMsg) {
-                    errorMessage = responseData.elHeader.resMsg;
-                }
-            }
-            
-            alert(errorMessage);
+            alert("비밀번호가 일치하지 않습니다. 다시 시도해주세요.");
+            scwin.resetPassword(); // 비밀번호 입력창 초기화
         }
-        
+
     } catch (error) {
-        console.error("응답 처리 중 오류:", error);
-        scwin.resetPassword();
         alert("로그인 처리 중 오류가 발생했습니다.");
+        scwin.resetPassword();
     }
 };
-
-// 에러 처리 함수
-scwin.sbm_SimpleLogin_submiterror = function(e) {
-    console.error("간편 로그인 서버 오류:", e);
-    scwin.resetPassword();
-    alert("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-};
-
-// 뒤로가기 버튼 처리
-scwin.backButton_onclick = function(e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/login.xml";
-};
-
-// 키패드 초기화 버튼
-scwin.clearButton_onclick = function(e) {
-    scwin.resetPassword();
-};]]></script>
+]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"

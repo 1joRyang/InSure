@@ -19,8 +19,8 @@ public class SimpleLoginVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "간편비밀번호", physicalName = "simplePw", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String simplePw;
 
-    @ElDtoField(logicalName = "아이디", physicalName = "sp_id", type = "int", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
-    private int sp_id;
+    @ElDtoField(logicalName = "아이디", physicalName = "id", type = "int", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private int id;
 
     @ElVoField(physicalName = "userId")
     public String getUserId(){
@@ -44,14 +44,14 @@ public class SimpleLoginVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.simplePw = simplePw;
     }
 
-    @ElVoField(physicalName = "sp_id")
-    public int getSp_id(){
-        return sp_id;
+    @ElVoField(physicalName = "id")
+    public int getId(){
+        return id;
     }
 
-    @ElVoField(physicalName = "sp_id")
-    public void setSp_id(int sp_id){
-        this.sp_id = sp_id;
+    @ElVoField(physicalName = "id")
+    public void setId(int id){
+        this.id = id;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class SimpleLoginVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("SimpleLoginVo [");
         sb.append("userId").append("=").append(userId).append(",");
         sb.append("simplePw").append("=").append(simplePw).append(",");
-        sb.append("sp_id").append("=").append(sp_id);
+        sb.append("id").append("=").append(id);
         sb.append("]");
         return sb.toString();
 

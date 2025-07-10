@@ -192,6 +192,10 @@ public class ProworksLoginAdapter extends LoginAdapter {
 	    info.setSuc(true);
 	    return info;
 	}
+	
+	
+	
+	
 
 	/**
 	 * 데모용 로그아웃 처리를 담당하는 구현체 메소드.

@@ -18,6 +18,7 @@
     			<w2:dataMap baseNode="map" id="dma_login_response">
     				<w2:keyInfo>
     					<w2:key dataType="text" name="아이디" id="id"></w2:key>
+    					<w2:key dataType="text" name="사용자아이디" id="userId"></w2:key>
     				</w2:keyInfo>
     			</w2:dataMap>
     		</w2:dataCollection>
@@ -35,18 +36,22 @@
 
 scwin.sbm_UserLogin_submitdone = function (e) {
     var customerId = null;
+    var userIdString = null;
     
     try {
        
-        // 서버 응답에서 직접 접근
-        if (!customerId && e && e.responseJSON) {
-            if (e.responseJSON.dma_login_response) {
-                customerId = e.responseJSON.dma_login_response.id;
-            }
-        }
+        if (e && e.responseJSON && e.responseJSON.dma_login_response) {
+                    
+                    customerId = e.responseJSON.dma_login_response.id;
+                    userIdString = e.responseJSON.dma_login_response.userId; 
+                }
         
-        if (customerId) {
+        if (customerId && userIdString) {
             localStorage.setItem("id", customerId);
+            localStorage.setItem("userId", userIdString);
+
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/simple_pw.xml&userId=" + customerId;
+        
         } else {
             alert("사용자 정보를 받아오는 데 실패했습니다. 관리자에게 문의하세요.");
             return;
@@ -57,7 +62,7 @@ scwin.sbm_UserLogin_submitdone = function (e) {
         return;
     }
     
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml";
+    //location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml";
 };
 
 scwin.login_btn_onclick = function (e) {

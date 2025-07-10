@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService {
     public boolean checkSimplePassword(String userId, String inputPin) throws Exception {
     
 
-
+/*
 	    System.out.println("[Service] 전달받은 ID: " + userId);
 	    System.out.println("[Service] 전달받은 PIN: " + inputPin);
     
@@ -131,7 +131,29 @@ public class UserServiceImpl implements UserService {
         } else {
             // 일치하지 않으면 실패!
             return false;
-        }
+        }*/
+        
+	
+	    UserVo param = new UserVo();
+	    param.setUserId(userId);
+	
+
+	    UserVo storedUser = this.selectUser(param);
+	
+	
+	    if (storedUser == null) {
+	        System.out.println("❌ [Service] 사용자를 찾을 수 없음");
+	        return false;
+	    }
+	
+	    String dbPin = storedUser.getSimplePw();
+	
+	    if (inputPin != null && inputPin.equals(dbPin)) {
+	        return true;
+	    } else {
+	        return false;
+	    }
+	        
     }
 
     /**
