@@ -759,10 +759,6 @@ scwin.calculateTotalExcludedAmount = function() {
     
     console.log("총 제외 금액:", totalExcluded);
     
-    // 총 제외 금액 표시
-    if (spn_totalExcluded) {
-        spn_totalExcluded.setValue(scwin.formatNumber(totalExcluded) + "원");
-    }
     
     // 정산 정보에도 반영 (옵션)
     var deductionAmt = dma_settlementInfo.get("deducation_amt");
@@ -858,7 +854,7 @@ scwin.searchInsuranceProducts = function() {
             insuranceAmount: "500000",
             claimAmount: "248924",
             paymentAmount: "248924",
-            status: "처리중"
+            status: "지급승인"
         }
     ];
     
@@ -1277,7 +1273,8 @@ scwin.sbm_selectSettlement_submiterror = function(e) {
 ]]></script>
 	</head>
 	<body ev:onpageload="scwin.onpageload">
-		<xf:group class="container" id="" style="padding: 20px;                background-color: #f5f5f5;">
+        <w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/hearder.xml"></w2:wframe>
+		<xf:group class="container" id="" style="padding:20px; background-color:#f5f5f5; top:100px; ">
 			<!-- 헤더 영역 -->
 			<xf:group class="header_section" id=""
 				style="background-color: white;                padding: 20px;                border-radius: 8px;                margin-bottom: 20px;                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -1290,16 +1287,6 @@ scwin.sbm_selectSettlement_submiterror = function(e) {
 							<xf:label>새로고침</xf:label>
 						</xf:trigger>
 						<!-- 테스트 버튼 그룹 (개발 환경에서만 표시) -->
-						<xf:group id="grp_testButtons" style="display:flex;gap:5px;">
-							<xf:trigger type="button" id="btn_saveTest" ev:onclick="scwin.saveTestData"
-								style="padding:4px 8px;font-size:11px;background-color:#ff9800;color:white;border:none;border-radius:3px;">
-								<xf:label>테스트저장</xf:label>
-							</xf:trigger>
-							<xf:trigger type="button" id="btn_loadTest" ev:onclick="scwin.loadTestData"
-								style="padding:4px 8px;font-size:11px;background-color:#9c27b0;color:white;border:none;border-radius:3px;">
-								<xf:label>테스트로드</xf:label>
-							</xf:trigger>
-						</xf:group>
 					</xf:group>
 				</xf:group>
 
@@ -1313,14 +1300,6 @@ scwin.sbm_selectSettlement_submiterror = function(e) {
 						<w2:span id="" ref="data:elData.patient_name" style="font-weight:bold;"></w2:span>
 					</xf:group>
 					<xf:group id="">
-						<w2:span id="" label="병원명: " style="color:#666;"></w2:span>
-						<w2:span id="" ref="data:dma_settlementInfo.hospital_name" style="font-weight:bold;"></w2:span>
-					</xf:group>
-					<xf:group id="">
-						<w2:span id="" label="진료일: " style="color:#666;"></w2:span>
-						<w2:span id="" ref="data:dma_settlementInfo.treatment_date" style="font-weight:bold;"></w2:span>
-					</xf:group>
-					<xf:group id="">
 						<w2:span id="" label="심사역: " style="color:#666;"></w2:span>
 						<w2:span id="" ref="data:elData.reviewer" style="font-weight:bold;"></w2:span>
 					</xf:group>
@@ -1331,118 +1310,16 @@ scwin.sbm_selectSettlement_submiterror = function(e) {
 			</xf:group>
 
 			<!-- 메인 컨텐츠 영역 -->
-			<xf:group class="main_content" id="" style="display: flex;                gap: 20px;">
+			<xf:group class="main_content" id="" style="display: flex; gap: 20px;">
 				<!-- 왼쪽 패널 -->
 				<xf:group class="left_panel" id=""
-					style="flex: 1;                background-color: white;                padding: 20px;                border-radius: 8px;                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+					style="flex: 1; background-color: white; padding: 20px; border-radius: 8px;  box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
 					<!-- 금액 표시 영역 -->
-					<xf:group class="amount_display" id=""
-						style="text-align: center;                padding: 30px;                background: #d9e3f0;                color: black;                border-radius: 8px;                margin-bottom: 20px;">
+					<xf:group class="amount_display" id="" style="text-align: center; padding: 30px; background: #d9e3f0; color: black; border-radius: 8px; margin-bottom: 20px;">
 						<w2:textbox class="amount_number" id="txt_amountNumber" label=""
-							style="font-size: 36px;                font-weight: bold;                margin-bottom: 10px;"></w2:textbox>
+							style="font-size: 36px; font-weight: bold; margin-bottom: 10px;"></w2:textbox>
 						<w2:textbox class="amount_desc" id="txt_amountDesc" label="" style="font-size: 14px;                opacity: 0.9;"></w2:textbox>
 					</xf:group>
-					<xf:group id=""
-						style="background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-						<!-- 제목 -->
-						<xf:group id="" style="margin-bottom: 20px;">
-							<w2:span id="" label="지급 금액 산출 내역" style="font-size: 16px; font-weight: bold; color: #333;"></w2:span>
-						</xf:group>
-
-						<!-- 계산 내역 -->
-						<xf:group id="" style="background-color: #f8f9fa; padding: 15px; border-radius: 4px;">
-							<!-- 총 청구금액 -->
-							<xf:group class="info_row" id=""
-								style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
-								<w2:span class="info_label" id="" label="최종 수납액" style="color: #666; font-size: 14px;"></w2:span>
-								<w2:span class="info_value" id="" style="color: #333; font-weight: 600; font-size: 14px;" ref="data:dma_settlementInfo.final_due" displayFormat="#,###">
-									<w2:span ref="data:dma_settlementInfo.final_due" dataType="number" displayFormatter="#,###"></w2:span>
-									<w2:span label="원"></w2:span>
-								</w2:span>
-							</xf:group>
-
-							<!-- 공제금액 (자기부담금) -->
-							<xf:group class="info_row" id=""
-								style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
-								<w2:span class="info_label" id="" label="병원 공제금" style="color: #666; font-size: 14px;"></w2:span>
-								<w2:span class="info_value" id="" style="color: #333; font-weight: 600; font-size: 14px;" ref="data:dma_settlementInfo.hospital_prepaid" displayFormat="#,###">
-									<w2:span label="-"></w2:span>
-									<w2:span ref="data:dma_settlementInfo.hospital_prepaid" dataType="number" displayFormatter="#,###"></w2:span>
-									<w2:span label="원"></w2:span>
-								</w2:span>
-							</xf:group>
-
-							<!-- 본인부담금 (10%) -->
-							<xf:group class="info_row" id=""
-								style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
-								<w2:span class="info_label" id="" label="삭감 항목 금액" style="color: #666; font-size: 14px;"></w2:span>
-								<w2:span class="info_value" id="" style="color: #333; font-weight: 600; font-size: 14px;" ref="data:dma_settlementInfo.deducation_amt" displayFormat="#,###">
-									<w2:span label="-"></w2:span>
-									<w2:span ref="data:dma_settlementInfo.deducation_amt" dataType="number" displayFormatter="#,###"></w2:span>
-									<w2:span label="원"></w2:span>
-								</w2:span>
-							</xf:group>
-
-							<!-- 구분선 (계산선) -->
-							<xf:group id="" style="margin: 15px 0; padding: 0;">
-								<hr style="border: none; border-top: 2px solid #333; margin: 0;" />
-							</xf:group>
-
-							<!-- 최종 지급금액 -->
-							<xf:group class="info_row" id=""
-								style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
-								<w2:span class="info_label" id="" label="최종 지급금액" style="color: #333; font-weight: bold; font-size: 15px;"></w2:span>
-								<w2:span class="info_value" id="" style="color: #007bff; font-weight: bold; font-size: 16px;" ref="data:dma_settlementInfo.refund_amt" displayFormat="#,###">
-									<w2:span ref="data:dma_settlementInfo.refund_amt" dataType="number" displayFormatter="#,###"></w2:span>
-									<w2:span label="원"></w2:span>
-								</w2:span>
-							</xf:group>
-						</xf:group>
-
-						<!-- 추가 정보
-						<xf:group id="" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e9ecef;">
-							<xf:group class="info_row" id="" style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0;">
-								<w2:span class="info_label" id="" label="진료 ID" style="color: #999; font-size: 13px;"></w2:span>
-								<w2:span class="info_value" id="" ref="data:dma_settlementInfo.treatment_id" style="color: #666; font-size: 13px;"></w2:span>
-							</xf:group>
-							<xf:group class="info_row" id="" style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0;">
-								<w2:span class="info_label" id="" label="청구번호" style="color: #999; font-size: 13px;"></w2:span>
-								<w2:span class="info_value" id="" ref="data:dma_settlementInfo.claim_no" style="color: #666; font-size: 13px;"></w2:span>
-							</xf:group>
-						</xf:group> -->
-                        
-					</xf:group>					<!-- 제외 항목 섹션 -->
-					<xf:group class="excluded_items_section" id=""
-						style="margin-top: 20px;                padding: 15px;                background-color: #d9e3f0;                border: 1px solid #ffeaa7;                border-radius: 4px;">
-						<w2:textbox class="section_title" id="" label="비보상 제외 항목"></w2:textbox>
-						<xf:group id="" style="margin-bottom:10px;">
-							<w2:span id="" label="총 제외 금액: " style="color:#666;"></w2:span>
-							<w2:span id="spn_totalExcluded" style="color:#F57C00;font-weight:bold;font-size:16px;"></w2:span>
-						</xf:group>
-
-						<w2:gridView id="grd_excludedItems" style="height:150px;" dataList="data:dlt_excludedItems" autoFit="allColumn"
-							readOnly="true" ev:oncelldblclick="scwin.grd_excludedItems_oncelldblclick" visibleRowNum="5">
-							<w2:caption style="" id="caption1" value="제외 항목 목록"></w2:caption>
-							<w2:header style="" id="header1">
-								<w2:row style="" id="row1">
-									<w2:column width="80" inputType="text" id="column0" value="항목ID" displayMode="label"></w2:column>
-									<w2:column width="120" inputType="text" id="column1" value="카테고리" displayMode="label"></w2:column>
-									<w2:column width="250" inputType="text" id="column2" value="제외 사유" displayMode="label"></w2:column>
-									<w2:column width="100" inputType="text" id="column3" value="제외 금액" displayMode="label"></w2:column>
-								</w2:row>
-							</w2:header>
-							<w2:gBody style="" id="gBody1">
-								<w2:row style="" id="row2">
-									<w2:column width="80" inputType="text" id="item_id" displayMode="label"></w2:column>
-									<w2:column width="120" inputType="text" id="category_name" displayMode="label"></w2:column>
-									<w2:column width="250" inputType="text" id="exc_reason" displayMode="label"></w2:column>
-									<w2:column width="100" inputType="text" id="exc_cost" displayMode="label" dataType="number" displayFormat="#,###"></w2:column>
-								</w2:row>
-							</w2:gBody>
-						</w2:gridView>
-					</xf:group>
-
-					<!-- 보험 상품 그리드 -->
 					<w2:textbox class="section_title" id="" label="보험 상품별 지급 내역" style="margin-top:20px;"></w2:textbox>
 					<w2:gridView id="grd_insuranceProducts" style="height:180px;" dataList="data:dlt_insuranceProducts" autoFit="allColumn"
 						readOnly="true">
@@ -1468,7 +1345,113 @@ scwin.sbm_selectSettlement_submiterror = function(e) {
 							</w2:row>
 						</w2:gBody>
 					</w2:gridView>
-				</xf:group>
+					<xf:group id=""
+						style="background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+						<!-- 제목 -->
+						<xf:group id="" style="margin-bottom: 20px;">
+							<w2:span id="" label="지급 금액 산출 내역" style="font-size: 16px; font-weight: bold; color: #333;"></w2:span>
+						</xf:group>
+
+						<!-- 계산 내역 -->
+						<xf:group id="" style="background-color: #f8f9fa; padding: 15px; border-radius: 4px;">
+							<!-- 총 청구금액 -->
+							<xf:group class="info_row" id=""
+								style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+								<w2:span class="info_label" id="" label="최종 수납액" style="color: #666; font-size: 14px;"></w2:span>
+								<w2:span class="info_value" id="" style="color: #333; font-weight: 600; font-size: 14px;"
+									ref="data:dma_settlementInfo.final_due" displayFormat="#,###">
+									<w2:span ref="data:dma_settlementInfo.final_due" dataType="number" displayFormatter="#,###"></w2:span>
+									<w2:span label="원"></w2:span>
+								</w2:span>
+							</xf:group>
+
+							<!-- 공제금액 (자기부담금) -->
+							<xf:group class="info_row" id=""
+								style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+								<w2:span class="info_label" id="" label="병원 공제금" style="color: #666; font-size: 14px;"></w2:span>
+								<w2:span class="info_value" id="" style="color: #333; font-weight: 600; font-size: 14px;"
+									ref="data:dma_settlementInfo.hospital_prepaid" displayFormat="#,###">
+									<w2:span label="-"></w2:span>
+									<w2:span ref="data:dma_settlementInfo.hospital_prepaid" dataType="number" displayFormatter="#,###"></w2:span>
+									<w2:span label="원"></w2:span>
+								</w2:span>
+							</xf:group>
+
+							<!-- 본인부담금 (10%) -->
+							<xf:group class="info_row" id=""
+								style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+								<w2:span class="info_label" id="" label="삭감 항목 금액" style="color: #666; font-size: 14px;"></w2:span>
+								<w2:span class="info_value" id="" style="color: #333; font-weight: 600; font-size: 14px;"
+									ref="data:dma_settlementInfo.deducation_amt" displayFormat="#,###">
+									<w2:span label="-"></w2:span>
+									<w2:span ref="data:dma_settlementInfo.deducation_amt" dataType="number" displayFormatter="#,###"></w2:span>
+									<w2:span label="원"></w2:span>
+								</w2:span>
+							</xf:group>
+
+							<!-- 구분선 (계산선) -->
+							<xf:group id="" style="margin: 15px 0; padding: 0;">
+								<hr style="border: none; border-top: 2px solid #333; margin: 0;" />
+							</xf:group>
+
+							<!-- 최종 지급금액 -->
+							<xf:group class="info_row" id=""
+								style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+								<w2:span class="info_label" id="" label="최종 지급금액" style="color: #333; font-weight: bold; font-size: 15px;"></w2:span>
+								<w2:span class="info_value" id="" style="color: #007bff; font-weight: bold; font-size: 16px;"
+									ref="data:dma_settlementInfo.refund_amt" displayFormat="#,###">
+									<w2:span ref="data:dma_settlementInfo.refund_amt" dataType="number" displayFormatter="#,###"></w2:span>
+									<w2:span label="원"></w2:span>
+								</w2:span>
+							</xf:group>
+						</xf:group>
+						<!-- 보험 상품 그리드 -->
+
+					</xf:group>
+					<!-- 추가 정보
+						<xf:group id="" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e9ecef;">
+						<xf:group class="info_row" id="" style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0;">
+						<w2:span class="info_label" id="" label="진료 ID" style="color: #999; font-size: 13px;"></w2:span>
+						<w2:span class="info_value" id="" ref="data:dma_settlementInfo.treatment_id" style="color: #666; font-size: 13px;"></w2:span>
+						</xf:group>
+						<xf:group class="info_row" id="" style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0;">
+						<w2:span class="info_label" id="" label="청구번호" style="color: #999; font-size: 13px;"></w2:span>
+						<w2:span class="info_value" id="" ref="data:dma_settlementInfo.claim_no" style="color: #666; font-size: 13px;"></w2:span>
+						</xf:group>
+						</xf:group> -->
+
+				</xf:group>					<!-- 제외 항목 섹션 -->
+				<!-- <xf:group class="excluded_items_section" id=""
+					style="margin-top: 20px; padding: 15px; background-color: #d9e3f0; border: 1px solid #ffeaa7; border-radius: 4px;">
+					<w2:textbox class="section_title" id="" label="비보상 제외 항목"></w2:textbox>
+					<xf:group id="" style="margin-bottom:10px;">
+					<w2:span id="" label="총 제외 금액: " style="color:#666;"></w2:span>
+					<w2:span id="spn_totalExcluded" style="color:#F57C00;font-weight:bold;font-size:16px;"></w2:span>
+					</xf:group>
+
+					<w2:gridView id="grd_excludedItems" style="height:150px;" dataList="data:dlt_excludedItems" autoFit="allColumn"
+					readOnly="true" ev:oncelldblclick="scwin.grd_excludedItems_oncelldblclick" visibleRowNum="5">
+					<w2:caption style="" id="caption1" value="제외 항목 목록"></w2:caption>
+					<w2:header style="" id="header1">
+					<w2:row style="" id="row1">
+					<w2:column width="80" inputType="text" id="column0" value="항목ID" displayMode="label"></w2:column>
+					<w2:column width="120" inputType="text" id="column1" value="카테고리" displayMode="label"></w2:column>
+					<w2:column width="250" inputType="text" id="column2" value="제외 사유" displayMode="label"></w2:column>
+					<w2:column width="100" inputType="text" id="column3" value="제외 금액" displayMode="label"></w2:column>
+					</w2:row>
+					</w2:header>
+					<w2:gBody style="" id="gBody1">
+					<w2:row style="" id="row2">
+					<w2:column width="80" inputType="text" id="item_id" displayMode="label"></w2:column>
+					<w2:column width="120" inputType="text" id="category_name" displayMode="label"></w2:column>
+					<w2:column width="250" inputType="text" id="exc_reason" displayMode="label"></w2:column>
+					<w2:column width="100" inputType="text" id="exc_cost" displayMode="label" dataType="number" displayFormat="#,###"></w2:column>
+					</w2:row>
+					</w2:gBody>
+					</w2:gridView>
+					</xf:group> -->
+
+
 
 				<!-- 오른쪽 패널 -->
 				<xf:group class="right_panel" id=""
