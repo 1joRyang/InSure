@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.demo.proworks.insimagefile.service.InsimagefileService;
 import com.demo.proworks.insimagefile.vo.InsimagefileVo;
+import com.demo.proworks.insimagefile.vo.Step1Vo;
 import com.demo.proworks.insimagefile.vo.InsimagefileListVo;
 
 import com.inswave.elfw.annotation.ElDescription;
@@ -133,15 +136,42 @@ public class InsimagefileController {
 	 * @return 처리 결과
      * @throws Exception
      */
-    @ElService(key = "submitClaim")    
-    @RequestMapping(value = "submitClaim")
-    @ElDescription(sub = "보험금 청구 이미지 접수 저장처리", desc = "보험금 청구 이미지 접수 저장 한다.")
+    @ElService(key = "/api/saveStep1")    
+    @RequestMapping(value = "/api/saveStep1")
+    @ElDescription(sub = "모바일 청구 단계별 서버세션 저장", desc = "모바일 청구 단계별 서버세션 저장 한다.")
     //@ResponseBody
     public void submitClaim(
     		@RequestParam("files") List<MultipartFile> files,
     		@RequestParam("claim_type") String claimType) throws Exception {
     	
     	insimagefileService.saveImageFiles(files, claimType); 	
+
+    }
+    
+    /**
+     * 청구단계별 서버세션 저장
+     */
+    @ElService(key = "saveStep1")    
+    @RequestMapping(value = "saveStep1")
+    @ElDescription(sub = "모바일 청구 1단계 청구유형 저장", desc = "모바일 청구유형을 서버 세션에 저장 한다.")
+    public void saveStep1(Step1Vo param, HttpServletRequest request) throws Exception {
+    	// 1. 표준적인 방식으로 현재 요청 세션 가져오기
+    	System.out.println("================콘트롤러진입");
+    	System.out.println("================전달받은 claimType: " + param.getClaimType());
+    	HttpSession session = request.getSession();
+    	
+    	// 2. 모든 청구정보 담을 객체 세션에 만들기
+    	Map<String, Object> claimData = new HashMap<>();
+    	
+    	// 3. 클라이언트가 보낸 claimType을 claimData에 저장
+    	claimData.put("claimType", param.getClaimType());
+    	
+    	// 4. 이 claimData를 "claim_data"라는 이름으로 세션에 저장
+    	session.setAttribute("claim_data", claimData);
+    	
+    	// 세션에 데이터 정상적으로 저장되었는 확인
+    	System.out.println("================세션에 저장된 claimType: " + session.getAttribute("claim_data"));
+    	System.out.println("================controller:saveStep1 메소드 종료");
 
     }
     

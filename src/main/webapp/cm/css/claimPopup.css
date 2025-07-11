@@ -4,20 +4,21 @@
 /* 팝업 전체 wrapper - 화면 하단에 위치하고 배경을 어둡게 만듭니다. */
 .popup-wrapper {
     position: fixed;
-    bottom: 0;
+    top: 0;
     left: 0;
     right: 0;
-    height: 100%;
+    bottom: 0;
+    /*height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* 팝업을 하단으로 정렬 */
+    justify-content: flex-end;*/ /* 팝업을 하단으로 정렬 */
     background-color: rgba(0, 0, 0, 0.5); /* 반투명 검은 배경 */
     z-index: 1000; /* 다른 요소보다 위에 오도록 설정 */
 }
 
 /* 팝업 컨테이너 (흰색 부분) - 둥근 모서리와 내부 패딩 */
 .popup-container, .date-picker-container {
-    background-color: #fff;
+     /*background-color: #fff;
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     padding: 24px 20px;
@@ -25,14 +26,63 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-height: 80vh; /* 화면 높이의 80%까지만 차지하도록 */
-    animation: slideUp 0.3s ease-out; /* 팝업 등장 애니메이션 */
+    max-height: 80vh;
+    animation: slideUp 0.3s ease-out; */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 24px 20px;
+    box-sizing:border-box;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    z-index: 1001;
+
+    animation: slideUp 0.3s ease-out;
 }
 
 /* 팝업 등장 애니메이션 (아래에서 위로) */
 @keyframes slideUp {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
+}
+
+/*pgtbox: 팝업 타이틀 헤더 영역*/
+.pgtbox {
+	display: flex;
+	align-items: center;
+	position: relative;
+	padding-bottom: 20px;
+	flex-shrink: 0;
+}
+
+/* pgt_tit : 팝업제목텍스트 */
+.pgtbox .pgt_tit {
+	font-size: 18px;
+	font-weight: bold;
+}
+
+/* btn_x : 닫기버튼*/
+.pgtbox .btn_x {
+	position: absolute;
+	right: 0px;
+	top: -5px;
+	width: 30px;
+	height: 30px;
+	cursor: pointer;
+	background: url(/InsWebApp/images/base/btn_delete.png) no-repeat center;
+	text-indent:-9999px;
+	border:none;
+}
+
+/* agreement_section : 동의 항목들을 감싸는 메인 영역*/
+.agreement_section {
+	flex-grow: 1;
+	overflow-y: auto;
 }
 
 /* 팝업 헤더 */

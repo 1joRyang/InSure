@@ -11,19 +11,82 @@
     		<xf:instance>
     			<data xmlns="" />
     		</xf:instance>
+    		<w2:dataCollection baseNode="map">
+    			<w2:dataMap baseNode="map" id="dma_step1">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="name1" id="claimType"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    		</w2:dataCollection>
+    		<xf:submission id="sbm_saveStep1" action="/InsWebApp/saveStep1.pwkjson" method="post" mediatype="application/json"
+    			ref='data:json,{"id":"dma_step1","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+    			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_saveStep1_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
     	</xf:model>
     	<w2:leaf>true</w2:leaf>
     	<w2:fileName>final_check.xml</w2:fileName>
     	<w2:css src="/css/custom.css"></w2:css>
     	<w2:js src="/js/final_check.js"></w2:js>
     	<w2:engine-version>5.0.0</w2:engine-version>
-        <script lazy="false" type="text/javascript"><![CDATA[
+        <script lazy="false" type="text/javascript"><![CDATA[scwin.selectedType = "";
+
 scwin.onpageload = function() {
-	
+
 };
 
+
+
 scwin.btnNext_onclick = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/second.xml"
+    if(scwin.selectedType === ""){
+        alert("청구 유형을 선택해주세요.");
+        return;
+    }
+    
+    // 1. DataMap에 선택한 값 넣기
+    dma_step1.set("claimType", scwin.selectedType);
+    console.log(scwin.selectedType);
+
+    // 2. Submission 실행
+    $p.executeSubmission("sbm_saveStep1");
+};
+
+
+
+scwin.diseaseSelectionBox_onclick = function (e) {
+    scwin.selectedType = "disease";
+    injurySelectionBox.removeClass("selected");
+    diseaseSelectionBox.addClass("selected");
+};
+
+scwin.injurySelectionBox_onclick = function (e) {
+    scwin.selectedType = "injury";
+    diseaseSelectionBox.removeClass("selected");
+    injurySelectionBox.addClass("selected");
+};
+
+scwin.sbm_saveStep1_submitdone = function (e) {
+    console.log("TEST: 서브미션 성공. 팝업 열기 시도...");
+    var popupUrl="/InsWebApp/ui/claimMobile/popupConsent2.xml";
+
+    var options = {
+        id: "consentPopup",
+        type:"iframePopup",
+        width: "300px",
+        height: "380px",
+        popupName: "보험금청구에는 동의가 필요해요!",
+        modal: true,
+        useFixPosition: true,
+        bottom: "0px"
+    };
+
+    $p.openPopup(popupUrl, options);
+};
+
+
+scwin.popup_callback = function(data){
+    if(data === "agree"){
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/second.xml"
+    }
 };
 ]]></script>
     	<style type="text/css"><![CDATA[/* custom.css */
@@ -233,12 +296,12 @@ scwin.btnNext_onclick = function (e) {
             <xf:group class="content-section" id="mainContent" style="margin: 0 auto;">
                 <w2:textbox class="question-text" id="" label="어떤 진료로 방문하셨나요?" style=""></w2:textbox>
 
-                <xf:group class="selection-box-container" id="diseaseSelectionBox" ev:onclick="scwin.selectDisease()">
+                <xf:group class="selection-box-container" id="diseaseSelectionBox" ev:onclick="scwin.diseaseSelectionBox_onclick">
                     <xf:image src="../../images/insure/injecting.png" class="selection-box-icon" id="imgDiseaseIcon"></xf:image>
                     <w2:textbox id="" label="아팠어요(질병)" class="selection-box-text"></w2:textbox>
                 </xf:group>
 
-                <xf:group class="selection-box-container" id="injurySelectionBox" ev:onclick="scwin.selectInjury()">
+                <xf:group class="selection-box-container" id="injurySelectionBox" ev:onclick="scwin.injurySelectionBox_onclick">
                     <xf:image src="../../images/insure/bandage.png" class="selection-box-icon" id="imgInjuryIcon"></xf:image>
                     <w2:textbox id="" label="다쳤어요(상해)" class="selection-box-text"></w2:textbox>
                 </xf:group>

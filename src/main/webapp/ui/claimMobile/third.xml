@@ -263,8 +263,8 @@ scwin.btnNext_onclick = function (e) {
             </xf:group>
 
             <xf:group class="content-section" id="mainContent" style="margin:0 auto;">
-            	<w2:textbox class="question-text" id="" label="진단 내용을 선택해 주세요" style=""></w2:textbox>
-            	<w2:textbox id="" label="진단 내용 선택" style="width: 150px;height: 23px;font-weight:bold;"></w2:textbox>
+            	<w2:textbox class="question-text" id="" label="상세 내용을 입력해 주세요" style=""></w2:textbox>
+            	<w2:textbox id="" label="진단 내용(다친 경우 재해경위)" style="width:217px;height:23px;font-weight:bold;"></w2:textbox>
             	<xf:select1 id="" chooseOption="" style="height:39px;" submenuSize="auto" allOption="" disabled="false" direction="auto"
             		appearance="minimal" disabledClass="w2selectbox_disabled" ref="/InsWebApp/insure/insMobile/claimFinal.xml">
             		<xf:choices>
