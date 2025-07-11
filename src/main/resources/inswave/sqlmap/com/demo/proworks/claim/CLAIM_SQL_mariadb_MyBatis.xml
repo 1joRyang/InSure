@@ -133,5 +133,18 @@
                  AND ID like '%${SC_ID}%'
             </if>
     </select>
+	<select id="findUsernameAndEmpNameByClaimNo" parameterType="com.demo.proworks.claim.vo.ClaimVo" resultType="com.demo.proworks.claim.vo.ClaimVo">
+	    SELECT
+	        u.user_name,
+	        c.claim_no,
+	        e.emp_name
+	    FROM
+	        CLAIM c
+	        LEFT JOIN USER u ON c.ID = u.ID
+	        LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+	    WHERE
+	        c.claim_no = #{claim_no}
+	</select>
+
 
 </mapper>

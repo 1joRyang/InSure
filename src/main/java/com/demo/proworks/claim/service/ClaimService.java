@@ -79,5 +79,8 @@ public interface ClaimService {
      * @throws Exception
      */
 	public int deleteClaim(ClaimVo claimVo) throws Exception;
+
+
+	public ClaimVo findUsernameAndEmpNameByClaimNo(ClaimVo claimVo);
 	
 }

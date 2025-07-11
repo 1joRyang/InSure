@@ -130,4 +130,25 @@ public class ClaimController {
         claimService.deleteClaim(claimVo);
     }
    
+   
+   
+   
+       /**
+     * 청구를 삭제 처리한다.
+     *
+     * @param  claimVo 청구    
+     * @throws Exception
+     */
+    @ElService(key = "CLAIMFindUserEmpInfo")    
+    @RequestMapping(value = "CLAIMFindUserEmpInfo")
+    @ElDescription(sub = "청구 삭제처리", desc = "청구를 삭제 처리한다.")    
+    public ClaimVo  findUsernameAndEmpNameByClaimNo(ClaimVo claimVo) throws Exception {
+      	return claimService.findUsernameAndEmpNameByClaimNo(claimVo);    	    
+		
+    }
+   
+   
+   
+   
+   
 }

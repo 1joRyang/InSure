@@ -98,4 +98,9 @@ public class ClaimDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstract
         return delete("com.demo.proworks.claim.deleteClaim", vo);
     }
 
+	public ClaimVo findUsernameAndEmpNameByClaimNo(ClaimVo claimVo) throws ElException {
+	    return (ClaimVo) selectByPk("com.demo.proworks.claim.findUsernameAndEmpNameByClaimNo", claimVo);
+	}
+
+
 }

@@ -158,5 +158,8 @@ public class ClaimServiceImpl implements ClaimService {
 	public int deleteClaim(ClaimVo claimVo) throws Exception {
 		return claimDAO.deleteClaim(claimVo);
 	}
+	public ClaimVo findUsernameAndEmpNameByClaimNo(ClaimVo claimVo){
+		return claimDAO.findUsernameAndEmpNameByClaimNo(claimVo);
+	}
 	
 }
