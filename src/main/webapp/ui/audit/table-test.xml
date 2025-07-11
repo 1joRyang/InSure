@@ -72,6 +72,12 @@
         				<w2:column dataType="text" name="select_disc" id="select_disc"></w2:column>
         			</w2:columnInfo>
         		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dm_header">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="청구번호" id="claimNo"></w2:key>
+        				<w2:key dataType="text" name="피보험자" id="patient"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
         	<xf:submission id="sbm_getExcList" action="/InsWebApp/EXCITEMListR.pwkjson" method="post" mediatype="application/json"
@@ -144,6 +150,9 @@ scwin.treatmentId = 0;
 scwin.isEdit = false; // false > insert | true > update
 
 scwin.onpageload = function() {
+    dm_header.set("claimNo", scwin.claimNo);
+    // todo: 값에 맞게 바인딩
+    dm_header.set("patient", "홍길동");
     let savedData = JSON.parse(localStorage.getItem('dateList') || '[]');
 
     savedData.forEach(item => {
@@ -151,6 +160,16 @@ scwin.onpageload = function() {
     });
     date_drop.setSelectedIndex(0);
     dm_treatment.set("treatment_date", date_drop.getText());
+
+    var jsnOptions = {
+        id: "img_popup",
+        type: "browserPopup", //필수 고정
+        width: "800px",
+        height: "600px",
+        popupName: "청구 영수증"
+    };
+
+    $p.openPopup("/InsWebApp/ui/audit/img_modal.xml", jsnOptions);
     
     scwin.createEmptyTable();
     getInsure();
@@ -275,6 +294,7 @@ scwin.btn_ocr_onclick = function (e) {
 
 scwin.btn_before_onclick = function (e) {
     // 이전 화면으로
+    //parent.WebSquare.util.getComponentById("web_container").setSrc("/InsWebApp/ui/audit/insure_second.xml");
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_second.xml"
 };
 
@@ -355,8 +375,8 @@ function resetExclusionCells() {
 
 scwin.btn_next_onclick = function (e) {
     saveInsure();
-
-    // location.href = "";
+    $p.closePopup("img_popup");
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-result.xml";
 };
 
 scwin.ipt_paid_onchange = function (info) {
@@ -427,10 +447,17 @@ function extractClaimItemData(treatmentId, claimNo) {
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
+        <w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/header.xml"></w2:wframe>
         <xf:group class="sub_contents">
-        	<xf:group class="pgtbox">
-        		<w2:textbox label="청구번호: " class="pgt_tit"></w2:textbox>
-        		<w2:textbox label="피보험자: " class="pgt_tit"></w2:textbox>
+        	<xf:group class="pgtbox" style="justify-content: space-between;">
+        		<xf:group style="display: flex;" id="">
+        			<w2:textbox ref="" label="청구번호: " class="pgt_tit"></w2:textbox>
+        			<w2:textbox ref="data:dm_header.claimNo" style="padding-left: 10px;" id="" label="" class="pgt_tit"></w2:textbox>
+        		</xf:group>
+        		<xf:group style="display: flex;" id="">
+        			<w2:textbox style="float: right;;" label="피보험자: " class="pgt_tit"></w2:textbox>
+        			<w2:textbox id="" label="" style="padding-left: 10px;" ref="data:dm_header.patient" class="pgt_tit"></w2:textbox>
+        		</xf:group>
         	</xf:group>
         	<xf:group meta_snippetCategory="03_조회영역" meta_snippetName="3_02 조회조건2행" meta_snippetKeyComponent="true" style="" id=""
         		class="schbox">
@@ -474,15 +501,15 @@ function extractClaimItemData(treatmentId, claimNo) {
         							disabled="false" id="sel_hospital" allOption="" direction="auto" chooseOptionLabel="선택">
         							<xf:choices>
         								<xf:item>
-        									<xf:label><![CDATA[1차]]></xf:label>
+        									<xf:label><![CDATA[의원급]]></xf:label>
         									<xf:value><![CDATA[1]]></xf:value>
         								</xf:item>
         								<xf:item>
-        									<xf:label><![CDATA[2차]]></xf:label>
+        									<xf:label><![CDATA[병원급]]></xf:label>
         									<xf:value><![CDATA[2]]></xf:value>
         								</xf:item>
         								<xf:item>
-        									<xf:label><![CDATA[3차]]></xf:label>
+        									<xf:label><![CDATA[상급종합병원급]]></xf:label>
         									<xf:value><![CDATA[3]]></xf:value>
         								</xf:item>
         							</xf:choices>
@@ -538,24 +565,24 @@ function extractClaimItemData(treatmentId, claimNo) {
         				<xf:group tagname="tr" style="">
         					<xf:group tagname="td" style="" class="w2tb_td">진료비총액</xf:group>
         					<xf:group tagname="td" style="" id="cell_total" class="w2tb_td">
-        						<xf:input id="ipt_tableTotal" style="width: 144px;height: 21px;" readOnly="true" readOnlyClass="readonly"
-        							ref="data:dm_sub.total_medical_fee" initValue="0">
+        						<xf:input readOnlyClass="readonly" ref="data:dm_sub.total_medical_fee" style="width: 144px;height: 21px;"
+        							readOnly="true" id="ipt_tableTotal" initValue="0">
         						</xf:input>
         					</xf:group>
         				</xf:group>
         				<xf:group tagname="tr" style="">
         					<xf:group tagname="td" style="" class="w2tb_td">환자부담총액</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
-        						<xf:input id="ipt_tableTotalminus" style="width: 144px;height: 21px;" readOnly="true"
-        							readOnlyClass="readonly" ref="data:dm_sub.total_patient_payment" initValue="0">
+        						<xf:input readOnlyClass="readonly" ref="data:dm_sub.total_patient_payment"
+        							style="width: 144px;height: 21px;" readOnly="true" id="ipt_tableTotalminus" initValue="0">
         						</xf:input>
         					</xf:group>
         				</xf:group>
         				<xf:group tagname="tr" style="">
         					<xf:group tagname="td" style="" class="w2tb_td">이미납부한금액</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
-        						<xf:input ref="data:dm_sub.amount_paid" maxByteLength="" dataType="text" style="width: 144px;height: 21px;"
-        							id="ipt_paid" ev:onchange="scwin.ipt_paid_onchange" initValue="0">
+        						<xf:input ref="data:dm_sub.amount_paid" ev:onchange="scwin.ipt_paid_onchange" maxByteLength=""
+        							dataType="text" style="width: 144px;height: 21px;" id="ipt_paid" initValue="0">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -570,84 +597,85 @@ function extractClaimItemData(treatmentId, claimNo) {
         				<xf:group tagname="tr" style="">
         					<xf:group tagname="td" style="" class="w2tb_td">납부한금액</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
-        						<xf:input ref="data:dm_sub.due_pay" maxByteLength="" dataType="text" style="width: 144px;height: 21px;"
-        							id="ipt_pay" ev:onchange="scwin.ipt_pay_onchange" initValue="0">
+        						<xf:input ref="data:dm_sub.due_pay" ev:onchange="scwin.ipt_pay_onchange" maxByteLength="" dataType="text"
+        							style="width: 144px;height: 21px;" id="ipt_pay" initValue="0">
         						</xf:input>
         					</xf:group>
         				</xf:group>
         			</xf:group>
-        			<xf:group class="w2tb" id="" style="width:100%;height: 100px;margin-top: 20px;" tagname="table">
+        			<xf:group tagname="table" style="width:100%;height: 100px;margin-top: 20px;" id="" class="w2tb">
         				<w2:attributes>
         					<w2:summary></w2:summary>
         				</w2:attributes>
         				<xf:group tagname="caption"></xf:group>
         				<xf:group tagname="colgroup">
-        					<xf:group style="width:50.00%;" tagname="col"></xf:group>
-        					<xf:group style="width:50.00%;" tagname="col"></xf:group>
+        					<xf:group tagname="col" style="width:50.00%;"></xf:group>
+        					<xf:group tagname="col" style="width:50.00%;"></xf:group>
         				</xf:group>
-        				<xf:group style="height:30px;" tagname="tr">
-        					<xf:group class="w2tb_th"
-        						style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:center;width:50%;height: 30px;" tagname="th">
+        				<xf:group tagname="tr" style="height:30px;">
+        					<xf:group tagname="th"
+        						style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:center;width:50%;height: 30px;" class="w2tb_th">
         						구분
         						<w2:attributes>
         							<w2:scope>col</w2:scope>
         						</w2:attributes>
         					</xf:group>
-        					<xf:group class="w2tb_th"
-        						style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:center;width:50%;height: 30px;" tagname="th">
+        					<xf:group tagname="th"
+        						style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:center;width:50%;height: 30px;" class="w2tb_th">
         						금액산정내용
         						<w2:attributes>
         							<w2:scope>col</w2:scope>
         						</w2:attributes>
         					</xf:group>
         				</xf:group>
-        				<xf:group style="" tagname="tr">
-        					<xf:group class="w2tb_td" style="" tagname="td">최종수납액</xf:group>
-        					<xf:group class="w2tb_td" id="" style="" tagname="td">
-        						<xf:input id="ipt_fianlpay" style="width: 144px;height: 21px;" readOnly="true"
-        							ref="data:dm_result.final_due" class="" readOnlyClass="readonly" initValue="0">
+        				<xf:group tagname="tr" style="">
+        					<xf:group tagname="td" style="" class="w2tb_td">최종수납액</xf:group>
+        					<xf:group tagname="td" style="" id="" class="w2tb_td">
+        						<xf:input ref="data:dm_result.final_due" readOnlyClass="readonly" style="width: 144px;height: 21px;"
+        							readOnly="true" id="ipt_fianlpay" class="" initValue="0">
         						</xf:input>
         					</xf:group>
         				</xf:group>
-        				<xf:group style="" tagname="tr">
-        					<xf:group class="w2tb_td" style="" tagname="td">병원공제금</xf:group>
-        					<xf:group class="w2tb_td" style="" tagname="td">
-        						<xf:input id="ipt_hosp" style="width: 144px;height: 21px;" ref="data:dm_result.hospital_prepaid"
-        							readOnly="true" class="readonly" readOnlyClass="readonly" initValue="0">
+        				<xf:group tagname="tr" style="">
+        					<xf:group tagname="td" style="" class="w2tb_td">병원공제금</xf:group>
+        					<xf:group tagname="td" style="" class="w2tb_td">
+        						<xf:input ref="data:dm_result.hospital_prepaid" readOnlyClass="readonly" style="width: 144px;height: 21px;"
+        							readOnly="true" id="ipt_hosp" class="readonly" initValue="0">
         						</xf:input>
         					</xf:group>
         				</xf:group>
-        				<xf:group style="" tagname="tr">
-        					<xf:group class="w2tb_td" style="" tagname="td">삭감항목총액</xf:group>
-        					<xf:group class="w2tb_td" style="" tagname="td">
-        						<xf:input id="ipt_excTotal" style="width: 144px;height: 21px;" ref="data:dm_result.deducation_amt"
-        							class="readonly" readOnly="true" readOnlyClass="readonly" ev:onchange="scwin.ipt_excTotal_onchange" initValue="0">
+        				<xf:group tagname="tr" style="">
+        					<xf:group tagname="td" style="" class="w2tb_td">삭감항목총액</xf:group>
+        					<xf:group tagname="td" style="" class="w2tb_td">
+        						<xf:input ref="data:dm_result.deducation_amt" readOnlyClass="readonly"
+        							ev:onchange="scwin.ipt_excTotal_onchange" style="width: 144px;height: 21px;" readOnly="true" id="ipt_excTotal"
+        							class="readonly" initValue="0">
         						</xf:input>
         					</xf:group>
         				</xf:group>
-        				<xf:group style="" tagname="tr">
-        					<xf:group class="w2tb_td" style="" tagname="td">산출금</xf:group>
-        					<xf:group class="w2tb_td" style="" tagname="td">
-        						<xf:input id="ipt_result" style="width: 144px;height: 21px;" ref="data:dm_result.refund_amt"
-        							class="readonly" readOnly="true" readOnlyClass="readonly" initValue="0">
+        				<xf:group tagname="tr" style="">
+        					<xf:group tagname="td" style="" class="w2tb_td">산출금</xf:group>
+        					<xf:group tagname="td" style="" class="w2tb_td">
+        						<xf:input ref="data:dm_result.refund_amt" readOnlyClass="readonly" style="width: 144px;height: 21px;"
+        							readOnly="true" id="ipt_result" class="readonly" initValue="0">
         						</xf:input>
         					</xf:group>
         				</xf:group>
         			</xf:group>
+        			<xf:group meta_snippetCategory="08_버튼" meta_snippetName="8_04 전체제어버튼" meta_snippetKeyComponent="true" style="margin-top: 185px;" id=""
+        				class="btnbox">
+        				<xf:group style="" id="" class="rt">
+        					<xf:trigger ev:onclick="scwin.btn_before_onclick" style="" id="btn_before" type="button" class="btn_cm">
+        						<xf:label><![CDATA[이전]]></xf:label>
+        					</xf:trigger>
+        					<w2:textbox style="" id="" label="" class="bar_btndiv"></w2:textbox>
+        					<xf:trigger ev:onclick="scwin.btn_next_onclick" style="" id="btn_next" type="button" class="btn_cm pt">
+        						<xf:label><![CDATA[다음]]></xf:label>
+        					</xf:trigger>
+        				</xf:group>
+        			</xf:group>
         		</xf:group>
 
-        	</xf:group>
-        	<xf:group class="btnbox" id="" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true" meta_snippetName="8_04 전체제어버튼"
-        		style="">
-        		<xf:group class="rt" id="" style="">
-        			<xf:trigger class="btn_cm" id="btn_before" style="" type="button" ev:onclick="scwin.btn_before_onclick">
-        				<xf:label><![CDATA[이전]]></xf:label>
-        			</xf:trigger>
-        			<w2:textbox class="bar_btndiv" id="" label="" style=""></w2:textbox>
-        			<xf:trigger class="btn_cm pt" id="btn_next" style="" type="button" ev:onclick="scwin.btn_next_onclick">
-        				<xf:label><![CDATA[다음]]></xf:label>
-        			</xf:trigger>
-        		</xf:group>
         	</xf:group>
         </xf:group>
     </body>

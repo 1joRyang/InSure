@@ -100,6 +100,12 @@
         				</w2:row>
         			</w2:data>
         		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dm_header">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="청구번호" id="claimNo"></w2:key>
+        				<w2:key dataType="text" name="피보험자" id="patient"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
         	<xf:submission id="sbm_befClaim" action="/InsWebApp/CLAIMnCResultList.pwkjson" method="post" mediatype="application/json"
@@ -134,6 +140,10 @@ localStorage.setItem("claimNo", "a52d86a3-5629-11f0-b4f3-bc2411231130");
 localStorage.setItem("ID", "1");
 
 scwin.onpageload = function() {
+    dm_header.set("claimNo", localStorage.getItem("claimNo"));
+    // todo: 값에 맞게 바인딩
+    dm_header.set("patient", "홍길동");
+
     dm_claim.set("claim_no", localStorage.getItem("claimNo"));
     let reqData = {"elData":{"ID": localStorage.getItem("ID")}};
     $c.sbm.execute(sbm_befClaim, reqData);
@@ -141,6 +151,16 @@ scwin.onpageload = function() {
 
     let request = {"claimVo": {"claim_no": localStorage.getItem("claimNo")}};
     $c.sbm.execute(sbm_getClaim, request);
+
+    var jsnOptions = {
+        id: "img_popup",
+        type: "browserPopup", //필수 고정
+        width: "800px",
+        height: "600px",
+        popupName: "청구 영수증"
+    };
+
+    $p.openPopup("/InsWebApp/ui/audit/img_modal.xml", jsnOptions);
 
     scwin.genList.push(scwin.index);
 	gen_date.insertChild(scwin.index++);   
@@ -221,7 +241,9 @@ scwin.btn_next_onclick = function (e) {
         }
         $c.sbm.execute(sbm_updateClaim);
 
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-ocr.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/table-test.xml";
+        $p.closePopup("img_popup");
+        //parent.WebSquare.util.getComponentById("web_container").setSrc("/InsWebApp/ui/audit/table-test.xml");
     }
     else {
         alert("다음 항목의 입력을 확인하세요\n" + missingFields.join(", "));
@@ -229,7 +251,8 @@ scwin.btn_next_onclick = function (e) {
 };
 
 scwin.btn_befo_onclick = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_modal.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
+    //parent.WebSquare.util.getComponentById("web_container").setSrc("/InsWebApp/ui/audit/insure_first.xml");
 };
 
 scwin.btn_add_date_onclick = function (e) {
@@ -291,12 +314,19 @@ function openHcodePopup(link) {
 }]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
+        <w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/header.xml"></w2:wframe>
     	<xf:group style="width: 100%;display: flex; overflow-x: hidden;" id="">
-    		<xf:group style="width: 9%;background-color: #6E6D6D;" id=""></xf:group>
-    		<xf:group style="width: 89%;" id="" class="sub_contents ">
-    			<xf:group style="" id="" class="pgtbox">
-    				<w2:textbox tagname="" style="" id="" label="화면타이틀" class="pgt_tit"></w2:textbox>
-    			</xf:group>
+    		<xf:group style="width: 100%;" id="" class="sub_contents ">
+    			<xf:group class="pgtbox" style="justify-content: space-between;">
+                    <xf:group style="display: flex;" id="">
+                        <w2:textbox ref="" label="청구번호: " class="pgt_tit"></w2:textbox>
+                        <w2:textbox ref="data:dm_header.claimNo" style="padding-left: 10px;" id="" label="" class="pgt_tit"></w2:textbox>
+                    </xf:group>
+                    <xf:group style="display: flex;" id="">
+                        <w2:textbox style="float: right;;" label="피보험자: " class="pgt_tit"></w2:textbox>
+                        <w2:textbox id="" label="" style="padding-left: 10px;" ref="data:dm_header.patient" class="pgt_tit"></w2:textbox>
+                    </xf:group>
+                </xf:group>
     			<xf:group style="" id="" class="lybox">
     				<xf:group adaptiveThreshold="" style="" id="" class=" col_5">
     					<xf:group style="" id="" class="titbox">
