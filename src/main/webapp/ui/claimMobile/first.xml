@@ -17,10 +17,20 @@
     					<w2:key dataType="text" name="name1" id="claimType"></w2:key>
     				</w2:keyInfo>
     			</w2:dataMap>
+    			<w2:dataMap baseNode="map" id="dma_consent">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="name1" id="agreed"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
     		</w2:dataCollection>
     		<xf:submission id="sbm_saveStep1" action="/InsWebApp/saveStep1.pwkjson" method="post" mediatype="application/json"
     			ref='data:json,{"id":"dma_step1","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
     			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_saveStep1_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
+    		<xf:submission id="sbm_saveConsent" action="/InsWebApp/saveConsent.pwkjson" method="post" mediatype="application/json"
+    			ref='data:json,{"id":"dma_consent","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
+    			customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_saveConsent_submitdone" ev:submiterror=""
+    			abortTrigger="">
     		</xf:submission>
     	</xf:model>
     	<w2:leaf>true</w2:leaf>
@@ -85,8 +95,13 @@ scwin.sbm_saveStep1_submitdone = function (e) {
 
 scwin.popup_callback = function(data){
     if(data === "agree"){
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/second.xml"
+        dma_consent.set("agreed","Y");
+        $p.executeSubmission("sbm_saveConsent");
     }
+};
+
+scwin.sbm_saveConsent_submitdone = function (e) {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/second.xml"
 };
 ]]></script>
     	<style type="text/css"><![CDATA[/* custom.css */

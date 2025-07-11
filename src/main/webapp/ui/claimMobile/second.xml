@@ -11,6 +11,17 @@
     		<xf:instance>
     			<data xmlns="" />
     		</xf:instance>
+    		<w2:dataCollection baseNode="map">
+    			<w2:dataMap baseNode="map" id="dma_step2">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="name1" id="accidentDate"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    		</w2:dataCollection>
+    		<xf:submission id="sbm_saveStep2" action="/InsWebApp/saveStep2.pwkjson" method="post" mediatype="application/json"
+    			ref='data:json,{"id":"dma_step2","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+    			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.submission1_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
     	</xf:model>
     	<w2:leaf>true</w2:leaf>
     	<w2:fileName>final_check.xml</w2:fileName>
@@ -22,8 +33,47 @@ scwin.onpageload = function() {
 	
 };
 
+scwin.dateDisplayBox_onclick = function (e) {
+    var popupUrl="/InsWebApp/ui/claimMobile/popupDatePicker.xml";
+
+    var popupOptions = {
+        id:"datePickerPopup",
+        type:"iframePopup",
+        width: "300px",
+        height: "380px",
+        popupName: " 년 / 월 / 일 ",
+        modal: true,
+        useFixPosition: true,
+        bottom: "0px"    
+    }
+
+    $p.openPopup(popupUrl, popupOptions);
+};
+
+scwin.setAccidentDate = function(date) {
+    if(date){
+        var formattedDate = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
+        txt_accidentDate.setValue(formattedDate);
+    }
+};
+
 
 scwin.btnNext_onclick = function (e) {
+    var accidentDate = txt_accidentDate.getValue();
+    if(!accidentDate || accidentDate === "날짜를 선택해 주세요"){
+        alert("사고(발병)일을 선택해주세요.");
+        return;
+    }
+
+    var dateValue = accidentDate.replace(/-/g,"");
+
+    dma_step2.set("accidentDate", dateValue);
+    $p.executeSubmission("sbm_saveStep2");
+};
+
+
+
+scwin.submission1_submitdone = function (e) {
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/third.xml"
 };
 ]]></script>
@@ -235,7 +285,11 @@ scwin.btnNext_onclick = function (e) {
 
             <xf:group class="content-section" id="mainContent" style="margin:0 auto;">
             	<w2:textbox class="question-text" id="" label="사고(발병)일은 언제인가요?" style=""></w2:textbox>
-            	<w2:inputCalendar id="" style="width: 100%;height:40px;" calendarValueType="yearMonthDate"></w2:inputCalendar>
+            	<xf:group id="dateDisplayBox" class="date-input-box" ev:onclick="scwin.dateDisplayBox_onclick">
+            		<w2:textbox id="txt_accidentDate" class="date-text" label="날짜를 선택해 주세요"></w2:textbox>
+            		<xf:image src="/InsWebApp/images/insure/calendar.png" class="calendar-icon"></xf:image>
+            	</xf:group>
+
 
             	<xf:group style="flex: 1;" id=""></xf:group>
             </xf:group>

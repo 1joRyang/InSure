@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.demo.proworks.insimagefile.service.InsimagefileService;
 import com.demo.proworks.insimagefile.vo.InsimagefileVo;
 import com.demo.proworks.insimagefile.vo.Step1Vo;
+import com.demo.proworks.insimagefile.vo.Step2Vo;
+import com.demo.proworks.insimagefile.vo.ConsentVo;
 import com.demo.proworks.insimagefile.vo.InsimagefileListVo;
 
 import com.inswave.elfw.annotation.ElDescription;
@@ -149,11 +151,11 @@ public class InsimagefileController {
     }
     
     /**
-     * 청구단계별 서버세션 저장
+     * (청구사유)청구단계별 서버세션 저장
      */
     @ElService(key = "saveStep1")    
     @RequestMapping(value = "saveStep1")
-    @ElDescription(sub = "모바일 청구 1단계 청구유형 저장", desc = "모바일 청구유형을 서버 세션에 저장 한다.")
+    @ElDescription(sub = "모바일 청구 1단계 청구사유 저장", desc = "청구사유를 서버 세션에 저장 한다.")
     public void saveStep1(Step1Vo param, HttpServletRequest request) throws Exception {
     	// 1. 표준적인 방식으로 현재 요청 세션 가져오기
     	System.out.println("================콘트롤러진입");
@@ -175,6 +177,67 @@ public class InsimagefileController {
 
     }
     
+    /**
+     * (개인정보동의)청구단계별 서버세션 저장
+     */
+    @ElService(key = "saveConsent")    
+    @RequestMapping(value = "saveConsent")
+    @ElDescription(sub = "모바일 청구 2단계 사고일자 저장", desc = "사고일자를 서버 세션에 저장 한다.")
+    public void saveConsent(ConsentVo param, HttpServletRequest request) throws Exception {
+    	// 1. 표준적인 방식으로 현재 요청 세션 가져오기
+    	System.out.println("================동의 콘트롤러진입");
+    	HttpSession session = request.getSession();
+    	
+    	// 2. 세션에 저장된 기존 claim_data 를 불러오기
+    	Map<String, Object> claimData = (Map<String, Object>) session.getAttribute("claim_data");
+    	
+    	if(claimData != null) {
+    		// 3. 불러온 데이터에 새로운 정보 추가
+    		claimData.put("agreed", param.getAgreed());
+    		
+    		// 4. 변경된 내용으로 세션 업데이트
+    		session.setAttribute("claim_data", claimData);
+    	} else {
+    		//비정상적인 접근처리(1단계 건너뛴 경우)
+    		//실제로 에러처리 해야하지만 지금은 비워둠
+    	}
+    	
+    	System.out.println("================세션에 저장된 claimType: " + session.getAttribute("claim_data"));
+    	System.out.println("================controller:saveConsent 메소드 종료");
+
+    }
+    
+    
+    /**
+     * (사고일자)청구단계별 서버세션 저장
+     */
+    @ElService(key = "saveStep2")    
+    @RequestMapping(value = "saveStep2")
+    @ElDescription(sub = "모바일 청구 2단계 사고일자 저장", desc = "사고일자를 서버 세션에 저장 한다.")
+    public void saveStep2(Step2Vo param, HttpServletRequest request) throws Exception {
+    	// 1. 표준적인 방식으로 현재 요청 세션 가져오기
+    	System.out.println("================사고일자 콘트롤러진입");
+    	HttpSession session = request.getSession();
+    	
+    	// 2. 세션에 저장된 기존 claim_data 를 불러오기
+    	Map<String, Object> claimData = (Map<String, Object>) session.getAttribute("claim_data");
+    	
+    	if(claimData != null) {
+    		// 3. 불러온 데이터에 새로운 정보 추가
+    		claimData.put("accidentDate", param.getAccidentDate());
+    		
+    		// 4. 변경된 내용으로 세션 업데이트
+    		session.setAttribute("claim_data", claimData);
+    		
+    		System.out.println("================세션에 저장된 claimType: " + session.getAttribute("claim_data"));
+    	} else {
+    		//비정상적인 접근처리(1단계 건너뛴 경우)
+    		//실제로 에러처리 해야하지만 지금은 비워둠
+    		
+    		System.out.println("================saveStep2에러: 세션에 claim_data없음");
+    	}
+
+    }
     
     
     
