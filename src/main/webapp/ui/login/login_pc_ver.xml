@@ -11,20 +11,26 @@
         <xf:model>
 
         	<w2:dataCollection baseNode="map">
-        		<w2:dataMap baseNode="map" id="dataMap1">
+        		<w2:dataMap baseNode="map" id="dma_login_request">
         			<w2:keyInfo>
-        				<w2:key dataType="text" name="name1" id="key1"></w2:key>
-        				<w2:key dataType="text" name="name2" id="key2"></w2:key>
-        				<w2:key dataType="text" name="name3" id="key3"></w2:key>
+        				<w2:key dataType="text" name="아이디" id="userId"></w2:key>
+        				<w2:key dataType="text" name="비밀번호" id="pw"></w2:key>
+        				<w2:key dataType="text" name="로그인 타입" id="loginType"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_login_response">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="아이디" id="id"></w2:key>
+        				<w2:key dataType="text" name="사용자아이디" id="userId"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
         	</w2:dataCollection>
 
         	<w2:workflowCollection />
 
-        	<xf:submission id="sbm_EmployeeLogin" action="/InsWebApp/EmployeeLogin.pwkjson" method="post" mediatype="application/json" ref="" target=""
+        	<xf:submission id="sbm_EmployeeLogin" action="/InsWebApp/EmployeeLogin.pwkjson" method="post" mediatype="application/json" ref='data:json,[{"id":"dma_login_request","key":"elData"},{"id":"dma_login_response","key":"elData"}]' target=""
         		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
-        		ev:submitdone="" ev:submiterror="" abortTrigger="">
+        		ev:submitdone="scwin.sbm_EmployeeLogin_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
 

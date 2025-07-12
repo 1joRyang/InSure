@@ -1,0 +1,95 @@
+@font-face {
+	font-family: 'Pretendard Variable';
+	font-weight: 45 920;
+	font-style: normal;
+	font-display: swap;
+	src: url('/InsWebApp/cm/css/woff2/PretendardVariable.woff2') format('woff2-variations');
+}
+
+
+.pin-wrapper {
+    font-family: 'Pretendard Variable', sans-serif;
+}
+
+
+.pin-wrapper.textTitle{
+	height: 50px;
+	text-align:center;
+	/*padding-top: 80px;*/
+	padding-bottom: 20px;
+	font-size:25px;
+	font-weight:bold;
+}
+
+
+.pin-wrapper.text{
+	height:23px;
+	text-align:center;
+	font-size: 15px;
+	color:#808080;
+	margin: 0 0 15px;
+
+}
+
+
+.pin-wrapper.pin_dot {
+    width: 22px;
+    height: 22px;
+    background-color: #e0e0e0;
+    border-radius: 50%;
+    transition: all 0.2s ease-in-out;
+}
+
+.pin-wrapper.pin_dot.filled {
+    background-color: #1a73e8;
+    transform: scale(1.1);
+}
+
+
+/* 키패드 영역 */
+.keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3열 그리드 */
+    gap: 5px; /* 키 사이의 간격 */
+    width: 100%;
+     /*padding: 10px 20px 30px;*/
+    box-sizing: border-box;
+	/*padding-bottom: 80px;*/
+}
+
+.pin-wrapper.key {
+    border: none;
+    background-color: transparent; 
+    font-size: 32px;
+    font-weight: 400;
+    color: #202124;
+    padding: 20px 0;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 12px;
+    transition: background-color 0.2s ease;
+}
+
+/* 키를 눌렀을 때의 효과 */
+.key:active {
+    background-color: #f1f3f4;
+}
+
+/* '취소' 버튼 스타일 */
+.pin-wrapper.key.text-key {
+    font-size: 20px;
+    font-weight: 400;
+}
+
+/* 아이콘 버튼 스타일 (백스페이스) */
+.pin-wrapper.key.icon-key {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-image {
+	width:30px;
+	height:30px;
+	object-fit:contain;
+}

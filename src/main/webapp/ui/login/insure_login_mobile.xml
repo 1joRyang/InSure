@@ -19,6 +19,7 @@
     				<w2:keyInfo>
     					<w2:key dataType="text" name="아이디" id="id"></w2:key>
     					<w2:key dataType="text" name="사용자아이디" id="userId"></w2:key>
+    					<w2:key dataType="text" name="간편비밀번호등록여부" id="hasSimplePassword"></w2:key>
     				</w2:keyInfo>
     			</w2:dataMap>
     		</w2:dataCollection>
@@ -37,6 +38,7 @@
 scwin.sbm_UserLogin_submitdone = function (e) {
     var customerId = null;
     var userIdString = null;
+    var hasSimplePassword = false;
     
     try {
        
@@ -44,20 +46,29 @@ scwin.sbm_UserLogin_submitdone = function (e) {
                     
                     customerId = e.responseJSON.dma_login_response.id;
                     userIdString = e.responseJSON.dma_login_response.userId; 
+                     hasSimplePassword = e.responseJSON.dma_login_response.hasSimplePassword || false;
                 }
         
         if (customerId && userIdString) {
             localStorage.setItem("id", customerId);
             localStorage.setItem("userId", userIdString);
+            localStorage.setItem("hasSimplePassword", hasSimplePassword);
 
-            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/simple_pw.xml&userId=" + customerId;
-        
+             if (hasSimplePassword) {
+                // 간편비밀번호가 있으면 -> 간편비밀번호 로그인 페이지
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/simple_pw.xml&userId=" + customerId;
+            } else {
+                // 간편비밀번호가 없으면 -> 간편비밀번호 등록 페이지
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/add_simple_pw.xml&userId=" + customerId;
+            }
+
         } else {
             alert("사용자 정보를 받아오는 데 실패했습니다. 관리자에게 문의하세요.");
             return;
         }
         
     } catch (error) {
+        console.error("로그인 처리 중 오류:", error);
         alert("로그인 처리 중 오류가 발생했습니다.");
         return;
     }
@@ -69,7 +80,11 @@ scwin.login_btn_onclick = function (e) {
     dma_login_request.set("loginType", "USER");
     var reqData = {"elData":dma_login_request.getJSON()};
     $c.sbm.execute(sbm_UserLogin, reqData);
-};]]></script>
+};
+scwin.sbm_EmployeeLogin_submitdone = function (e) {
+
+};
+]]></script>
     	<w2:require as="udc_notification" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/notification.xml"></w2:require>
     </head>
     <body ev:onpageload="scwin.onpageload">

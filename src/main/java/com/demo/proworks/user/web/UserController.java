@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.hsqldb.SessionManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,7 +19,9 @@ import com.demo.proworks.user.service.UserService;
 import com.demo.proworks.user.vo.UserVo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.demo.proworks.user.vo.LoginVo;
+import com.demo.proworks.user.vo.SimpleConfirmVo;
 import com.demo.proworks.user.vo.SimpleLoginVo;
+import com.demo.proworks.user.vo.SimplepwRegisterVo;
 import com.demo.proworks.user.vo.UserListVo;
 
 import com.inswave.elfw.annotation.ElDescription;
@@ -85,6 +88,18 @@ public class UserController {
     	
 		    // 로그인 성공 시
 	    if (info.isSuc()) {
+	           
+
+		        // loginProcess가 세션을 만들지 않는 것에 대비하여, 여기서 직접 세션을 생성합니다.
+		        HttpSession session = request.getSession(true); // 기존 세션을 가져오거나 없으면 새로 생성
+		
+		        // 세션에 로그인 성공했다는 최소한의 정보라도 저장합니다.
+		        // (이후 다른 인터셉터가 이 값을 확인할 수 있습니다)
+		        session.setAttribute("loginInfo", info); // info 객체나 user_id 등을 저장
+		        session.setMaxInactiveInterval(30 * 60); // 예: 세션 유효 시간 30분 설정
+		        
+		        System.out.println(">>>>> [DEBUG] 세션 강제 생성 완료! Session ID: " + session.getId());
+
 	    
 	    	try {
 		     
@@ -103,11 +118,16 @@ public class UserController {
 	                System.out.println(">>>>> DB에서 조회한 사용자 ID: " + customerId);
 	                System.out.println(">>>>> DB에서 조회한 사용자 userId: " + userIdString);
 	                
+	                // 간편비밀번호 등록 여부 확인
+	                boolean hasSimplePassword = userService.hasSimplePassword(userInfo.getUserId());
+   
+	                
 	                // 응답 JSON 생성
 	                Map<String, Object> elData = new HashMap<>();
 	                Map<String, Object> responseMap = new HashMap<>();
 	                responseMap.put("id", customerId);
 	                responseMap.put("userId", userIdString);
+	                responseMap.put("hasSimplePassword", hasSimplePassword);
 	                elData.put("dma_login_response", responseMap);
 	
 	                ObjectMapper mapper = new ObjectMapper();
@@ -304,6 +324,86 @@ public class UserController {
     }
 }
 
+    /**
+     * 간편비밀번호를 등록(임시저장)한다. (1단계)
+     *
+	 * @param registerVo 간편비밀번호 등록 정보 registerVo
+	 * @param request    요청 정보 HttpServletRequest
+	 * @param response   응답 정보 HttpServletResponse
+	 * @throws Exception
+	 */
+    @ElService(key = "SimplePwRegister")
+    @RequestMapping(value = "SimplePwRegister")    
+    @ElDescription(sub = "간편 비밀번호 등록", desc = "간편 비밀번호를 등록한다.")   
+	public void registerSimplePassword(SimplepwRegisterVo registerVo, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	    
+	    Map<String, Object> responseData = new HashMap<>();
+	    try {
+	        // 서비스 호출
+	        userService.temporarilyStorePin(registerVo.getUserId(), registerVo.getSimplePw(), request.getSession());
+	
+	        // 성공 시 응답 데이터 구성
+	        responseData.put("resultCode", "OK");
+	        responseData.put("resultMessage", "확인 단계로 진행합니다.");
+	
+	    } catch (Exception e) {
+	        // 서비스에서 Exception 발생 시 실패 응답 구성
+	        responseData.put("resultCode", "FAIL");
+	        responseData.put("resultMessage", e.getMessage());
+	    }
+	    
+	    Map<String, Object> elData = new HashMap<>();
+	    elData.put("dma_login_response", responseData);
+	    
+	    // JSON으로 변환하여 응답 작성
+	    ObjectMapper objectMapper = new ObjectMapper();
+	    response.setContentType("application/json");
+	    response.setCharacterEncoding("UTF-8");
+	    
+	    response.getWriter().write(objectMapper.writeValueAsString(elData));
+	}
+	
+
+	
+	
+	 /**
+     * 간편비밀번호 확인 및 최종 등록을 처리한다.(2단계)
+     *
+	 * @param confirmVo 간편비밀번호 확인 정보 confirmVo
+	 * @param request   요청 정보 HttpServletRequest
+	 * @param response  응답 정보 HttpServletResponse
+	 * @throws Exception
+	 */
+    @ElService(key = "SimplePwRegisterCheck")
+    @RequestMapping(value = "SimplePwRegisterCheck")    
+    @ElDescription(sub = "간편 비밀번호 최종등록", desc = "간편 비밀번호 최종등록을 한다.")    	 
+	public void confirmSimplePassword(SimpleConfirmVo confirmVo, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	    Map<String, Object> responseData = new HashMap<>();
+	    
+	    // 서비스 호출하여 성공 여부(boolean) 받기
+	    boolean isSuccess = userService.confirmAndSavePin(confirmVo.getUserId(), confirmVo.getSimplePw(), request.getSession());
+	
+	    if (isSuccess) {
+	        // 성공 시 응답
+	        responseData.put("resultCode", "OK");
+	        responseData.put("resultMessage", "간편비밀번호가 등록되었습니다.");
+	    } else {
+	        // 실패 시 응답
+	        responseData.put("resultCode", "FAIL");
+	        responseData.put("resultMessage", "비밀번호가 일치하지 않습니다. 다시 시도해주세요.");
+	    }
+	    
+	    // dma_login_response 키로 한번 더 감싸주는 로직 추가
+	    Map<String, Object> elData = new HashMap<>();
+	    elData.put("dma_login_response", responseData);
+	
+	    // JSON으로 변환하여 응답 작성
+	    ObjectMapper objectMapper = new ObjectMapper();
+	    response.setContentType("application/json");
+	    response.setCharacterEncoding("UTF-8");
+	    response.getWriter().write(objectMapper.writeValueAsString(elData));
+	}
+		
         
     /**
      * 사용자정보을 단건 조회 처리 한다.
