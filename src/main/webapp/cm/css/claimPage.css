@@ -236,6 +236,9 @@ html, body {
     overflow-y: auto; /* 내용이 넘치면 스크롤 */
     padding-bottom: 80px; /* 푸터와 겹치지 않도록 하단 패딩 충분히 확보 */
     padding-top: 40px;
+    width: 100%;
+    max-width:350px;
+    box-sizing: border-box;
 }
 
 .infoSection {

@@ -50,7 +50,7 @@ scwin.btnNext_onclick = function (e) {
 };
 
 scwin.sbm_saveStep3_submitdone = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/fourth.xml"
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/fourth2.xml"
 };
 ]]></script>
     	<style type="text/css"><![CDATA[/* custom.css */
