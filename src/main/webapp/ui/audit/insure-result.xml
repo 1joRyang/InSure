@@ -54,7 +54,15 @@
 						<w2:key id="totalPageCount" name="전체페이지수" dataType="text"></w2:key>
 					</w2:keyInfo>
 				</w2:dataMap>
-
+				<!-- CLAIM_RESULT -->
+				<w2:dataMap baseNode="map" id="dma_claimResult">
+					<w2:keyInfo>
+						<w2:key id="claim_no" name="청구번호" dataType="text"></w2:key>
+						<w2:key id="claim_memo" name="청구메모" dataType="text"></w2:key>
+						<w2:key id="amount" name="금액" dataType="text"></w2:key>
+						<w2:key id="date" name="날짜" dataType="text"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
 				<!-- 제외 항목 데이터리스트 -->
 				<w2:dataList baseNode="list" id="dlt_excludedItems" saveRemovedData="true" repeatNode="map">
 					<w2:columnInfo>
@@ -199,7 +207,18 @@
 				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_selectClaimUserEmpInfo_submitdone"
 				ev:submiterror="scwin.sbm_selectClaimUserEmpInfo_submiterror">
 			</xf:submission>
+			<xf:submission id="sbm_saveClaimResult" ref='data:json,{"id":"dma_claimResult","key":"claimResultVo"}'
+				target='data:json,{"id":"dma_result","key":"elData"}' action="/InsWebApp/CLAIMRESULTSave.pwkjson" method="post"
+				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_saveClaimResult_submitdone"
+				ev:submiterror="scwin.sbm_saveClaimResult_submiterror">
+			</xf:submission>
 
+			<!-- CLAIM_RESULT 업데이트 -->
+			<xf:submission id="sbm_updateClaimResult" ref='data:json,{"id":"dma_claimResult","key":"claimResultVo"}'
+				target='data:json,{"id":"dma_result","key":"elData"}' action="/InsWebApp/CLAIMRESULTUpd.pwkjson" method="post"
+				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_updateClaimResult_submitdone"
+				ev:submiterror="scwin.sbm_updateClaimResult_submiterror">
+			</xf:submission>
 
 
 		</xf:model>
@@ -1329,7 +1348,6 @@ scwin.sbm_selectClaimVo_submitdone = function (e) {
 scwin.loadClaimUserEmpInfo = function (e) {
     console.log("=== [callUserEmpInfoSubmission] 시작 ===");
 
-    // 1️⃣ 스토리지에서 읽기
     var claimNo = localStorage.getItem("claim_no");
     console.log("스토리지에서 읽은 claim_no:", claimNo);
 
@@ -1337,20 +1355,228 @@ scwin.loadClaimUserEmpInfo = function (e) {
         alert("저장된 청구번호가 없습니다.");
         return;
     }
-
-    // 2️⃣ DMA에 강제 세팅
     dma_claimNoVo.set("claim_no", claimNo);
     console.log("DMA 최종 상태:", dma_claimNoVo.getJSON());
 
-    // 3️⃣ Submission 실행
     $p.executeSubmission("sbm_selectClaimUserEmpInfo");
 };
 
-scwin.sbm_selectClaimUserEmpInfo_submitdone = function (e) {
-    console.log("⭐⭐⭐⭐⭐⭐")
-    console.log("✅ 유저/실무자 응답:", e);
-    console.log("✅ dma_userEmpResult:", dma_userEmpResult.getJSON());
+// CLAIM_RESULT 데이터 준비 함수
+scwin.prepareClaimResultData = function() {
+    var claimNo = dma_search.get("claim_no");
+    var memo = txt_examMemo.getValue() || "";
+    var refundAmount = dma_settlementInfo.get("refund_amt") || "0";
+    
+    // 현재 날짜 (YYYY-MM-DD 형식)
+    var currentDate = new Date();
+    var formattedDate = currentDate.getFullYear() + '-' + 
+                       String(currentDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(currentDate.getDate()).padStart(2, '0');
+    
+    // CLAIM_RESULT 데이터 설정
+    dma_claimResult.set("claim_no", claimNo);
+    dma_claimResult.set("claim_memo", memo.trim());
+    dma_claimResult.set("amount", refundAmount);
+    dma_claimResult.set("date", formattedDate);
+    
+    console.log("CLAIM_RESULT 저장 데이터:", dma_claimResult.getJSON());
+    
+    return {
+        claim_no: claimNo,
+        memo: memo.trim(),
+        amount: refundAmount,
+        date: formattedDate
+    };
+};
 
+// 메모 저장 (수정된 함수)
+scwin.btn_save_onclick = function () {
+    var memo = txt_examMemo.getValue();
+
+    if (!memo || memo.trim() === "") {
+        alert("저장할 메모가 없습니다.");
+        return;
+    }
+
+    var claimNo = dma_search.get("claim_no");
+    if (!claimNo) {
+        alert("청구번호가 없습니다.");
+        return;
+    }
+
+    // CLAIM_RESULT 데이터 준비
+    var resultData = scwin.prepareClaimResultData();
+    
+    if (!resultData.memo) {
+        alert("메모 내용이 비어있습니다.");
+        return;
+    }
+
+    if (confirm("메모를 저장하시겠습니까?")) {
+        scwin.showLoading(true);
+        
+        // CLAIM_RESULT 테이블에 저장/업데이트
+        $p.executeSubmission("sbm_saveClaimResult");
+    }
+};
+
+// 최종 심사 완료 (수정된 함수)
+scwin.btn_complete_onclick = function () {
+    var memo = txt_examMemo.getValue();
+
+    if (!memo || memo.trim() === "") {
+        alert("심사 메모를 먼저 생성해주세요.");
+        return;
+    }
+
+    var claimNo = dma_search.get("claim_no");
+    if (!claimNo) {
+        alert("청구번호가 없습니다.");
+        return;
+    }
+
+    // CLAIM_RESULT 데이터 준비
+    var resultData = scwin.prepareClaimResultData();
+
+    if (confirm("최종 심사를 완료하시겠습니까?\n\n- 청구번호: " + resultData.claim_no + 
+               "\n- 지급금액: " + scwin.formatNumber(resultData.amount) + "원" +
+               "\n- 처리일자: " + resultData.date)) {
+        
+        scwin.showLoading(true);
+        
+        // 1단계: 정산 정보 상태 업데이트
+        dma_settlementInfo.set("status", "심사완료");
+        
+        // 2단계: CLAIM_RESULT 저장
+        $p.executeSubmission("sbm_saveClaimResult");
+    }
+};
+
+// CLAIM_RESULT 저장 성공 콜백
+scwin.sbm_saveClaimResult_submitdone = function(e) {
+    console.log("=== CLAIM_RESULT 저장 완료 ===");
+    console.log("저장 응답:", e);
+    
+    var responseData = e.responseJSON;
+    var elHeader = responseData ? responseData.elHeader : null;
+    
+    if (elHeader && elHeader.resSuc !== false) {
+        // 저장 성공
+        console.log("CLAIM_RESULT 저장 성공");
+        
+        // 정산 정보도 업데이트 (심사완료 상태인 경우)
+        var currentStatus = dma_settlementInfo.get("status");
+        if (currentStatus === "심사완료") {
+            scwin.updateSettlementStatus();
+        } else {
+            scwin.showLoading(false);
+            alert("메모가 성공적으로 저장되었습니다.");
+        }
+        
+    } else {
+        // 저장 실패
+        scwin.showLoading(false);
+        var errorMsg = elHeader && elHeader.resMsg ? elHeader.resMsg : "저장에 실패했습니다.";
+        console.error("CLAIM_RESULT 저장 실패:", errorMsg);
+        alert("CLAIM_RESULT 저장 실패: " + errorMsg);
+        
+        // 심사완료 상태였다면 되돌리기
+        if (dma_settlementInfo.get("status") === "심사완료") {
+            dma_settlementInfo.set("status", "심사중");
+        }
+    }
+};
+
+// CLAIM_RESULT 저장 실패 콜백
+scwin.sbm_saveClaimResult_submiterror = function(e) {
+    scwin.showLoading(false);
+    
+    console.error("=== CLAIM_RESULT 저장 오류 ===");
+    console.error("오류 객체:", e);
+    console.error("상태 코드:", e.status);
+    console.error("응답 텍스트:", e.responseText);
+    
+    var errorMsg = "CLAIM_RESULT 저장 중 오류가 발생했습니다.";
+    
+    if (e.status === 404) {
+        errorMsg += "\n요청 URL을 찾을 수 없습니다.";
+    } else if (e.status === 500) {
+        errorMsg += "\n서버 내부 오류가 발생했습니다.";
+    } else if (e.responseText) {
+        try {
+            var errorData = JSON.parse(e.responseText);
+            errorMsg += "\n" + (errorData.message || e.responseText);
+        } catch (ex) {
+            errorMsg += "\n" + e.responseText;
+        }
+    }
+    
+    alert(errorMsg);
+    
+    // 심사완료 상태였다면 되돌리기
+    if (dma_settlementInfo.get("status") === "심사완료") {
+        dma_settlementInfo.set("status", "심사중");
+    }
+};
+
+// 정산 정보 상태 업데이트 함수
+scwin.updateSettlementStatus = function() {
+    console.log("정산 정보 상태 업데이트 시작");
+    
+    // 정산 정보 업데이트 submission 실행
+    $p.executeSubmission("sbm_updateSettlement", {
+        success: function(e) {
+            scwin.showLoading(false);
+            
+            console.log("정산 정보 업데이트 성공");
+            
+            // 보험 상품 상태 업데이트
+            var rowCount = dlt_insuranceProducts.getRowCount();
+            for (var i = 0; i < rowCount; i++) {
+                dlt_insuranceProducts.setCellData(i, "status", "지급완료");
+            }
+
+            // 상태 배지 업데이트
+            spn_status.removeClass("status_pending");
+            spn_status.addClass("status_completed");
+            spn_status.setValue("심사완료");
+
+            alert("심사가 완료되었습니다.\nCLAIM_RESULT 테이블에 결과가 저장되었습니다.");
+        },
+        error: function(e) {
+            scwin.showLoading(false);
+            console.error("정산 정보 업데이트 실패:", e);
+            
+            // 상태는 되돌리지만 CLAIM_RESULT는 이미 저장됨
+            dma_settlementInfo.set("status", "심사중");
+            alert("CLAIM_RESULT는 저장되었지만, 정산 정보 업데이트에 실패했습니다.");
+        }
+    });
+};
+
+// CLAIM_RESULT 업데이트 성공 콜백 (기존 데이터가 있을 때 사용)
+scwin.sbm_updateClaimResult_submitdone = function(e) {
+    console.log("=== CLAIM_RESULT 업데이트 완료 ===");
+    console.log("업데이트 응답:", e);
+    
+    scwin.showLoading(false);
+    
+    var responseData = e.responseJSON;
+    var elHeader = responseData ? responseData.elHeader : null;
+    
+    if (elHeader && elHeader.resSuc !== false) {
+        alert("CLAIM_RESULT가 성공적으로 업데이트되었습니다.");
+    } else {
+        var errorMsg = elHeader && elHeader.resMsg ? elHeader.resMsg : "업데이트에 실패했습니다.";
+        alert("CLAIM_RESULT 업데이트 실패: " + errorMsg);
+    }
+};
+
+// CLAIM_RESULT 업데이트 실패 콜백
+scwin.sbm_updateClaimResult_submiterror = function(e) {
+    scwin.showLoading(false);
+    console.error("=== CLAIM_RESULT 업데이트 오류 ===", e);
+    alert("CLAIM_RESULT 업데이트 중 오류가 발생했습니다.");
 };
 ]]></script>
 	</head>
