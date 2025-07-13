@@ -192,4 +192,24 @@ public class ClaimServiceImpl implements ClaimService {
 		return claimDAO.selectClaimEmployeeListCount(claimEmployeeVo);
 	}
 
+	/**
+	 * 청구 담당자를 업데이트한다.
+	 *
+	 * @process 1. 청구 존재 여부를 확인한다. 2. 담당자 정보를 업데이트한다.
+	 * 
+	 * @param claimVo 청구 정보
+	 * @return 업데이트 결과
+	 * @throws Exception
+	 */
+	public int updateClaimAssignee(ClaimVo claimVo) throws Exception {
+		// 청구 존재 여부 확인
+		ClaimVo existingClaim = claimDAO.selectClaim(claimVo);
+		if (existingClaim == null) {
+			throw new Exception("해당 청구를 찾을 수 없습니다.");
+		}
+		
+		// 담당자 업데이트
+		return claimDAO.updateClaim(claimVo);
+	}
+
 }

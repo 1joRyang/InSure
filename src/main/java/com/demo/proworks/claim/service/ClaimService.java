@@ -101,4 +101,13 @@ public interface ClaimService {
 	 */
 	public long selectClaimEmployeeListCount(ClaimEmployeeVo claimEmployeeVo) throws Exception;
 
+	/**
+	 * 청구 담당자를 업데이트한다.
+	 *
+	 * @param claimVo 청구 정보
+	 * @return 업데이트 결과
+	 * @throws Exception
+	 */
+	public int updateClaimAssignee(ClaimVo claimVo) throws Exception;
+
 }

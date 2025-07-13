@@ -1,7 +1,7 @@
 package com.demo.proworks.claim.web;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -170,6 +170,46 @@ public class ClaimController {
 		List<ClaimEmployeeVo> claimEmployeeList = claimService.selectClaimEmployeeList(claimEmployeeVo);
 		
 		return claimEmployeeList;
+	}
+
+	/**
+	 * 청구 담당자를 업데이트한다.
+	 *
+	 * @param claimVo 청구 정보 (claim_no, emp_no 포함)
+	 * @return 업데이트 결과
+	 * @throws Exception
+	 */
+	@ElService(key = "CLAIMUpdAssignee")
+	@RequestMapping(value = "CLAIMUpdAssignee")
+	@ElDescription(sub = "청구 담당자 갱신", desc = "청구의 담당자를 갱신한다.")
+	public Map<String, Object> updateClaimAssignee(ClaimVo claimVo) throws Exception {
+		Map<String, Object> result = new HashMap<>();
+		
+		try {
+			if (claimVo.getClaim_no() == null || claimVo.getClaim_no().trim().isEmpty()) {
+				result.put("success", false);
+				result.put("message", "청구 번호를 입력해주세요.");
+				return result;
+			}
+			
+			if (claimVo.getEmp_no() == null || claimVo.getEmp_no().trim().isEmpty()) {
+				result.put("success", false);
+				result.put("message", "담당자를 선택해주세요.");
+				return result;
+			}
+			
+			// 청구 담당자 업데이트
+			claimService.updateClaimAssignee(claimVo);
+			
+			result.put("success", true);
+			result.put("message", "담당자가 성공적으로 변경되었습니다.");
+			
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("message", e.getMessage());
+		}
+		
+		return result;
 	}
 
 }
