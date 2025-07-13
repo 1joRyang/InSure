@@ -46,12 +46,6 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "search_ID", physicalName = "SC_ID", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String SC_ID;
 
-    @ElDtoField(logicalName = "user_name", physicalName = "user_name", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
-    private String user_name;
-
-    @ElDtoField(logicalName = "emp_name", physicalName = "emp_name", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
-    private String emp_name;
-
     @ElVoField(physicalName = "claim_no")
     public String getClaim_no(){
         String ret = this.claim_no;
@@ -173,28 +167,6 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.SC_ID = SC_ID;
     }
 
-    @ElVoField(physicalName = "user_name")
-    public String getUser_name(){
-        String ret = this.user_name;
-        return ret;
-    }
-
-    @ElVoField(physicalName = "user_name")
-    public void setUser_name(String user_name){
-        this.user_name = user_name;
-    }
-
-    @ElVoField(physicalName = "emp_name")
-    public String getEmp_name(){
-        String ret = this.emp_name;
-        return ret;
-    }
-
-    @ElVoField(physicalName = "emp_name")
-    public void setEmp_name(String emp_name){
-        this.emp_name = emp_name;
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -209,9 +181,7 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("disease_code").append("=").append(disease_code).append(",");
         sb.append("date_of_accident").append("=").append(date_of_accident).append(",");
         sb.append("SC_receipt_date").append("=").append(SC_receipt_date).append(",");
-        sb.append("SC_ID").append("=").append(SC_ID).append(",");
-        sb.append("user_name").append("=").append(user_name).append(",");
-        sb.append("emp_name").append("=").append(emp_name);
+        sb.append("SC_ID").append("=").append(SC_ID);
         sb.append("]");
         return sb.toString();
 

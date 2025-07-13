@@ -33,11 +33,6 @@
 						<w2:key id="receipt_no" name="접수번호" dataType="text"></w2:key>
 					</w2:keyInfo>
 				</w2:dataMap>
-				<w2:dataMap baseNode="map" id="dma_claimInfo">
-					<w2:columnInfo>
-				          <w2:key id="claim_no" name="청구번호" dataType="text"></w2:key>
-					</w2:columnInfo>
-				</w2:dataMap>
 
 				<!-- API 응답 데이터맵 추가 -->
 				<w2:dataMap baseNode="map" id="dma_apiResponse">
@@ -47,13 +42,6 @@
 						<w2:key id="receipt_no" name="접수번호" dataType="text"></w2:key>
 						<w2:key id="status" name="상태" dataType="text"></w2:key>
 					</w2:keyInfo>
-				</w2:dataMap>
-				<w2:dataMap id="dma_userEmpResult">
-					<w2:columnInfo>
-						<w2:column id="claim_no" type="text" />
-						<w2:column id="user_name" type="text" />
-						<w2:column id="emp_name" type="text" />
-					</w2:columnInfo>
 				</w2:dataMap>
 
 				<!-- 페이징 정보용 데이터맵 -->
@@ -105,6 +93,13 @@
 						<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
 					</w2:columnInfo>
 				</w2:dataList>
+				<w2:dataList id="dlt_claimUserEmp">
+					<w2:columnInfo>
+						<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+						<w2:column dataType="text" name="emp_name" id="emp_name"></w2:column>
+						<w2:column dataType="text" name="user_name" id="user_name"></w2:column>
+					</w2:columnInfo>
+				</w2:dataList>
 
 				<!-- 전체 데이터를 담을 결과 데이터맵 -->
 				<w2:dataMap baseNode="map" id="dma_result">
@@ -135,22 +130,27 @@
 						<w2:key dataType="text" name="date_of_accident" id="date_of_accident"></w2:key>
 					</w2:keyInfo>
 				</w2:dataMap>
-				<w2:dataMap baseNode="map" id="dmp_claimVo">
+				<!-- 응답 데이터를 받을 DataMap 정의 -->
+				<w2:dataMap id="dma_claimNoVo">
 					<w2:keyInfo>
-						<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
-						<w2:key nullYN="" defaultValue="" dataType="text" name="claim_type" length="" id="claim_type" encYN=""></w2:key>
-						<w2:key nullYN="" defaultValue="" dataType="text" name="receipt_date" length="" id="receipt_date" encYN=""></w2:key>
-						<w2:key nullYN="" defaultValue="" dataType="text" name="status" length="" id="status" encYN=""></w2:key>
-						<w2:key nullYN="" defaultValue="" dataType="text" name="emp_no" length="" id="emp_no" encYN=""></w2:key>
-						<w2:key nullYN="" defaultValue="" dataType="text" name="ID" length="" id="ID" encYN=""></w2:key>
-						<w2:key nullYN="" defaultValue="" dataType="text" name="claim_content" length="" id="claim_content" encYN=""></w2:key>
-						<w2:key nullYN="" defaultValue="" dataType="text" name="disease_code" length="" id="disease_code" encYN=""></w2:key>
-						<w2:key dataType="text" name="date_of_accident" id="date_of_accident"></w2:key>
+						<w2:key id="claim_no" dataType="text" />
 					</w2:keyInfo>
 				</w2:dataMap>
-				<w2:dataMap baseNode="map" id="dataMap9">
-					<w2:keyInfo></w2:keyInfo>
+
+				<w2:dataMap id="dma_userEmpResult">
+					<w2:keyInfo>
+						<w2:key id="claim_no" dataType="text" />
+						<w2:key id="user_name" dataType="text" />
+						<w2:key id="emp_name" dataType="text" />
+					</w2:keyInfo>
 				</w2:dataMap>
+
+
+				<w2:dataMap id="dma_claimVo">
+					<w2:key id="claim_no" name="청구번호" dataType="text" />
+				</w2:dataMap>
+
+
 			</w2:dataCollection>
 			<w2:workflowCollection />
 
@@ -194,10 +194,13 @@
 				ref="" target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
 				ev:submitdone="scwin.sbm_selectClaimVo_submitdone" ev:submiterror="" abortTrigger="">
 			</xf:submission>
-			<xf:submission id="sbm_findUserEmpInfo" ref="data:json,dma_claimInfo" target="data:json,dma_userEmpResult"
-				action="/InsWebApp/CLAIMFindUserEmpInfo.pwkjson" method="post" mediatype="application/json" mode="asynchronous"
-				ev:submitdone="scwin.sbm_findUserEmpInfo_submitdone" ev:submiterror="scwin.sbm_findUserEmpInfo_submiterror">
+			<xf:submission id="sbm_selectClaimUserEmpInfo" ref='data:json,{"id":"dma_claimNoVo","key":"claimNoVo"}'
+				target='data:json,{"id":"dma_userEmpResult","key":"elData"}' action="/InsWebApp/CLAIMFindUserEmpInfo.pwkjson" method="post"
+				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_selectClaimUserEmpInfo_submitdone"
+				ev:submiterror="scwin.sbm_selectClaimUserEmpInfo_submiterror">
 			</xf:submission>
+
+
 
 		</xf:model>
 		<w2:layoutInfo />
@@ -428,6 +431,7 @@ scwin.showLoading = function (show) {
 
 scwin.onpageload = function () {
     console.log("=== 페이지 로드 시작 ===");
+    console.log("느금이요씨발");
 
     // 로컬스토리지에 초기값 설정
     localStorage.setItem("treatment_id", "1");
@@ -436,18 +440,19 @@ scwin.onpageload = function () {
     // 로컬스토리지에서 가져오기
     var treatmentId = localStorage.getItem("treatment_id");
     var claimNo = localStorage.getItem("claim_no");
-
     console.log("로컬스토리지에서 가져온 값 - treatment_id:", treatmentId, "claim_no:", claimNo);
+    dma_claimVo.set("claimVo.claim_no", claimNo);
 
     // 검색 조건에 설정
     dma_search.set("treatment_id", treatmentId);
     dma_search.set("claim_no", claimNo);
-
+    console.log("[loadClaimUserEmpInfo] dma_claimNoVo:", dma_claimNoVo.getJSON());
     // 페이징 정보 설정
     dmp_settlementVo.set("SC_treatment_id", treatmentId);
     dmp_settlementVo.set("SC_claim_no", claimNo);
 
     // 데이터 조회
+    scwin.loadClaimUserEmpInfo();
     scwin.searchSettlementData();
 };
 
@@ -1263,20 +1268,32 @@ scwin.btn_reset_onclick = function () {
 
 // 데이터 새로고침
 scwin.refreshData = function () {
-    console.log("사용자 정보 조회 시작");
+    console.log("=== [refreshData] 새로고침 시작 ===");
 
-    var claimNo = dma_search.get("claim_no");
+    // ① 로컬스토리지에서 읽기
+    var treatmentId = localStorage.getItem("treatment_id") || "";
+    var claimNo = localStorage.getItem("claim_no") || "";
+
+    console.log("로컬스토리지에서 가져온 값:", treatmentId, claimNo);
+
     if (!claimNo) {
-        alert("청구번호가 필요합니다.");
+        alert("로컬스토리지에 청구번호가 없습니다.");
         return;
     }
 
-    // dma_claimInfo에 claim_no 설정
-    dma_claimInfo.set("claim_no", claimNo);
+    // ② DMA 세팅
+    dma_search.set("treatment_id", treatmentId);
+    dma_search.set("claim_no", claimNo);
+    dma_claimNoVo.set("claim_no", claimNo);
 
-    // submission 실행
-    scwin.showLoading(true);
-    $p.executeSubmission("sbm_findUserEmpInfo");
+    console.log("[refreshData] dma_search:", dma_search.getJSON());
+    console.log("[refreshData] dma_claimNoVo:", dma_claimNoVo.getJSON());
+
+    // ③ 서브미션 재호출
+    scwin.loadClaimUserEmpInfo();
+    scwin.searchSettlementData();
+
+    console.log("=== [refreshData] 새로고침 완료 ===");
 };
 
 // 4. 정산 상세 조회 오류 처리 콜백 추가
@@ -1306,76 +1323,36 @@ scwin.sbm_selectClaimVo_submitdone = function (e) {
 
 };
 
-scwin.sbm_findUserEmpInfo_submitdone = function (e) {
-    // console.log("sbm_findUserEmpInfo_submitdone");
-    // console.log(e);
 
-    // // 응답 데이터 확인
-    // if (e.responseJSON) {
-    //     console.log("응답 데이터:", e.responseJSON);
 
-    //     // 성공 여부 확인
-    //     if (e.responseJSON.elHeader && e.responseJSON.elHeader.resSuc) {
-    //         console.log("데이터 조회 성공");
-    //         // dma_userEmpResult에 데이터가 자동으로 설정됨
-    //         console.log("조회된 데이터:", dma_userEmpResult.getAllJSON());
-    //     } else {
-    //         console.error("데이터 조회 실패:", e.responseJSON.elHeader);
-    //     }
-    // }
-      scwin.showLoading(false);
-    
-    console.log("=== 사용자 정보 조회 완료 ===");
-    console.log("전체 응답:", e);
-    
-    if (e.responseJSON && e.responseJSON.elHeader) {
-        if (e.responseJSON.elHeader.resSuc === true) {
-            console.log("조회 성공");
-            
-            // 조회된 데이터 확인
-            var userEmpData = dma_userEmpResult.getAllJSON();
-            console.log("사용자 정보:", userEmpData);
-            
-            // UI 업데이트 (예시)
-            if (userEmpData && userEmpData.length > 0) {
-                var firstRow = userEmpData[0];
-                if (firstRow.emp_name) {
-                    dma_settlementInfo.set("emp_name", firstRow.emp_name);
-                }
-                if (firstRow.user_name) {
-                    dma_settlementInfo.set("patient_name", firstRow.user_name);
-                }
-            }
-        } else {
-            console.error("조회 실패:", e.responseJSON.elHeader.resMsg);
-            alert("사용자 정보를 찾을 수 없습니다.");
-        }
-    }
-};
 
-scwin.sbm_findUserEmpInfo = function () {
+scwin.loadClaimUserEmpInfo = function (e) {
+    console.log("=== [callUserEmpInfoSubmission] 시작 ===");
 
-    var claimNo = dma_search.get("claim_no");
+    // 1️⃣ 스토리지에서 읽기
+    var claimNo = localStorage.getItem("claim_no");
+    console.log("스토리지에서 읽은 claim_no:", claimNo);
 
     if (!claimNo) {
-        console.error("claim_no가 없습니다.");
+        alert("저장된 청구번호가 없습니다.");
         return;
     }
 
-    // dma_claimInfo에 claim_no 설정
-    dma_claimInfo.set("claim_no", claimNo);
+    // 2️⃣ DMA에 강제 세팅
+    dma_claimNoVo.set("claim_no", claimNo);
+    console.log("DMA 최종 상태:", dma_claimNoVo.getJSON());
 
-    // submission 실행
-    $p.executeSubmission("sbm_findUserEmpInfo");
+    // 3️⃣ Submission 실행
+    $p.executeSubmission("sbm_selectClaimUserEmpInfo");
 };
-scwin.sbm_findUserEmpInfo_submiterror = function (e) {
-    console.error("sbm_findUserEmpInfo 오류 발생");
-    console.error("상태 코드:", e.status);
-    console.error("오류 메시지:", e.responseText);
 
-    scwin.showLoading(false);
-    alert("사용자 정보 조회에 실패했습니다.");
-};]]></script>
+scwin.sbm_selectClaimUserEmpInfo_submitdone = function (e) {
+    console.log("⭐⭐⭐⭐⭐⭐")
+    console.log("✅ 유저/실무자 응답:", e);
+    console.log("✅ dma_userEmpResult:", dma_userEmpResult.getJSON());
+
+};
+]]></script>
 	</head>
 	<body ev:onpageload="scwin.onpageload">
 		<w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/hearder.xml"></w2:wframe>
@@ -1398,15 +1375,15 @@ scwin.sbm_findUserEmpInfo_submiterror = function (e) {
 				<xf:group id="" style="display:flex;gap:30px;flex-wrap:wrap;">
 					<xf:group id="">
 						<w2:span id="" label="청구번호: " style="color:#666;"></w2:span>
-						<w2:span id="" ref="data:dma_settlementInfo.claim_no" style="font-weight:bold;"></w2:span>
+						<w2:span id="" ref="data:dma_userEmpResult.claim_no" style="font-weight:bold;"></w2:span>
 					</xf:group>
 					<xf:group id="">
 						<w2:span id="" label="환자명: " style="color:#666;"></w2:span>
-						<w2:span id="" ref="data:elData.patient_name" style="font-weight:bold;"></w2:span>
+						<w2:span id="" ref="data:dma_userEmpResult.user_name" style="font-weight:bold;"></w2:span>
 					</xf:group>
 					<xf:group id="">
 						<w2:span id="" label="심사역: " style="color:#666;"></w2:span>
-						<w2:span id="" ref="data:elData.reviewer" style="font-weight:bold;"></w2:span>
+						<w2:span id="" ref="data:dma_userEmpResult.emp_name" style="font-weight:bold;"></w2:span>
 					</xf:group>
 					<xf:group id="">
 						<w2:span id="spn_receiptNo" style="color:#2196F3;font-weight:bold;"></w2:span>
