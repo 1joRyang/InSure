@@ -18,6 +18,7 @@ import com.demo.proworks.insimagefile.vo.Step1Vo;
 import com.demo.proworks.insimagefile.vo.Step2Vo;
 import com.demo.proworks.insimagefile.vo.Step3Vo;
 import com.demo.proworks.insimagefile.vo.Step4Vo;
+import com.demo.proworks.insimagefile.vo.Step5Vo;
 import com.demo.proworks.insimagefile.vo.ConsentVo;
 import com.demo.proworks.insimagefile.vo.InsimagefileListVo;
 
@@ -304,6 +305,37 @@ public class InsimagefileController {
     		//실제로 에러처리 해야하지만 지금은 비워둠
     		
     		System.out.println("================saveStep4에러: 세션에 claim_data없음");
+    	}
+
+    }
+    
+    /**
+     * (서류이미지)청구단계별 서버세션 저장
+     */
+    @ElService(key = "saveStep5")    
+    @RequestMapping(value = "saveStep5")
+    @ElDescription(sub = "모바일 청구 5단계 청구서류저장", desc = "청구서류를 서버 세션에 저장 한다.")
+    public void saveStep5(Step5Vo param, HttpServletRequest request) throws Exception {
+    	// 1. 표준적인 방식으로 현재 요청 세션 가져오기
+    	System.out.println("================청구서류 콘트롤러진입");
+    	HttpSession session = request.getSession();
+    	
+    	// 2. 세션에 저장된 기존 claim_data 를 불러오기
+    	Map<String, Object> claimData = (Map<String, Object>) session.getAttribute("claim_data");
+    	
+    	if(claimData != null) {
+    		// 3. 불러온 데이터에 새로운 정보 추가
+    		claimData.put("s3fileKeys", param.getS3FileKeys());  		
+    		
+    		// 4. 변경된 내용으로 세션 업데이트
+    		session.setAttribute("claim_data", claimData);
+    		
+    		System.out.println("================세션에 저장된 claimType: " + session.getAttribute("claim_data"));
+    	} else {
+    		//비정상적인 접근처리(1단계 건너뛴 경우)
+    		//실제로 에러처리 해야하지만 지금은 비워둠
+    		
+    		System.out.println("================saveStep5에러: 세션에 claim_data없음");
     	}
 
     }
