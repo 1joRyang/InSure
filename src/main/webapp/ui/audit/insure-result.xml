@@ -1255,10 +1255,15 @@ scwin.btn_complete_onclick = function () {
 scwin.btn_save_onclick = function () {
     var memo = txt_examMemo.getValue();
 
-    if (memo && memo.trim() !== "") {
-        dma_settlementInfo.set("generated_memo", memo);
+    if (!memo || memo.trim() === "") {
+        alert("저장할 메모가 없습니다.");
+        return;
+    }
 
-        // 서버에 저장
+    // 메모만 settlementInfo에 세팅
+    dma_settlementInfo.set("generated_memo", memo.trim());
+
+    if (confirm("메모를 저장하시겠습니까?")) {
         scwin.showLoading(true);
         $p.executeSubmission("sbm_updateSettlement", {
             success: function (e) {
@@ -1270,10 +1275,8 @@ scwin.btn_save_onclick = function () {
                 alert("메모 저장 중 오류가 발생했습니다.");
             }
         });
-    } else {
-        alert("저장할 메모가 없습니다.");
     }
-};
+}; 
 
 // 메모 초기화
 scwin.btn_reset_onclick = function () {
@@ -1389,40 +1392,40 @@ scwin.prepareClaimResultData = function() {
     };
 };
 
-// 메모 저장 (수정된 함수)
-scwin.btn_save_onclick = function () {
-    var memo = txt_examMemo.getValue();
+// // 메모 저장 (수정된 함수)
+// scwin.btn_save_onclick = function () {
+//     var memo = txt_examMemo.getValue();
 
-    if (!memo || memo.trim() === "") {
-        alert("저장할 메모가 없습니다.");
-        return;
-    }
+//     if (!memo || memo.trim() === "") {
+//         alert("저장할 메모가 없습니다.");
+//         return;
+//     }
 
-    var claimNo = dma_search.get("claim_no");
-    if (!claimNo) {
-        alert("청구번호가 없습니다.");
-        return;
-    }
+//     var claimNo = dma_search.get("claim_no");
+//     if (!claimNo) {
+//         alert("청구번호가 없습니다.");
+//         return;
+//     }
 
-    // CLAIM_RESULT 데이터 준비
-    var resultData = scwin.prepareClaimResultData();
+//     // CLAIM_RESULT 데이터 준비
+//     var resultData = scwin.prepareClaimResultData();
     
-    if (!resultData.memo) {
-        alert("메모 내용이 비어있습니다.");
-        return;
-    }
+//     if (!resultData.memo) {
+//         alert("메모 내용이 비어있습니다.");
+//         return;
+//     }
 
-    if (confirm("메모를 저장하시겠습니까?")) {
-        scwin.showLoading(true);
+//     if (confirm("메모를 저장하시겠습니까?")) {
+//         scwin.showLoading(true);
         
-        // CLAIM_RESULT 테이블에 저장/업데이트
-        $p.executeSubmission("sbm_saveClaimResult");
-    }
-};
+//         // CLAIM_RESULT 테이블에 저장/업데이트
+//         $p.executeSubmission("sbm_saveClaimResult");
+//     }
+// };
 
 // 최종 심사 완료 (수정된 함수)
 scwin.btn_complete_onclick = function () {
-    var memo = txt_examMemo.getValue();
+      var memo = txt_examMemo.getValue();
 
     if (!memo || memo.trim() === "") {
         alert("심사 메모를 먼저 생성해주세요.");
@@ -1438,16 +1441,18 @@ scwin.btn_complete_onclick = function () {
     // CLAIM_RESULT 데이터 준비
     var resultData = scwin.prepareClaimResultData();
 
-    if (confirm("최종 심사를 완료하시겠습니까?\n\n- 청구번호: " + resultData.claim_no + 
-               "\n- 지급금액: " + scwin.formatNumber(resultData.amount) + "원" +
-               "\n- 처리일자: " + resultData.date)) {
-        
+    if (confirm(
+        "최종 심사를 완료하시겠습니까?\n\n" +
+        "- 청구번호: " + resultData.claim_no + 
+        "\n- 지급금액: " + scwin.formatNumber(resultData.amount) + "원" +
+        "\n- 처리일자: " + resultData.date
+    )) {
         scwin.showLoading(true);
-        
-        // 1단계: 정산 정보 상태 업데이트
+
+        // 1단계: settlement 상태 변경
         dma_settlementInfo.set("status", "심사완료");
-        
-        // 2단계: CLAIM_RESULT 저장
+
+        // 2단계: CLAIM_RESULT 테이블에 저장
         $p.executeSubmission("sbm_saveClaimResult");
     }
 };
