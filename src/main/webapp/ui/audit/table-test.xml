@@ -78,6 +78,20 @@
         				<w2:key dataType="text" name="피보험자" id="patient"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dm_getTreatReq">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
+        				<w2:key dataType="text" name="treatment_date" id="treatment_date"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dm_getClaimItemList">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="search_treatment_id" id="SC_treatment_id"></w2:key>
+        				<w2:key dataType="text" name="search_claim_no" id="SC_claim_no"></w2:key>
+        				<w2:key dataType="text" name="페이지_번호" id="pageIndex" defaultValue="1"></w2:key>
+        				<w2:key dataType="text" name="페이지_건수" id="pageSize" defaultValue="100"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
         	<xf:submission id="sbm_getExcList" action="/InsWebApp/EXCITEMListR.pwkjson" method="post" mediatype="application/json"
@@ -98,7 +112,7 @@
         		ev:submit="" ev:submitdone="scwin.sbm_updateClaimItems_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getClaimItemList" action="/InsWebApp/CLAIMITEMList.pwkjson" method="post" mediatype="application/json"
-        		ref='data:json,{"id":"dm_getExc","key":"elData"}' target='data:json,{"id":"dl_claimItemList","key":"claimItemVoList"}'
+        		ref='data:json,{"id":"dm_getClaimItemList","key":"elData"}' target='data:json,{"id":"dl_claimItemList","key":"claimItemVoList"}'
         		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
         		ev:submitdone="scwin.sbm_getClaimItemList_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
@@ -113,12 +127,12 @@
         		abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_insertTreatment" action="/InsWebApp/TREATMENTIns.pwkjson" method="post" mediatype="application/json"
-        		ref='data:json,{"id":"dm_treatment","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
+        		ref='data:json,{"id":"dm_treatment","key":"elData"}' target='' encoding="UTF-8" instance="" replace="" errorHandler=""
         		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_insertTreatment_submitdone"
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getTreatment" action="/InsWebApp/TREATMENTUpdView.pwkjson" method="post" mediatype="application/json"
-        		ref='' target='data:json,{"id":"dm_treatment","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		ref='data:json,{"id":"dm_getTreatReq","key":"elData"}' target='data:json,{"id":"dm_treatment","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler=""
         		customHandler="" mode="asynchronous" processMsg="로딩 중..." ev:submit="" ev:submitdone="scwin.sbm_getTreatment_submitdone"
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
@@ -148,6 +162,8 @@
 scwin.claimNo = localStorage.getItem("claimNo");
 scwin.treatmentId = 0;
 scwin.isEdit = false; // false > insert | true > update
+scwin.nextClick = false;
+scwin.isGetTreatId = false;
 
 scwin.onpageload = function() {
     dm_header.set("claimNo", scwin.claimNo);
@@ -177,26 +193,52 @@ scwin.onpageload = function() {
 
 function getInsure() {
     // 가져오고
-    let req = {"claim_no": scwin.claimNo, "treatment_date": date_drop.getText()}
-    $c.sbm.execute(sbm_getTreatment, {elData: req});
+    dm_getTreatReq.set("claim_no", scwin.claimNo);
+    dm_getTreatReq.set("treatment_date", date_drop.getText());
+    dm_treatment.set("treatment_date", date_drop.getText());
+    $c.sbm.execute(sbm_getTreatment);
 }
 
 scwin.sbm_getTreatment_submitdone = function (e) {
+    if (scwin.isGetTreatId) {
+        // treatmentId 저장
+        scwin.treatmentId = dm_treatment.getJSON().treatment_id;
+        console.log(scwin.treatmentId);
+
+        dm_result.set("claim_no", scwin.claimNo);
+        dm_result.set("treatment_id", scwin.treatmentId);
+        scwin.isEdit ? $c.sbm.execute(sbm_updateSettlement) : $c.sbm.execute(sbm_insertSettlement);
+
+        dm_sub.set("claim_no", scwin.claimNo);
+        dm_sub.set("treatment_id", scwin.treatmentId);
+        scwin.isEdit ? $c.sbm.execute(sbm_updatePaymentInfo) : $c.sbm.execute(sbm_insertPaymentInfo);
+
+        let requestData = extractClaimItemData(scwin.treatmentId, scwin.claimNo);
+        console.log(requestData);
+        requestData.forEach(item => {
+            // item마다 저장 요청 실행
+            scwin.isEdit ? $c.sbm.execute(sbm_updateClaimItems, {"elData": item}) : $c.sbm.execute(sbm_insertClaimItems, {"elData": item});
+        });
+        scwin.isGetTreatId = false;
+        return;
+    }
 
     // 값이 있으면 수정
     if (ipt_department.getValue() !== "") {
         // treatmentId 여기서 저장
         localStorage.setItem("treatmentId", dm_treatment.getJSON().treatment_id);
         scwin.treatmentId = localStorage.getItem("treatmentId");
-
         scwin.isEdit = true;
 
         dm_getExc.set("claim_no", scwin.claimNo);
         dm_getExc.set("treatment_id", scwin.treatmentId);
-        
+
         // 다른 애들도 가져오기
         $c.sbm.execute(sbm_getSettlement);
         $c.sbm.execute(sbm_getPaymentInfo);
+
+        dm_getClaimItemList.set("SC_claim_no", scwin.claimNo)
+        dm_getClaimItemList.set("SC_treatment_id", scwin.treatmentId);
         $c.sbm.execute(sbm_getClaimItemList);
         
         // 제외항목
@@ -294,7 +336,6 @@ scwin.btn_ocr_onclick = function (e) {
 
 scwin.btn_before_onclick = function (e) {
     // 이전 화면으로
-    //parent.WebSquare.util.getComponentById("web_container").setSrc("/InsWebApp/ui/audit/insure_second.xml");
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_second.xml"
 };
 
@@ -311,7 +352,9 @@ function saveInsure(idx = -1) {
         localStorage.removeItem("treatementId");
 
         dm_treatment.set("claim_no", scwin.claimNo);
-        
+
+        // todo: 이미지 모달.. setSrc
+        console.log(dm_treatment.getJSON());
         scwin.isEdit ? $c.sbm.execute(sbm_updateTreatment) : $c.sbm.execute(sbm_insertTreatment);
     }
     else {
@@ -323,24 +366,18 @@ function saveInsure(idx = -1) {
 }
 
 scwin.sbm_insertTreatment_submitdone = function (e) {
-
-    dm_result.set("claim_no", scwin.claimNo);
-    dm_result.set("treatment_id", scwin.treatmentId);
-    scwin.isEdit ? $c.sbm.execute(sbm_updateSettlement) : $c.sbm.execute(sbm_insertSettlement);
-
-    dm_sub.set("claim_no", scwin.claimNo);
-    dm_sub.set("treatment_id", scwin.treatmentId);
-    scwin.isEdit ? $c.sbm.execute(sbm_updatePaymentInfo) : $c.sbm.execute(sbm_insertPaymentInfo);
-
-    let requestData = extractClaimItemData(scwin.treatmentId, scwin.claimNo);
-    requestData.forEach(item => {
-        // item마다 저장 요청 실행
-        scwin.isEdit ? $c.sbm.execute(sbm_updateClaimItems, {"elData": item}) : $c.sbm.execute(sbm_insertClaimItems, {"elData": item});
-    });
-    
+    scwin.isGetTreatId = true;
+    console.log(dm_treatment.getJSON());
+    $c.sbm.execute(sbm_getTreatment);
 };
 
 scwin.sbm_updateClaimItems_submitdone = function (e) {
+
+    if (scwin.nextClick) {
+        //location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-result.xml";
+        return;
+    }
+
     // 초기화
     dm_treatment.setEmptyValue();
     dm_result.setEmptyValue();
@@ -374,9 +411,10 @@ function resetExclusionCells() {
 }
 
 scwin.btn_next_onclick = function (e) {
+    scwin.nextClick = true;
     saveInsure();
     $p.closePopup("img_popup");
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-result.xml";
+    
 };
 
 scwin.ipt_paid_onchange = function (info) {

@@ -49,7 +49,7 @@
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
 	scwin.renderImageList();
-
+    
     img.setSrc(dl_imgList.getRowData(0)[0])
 };
 
@@ -70,7 +70,7 @@ scwin.renderImageList = function() {
             },
             targetGrp
         );
-        console.log("alt", i);
+        
         // 이미지 추가
         let imgResult = $p.dynamicCreate(
             "img_" + i,
@@ -83,7 +83,7 @@ scwin.renderImageList = function() {
             cmpGroup
         );
         imgResult.bind("onclick", scwin.btn_dynamic_onclick);
-        console.log(imgInfo[1]);
+
         // 타이틀 추가 (텍스트 등)
         let imgIdx = $p.dynamicCreate(
             "txt_" + i,
@@ -98,18 +98,18 @@ scwin.renderImageList = function() {
 };
 
 scwin.btn_dynamic_onclick = function(e) {
-    localStorage.setItem("Imgidx", e.target.alt);
-    let len = $p.parent().scwin.genList.length;
-    console.log(len, $p.parent().scwin.genList[len-1]);
-    $p.parent().gen_date.getChild($p.parent().scwin.genList[len-1], "ipt_idx").setValue(e.target.alt);
+    let len = $p.parent().scwin.genList?.length;
+    $p.parent().gen_date?.getChild($p.parent().scwin.genList[len-1], "ipt_idx").setValue(e.target.alt);
     img.setSrc(e.target.src);
-}]]></script>
+}
+
+]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
     	<xf:group meta_snippetCategory="01_화면분할" meta_snippetName="1_05 좌측 고정 2단 분할_width값 200px" meta_snippetKeyComponent="true" style="height: 100%;display: flex;flex-direction: row"
     		id="" class="">
     		<xf:group style="width:10%;background-color:#6E6D6D;height: 100%;overflow-y: scroll;overflow-x: hidden;padding-right: 10px;" id="imgList" class="imgList"></xf:group>
-    		<xf:group style="width: 90%;height: 100%;justify-content: center;display: flex;background-color: gainsboro" id="" class="">
+    		<xf:group style="width: 90%;height: 100%;justify-content: center;display: flex;background-color: gainsboro" id="" class="imgContainer">
     			<xf:image src="" style="" id="img"></xf:image>
     		</xf:group>
     	</xf:group>

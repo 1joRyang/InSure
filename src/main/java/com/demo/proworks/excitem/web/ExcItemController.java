@@ -47,7 +47,7 @@ public class ExcItemController {
     @ElDescription(sub = "하나의 영수증에 대한 제외항목 조회", desc = "페이징처리없음")               
     public List<ExcItemVo> selectListExcItemR(ExcItemVo excItemVo) throws Exception {    	   	
 
-        List<ExcItemVo> excItemList = excItemService.selectListExcItem(excItemVo);                  
+        List<ExcItemVo> excItemList = excItemService.selectListExcItemR(excItemVo);                  
 
         return excItemList;            
     }  
