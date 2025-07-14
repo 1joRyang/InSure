@@ -323,7 +323,7 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 			EmployeeVo searchVo = new EmployeeVo();
 			searchVo.setDeptId(deptId);
 			if (lastEmpNo != null) {
-				searchVo.setLastEmpNo(lastEmpNo.toString());
+				searchVo.setEmpNo(lastEmpNo.toString());
 			}
 			
 			EmployeeVo nextEmployee = employeeDAO.selectNextEmployeeForAssignment(searchVo);

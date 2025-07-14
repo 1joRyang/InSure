@@ -3,6 +3,7 @@ package com.demo.proworks.settlement.service;
 import java.util.List;
 
 import com.demo.proworks.settlement.vo.SettlementVo;
+import com.demo.proworks.settlement.vo.SettlementTreatmentVo;
 
 /**  
  * @subject     : 정산정보 관련 처리를 담당하는 인터페이스
@@ -71,5 +72,14 @@ public interface SettlementService {
      * @throws Exception
      */
 	public int deleteSettlement(SettlementVo settlementVo) throws Exception;
+	
+    /**
+     * 정산정보와 치료정보를 조인하여 조회한다.
+     *
+     * @param  settlementTreatmentVo 정산치료정보 SettlementTreatmentVo
+     * @return 정산치료정보 목록 List<SettlementTreatmentVo>
+     * @throws Exception
+     */
+	public List<SettlementTreatmentVo> selectSettlementTreatment(SettlementTreatmentVo settlementTreatmentVo) throws Exception;
 	
 }

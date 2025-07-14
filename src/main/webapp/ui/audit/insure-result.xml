@@ -33,6 +33,11 @@
 						<w2:key id="receipt_no" name="접수번호" dataType="text"></w2:key>
 					</w2:keyInfo>
 				</w2:dataMap>
+				<w2:dataMap baseNode="map" id="dma_settlementTreatmentSearch">
+					<w2:keyInfo>
+						<w2:key id="SC_claim_no" name="검색_청구번호" dataType="text"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
 
 				<!-- API 응답 데이터맵 추가 -->
 				<w2:dataMap baseNode="map" id="dma_apiResponse">
@@ -159,6 +164,18 @@
 				</w2:dataMap>
 
 
+				<w2:dataList baseNode="list" repeatNode="map" id="dlt_settlementTreatmentList" saveRemovedData="true">
+					<w2:columnInfo>
+						<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+						<w2:column defaultValue="" dataType="text" name="treatment_id" length="" id="treatment_id" encYN="" ignoreStatus="">
+						</w2:column>
+						<w2:column defaultValue="" dataType="text" name="final_due" length="" id="final_due" encYN="" ignoreStatus=""></w2:column>
+						<w2:column defaultValue="" dataType="text" name="refund_amt" length="" id="refund_amt" encYN="" ignoreStatus=""></w2:column>
+						<w2:column dataType="text" name="treatment_date" id="treatment_date"></w2:column>
+						<w2:column dataType="text" name="hospital_prepaid" id="hospital_prepaid"></w2:column>
+						<w2:column dataType="text" name="deducation_amt" id="deducation_amt"></w2:column>
+					</w2:columnInfo>
+				</w2:dataList>
 			</w2:dataCollection>
 			<w2:workflowCollection />
 
@@ -221,6 +238,12 @@
 			</xf:submission>
 
 
+			<xf:submission id="sbm_selectSettlementTreatment" action="/InsWebApp/SETTLEMENTTreatmentList.pwkjson" method="post"
+				mediatype="application/json" ref='data:json,{"id":"dma_settlementTreatmentSearch","key":"settlementTreatmentVo"}'
+				target='data:json,{"id":"dlt_settlementTreatmentList","key":"settlementTreatmentVoList"}' encoding="UTF-8" instance="" replace=""
+				errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="scwin.sbm_selectSettlementTreatment_submit"
+				ev:submitdone="scwin.sbm_selectSettlementTreatment_submitdone" ev:submiterror="" abortTrigger="">
+			</xf:submission>
 		</xf:model>
 		<w2:layoutInfo />
 		<w2:publicInfo method="" />
@@ -450,7 +473,6 @@ scwin.showLoading = function (show) {
 
 scwin.onpageload = function () {
     console.log("=== 페이지 로드 시작 ===");
-    console.log("느금이요씨발");
 
     // 로컬스토리지에 초기값 설정
     localStorage.setItem("treatment_id", "1");
@@ -473,8 +495,28 @@ scwin.onpageload = function () {
     // 데이터 조회
     scwin.loadClaimUserEmpInfo();
     scwin.searchSettlementData();
+    scwin.sbm_selectSettlementTreatment();
 };
 
+scwin.sbm_selectSettlementTreatment = function () {
+    var claimNo = dma_search.get("claim_no");
+    if (!claimNo) {
+        console.error("청구번호가 없습니다.")
+        alert("청구번호가 설정되지 않았습니다.")
+        return;
+    }
+    dma_settlementTreatmentSearch.set("SC_claim_no", claimNo);
+    console.log("dma_settlementTreatmentSearch:", dma_settlementTreatmentSearch.getJSON());
+    console.log("dlt_settlementTreatmentList count:", dlt_settlementTreatmentList.getRowCount());
+
+    try {
+        $p.executeSubmission("sbm_selectSettlementTreatment");
+        console.log("sbm_selectSettlementTreatment Submission 실행됨");
+    } catch (error) {
+        console.error("Submission 실행 오류:", error);
+        alert("정산치료 조회 중 오류가 발생했습니다: " + error.message);
+    }
+}
 // 정산 데이터 조회 메인 함수
 scwin.searchSettlementData = function () {
     var treatmentId = dma_search.get("treatment_id");
@@ -1276,7 +1318,7 @@ scwin.btn_save_onclick = function () {
             }
         });
     }
-}; 
+};
 
 // 메모 초기화
 scwin.btn_reset_onclick = function () {
@@ -1365,25 +1407,25 @@ scwin.loadClaimUserEmpInfo = function (e) {
 };
 
 // CLAIM_RESULT 데이터 준비 함수
-scwin.prepareClaimResultData = function() {
+scwin.prepareClaimResultData = function () {
     var claimNo = dma_search.get("claim_no");
     var memo = txt_examMemo.getValue() || "";
     var refundAmount = dma_settlementInfo.get("refund_amt") || "0";
-    
+
     // 현재 날짜 (YYYY-MM-DD 형식)
     var currentDate = new Date();
-    var formattedDate = currentDate.getFullYear() + '-' + 
-                       String(currentDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                       String(currentDate.getDate()).padStart(2, '0');
-    
+    var formattedDate = currentDate.getFullYear() + '-' +
+        String(currentDate.getMonth() + 1).padStart(2, '0') + '-' +
+        String(currentDate.getDate()).padStart(2, '0');
+
     // CLAIM_RESULT 데이터 설정
     dma_claimResult.set("claim_no", claimNo);
     dma_claimResult.set("claim_memo", memo.trim());
     dma_claimResult.set("amount", refundAmount);
     dma_claimResult.set("date", formattedDate);
-    
+
     console.log("CLAIM_RESULT 저장 데이터:", dma_claimResult.getJSON());
-    
+
     return {
         claim_no: claimNo,
         memo: memo.trim(),
@@ -1409,7 +1451,7 @@ scwin.prepareClaimResultData = function() {
 
 //     // CLAIM_RESULT 데이터 준비
 //     var resultData = scwin.prepareClaimResultData();
-    
+
 //     if (!resultData.memo) {
 //         alert("메모 내용이 비어있습니다.");
 //         return;
@@ -1417,7 +1459,7 @@ scwin.prepareClaimResultData = function() {
 
 //     if (confirm("메모를 저장하시겠습니까?")) {
 //         scwin.showLoading(true);
-        
+
 //         // CLAIM_RESULT 테이블에 저장/업데이트
 //         $p.executeSubmission("sbm_saveClaimResult");
 //     }
@@ -1425,7 +1467,7 @@ scwin.prepareClaimResultData = function() {
 
 // 최종 심사 완료 (수정된 함수)
 scwin.btn_complete_onclick = function () {
-      var memo = txt_examMemo.getValue();
+    var memo = txt_examMemo.getValue();
 
     if (!memo || memo.trim() === "") {
         alert("심사 메모를 먼저 생성해주세요.");
@@ -1443,7 +1485,7 @@ scwin.btn_complete_onclick = function () {
 
     if (confirm(
         "최종 심사를 완료하시겠습니까?\n\n" +
-        "- 청구번호: " + resultData.claim_no + 
+        "- 청구번호: " + resultData.claim_no +
         "\n- 지급금액: " + scwin.formatNumber(resultData.amount) + "원" +
         "\n- 처리일자: " + resultData.date
     )) {
@@ -1458,17 +1500,17 @@ scwin.btn_complete_onclick = function () {
 };
 
 // CLAIM_RESULT 저장 성공 콜백
-scwin.sbm_saveClaimResult_submitdone = function(e) {
+scwin.sbm_saveClaimResult_submitdone = function (e) {
     console.log("=== CLAIM_RESULT 저장 완료 ===");
     console.log("저장 응답:", e);
-    
+
     var responseData = e.responseJSON;
     var elHeader = responseData ? responseData.elHeader : null;
-    
+
     if (elHeader && elHeader.resSuc !== false) {
         // 저장 성공
         console.log("CLAIM_RESULT 저장 성공");
-        
+
         // 정산 정보도 업데이트 (심사완료 상태인 경우)
         var currentStatus = dma_settlementInfo.get("status");
         if (currentStatus === "심사완료") {
@@ -1477,14 +1519,14 @@ scwin.sbm_saveClaimResult_submitdone = function(e) {
             scwin.showLoading(false);
             alert("메모가 성공적으로 저장되었습니다.");
         }
-        
+
     } else {
         // 저장 실패
         scwin.showLoading(false);
         var errorMsg = elHeader && elHeader.resMsg ? elHeader.resMsg : "저장에 실패했습니다.";
         console.error("CLAIM_RESULT 저장 실패:", errorMsg);
         alert("CLAIM_RESULT 저장 실패: " + errorMsg);
-        
+
         // 심사완료 상태였다면 되돌리기
         if (dma_settlementInfo.get("status") === "심사완료") {
             dma_settlementInfo.set("status", "심사중");
@@ -1493,16 +1535,16 @@ scwin.sbm_saveClaimResult_submitdone = function(e) {
 };
 
 // CLAIM_RESULT 저장 실패 콜백
-scwin.sbm_saveClaimResult_submiterror = function(e) {
+scwin.sbm_saveClaimResult_submiterror = function (e) {
     scwin.showLoading(false);
-    
+
     console.error("=== CLAIM_RESULT 저장 오류 ===");
     console.error("오류 객체:", e);
     console.error("상태 코드:", e.status);
     console.error("응답 텍스트:", e.responseText);
-    
+
     var errorMsg = "CLAIM_RESULT 저장 중 오류가 발생했습니다.";
-    
+
     if (e.status === 404) {
         errorMsg += "\n요청 URL을 찾을 수 없습니다.";
     } else if (e.status === 500) {
@@ -1515,9 +1557,9 @@ scwin.sbm_saveClaimResult_submiterror = function(e) {
             errorMsg += "\n" + e.responseText;
         }
     }
-    
+
     alert(errorMsg);
-    
+
     // 심사완료 상태였다면 되돌리기
     if (dma_settlementInfo.get("status") === "심사완료") {
         dma_settlementInfo.set("status", "심사중");
@@ -1525,16 +1567,16 @@ scwin.sbm_saveClaimResult_submiterror = function(e) {
 };
 
 // 정산 정보 상태 업데이트 함수
-scwin.updateSettlementStatus = function() {
+scwin.updateSettlementStatus = function () {
     console.log("정산 정보 상태 업데이트 시작");
-    
+
     // 정산 정보 업데이트 submission 실행
     $p.executeSubmission("sbm_updateSettlement", {
-        success: function(e) {
+        success: function (e) {
             scwin.showLoading(false);
-            
+
             console.log("정산 정보 업데이트 성공");
-            
+
             // 보험 상품 상태 업데이트
             var rowCount = dlt_insuranceProducts.getRowCount();
             for (var i = 0; i < rowCount; i++) {
@@ -1548,10 +1590,10 @@ scwin.updateSettlementStatus = function() {
 
             alert("심사가 완료되었습니다.\nCLAIM_RESULT 테이블에 결과가 저장되었습니다.");
         },
-        error: function(e) {
+        error: function (e) {
             scwin.showLoading(false);
             console.error("정산 정보 업데이트 실패:", e);
-            
+
             // 상태는 되돌리지만 CLAIM_RESULT는 이미 저장됨
             dma_settlementInfo.set("status", "심사중");
             alert("CLAIM_RESULT는 저장되었지만, 정산 정보 업데이트에 실패했습니다.");
@@ -1560,15 +1602,15 @@ scwin.updateSettlementStatus = function() {
 };
 
 // CLAIM_RESULT 업데이트 성공 콜백 (기존 데이터가 있을 때 사용)
-scwin.sbm_updateClaimResult_submitdone = function(e) {
+scwin.sbm_updateClaimResult_submitdone = function (e) {
     console.log("=== CLAIM_RESULT 업데이트 완료 ===");
     console.log("업데이트 응답:", e);
-    
+
     scwin.showLoading(false);
-    
+
     var responseData = e.responseJSON;
     var elHeader = responseData ? responseData.elHeader : null;
-    
+
     if (elHeader && elHeader.resSuc !== false) {
         alert("CLAIM_RESULT가 성공적으로 업데이트되었습니다.");
     } else {
@@ -1578,10 +1620,103 @@ scwin.sbm_updateClaimResult_submitdone = function(e) {
 };
 
 // CLAIM_RESULT 업데이트 실패 콜백
-scwin.sbm_updateClaimResult_submiterror = function(e) {
+scwin.sbm_updateClaimResult_submiterror = function (e) {
     scwin.showLoading(false);
     console.error("=== CLAIM_RESULT 업데이트 오류 ===", e);
     alert("CLAIM_RESULT 업데이트 중 오류가 발생했습니다.");
+};
+
+// 1. 수정된 콜백 함수 - 서버 응답에 따른 데이터 처리
+scwin.sbm_selectSettlementTreatment_submitdone = function (e) {
+    console.log("=== settlementTreatment 조회 완료 ===");
+    console.log("전체 응답:", e);
+    
+    // 응답 데이터 구조 확인
+    var responseData = e.responseJSON;
+    console.log("responseJSON:", responseData);
+    
+    // elHeader 확인
+    var elHeader = responseData ? responseData.elHeader : null;
+    console.log("elHeader:", elHeader);
+    
+    if (!elHeader || elHeader.resSuc === false) {
+        console.error("settlementTreatment 조회 실패:", elHeader);
+        alert("정산치료 조회에 실패했습니다: " + (elHeader ? elHeader.resMsg : "응답 없음"));
+        return;
+    }
+    
+    // elData에서 데이터 추출
+    var treatmentData = null;
+    
+    if (responseData.elData) {
+        // 1. List<SettlementTreatmentVo> 직접 반환하는 경우
+        if (Array.isArray(responseData.elData)) {
+            treatmentData = responseData.elData;
+            console.log("elData가 직접 배열:", treatmentData.length);
+        }
+        // 2. 래핑된 구조인 경우 (가능한 키들 확인)
+        else if (responseData.elData.settlementTreatmentVoList) {
+            treatmentData = responseData.elData.settlementTreatmentVoList;
+            console.log("settlementTreatmentVoList:", treatmentData.length);
+        }
+        else if (responseData.elData.list) {
+            treatmentData = responseData.elData.list;
+            console.log("list 키로 수신:", treatmentData.length);
+        }
+        else {
+            // 구조를 확인하기 위해 모든 키 출력
+            console.log("elData 구조 확인:");
+            Object.keys(responseData.elData).forEach(function(key) {
+                console.log("- " + key + ":", responseData.elData[key]);
+            });
+            
+            // 첫 번째 키의 값이 배열인지 확인
+            var firstKey = Object.keys(responseData.elData)[0];
+            if (firstKey && Array.isArray(responseData.elData[firstKey])) {
+                treatmentData = responseData.elData[firstKey];
+                console.log("첫 번째 키(" + firstKey + ")로 데이터 추출:", treatmentData.length);
+            }
+        }
+    }
+    
+    // 데이터 설정
+    if (treatmentData && Array.isArray(treatmentData) && treatmentData.length > 0) {
+        console.log("치료 데이터 샘플:", treatmentData[0]);
+        
+        // DataList에 설정
+        dlt_settlementTreatmentList.setJSON(treatmentData);
+        console.log("DataList 설정 완료, 행 수:", dlt_settlementTreatmentList.getRowCount());
+        
+        // 첫 번째 행의 데이터를 settlementInfo에도 반영 (선택사항)
+        var firstRow = treatmentData[0];
+        if (firstRow.hospital_prepaid) {
+            dma_settlementInfo.set("hospital_prepaid", firstRow.hospital_prepaid);
+        }
+        if (firstRow.deducation_amt) {
+            dma_settlementInfo.set("deducation_amt", firstRow.deducation_amt);
+        }
+        if (firstRow.final_due) {
+            dma_settlementInfo.set("final_due", firstRow.final_due);
+        }
+        if (firstRow.refund_amt) {
+            dma_settlementInfo.set("refund_amt", firstRow.refund_amt);
+        }
+        
+        console.log("settlementInfo 업데이트 완료");
+        console.log("- hospital_prepaid:", dma_settlementInfo.get("hospital_prepaid"));
+        console.log("- deducation_amt:", dma_settlementInfo.get("deducation_amt"));
+        
+        // 금액 표시 업데이트
+        scwin.updateAmountDisplay();
+        
+    } else {
+        console.log("치료 데이터가 없거나 빈 배열");
+    }
+};
+
+
+scwin.sbm_selectSettlementTreatment_submiterror = function (e) {
+
 };
 ]]></script>
 	</head>
@@ -1633,8 +1768,7 @@ scwin.sbm_updateClaimResult_submiterror = function(e) {
 						<w2:textbox class="amount_number" id="txt_amountNumber" label=""
 							style="font-size: 36px; font-weight: bold; margin-bottom: 10px;">
 						</w2:textbox>
-						<w2:textbox class="amount_desc" id="txt_amountDesc" label=""
-							style="font-size: 14px;                opacity: 0.9;">
+						<w2:textbox class="amount_desc" id="txt_amountDesc" label="" style="font-size: 14px;                opacity: 0.9;">
 						</w2:textbox>
 					</xf:group>
 					<w2:textbox class="section_title" id="" label="보험 상품별 지급 내역" style="margin-top:20px;"></w2:textbox>
@@ -1656,11 +1790,9 @@ scwin.sbm_updateClaimResult_submiterror = function(e) {
 								<w2:column width="120" inputType="text" id="productCode" displayMode="label"></w2:column>
 								<w2:column width="150" inputType="text" id="coverage" displayMode="label"></w2:column>
 								<w2:column width="80" inputType="text" id="contractor" displayMode="label"></w2:column>
-								<w2:column width="100" inputType="text" id="claimAmount" displayMode="label" dataType="number"
-									displayFormat="#,###">
+								<w2:column width="100" inputType="text" id="claimAmount" displayMode="label" dataType="number" displayFormat="#,###">
 								</w2:column>
-								<w2:column width="100" inputType="text" id="paymentAmount" displayMode="label" dataType="number"
-									displayFormat="#,###">
+								<w2:column width="100" inputType="text" id="paymentAmount" displayMode="label" dataType="number" displayFormat="#,###">
 								</w2:column>
 								<w2:column width="80" inputType="text" id="status" displayMode="label"></w2:column>
 							</w2:row>
@@ -1718,8 +1850,7 @@ scwin.sbm_updateClaimResult_submiterror = function(e) {
 							<!-- 최종 지급금액 -->
 							<xf:group class="info_row" id=""
 								style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
-								<w2:span class="info_label" id="" label="최종 지급금액"
-									style="color: #333; font-weight: bold; font-size: 15px;">
+								<w2:span class="info_label" id="" label="최종 지급금액" style="color: #333; font-weight: bold; font-size: 15px;">
 								</w2:span>
 								<w2:span class="info_value" id="" style="color: #007bff; font-weight: bold; font-size: 16px;"
 									ref="data:dma_settlementInfo.refund_amt" displayFormat="#,###">
@@ -1731,91 +1862,44 @@ scwin.sbm_updateClaimResult_submiterror = function(e) {
 						<!-- 보험 상품 그리드 -->
 
 					</xf:group>
-					<!-- 추가 정보
-						<xf:group id="" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e9ecef;">
-						<xf:group class="info_row" id="" style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0;">
-						<w2:span class="info_label" id="" label="진료 ID" style="color: #999; font-size: 13px;"></w2:span>
-						<w2:span class="info_value" id="" ref="data:dma_settlementInfo.treatment_id" style="color: #666; font-size: 13px;"></w2:span>
-						</xf:group>
-						<xf:group class="info_row" id="" style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0;">
-						<w2:span class="info_label" id="" label="청구번호" style="color: #999; font-size: 13px;"></w2:span>
-						<w2:span class="info_value" id="" ref="data:dma_settlementInfo.claim_no" style="color: #666; font-size: 13px;"></w2:span>
-						</xf:group>
-						</xf:group> -->
+
 
 					<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
 						meta_snippetName="6_02 그리드_순번_상태" style="">
 					</xf:group>
 					<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
 						meta_snippetName="6_01 그리드" style="">
-						<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dataList1" focusMode="row"
-							id="" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 153px;">
+						<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dlt_settlementTreatmentList"
+							focusMode="row" id="" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 153px;">
 							<w2:caption id="caption2" style="" value="this is a grid caption."></w2:caption>
 							<w2:header id="header2" style="">
 								<w2:row id="row3" style="">
-									<w2:column blockSelect="false" displayMode="label" id="column12" inputType="text"
-										removeBorderStyle="false" value="날짜" width="70">
+									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column9" value="진료날짜" blockSelect="false"
+										displayMode="label">
 									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="column11" inputType="text"
-										removeBorderStyle="false" value="타이틀" width="70">
+									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column11" value="최종 수납액" blockSelect="false"
+										displayMode="label">
 									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="column10" inputType="text"
-										removeBorderStyle="false" value="타이틀" width="70">
+									<w2:column width="70" inputType="text" style="" id="column13" value="병원 공제금" displayMode="label">
 									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="column9" inputType="text"
-										removeBorderStyle="false" value="타이틀" width="70">
+									<w2:column width="70" inputType="text" style="" id="column15" value="삭감항목금액" displayMode="label">
 									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="column8" inputType="text"
-										removeBorderStyle="false" value="타이틀" width="70">
-									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="column7" inputType="text"
-										removeBorderStyle="false" value="타이틀" width="70">
-									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="column6" inputType="text"
-										removeBorderStyle="false" value="타이틀" width="70">
-									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="column5" inputType="text"
-										removeBorderStyle="false" value="타이틀" width="70">
-									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="column4" inputType="text"
-										removeBorderStyle="false" value="타이틀" width="70">
-									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="column3" inputType="text"
-										removeBorderStyle="false" value="타이틀" width="70">
+									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column10" value="지급금액" blockSelect="false"
+										displayMode="label">
 									</w2:column>
 								</w2:row>
 							</w2:header>
 							<w2:gBody id="gBody2" style="">
 								<w2:row id="row4" style="">
-									<w2:column blockSelect="false" displayMode="label" id="col1" inputType="text" removeBorderStyle="false"
-										width="70">
+									<w2:column removeBorderStyle="false" width="70" inputType="text" id="treatment_date" blockSelect="false"
+										displayMode="label" >
 									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="col2" inputType="text" removeBorderStyle="false"
-										width="70">
+									<w2:column removeBorderStyle="false" width="70" inputType="text" id="final_due" blockSelect="false" displayMode="label" displayFormat="#,### 원">
 									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="col3" inputType="text" removeBorderStyle="false"
-										width="70">
-									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="col4" inputType="text" removeBorderStyle="false"
-										width="70">
-									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="col5" inputType="text" removeBorderStyle="false"
-										width="70">
-									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="col6" inputType="text" removeBorderStyle="false"
-										width="70">
-									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="col7" inputType="text" removeBorderStyle="false"
-										width="70">
-									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="col8" inputType="text" removeBorderStyle="false"
-										width="70">
-									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="col9" inputType="text" removeBorderStyle="false"
-										width="70">
-									</w2:column>
-									<w2:column blockSelect="false" displayMode="label" id="col10" inputType="text" removeBorderStyle="false"
-										width="70">
+									<w2:column width="70" inputType="text" style="" id="hospital_prepaid" value="" displayMode="label" displayFormat="#,### 원"></w2:column>
+									<w2:column width="70" inputType="text" style="" id="deducation_amt" value="" displayMode="label" displayFormat="#,### 원"></w2:column>
+									<w2:column removeBorderStyle="false" width="70" inputType="text" id="refund_amt" blockSelect="false" displayMode="label" displayFormat="#,### 원"
+										>
 									</w2:column>
 								</w2:row>
 							</w2:gBody>
@@ -1874,8 +1958,7 @@ scwin.sbm_updateClaimResult_submiterror = function(e) {
 							<xf:label>AI 심사메모 생성</xf:label>
 						</xf:trigger>
 					</xf:group>
-					<xf:group class="button_group" id=""
-						style="display: flex;                gap: 10px;                margin-top: 20px;">
+					<xf:group class="button_group" id="" style="display: flex;                gap: 10px;                margin-top: 20px;">
 					</xf:group>
 
 					<!-- 심사 액션 버튼들 -->

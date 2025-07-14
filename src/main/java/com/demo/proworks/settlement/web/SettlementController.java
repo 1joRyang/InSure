@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import com.demo.proworks.settlement.service.SettlementService;
 import com.demo.proworks.settlement.vo.SettlementListVo;
 import com.demo.proworks.settlement.vo.SettlementVo;
+import com.demo.proworks.settlement.vo.SettlementTreatmentVo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
@@ -117,6 +118,21 @@ public class SettlementController {
 		settlementService.deleteSettlement(settlementVo);
 	}
 
+	/**
+	 * 정산정보와 치료정보를 조인하여 조회합니다.
+	 *
+	 * @param settlementTreatmentVo 정산치료정보
+	 * @return 조인 조회 결과
+	 * @throws Exception
+	 */
+	@ElService(key = "SETTLEMENTTreatmentList")
+	@RequestMapping(value = "SETTLEMENTTreatmentList")
+	@ElDescription(sub = "정산치료정보 조인조회", desc = "정산정보와 치료정보를 조인하여 조회한다.")
+	public List<SettlementTreatmentVo> selectSettlementTreatment(SettlementTreatmentVo settlementTreatmentVo) throws Exception {
+		List<SettlementTreatmentVo> list = settlementService.selectSettlementTreatment(settlementTreatmentVo);
+		return list;
+	}
+
 	/// =====================================================
 	@ElService(key = "SETTLEMENTMemoGenerate")
 	@RequestMapping(value = "SETTLEMENTMemoGenerate")
@@ -145,5 +161,6 @@ public class SettlementController {
 		return response;
 	}
 	
+
 
 }
