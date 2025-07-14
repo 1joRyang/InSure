@@ -6,17 +6,17 @@ import com.inswave.elfw.annotation.ElVoField;
 import com.fasterxml.jackson.annotation.JsonFilter;
 
 @JsonFilter("elExcludeFilter")
-@ElDto(FldYn = "", delimeterYn = "", logicalName = "간편로그인VO")
-public class SimpleLoginVo extends com.demo.proworks.cmmn.ProworksCommVO {
+@ElDto(FldYn = "", delimeterYn = "", logicalName = "로그인VO")
+public class SimpleConfirmVo extends com.demo.proworks.cmmn.ProworksCommVO {
     private static final long serialVersionUID = 1L;
 
-    public SimpleLoginVo(){
+    public SimpleConfirmVo(){
     }
 
-    @ElDtoField(logicalName = "user_id", physicalName = "userId", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    @ElDtoField(logicalName = "사용자아이디", physicalName = "userId", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String userId;
 
-    @ElDtoField(logicalName = "간편비밀번호", physicalName = "simplePw", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    @ElDtoField(logicalName = "간단비밀번호", physicalName = "simplePw", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String simplePw;
 
     @ElDtoField(logicalName = "로그인타입", physicalName = "loginType", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
@@ -58,7 +58,7 @@ public class SimpleLoginVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("SimpleLoginVo [");
+        sb.append("SimplepwRegisterVo [");
         sb.append("userId").append("=").append(userId).append(",");
         sb.append("simplePw").append("=").append(simplePw).append(",");
         sb.append("loginType").append("=").append(loginType);

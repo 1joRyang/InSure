@@ -22,6 +22,12 @@
           FROM USER
          WHERE USER_ID = #{userId}
     </select>
+    
+    <update id="updateSimplePassword" parameterType="com.demo.proworks.user.vo.UserVo">
+	    UPDATE USER
+	       SET simple_pw = #{simplePw}
+	     WHERE user_id = #{userId}
+	</update>
 
 
     <insert id="insertUser" parameterType="com.demo.proworks.user.vo.UserVo">
