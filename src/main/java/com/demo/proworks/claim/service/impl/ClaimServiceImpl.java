@@ -15,6 +15,7 @@ import com.demo.proworks.claim.vo.ClaimNClaimResultVo;
 import com.demo.proworks.claim.vo.ClaimNoVo;
 import com.demo.proworks.claim.vo.ClaimUserEmpVo;
 import com.demo.proworks.claim.vo.ClaimEmployeeVo;
+import com.demo.proworks.claim.vo.ClaimFullJoinVo;
 import com.demo.proworks.claim.vo.ClaimUserVo;
 import com.demo.proworks.claim.vo.ClaimVo;
 
@@ -210,6 +211,33 @@ public class ClaimServiceImpl implements ClaimService {
 		
 		// 담당자 업데이트
 		return claimDAO.updateClaim(claimVo);
+	}
+
+	/**
+	 * 청구와 사용자, 직원, 결과 정보 전체 조인 목록 조회
+	 *
+	 * @process 1. 청구, 사용자, 직원, 결과 정보를 전체 조인하여 목록을 조회한다. 2. 결과 List<ClaimFullJoinVo>을(를) 리턴한다.
+	 * 
+	 * @param claimFullJoinVo 청구-전체조인 VO
+	 * @return 청구-전체조인 목록 List<ClaimFullJoinVo>
+	 * @throws Exception
+	 */
+	public List<ClaimFullJoinVo> selectClaimFullJoinList(ClaimFullJoinVo claimFullJoinVo) throws Exception {
+		List<ClaimFullJoinVo> list = claimDAO.selectClaimFullJoinList(claimFullJoinVo);
+		return list;
+	}
+
+	/**
+	 * 청구와 사용자, 직원, 결과 정보 전체 조인 목록 카운트 조회
+	 *
+	 * @process 1. 청구, 사용자, 직원, 결과 정보를 전체 조인하여 카운트를 리턴한다.
+	 * 
+	 * @param claimFullJoinVo 청구-전체조인 VO
+	 * @return 청구-전체조인 목록 카운트
+	 * @throws Exception
+	 */
+	public long selectClaimFullJoinListCount(ClaimFullJoinVo claimFullJoinVo) throws Exception {
+		return claimDAO.selectClaimFullJoinListCount(claimFullJoinVo);
 	}
 
 }

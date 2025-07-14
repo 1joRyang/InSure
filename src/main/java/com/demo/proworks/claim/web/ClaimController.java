@@ -18,6 +18,7 @@ import com.demo.proworks.claim.vo.ClaimNClaimResultVo;
 import com.demo.proworks.claim.vo.ClaimNoVo;
 import com.demo.proworks.claim.vo.ClaimUserEmpVo;
 import com.demo.proworks.claim.vo.ClaimEmployeeVo;
+import com.demo.proworks.claim.vo.ClaimFullJoinVo;
 import com.demo.proworks.claim.vo.ClaimUserVo;
 import com.demo.proworks.claim.vo.ClaimVo;
 import com.inswave.elfw.annotation.ElDescription;
@@ -210,6 +211,23 @@ public class ClaimController {
 		}
 		
 		return result;
+	}
+
+	/**
+	 * 청구와 사용자, 직원, 결과 정보 전체 조인 목록 조회
+	 *
+	 * @param claimFullJoinVo 청구-전체조인
+	 * @return 목록조회 결과
+	 * @throws Exception
+	 */
+	@ElService(key = "CLAIMFullJoinList")
+	@RequestMapping(value = "CLAIMFullJoinList")
+	@ElDescription(sub = "청구 전체 조인 목록조회", desc = "청구, 사용자, 직원, 결과 정보를 모두 조인하여 목록을 조회한다.")
+	public List<ClaimFullJoinVo> selectClaimFullJoinList(ClaimFullJoinVo claimFullJoinVo) throws Exception {
+		
+		List<ClaimFullJoinVo> claimFullJoinList = claimService.selectClaimFullJoinList(claimFullJoinVo);
+		
+		return claimFullJoinList;
 	}
 
 }

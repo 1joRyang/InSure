@@ -9,6 +9,7 @@ import com.demo.proworks.claim.vo.ClaimNClaimResultVo;
 import com.demo.proworks.claim.vo.ClaimNoVo;
 import com.demo.proworks.claim.vo.ClaimUserEmpVo;
 import com.demo.proworks.claim.vo.ClaimEmployeeVo;
+import com.demo.proworks.claim.vo.ClaimFullJoinVo;
 import com.demo.proworks.claim.vo.ClaimUserVo;
 import com.demo.proworks.claim.vo.ClaimVo;
 import com.demo.proworks.claim.dao.ClaimDAO;
@@ -124,6 +125,28 @@ public class ClaimDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstract
 	 */
 	public long selectClaimEmployeeListCount(ClaimEmployeeVo vo) throws ElException {
 		return (Long) selectByPk("com.demo.proworks.claim.selectClaimEmployeeListCount", vo);
+	}
+
+	/**
+	 * 청구와 사용자, 직원, 결과 정보 전체 조인 목록 조회
+	 * 
+	 * @param ClaimFullJoinVo 청구-전체조인 VO
+	 * @return List<ClaimFullJoinVo> 청구-전체조인 목록
+	 * @throws ElException
+	 */
+	public List<ClaimFullJoinVo> selectClaimFullJoinList(ClaimFullJoinVo vo) throws ElException {
+		return (List<ClaimFullJoinVo>) list("com.demo.proworks.claim.selectClaimFullJoinList", vo);
+	}
+
+	/**
+	 * 청구와 사용자, 직원, 결과 정보 전체 조인 목록 카운트 조회
+	 * 
+	 * @param ClaimFullJoinVo 청구-전체조인 VO
+	 * @return long 전체 카운트
+	 * @throws ElException
+	 */
+	public long selectClaimFullJoinListCount(ClaimFullJoinVo vo) throws ElException {
+		return (Long) selectByPk("com.demo.proworks.claim.selectClaimFullJoinListCount", vo);
 	}
 
 }

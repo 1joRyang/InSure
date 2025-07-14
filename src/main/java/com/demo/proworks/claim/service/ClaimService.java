@@ -6,6 +6,7 @@ import com.demo.proworks.claim.vo.ClaimNClaimResultVo;
 import com.demo.proworks.claim.vo.ClaimNoVo;
 import com.demo.proworks.claim.vo.ClaimUserEmpVo;
 import com.demo.proworks.claim.vo.ClaimEmployeeVo;
+import com.demo.proworks.claim.vo.ClaimFullJoinVo;
 import com.demo.proworks.claim.vo.ClaimUserVo;
 import com.demo.proworks.claim.vo.ClaimVo;
 
@@ -109,5 +110,23 @@ public interface ClaimService {
 	 * @throws Exception
 	 */
 	public int updateClaimAssignee(ClaimVo claimVo) throws Exception;
+
+	/**
+	 * 청구와 사용자, 직원, 결과 정보 전체 조인 목록 조회
+	 *
+	 * @param claimFullJoinVo 청구-전체조인 VO
+	 * @return 청구-전체조인 목록 List<ClaimFullJoinVo>
+	 * @throws Exception
+	 */
+	public List<ClaimFullJoinVo> selectClaimFullJoinList(ClaimFullJoinVo claimFullJoinVo) throws Exception;
+
+	/**
+	 * 청구와 사용자, 직원, 결과 정보 전체 조인 목록 카운트 조회
+	 * 
+	 * @param claimFullJoinVo 청구-전체조인 VO
+	 * @return 청구-전체조인 목록 카운트
+	 * @throws Exception
+	 */
+	public long selectClaimFullJoinListCount(ClaimFullJoinVo claimFullJoinVo) throws Exception;
 
 }
