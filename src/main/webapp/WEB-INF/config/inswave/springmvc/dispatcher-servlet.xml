@@ -22,7 +22,7 @@
 	<aop:config>        
 	    <aop:pointcut id="controllerInterceptorPointcut" 
 	        expression="execution(* com.demo..*Controller.*(..)) and !execution(* com.demo.proworks.user.web.UserController.login(..)) and !execution(* com.demo.proworks.user.web.UserController.simpleLogin(..)) and !execution(* com.demo.proworks.employee.web.EmployeeController.login(..))" /> 
-	
+		<!--  !execution(* com.demo.proworks.employee.web.EmployeeController.login(..))"  이 부분 추가했습니다. -->
 	    <aop:advisor advice-ref="controllerInterceptorAdvice"
 	        pointcut-ref="controllerInterceptorPointcut" id="controllerInterceptorAdvisor" order="0"/>
 	</aop:config>      

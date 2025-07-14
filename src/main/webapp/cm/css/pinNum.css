@@ -31,6 +31,15 @@
 
 }
 
+.pin-wrapper.text2{
+	height:23px;
+	text-align:center;
+	font-size: 18px;
+	margin: 0 0 15px;
+	font-weight:bold;
+
+}
+
 
 .pin-wrapper.pin_dot {
     width: 22px;

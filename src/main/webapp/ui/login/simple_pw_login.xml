@@ -18,16 +18,15 @@
         		</w2:dataMap>
         		<w2:dataMap baseNode="map" id="dma_login_response">
         			<w2:keyInfo>
-        				<w2:key dataType="text" name="결과코드" id="resultCode"></w2:key>
-        				<w2:key dataType="text" name="결과메세지" id="resultMessage"></w2:key>
+        				<w2:key dataType="text" name="아이디" id="id"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
-        	<xf:submission id="sbm_Simplepw_registerCheck" action="/InsWebApp/SimplePwRegisterCheck.pwkjson" method="post" mediatype="application/json"
+        	<xf:submission id="sbm_SimpleLogin" action="/InsWebApp/SimpleLogin.pwkjson" method="post" mediatype="application/json"
         		ref='data:json,[{"id":"dma_login_request","key":"elData"},{"id":"dma_login_response","key":"elData"}]' target="" encoding="UTF-8"
         		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
-        		ev:submitdone="scwin.sbm_Simplepw_registerCheck_submitdone" ev:submiterror="" abortTrigger="">
+        		ev:submitdone="scwin.sbm_SimpleLogin_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -47,7 +46,7 @@ scwin.onpageload = function() {
     
     dma_login_request.set("userId", userId);
     
-    console.log("간편비밀번호 등록 확인 - 사용자 ID:", userId);
+    console.log("간편비밀번호 등록 - 사용자 ID:", userId);
     
     // userId가 없으면 에러 처리
     if (!userId) {
@@ -94,29 +93,40 @@ scwin.onNumberKeyClick = function(num) {
 
   // 6자리가 모두 입력되었으면 처리
     if (scwin.pinValue.length === 6) {
-        
         try {
-            // 확인용 PIN이므로 별도의 데이터맵에 설정합니다.
+            // user 객체에서 userId 다시 가져오기 
+            const userString = localStorage.getItem("user");
+            const user = userString ? JSON.parse(userString) : null;
+            let userId = user ? user.userId : null;
+            
+            // fallback으로 기존 방식도 시도
+            if (!userId) {
+                userId = localStorage.getItem("userId");
+            }
+            
+            console.log("간편 로그인 시 사용할 userId:", userId);
+            
+            dma_login_request.set("loginType", "SIMPLE");
+            dma_login_request.set("userId", userId);  // userId 추가!
             dma_login_request.set("simplePw", scwin.pinValue);
             
-        
             let reqData = { "elData": dma_login_request.getJSON() };
 
-            console.log("간편비밀번호 최종 등록 요청 데이터:", reqData);
+            console.log("간편 로그인 요청 데이터:", reqData);
         
 
-        // submission 실행 전 검증
-        if (typeof sbm_Simplepw_registerCheck === 'undefined') {
-            console.error("sbm_Simplepw_register가 정의되지 않았습니다.");
-            alert("로그인 설정에 오류가 있습니다. 관리자에게 문의하세요.");
-            return;
-        }
-        
-            $c.sbm.execute(sbm_Simplepw_registerCheck, reqData);
-        
+            //submission 실행 전 검증
+            if (typeof sbm_SimpleLogin === 'undefined') {
+                console.error("sbm_SimpleLogin이 정의되지 않았습니다.");
+                alert("로그인 설정에 오류가 있습니다. 관리자에게 문의하세요.");
+                return;
+            }
+            
+            $c.sbm.execute(sbm_SimpleLogin, reqData);
+            
         } catch (error) {
-            console.error("최종 등록 요청 실패:", error);
-            alert("처리 중 오류가 발생했습니다.");
+            console.error("간편 로그인 요청 실패:", error);
+            alert("로그인 처리 중 오류가 발생했습니다.");
             scwin.resetPassword();
         }
         
@@ -124,7 +134,6 @@ scwin.onNumberKeyClick = function(num) {
 
     
 };
-
 
 
 scwin.resetPassword = function() {
@@ -136,25 +145,69 @@ scwin.resetPassword = function() {
 };
 
 
-scwin.sbm_Simplepw_registerCheck_submitdone = function (e) {
-    var resData = e.responseJSON.dma_login_response;
-
-    if (resData && resData.resultCode === "OK") {
-        // 성공 시: 메인페이지로 이동
-        //location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/insure_login_mobile.xml&userId=" + localStorage.getItem("userId");
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml";
-    
-    } else {
-        // 실패 시: 안내 문구 변경 및 입력값 초기화
-        var message = resData ? resData.resultMessage : "PIN 등록에 실패했습니다.";
-        // txt_info 컴포넌트가 없다면 이 줄에서 에러가 날 수 있습니다.
-        txt_info.setValue(message); 
-        alert(message);
+/**
+ * sbm_Simplepw_register 서브미션 완료 후 실행될 함수
+ */
+scwin.sbm_SimpleLogin_submitdone = function (e) {
+   
+        try {
+        console.log("간편로그인 서버 응답:", e);
         
-        //txt_info.setValue(resData.resultMessage || "등록 중 오류가 발생했습니다.");
-        scwin.pinValue = ""; // 저장된 PIN 값 초기화
-        scwin.updatePinDots(); // 원형 UI 초기화
+        if (e && e.responseJSON && e.responseJSON.dma_login_response) {
+            const loginResponse = e.responseJSON.dma_login_response;
+            
+            // 성공 확인 (resultCode 또는 id 존재 여부)
+            if (loginResponse.resultCode === "OK" || loginResponse.id) {
+                console.log("간편비밀번호 로그인 성공");
+                
+                // id가 있으면 localStorage에 저장
+                if (loginResponse.id) {
+                    localStorage.setItem("id", loginResponse.id);
+                }
+                
+                // 로그인 성공 시 메인 페이지로 이동
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml";
+                
+            } else {
+                // 로그인 실패 시
+                var message = loginResponse.resultMessage || "비밀번호가 일치하지 않습니다.";
+                
+                if (typeof txt_info !== 'undefined') {
+                    txt_info.setValue(message);
+                } else {
+                    alert(message);
+                }
+                
+                scwin.pinValue = "";
+                scwin.updatePinDots();
+            }
+        } else {
+            // 응답 형식 오류
+            console.error("응답 형식 오류:", e);
+            
+            if (typeof txt_info !== 'undefined') {
+                txt_info.setValue("서버 응답에 오류가 있습니다.");
+            } else {
+                alert("서버 응답에 오류가 있습니다.");
+            }
+            
+            scwin.pinValue = "";
+            scwin.updatePinDots();
+        }
+        
+    } catch (error) {
+        console.error("간편로그인 결과 처리 중 오류:", error);
+        
+        if (typeof txt_info !== 'undefined') {
+            txt_info.setValue("로그인 처리 중 오류가 발생했습니다.");
+        } else {
+            alert("로그인 처리 중 오류가 발생했습니다.");
+        }
+        
+        scwin.pinValue = "";
+        scwin.updatePinDots();
     }
+
 };
 
 
@@ -177,32 +230,32 @@ scwin.btn_delete_onclick = function (e) {
     	<xf:group style="width: 100%;height: 100%;display: flex;justify-content: center;align-items:center" id="">
     		<xf:group meta_snippetCategory="00_화면시작" meta_snippetName="0_01 페이지시작" meta_snippetKeyComponent="true" style="" id=""
     			class="pin-wrapper">
-    			<w2:textbox style="" id="txt_info1" label="간편 비밀번호 확인" class="pin-wrapper textTitle"></w2:textbox>
-    			<w2:textbox style="" id="txt_info2" label="간편 비밀번호 6자리를 한 번 더 입력해 주세요." class="pin-wrapper text"></w2:textbox>
+    			<w2:textbox style="" id="txt_info1" label="간편 비밀번호" class="pin-wrapper textTitle"></w2:textbox>
+    			<w2:textbox style="" id="txt_info2" label="간편 비밀번호 6자리를 입력해주세요." class="pin-wrapper text"></w2:textbox>
     			<xf:group style="height: 30px;text-align:center;display: flex; justify-content: center; padding-bottom: 80px;" id="">
     				<xf:group style="width:178px;height:30px;display:flex;gap:5px;justify-content: center;align-items: center;margin: 0;"
     					id="">
     					<xf:group
     						style="width: 22px;height: 22px;background-color: #e0e0e0;border-radius: 50%transition: background-color 0.3s ease;border-radius: 50%;"
-    						id="dot1" class="pin_dot">
+    						id="dot1" class="pin-wrapper pin_dot">
     					</xf:group>
     					<xf:group
     						style="width: 22px;height: 22px;background-color: #e0e0e0;border-radius: 50%transition: background-color 0.3s ease;border-radius: 50%;"
-    						id="dot2" class="pin_dot">
+    						id="dot2" class="pin-wrapper pin_dot">
     					</xf:group>
     					<xf:group
     						style="width: 22px;height: 22px;background-color: #e0e0e0;border-radius: 50%transition: background-color 0.3s ease;border-radius: 50%;"
-    						id="dot3" class="pin_dot">
+    						id="dot3" class="pin-wrapper pin_dot">
     					</xf:group>
     					<xf:group
     						style="width: 22px;height: 22px;background-color: #e0e0e0;border-radius: 50%transition: background-color 0.3s ease;border-radius: 50%;"
-    						id="dot4" class="pin_dot">
+    						id="dot4" class="pin-wrapper pin_dot">
     					</xf:group>
-    					<xf:group style="width:22px;height:22px;background-color:#e0e0e0;border-radius:50%;" id="dot5" class="pin_dot">
+    					<xf:group style="width:22px;height:22px;background-color:#e0e0e0;border-radius:50%;" id="dot5" class="pin-wrapper pin_dot">
     					</xf:group>
     					<xf:group
     						style="width: 22px;height: 22px;background-color: #e0e0e0;border-radius: 50%transition: background-color 0.3s ease;border-radius: 50%;"
-    						id="dot6" class="pin_dot">
+    						id="dot6" class="pin-wrapper pin_dot">
     					</xf:group>
     				</xf:group>
     			</xf:group>

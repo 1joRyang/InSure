@@ -63,8 +63,117 @@ public class EmployeeController {
     @RequestMapping(value = "EmployeeLogin")
     @ElDescription(sub = "실무자/관리자 로그인", desc = "직원 로그인을 처리한다.")
 	public void login(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		 
+		 try {
+        // 1. 원시 JSON 문자열 읽기
+        StringBuilder sb = new StringBuilder();
+        BufferedReader reader = request.getReader();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+        }
+        String jsonString = sb.toString();
+        
+        System.out.println(">>>>> 받은 JSON 문자열: " + jsonString);
+        
+        // 2. JSON 수동 파싱 (ObjectMapper 사용)
+        ObjectMapper jsonMapper = new ObjectMapper();  // 변수명 변경
+        JsonNode jsonNode = jsonMapper.readTree(jsonString);
+        
+        // 3. 각 필드 추출 (null 체크 포함)
+        String empNo = jsonNode.get("empNo") != null ? jsonNode.get("empNo").asText() : null;
+        String empPw = jsonNode.get("empPw") != null ? jsonNode.get("empPw").asText() : null;
+        String loginType = jsonNode.get("loginType") != null ? jsonNode.get("loginType").asText() : null;
+        
+        System.out.println(">>>>> 파싱된 데이터 - empNo: " + empNo + ", empPw: " + empPw + ", loginType: " + loginType);
+        
+        // 4. 입력값 검증
+        if (empNo == null || empNo.trim().isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            sendErrorResponse(response, "아이디가 입력되지 않았습니다.");
+            return;
+        }
+        
+        if (empPw == null || empPw.trim().isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            sendErrorResponse(response, "비밀번호가 입력되지 않았습니다.");
+            return;
+        }
+
+        // 5. 프레임워크의 로그인 프로세스를 호출
+        LoginInfo info = loginProcess.processLogin(request, empNo, "EMPLOYEE", empPw);
+        
+        System.out.println(">>>>> 로그인 결과: " + info.toString());
+
+        if (info.isSuc()) {
+            try {
+                // DB에서 완전한 employee 정보 조회
+                EmployeeVo searchEmpVo = new EmployeeVo();
+                searchEmpVo.setEmpNo(empNo);
+                EmployeeVo empInfo = employeeService.selectEmployee(searchEmpVo);
+                
+                System.out.println(">>>>> 조회된 Employee 정보: " + empInfo);
+
+	                if (empInfo != null) {
+	                    Map<String, Object> elData = new HashMap<>();
+	                    Map<String, Object> responseMap = new HashMap<>();
+	
+	                    // 로그인 상태
+	                    responseMap.put("status", "SUCCESS");
+	                    
+	                    // EmployeeVo의 컬럼들만 포함 (empPw 제외)
+	                    responseMap.put("empNo", empInfo.getEmpNo());
+	                    responseMap.put("empName", empInfo.getEmpName());
+	                    responseMap.put("empStatus", empInfo.getStatus());
+	                    responseMap.put("deptId", empInfo.getDeptId());
+	                    responseMap.put("role", empInfo.getRole());
+	                    
+	                    
+	                      // 디버깅을 위한 로그 추가
+					    System.out.println(">>>>> empInfo.getEmpNo(): " + empInfo.getEmpNo());
+					    System.out.println(">>>>> empInfo.getEmpName(): " + empInfo.getEmpName());
+					    System.out.println(">>>>> empInfo.getStatus(): " + empInfo.getStatus());
+					    System.out.println(">>>>> empInfo.getDeptId(): " + empInfo.getDeptId());
+					    System.out.println(">>>>> empInfo.getRole(): " + empInfo.getRole());
+	
+	                    elData.put("dma_login_response", responseMap);
+	
+	                    ObjectMapper responseMapper = new ObjectMapper();  // 변수명 변경
+	                    String jsonResponse = responseMapper.writeValueAsString(elData);
+	                    
+	                    System.out.println(">>>>> 전송할 응답: " + jsonResponse);
+	
+	                    response.setContentType("application/json");
+	                    response.setCharacterEncoding("UTF-8");
+	                    response.getWriter().write(jsonResponse);
+	
+	                } else {
+	                    System.out.println(">>>>> empInfo가 null입니다.");
+	                    throw new Exception("직원 정보를 조회할 수 없습니다.");
+	                }
+
+	            } catch (Exception e) {
+	                System.out.println(">>>>> DB 처리 중 오류: " + e.getMessage());
+	                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	                sendErrorResponse(response, "로그인 처리 중 오류가 발생했습니다.");
+	            }
+
+	        } else {
+	            // 로그인 실패 처리
+	            System.out.println(">>>>> 로그인 실패!");
+	            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	            sendErrorResponse(response, "로그인 실패: 아이디 또는 비밀번호가 올바르지 않습니다.");
+	        }
+	        
+	    } catch (Exception e) {
+	        System.out.println(">>>>> JSON 파싱 중 오류: " + e.getMessage());
+	        e.printStackTrace();
+	        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+	        sendErrorResponse(response, "요청 데이터를 처리할 수 없습니다: " + e.getMessage());
+	    }
+	}
     
-        try {
+       /* try {
             // 1. 원시 JSON 문자열 읽기
             StringBuilder sb = new StringBuilder();
             BufferedReader reader = request.getReader();
@@ -154,7 +263,7 @@ public class EmployeeController {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             sendErrorResponse(response, "요청 데이터를 처리할 수 없습니다: " + e.getMessage());
         }
-    }
+    }*/
 
     /**
      * 에러 응답을 보내는 헬퍼 메서드

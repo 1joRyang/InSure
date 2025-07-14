@@ -250,7 +250,98 @@ public class UserController {
 	    System.out.println(">>>>> 1. 화면에서 입력받은 id: " + user_id);
 	    System.out.println(">>>>> 1. 화면에서 입력받은 simple_pw: " + simple_pw);
 	    
-    try {
+	    try {
+	        // 간편비밀번호 검증
+	        boolean isSimplePasswordValid = userService.checkSimplePassword(user_id, simple_pw);
+	        System.out.println(">>>>> 간편비밀번호 검증 결과: " + isSimplePasswordValid);
+	
+	        if (isSimplePasswordValid) {
+	            // 비밀번호 검증 성공
+	            UserVo searchUserVo = new UserVo();
+	            searchUserVo.setUserId(user_id);
+	            UserVo userInfo = userService.selectUser(searchUserVo);
+	
+	            if (userInfo == null) {
+	                throw new Exception("인증 후 사용자 정보를 조회하는데 실패했습니다.");
+	            }
+	
+	            int customerId = userInfo.getId();
+	            System.out.println(">>>>> DB에서 조회한 사용자 ID: " + customerId);
+	
+	            // 세션에 로그인 정보 저장
+	            request.getSession().setAttribute("connectedUserId", customerId);
+	
+	            // 응답 JSON 생성 (성공 응답 구조 통일)
+	            Map<String, Object> elData = new HashMap<>();
+	            Map<String, Object> responseMap = new HashMap<>();
+	            
+	            // JavaScript에서 기대하는 필드들 포함
+	            responseMap.put("id", customerId);
+	            responseMap.put("userId", userInfo.getUserId());
+	            responseMap.put("resultCode", "OK");  // 성공 코드 추가
+	            responseMap.put("status", "SUCCESS");
+	            
+	            elData.put("dma_login_response", responseMap);
+	
+	            ObjectMapper mapper = new ObjectMapper();
+	            String jsonResponse = mapper.writeValueAsString(elData);
+	            
+	            System.out.println(">>>>> SimpleLogin 성공 응답: " + jsonResponse);
+	
+	            response.setContentType("application/json");
+	            response.setCharacterEncoding("UTF-8");
+	            response.getWriter().write(jsonResponse);
+	
+	        } else {
+	            // 비밀번호 검증 실패
+	            System.out.println(">>>>> 간편비밀번호 인증 실패");
+	            
+	            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	            
+	            // 실패 응답도 dma_login_response 구조로 통일
+	            Map<String, Object> elData = new HashMap<>();
+	            Map<String, Object> responseMap = new HashMap<>();
+	            responseMap.put("resultCode", "FAIL");
+	            responseMap.put("resultMessage", "아이디 또는 간편 비밀번호가 올바르지 않습니다.");
+	            responseMap.put("status", "FAIL");
+	            
+	            elData.put("dma_login_response", responseMap);
+	
+	            ObjectMapper mapper = new ObjectMapper();
+	            String jsonErrorResponse = mapper.writeValueAsString(elData);
+	            
+	            System.out.println(">>>>> SimpleLogin 실패 응답: " + jsonErrorResponse);
+	            
+	            response.setContentType("application/json");
+	            response.setCharacterEncoding("UTF-8");
+	            response.getWriter().write(jsonErrorResponse);
+	        }
+
+	    } catch (Exception e) {
+	        System.out.println(">>>>> SimpleLogin 처리 중 오류: " + e.getMessage());
+	        e.printStackTrace();
+	        
+	        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	        
+	        // 오류 응답도 dma_login_response 구조로 통일
+	        Map<String, Object> elData = new HashMap<>();
+	        Map<String, Object> responseMap = new HashMap<>();
+	        responseMap.put("resultCode", "ERROR");
+	        responseMap.put("resultMessage", "로그인 처리 중 오류가 발생했습니다.");
+	        responseMap.put("status", "ERROR");
+	        
+	        elData.put("dma_login_response", responseMap);
+	
+	        ObjectMapper mapper = new ObjectMapper();
+	        String jsonErrorResponse = mapper.writeValueAsString(elData);
+	        
+	        response.setContentType("application/json");
+	        response.setCharacterEncoding("UTF-8");
+	        response.getWriter().write(jsonErrorResponse);
+	    }
+	}
+	    
+    /*try {
         // 2. 로직 최적화: 비밀번호 검증을 먼저 수행합니다.
         // 이 메서드가 '사용자 없음'과 '비밀번호 틀림'을 모두 처리해줍니다.
         boolean isSimplePasswordValid = userService.checkSimplePassword(user_id, simple_pw);
@@ -322,7 +413,7 @@ public class UserController {
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(jsonErrorResponse);
     }
-}
+}*/
 
     /**
      * 간편비밀번호를 등록(임시저장)한다. (1단계)
