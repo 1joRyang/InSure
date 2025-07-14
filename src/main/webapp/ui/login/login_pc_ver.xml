@@ -11,20 +11,25 @@
         <xf:model>
 
         	<w2:dataCollection baseNode="map">
-        		<w2:dataMap baseNode="map" id="dataMap1">
+        		<w2:dataMap baseNode="map" id="dma_login_request">
         			<w2:keyInfo>
-        				<w2:key dataType="text" name="name1" id="key1"></w2:key>
-        				<w2:key dataType="text" name="name2" id="key2"></w2:key>
-        				<w2:key dataType="text" name="name3" id="key3"></w2:key>
+        				<w2:key dataType="text" name="실무자아이디" id="empNo"></w2:key>
+        				<w2:key dataType="text" name="비밀번호" id="empPw"></w2:key>
+        				<w2:key dataType="text" name="로그인 타입" id="loginType"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_login_response">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="실무자아이디" id="empNo"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
         	</w2:dataCollection>
 
         	<w2:workflowCollection />
 
-        	<xf:submission id="sbm_EmployeeLogin" action="/InsWebApp/EmployeeLogin.pwkjson" method="post" mediatype="application/json" ref="" target=""
+        	<xf:submission id="sbm_EmployeeLogin" action="/InsWebApp/EmployeeLogin.pwkjson" method="post" mediatype="application/json" ref='data:json,[{"id":"dma_login_request","key":"elData"},{"id":"dma_login_response","key":"elData"}]' target=""
         		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
-        		ev:submitdone="" ev:submiterror="" abortTrigger="">
+        		ev:submitdone="scwin.sbm_EmployeeLogin_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
 
@@ -34,13 +39,189 @@
                 
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
-	
+	// 1. dma_login_request 데이터맵을 초기화합니다.
+    dma_login_request.set("empNo", "");
+    dma_login_request.set("empPw", "");
+
+    // 2. 이 페이지는 직원 로그인 전용이므로, loginType을 'EMPLOYEE'로 미리 설정합니다.
+    dma_login_request.set("loginType", "EMPLOYEE");
+
+    // 3. 페이지 로드 시 아이디 입력창에 포커스를 줍니다.
+    ibx_empNo.focus();
 };
 
-scwin.trigger1_login_onclick = function (e) {
+/**
+ * 로그인 버튼(trigger)을 클릭했을 때 실행되는 함수입니다.
+ * 입력값 유효성을 검사하고, 서버에 로그인을 요청합니다.
+ */
+scwin.trigger1_login_onclick = function(e) {
+    // 1. 아이디 입력값 검증
+    if (dma_login_request.get("empNo") === "") {
+        alert("아이디를 입력해주세요.");
+        ibx_empNo.focus();
+        return;
+    }
 
+    // 2. 비밀번호 입력값 검증
+    if (dma_login_request.get("empPw") === "") {
+        alert("비밀번호를 입력해주세요.");
+        ibx_empPw.focus(); 
+        return;
+    }
+
+    // 3. 디버깅을 위한 로그 출력
+    console.log("전송할 데이터:", dma_login_request.getJSON());
+    
+
+    // . 유효성 검사를 통과하면 sbm_EmployeeLogin 서브미션을 실행하여 서버에 데이터를 전송합니다.
+     var reqData = dma_login_request.getJSON();
+    $c.sbm.execute(sbm_EmployeeLogin, reqData);
 };
-]]></script>
+
+scwin.sbm_EmployeeLogin_submitdone = function (e) {
+    
+    try {
+        console.log("서버 응답:", e); // 디버깅용
+
+        //성공 여부를 응답받은 JSON 데이터의 존재 유무로 직접 확인합니다.
+        // 서버가 dma_login_response 데이터를 정상적으로 보냈다면 성공으로 간주합니다.
+        if (e && e.responseJSON && e.responseJSON.dma_login_response) {
+            const loginResponse = e.responseJSON.dma_login_response;
+
+             // Employee 객체 생성
+             const employee = {
+                empNo: loginResponse.empNo,     
+                empName: loginResponse.empName,   
+                status: loginResponse.empStatus,     
+                deptId: loginResponse.deptId, 
+                role: loginResponse.role
+            };
+
+            // Employee 로그인 시 모든 기존 로그인 정보 삭제
+            localStorage.removeItem("user");
+            localStorage.removeItem("simple");
+            localStorage.setItem("employee", JSON.stringify(employee));
+            
+            console.log("Employee 로그인 완료, USER/SIMPLE 정보 삭제됨");
+            console.log("로컬스토리지에 저장된 employee:", employee);
+            
+
+            // 메인 페이지로 이동
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml";
+            
+        } else {
+            // 로그인 실패 시 처리
+            // (서버에서 dma_login_response를 보내지 않았거나, 통신 오류 발생)
+            // 실패 메시지는 프레임워크가 자동으로 띄워주므로, 여기서는 UI만 처리합니다.
+            dma_login_request.set("empPw", "");
+            ibx_empPw.focus();
+        }
+    } catch (error) {
+        console.error("로그인 결과 처리 중 오류가 발생했습니다:", error);
+        alert("로그인 결과를 처리하는 중 오류가 발생했습니다.");
+    }
+};
+
+/**
+ * Employee 로그인 에러 처리 함수
+ */
+scwin.sbm_EmployeeLogin_submiterror = function(e) {
+    console.error("Employee 로그인 서브미션 에러:", e);
+    alert("서버와의 통신 중 오류가 발생했습니다.");
+    dma_login_request.set("empPw", "");
+    ibx_empPw.focus();
+};
+
+
+
+// 로컬스토리지에서 employee 읽기
+function getEmployee() {
+    try {
+        const employeeData = localStorage.getItem("employee");
+        return employeeData ? JSON.parse(employeeData) : null;
+    } catch (error) {
+        console.error("employee 데이터 읽기 실패:", error);
+        return null;
+    }
+}
+
+/**
+ * 현재 로그인 상태 확인 함수 (3가지 타입 지원)
+ */
+function getCurrentLoginType() {
+    const user = localStorage.getItem("user");
+    const simple = localStorage.getItem("simple");
+    const employee = localStorage.getItem("employee");
+    
+    // 우선순위: EMPLOYEE > SIMPLE > USER
+    if (employee) {
+        return { type: "EMPLOYEE", data: JSON.parse(employee) };
+    } else if (simple) {
+        return { 
+            type: "SIMPLE", 
+            data: JSON.parse(simple), 
+            userInfo: user ? JSON.parse(user) : null 
+        };
+    } else if (user) {
+        return { type: "USER", data: JSON.parse(user) };
+    } else {
+        return { type: "NONE", data: null };
+    }
+}
+
+/**
+ * 로그인 권한 체크
+ */
+function checkLoginPermission(requiredType) {
+    const currentLogin = getCurrentLoginType();
+    
+    switch (requiredType) {
+        case "USER":
+            return ["USER", "SIMPLE", "EMPLOYEE"].includes(currentLogin.type);
+        case "SIMPLE":
+            return ["SIMPLE", "EMPLOYEE"].includes(currentLogin.type);
+        case "EMPLOYEE":
+            return currentLogin.type === "EMPLOYEE";
+        default:
+            return false;
+    }
+}
+
+/**
+ * 통합 로그아웃 함수
+ */
+function logout() {
+    const currentLogin = getCurrentLoginType();
+    
+    // 모든 로그인 정보 삭제
+    localStorage.removeItem("user");
+    localStorage.removeItem("simple");
+    localStorage.removeItem("employee");
+    
+    console.log("모든 로그인 정보 삭제됨");
+    
+    // 로그인 타입별 로그아웃 처리
+    if (currentLogin.type === "EMPLOYEE") {
+        // Employee 로그아웃 후 Employee 로그인 페이지로
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/login_pc_ver.xml";
+    } else {
+        // USER/SIMPLE 로그아웃 후 user 로그인 페이지로
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/insure_login_mobile.xml";
+    }
+}
+
+/**
+ * Employee 권한 체크 (Employee 전용 페이지에서 사용)
+ */
+function checkEmployeeAuth() {
+    const currentLogin = getCurrentLoginType();
+    if (currentLogin.type !== "EMPLOYEE") {
+        alert("Employee 권한이 필요합니다.");
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/login_pc_ver.xml";
+        return false;
+    }
+    return true;
+}]]></script>
             
     </head>
         
@@ -70,7 +251,7 @@ scwin.trigger1_login_onclick = function (e) {
 
     						<w2:textbox class="tit" for="user_id" id="" label="아이디" style="" tagname="label" />
 
-    						<xf:input adjustMaxLength="false" id="" placeholder="아이디를 입력해주세요." style="" />
+    						<xf:input adjustMaxLength="false" id="ibx_empNo" placeholder="아이디를 입력해주세요." style="" ref="data:dma_login_request.empNo"/>
 
     					</xf:group>
 
@@ -80,7 +261,7 @@ scwin.trigger1_login_onclick = function (e) {
 
     						<xf:group class="login_form" id="">
 
-    							<xf:input adjustMaxLength="false" id="" placeholder="비밀번호를 입력해주세요." style="" type="password" />
+    							<xf:input adjustMaxLength="false" id="ibx_empPw" placeholder="비밀번호를 입력해주세요." style="" type="password" ref="data:dma_login_request.empPw"/>
 
     							<w2:anchor class="btn_login_password" id="" outerDiv="false" style="">
 
@@ -142,8 +323,6 @@ scwin.trigger1_login_onclick = function (e) {
 
 
     		</xf:group>
-
-    		<xf:group style="width:454px;height:378px;" id=""></xf:group>
     	</xf:group>
 
     	

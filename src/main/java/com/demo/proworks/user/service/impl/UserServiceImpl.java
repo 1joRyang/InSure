@@ -3,12 +3,15 @@ package com.demo.proworks.user.service.impl;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import com.demo.proworks.user.service.UserService;
 import com.demo.proworks.user.vo.UserVo;
+import com.inswave.elfw.login.LoginInfo;
+import com.demo.proworks.emp.vo.LoginVo;
 import com.demo.proworks.user.dao.UserDAO;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -99,40 +102,147 @@ public class UserServiceImpl implements UserService {
      * @return 성공하면 true, 실패하면 false
      */
     public boolean checkSimplePassword(String userId, String inputPin) throws Exception {
-    
+        
+	
+	    UserVo param = new UserVo();
+	    param.setUserId(userId);
+	
 
-
-	    System.out.println("[Service] 전달받은 ID: " + userId);
-	    System.out.println("[Service] 전달받은 PIN: " + inputPin);
-    
-
-        // 1. DB에서 사용자 정보를 가져오기 위해 파라미터 준비
-        UserVo param = new UserVo();
-        param.setUserId(userId);
-
-        // 2. 기존의 selectUser 메소드를 호출해서 DB로부터 사용자 정보를 가져옴
-        UserVo storedUser = this.selectUser(param);
-
-        // 3. 비밀번호 비교 로직
-        if (storedUser == null) {
-            // DB에 해당 ID의 사용자가 아예 없음
-            System.out.println("[Service] DB 조회 실패: " + userId + " 사용자를 찾을 수 없음");
-            
-            return false;
-        }
-
-        // DB에 저장된 비밀번호를 꺼냄
-        String dbPin = storedUser.getSimplePw();
-
-        // 사용자가 입력한 비밀번호(inputPin)와 DB 비밀번호(dbPin)가 같은지 비교
-        if (inputPin != null && inputPin.equals(dbPin)) {
-            // 일치하면 성공!
-            return true;
-        } else {
-            // 일치하지 않으면 실패!
-            return false;
-        }
+	    UserVo storedUser = this.selectUser(param);
+	
+	
+	    if (storedUser == null) {
+	        System.out.println("❌ [Service] 사용자를 찾을 수 없음");
+	        return false;
+	    }
+	
+	    String dbPin = storedUser.getSimplePw();
+	
+	    if (inputPin != null && inputPin.equals(dbPin)) {
+	        return true;
+	    } else {
+	        return false;
+	    }
+	        
     }
+    
+    
+
+     /**
+     * 간편비밀번호 등록 여부를 확인한다.
+	 *
+	 * @process
+     * 1. 간편비밀번호 등록 여부를 확인한다.
+     * 2. 등록 여부 결과를 boolean 타입으로 리턴한다.
+	 *
+     * @param userId 사용자 ID
+     * @return 간편비밀번호 등록 여부
+	 * @throws Exception
+     */
+	public boolean hasSimplePassword(String userId) throws Exception {
+		
+		UserVo param = new UserVo();
+	    param.setUserId(userId);
+	    
+	    UserVo storedUser = this.selectUser(param);
+	    
+	    if (storedUser == null) {
+        return false;
+	    }
+	
+		if (storedUser.getSimplePw() == null || storedUser.getSimplePw().trim().isEmpty()) {
+            return false;
+        }
+        return true;
+	}
+	
+    
+    
+     /**
+     * 간편비밀번호 등록한다.(1단계)
+	 *
+	 * @process
+     * 1. 간편비밀번호를 등록한다.
+     * 2. 간편비밀번호를 암호화하여 세션에 임시 저장한다.( 1단계 )
+	 *
+	 * @param userId 사용자 ID
+	 * @param rawSimplePw 사용자가 입력한 원본 PIN
+	 * @param session 현재 HttpSession
+     * @return 간편비밀번호 등록 여부
+	 * @throws Exception
+     */   	
+	public void temporarilyStorePin(String userId, String rawSimplePw, HttpSession session) throws Exception {
+	    
+	    // 1. 세션의 로그인 정보와 요청 사용자가 일치하는지 검증	    
+	    //LoginInfo loggedInUser = (LoginInfo) session.getAttribute("loginInfo");
+	    		   
+	    
+	    /*if (loggedInUser == null || !loggedInUser.getUserId().equals(userId)) {
+	        throw new Exception("인증 정보가 올바르지 않습니다.");
+	    }
+	
+	    // 2. PIN 암호화
+	    String hashedSimplePw = passwordEncoder.encode(rawSimplePw);
+	
+	    // 3. 암호화된 PIN을 세션에 임시 저장
+	    session.setAttribute("tempSimplePw", hashedSimplePw);
+	     */
+	     
+	     
+        String hashedSimplePw = passwordEncoder.encode(rawSimplePw);
+
+
+	    session.setAttribute("tempSimplePw", hashedSimplePw);
+	
+	    System.out.println("### PIN 임시 저장 성공! UserId: " + userId);
+	}
+	
+	
+	
+	/**
+	 * 간편비밀번호 등록한다.(2단계)
+	 * @process
+     * 1. 간편비밀번호를 등록한다.
+     * 2. 입력된 PIN과 세션의 임시 PIN을 비교하고, 일치하면 DB에 최종 저장한다.( 2단계 )
+	 *
+	 * @param userId 사용자 ID
+	 * @param confirmationPin 사용자가 확인을 위해 입력한 PIN
+	 * @param session 현재 HttpSession
+	 * @return 성공 시 true, 실패 시 false
+	 * @throws Exception
+	 */
+	public boolean confirmAndSavePin(String userId, String confirmationPin, HttpSession session) throws Exception {
+	    // 1. 세션에서 임시 저장된 암호화 PIN 가져오기
+	    String tempHashedPin = (String) session.getAttribute("tempSimplePw");
+	    //UserVo loggedInUser = (UserVo) session.getAttribute("loginInfo");
+	  
+	
+	    /* 2. 유효성 검증
+	    if (loggedInUser == null || !loggedInUser.getUserId().equals(userId) || tempHashedPin == null) {
+	        return false; // 비정상 접근
+	    }*/
+	
+	    // 3. 입력된 확인 PIN과 임시 PIN 비교
+	    if (passwordEncoder.matches(confirmationPin, tempHashedPin)) {
+	    
+	        UserVo updateUserVo = new UserVo();
+		    updateUserVo.setUserId(userId);
+		    updateUserVo.setSimplePw(tempHashedPin); 
+		    
+	        // 4. 일치하면 DB에 최종 저장
+	        userDAO.updateSimplePassword(updateUserVo);
+	        
+	        // 5. 세션의 임시 비밀번호 제거
+	        session.removeAttribute("tempSimplePw");
+	        
+	        return true; // 성공
+	    }
+	
+	    return false; // 불일치
+	}
+
+
+
 
     /**
      * 사용자정보를 등록 처리 한다.

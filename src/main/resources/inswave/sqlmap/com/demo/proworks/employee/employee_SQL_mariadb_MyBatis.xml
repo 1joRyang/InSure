@@ -25,6 +25,7 @@
             <if test="status  != null"> , STATUS   </if>
             <if test="deptId != null"> , DEPT_ID  </if>
             <if test="role    != null"> , ROLE     </if>
+            <if test="empPw    != null"> , EMP_PW     </if>
         )
         VALUES  
         ( 
@@ -33,6 +34,7 @@
             <if test="status  != null"> , #{status}   </if>
             <if test="deptId != null"> , #{deptId}  </if>
             <if test="role    != null"> , #{role}     </if> 
+            <if test="empPw    != null"> , #{empPw}      </if>
         )          
     </insert>	
 	
@@ -45,7 +47,8 @@
             <if test="empName!= null"> , EMP_NAME = #{empName} </if>
             <if test="status  != null"> , STATUS   = #{status}   </if>
             <if test="deptId != null"> , DEPT_ID  = #{deptId}  </if>
-            <if test="role    != null"> , ROLE     = #{role}     </if>                 
+            <if test="role    != null"> , ROLE     = #{role}     </if>
+            <if test="empPw    != null"> , EMP_PW  = #{empPw}   </if>                 
         WHERE   
                 EMP_NO   = #{empNo}  
     </update>
@@ -61,7 +64,7 @@
     <select id="selectEmployee" parameterType="com.demo.proworks.employee.vo.EmployeeVo" resultType="com.demo.proworks.employee.vo.EmployeeVo">
     	<!-- 실무자,관리자정보를 상세 조회한다. -->	
         SELECT     /* QueryID : com.demo.proworks.employee.selectEmployee */
-            EMP_NO as empNo, EMP_NAME as empName, STATUS as status, DEPT_ID as deptId, ROLE as role
+            EMP_NO as empNo, EMP_NAME as empName, STATUS as status, DEPT_ID as deptId, ROLE as role, EMP_PW as empPw
         FROM EMPLOYEE 
         WHERE 
                 EMP_NO   = #{empNo}  			
@@ -70,7 +73,7 @@
     <select id="selectListEmployee" parameterType="com.demo.proworks.employee.vo.EmployeeVo" resultType="com.demo.proworks.employee.vo.EmployeeVo">
     	<!-- 실무자,관리자정보 목록을 조회한다. -->
            SELECT    /* QueryID : com.demo.proworks.employee.selectListEmployee */
-               EMP_NO as empNo, EMP_NAME as empName, STATUS as status, DEPT_ID as deptId, ROLE as role		       
+               EMP_NO as empNo, EMP_NAME as empName, STATUS as status, DEPT_ID as deptId, ROLE as role, EMP_PW as empPw	       
            FROM (
                SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
                FROM (				
@@ -101,7 +104,8 @@
 		EMP_NAME AS empName,
 		STATUS AS status,
 		DEPT_ID AS deptId,
-		ROLE AS role
+		ROLE AS role,
+		EMP_PW AS empPw
 		FROM EMPLOYEE
 		WHERE 1=1
 		<if test="deptId != null and deptId != ''">
@@ -128,7 +132,8 @@
 			EMP_NAME as empName, 
 			STATUS as status, 
 			DEPT_ID as deptId, 
-			ROLE as role
+			ROLE as role,
+			EMP_PW AS empPw
 		FROM EMPLOYEE
 		WHERE 1=1
 			<if test="deptId != null and deptId != ''">
@@ -159,7 +164,8 @@
 			EMP_NAME as empName, 
 			STATUS as status, 
 			DEPT_ID as deptId, 
-			ROLE as role
+			ROLE as role,
+			EMP_PW AS empPw
 		FROM EMPLOYEE
 		WHERE DEPT_ID = #{deptId}
 		  AND STATUS = '재직중'
@@ -178,7 +184,8 @@
 			EMP_NAME as empName, 
 			STATUS as status, 
 			DEPT_ID as deptId, 
-			ROLE as role
+			ROLE as role,
+			EMP_PW AS empPw
 		FROM EMPLOYEE
 		WHERE DEPT_ID = #{deptId}
 		  AND STATUS = '재직중'
