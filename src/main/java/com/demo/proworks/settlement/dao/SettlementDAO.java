@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import com.inswave.elfw.exception.ElException;
 import com.demo.proworks.settlement.vo.SettlementVo;
+import com.demo.proworks.settlement.vo.SettlementTreatmentVo;
 import com.demo.proworks.settlement.dao.SettlementDAO;
 
 /**  
@@ -87,6 +88,17 @@ public class SettlementDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbs
      */
     public int deleteSettlement(SettlementVo vo) throws ElException {
         return delete("com.demo.proworks.settlement.deleteSettlement", vo);
+    }
+
+    /**
+     * 정산정보와 치료정보를 조인하여 조회한다.
+     *  
+     * @param  SettlementTreatmentVo 정산치료정보
+     * @return List<SettlementTreatmentVo> 정산치료정보
+     * @throws ElException
+     */
+    public List<SettlementTreatmentVo> selectSettlementTreatment(SettlementTreatmentVo vo) throws ElException {
+        return (List<SettlementTreatmentVo>) list("com.demo.proworks.settlement.selectSettlementTreatment", vo);
     }
 
 }
