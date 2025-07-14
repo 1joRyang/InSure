@@ -10,8 +10,8 @@
         	<w2:dataCollection baseNode="map">
         		<w2:dataList baseNode="list" repeatNode="map" id="dl_manager" saveRemovedData="true">
         			<w2:columnInfo>
-        				<w2:column dataType="text" name="empno" id="empno"></w2:column>
-        				<w2:column dataType="text" name="emp_name" id="emp_name"></w2:column>
+        				<w2:column dataType="text" name="empNo" id="empNo"></w2:column>
+        				<w2:column dataType="text" name="empName" id="empName"></w2:column>
         			</w2:columnInfo>
         		</w2:dataList>
         		<w2:dataMap baseNode="map" id="dm_approvalReq">
@@ -21,41 +21,39 @@
         				<w2:key dataType="text" name="manager_no" id="manager_no"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dm_deptName">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="dept_name" id="dept_name"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
-        	<xf:submission id="sbm_insertApprovalReq" action="" method="post" mediatype="application/json"
+        	<xf:submission id="sbm_insertApprovalReq" action="/InsWebApp/APPROVALREQIns.pwkjson" method="post" mediatype="application/json"
         		ref='data:json,{"id":"dm_approvalReq","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
         		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_getManager" action="" method="post" mediatype="application/json" ref=""
-        		target='data:json,{"id":"dl_manager","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+        	<xf:submission id="sbm_getManager" action="/InsWebApp/EmployeeForRule.pwkjson" method="post" mediatype="application/json" ref=""
+        		target='data:json,{"id":"dl_manager","key":"employeeVoList"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
         		mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getDeptName" action="/InsWebApp/insdept0001UpdView.pwkjson" method="post" mediatype="application/json"
+        		ref="" target='data:json,{"id":"dm_deptName","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg=""
+        		ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
         <script lazy="false" type="text/javascript"><![CDATA[// todo: localStroage 저장 로직 지우기
-const employee = {
-  empNo: 101001,
-  empName: '홍길동',
-  deptId: 10,
-  role: '실무자'
-};
-
-// 객체를 JSON 문자열로 변환 후 저장
-localStorage.setItem('employee', JSON.stringify(employee));
-
-
 
 scwin.onpageload = function() {
-    scwin.emp = localStorage.getItem("employee");
+    scwin.emp = JSON.parse(localStorage.getItem("employee"));
+    console.log(scwin.emp)
 	ipt_claimNo.setValue(localStorage.getItem("claimNo"));
     ipt_emp.setValue(scwin.emp.empName);
 
-    // todo: 부서 이름 가져오기
+    $c.sbm.execute(sbm_getDeptName, {"elData": {"dept_id": scwin.emp.deptId}});
 
-    // todo: manager 가져오기
-    $c.sbm.execute(sbm_getManager);
+    $c.sbm.execute(sbm_getManager, {"elData": {"deptId": scwin.emp.deptId, "role": "관리자"}});
 };
 
 scwin.btn_close_onclick = function (e) {
@@ -64,10 +62,12 @@ scwin.btn_close_onclick = function (e) {
 };
 
 scwin.btn_confirm_onclick = function (e) {
-    // todo: insert
     dm_approvalReq.set("emp_no", scwin.emp.empNo);
-    console.log(dm_approvalReq.getJSON());
     $c.sbm.execute(sbm_insertApprovalReq);
+};
+
+scwin.sbm_insertApprovalReq_submitdone = function (e) {
+    $p.closePopup();
 };
 ]]></script>
     </head>
@@ -89,8 +89,8 @@ scwin.btn_confirm_onclick = function (e) {
     		<xf:group id="" style="margin-top: 20px;display: flex;gap: 15px;">
     			<xf:group style="flex: 1;">
     				<w2:textbox label="부서" style="display: block; margin-bottom: 5px;  font-weight: bold; color: #555;"></w2:textbox>
-    				<xf:input class="" id="" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    					meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" readOnly="true">
+    				<xf:input class="" id="ipt_dept" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
+    					meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" readOnly="true" ref="data:dm_deptName.dept_name">
     				</xf:input>
     			</xf:group>
     			<xf:group style="flex: 1;">
@@ -100,8 +100,8 @@ scwin.btn_confirm_onclick = function (e) {
     					style="width: 100%;" submenuSize="auto">
     					<xf:choices>
     						<xf:itemset nodeset="data:dl_manager">
-    							<xf:label ref="emp_name"></xf:label>
-    							<xf:value ref="empno"></xf:value>
+    							<xf:label ref="empName"></xf:label>
+    							<xf:value ref="empNo"></xf:value>
     						</xf:itemset>
     					</xf:choices>
     				</xf:select1>

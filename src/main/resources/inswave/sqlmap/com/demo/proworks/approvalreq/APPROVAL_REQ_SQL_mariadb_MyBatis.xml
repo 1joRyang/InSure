@@ -20,24 +20,18 @@
     		
         INSERT INTO APPROVAL_REQ   /* QueryID : com.demo.proworks.approvalreq.insertApprovalReq */
         ( 
-            APPROVAL_ID
-            <if test="claim_no     != null"> , CLAIM_NO      </if>
+            <if test="claim_no     != null">   CLAIM_NO      </if>
             <if test="emp_no       != null"> , EMP_NO        </if>
             <if test="manager_no   != null"> , MANAGER_NO    </if>
-            <if test="status       != null"> , STATUS        </if>
-            <if test="req_date     != null"> , REQ_DATE      </if>
-            <if test="process_date != null"> , PROCESS_DATE  </if>
+             , STATUS  
             <if test="approval_memo!= null"> , APPROVAL_MEMO </if>
         )
         VALUES  
         ( 
-            #{approval_id}
-            <if test="claim_no     != null"> , #{claim_no}      </if>
+            <if test="claim_no     != null">  #{claim_no}      </if>
             <if test="emp_no       != null"> , #{emp_no}        </if>
             <if test="manager_no   != null"> , #{manager_no}    </if>
-            <if test="status       != null"> , #{status}        </if>
-            <if test="req_date     != null"> , #{req_date}      </if>
-            <if test="process_date != null"> , #{process_date}  </if>
+            ,'결재 대기'
             <if test="approval_memo!= null"> , #{approval_memo} </if> 
         )          
     </insert>	
@@ -52,8 +46,6 @@
             <if test="emp_no       != null"> , EMP_NO        = #{emp_no}        </if>
             <if test="manager_no   != null"> , MANAGER_NO    = #{manager_no}    </if>
             <if test="status       != null"> , STATUS        = #{status}        </if>
-            <if test="req_date     != null"> , REQ_DATE      = #{req_date}      </if>
-            <if test="process_date != null"> , PROCESS_DATE  = #{process_date}  </if>
             <if test="approval_memo!= null"> , APPROVAL_MEMO = #{approval_memo} </if>                 
         WHERE   
                 APPROVAL_ID   = #{approval_id}  
@@ -70,7 +62,7 @@
     <select id="selectApprovalReq" parameterType="com.demo.proworks.approvalreq.vo.ApprovalReqVo" resultType="com.demo.proworks.approvalreq.vo.ApprovalReqVo">
     	<!-- 결재요청를 상세 조회한다. -->	
         SELECT     /* QueryID : com.demo.proworks.approvalreq.selectApprovalReq */
-            APPROVAL_ID, CLAIM_NO, EMP_NO, MANAGER_NO, STATUS, REQ_DATE, PROCESS_DATE, APPROVAL_MEMO
+            APPROVAL_ID, CLAIM_NO, EMP_NO, MANAGER_NO, STATUS, APPROVAL_MEMO
         FROM APPROVAL_REQ 
         WHERE 
                 APPROVAL_ID   = #{approval_id}  			
@@ -79,7 +71,7 @@
     <select id="selectListApprovalReq" parameterType="com.demo.proworks.approvalreq.vo.ApprovalReqVo" resultType="com.demo.proworks.approvalreq.vo.ApprovalReqVo">
     	<!-- 결재요청 목록을 조회한다. -->
            SELECT    /* QueryID : com.demo.proworks.approvalreq.selectListApprovalReq */
-               APPROVAL_ID, CLAIM_NO, EMP_NO, MANAGER_NO, STATUS, REQ_DATE, PROCESS_DATE, APPROVAL_MEMO		       
+               APPROVAL_ID, CLAIM_NO, EMP_NO, MANAGER_NO, STATUS, APPROVAL_MEMO		       
            FROM (
                SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
                FROM (				

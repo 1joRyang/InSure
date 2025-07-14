@@ -6,49 +6,47 @@ import com.inswave.elfw.annotation.ElVoField;
 import com.fasterxml.jackson.annotation.JsonFilter;
 
 @JsonFilter("elExcludeFilter")
-@ElDto(FldYn = "", logicalName = "결재요청")
+@ElDto(FldYn = "", delimeterYn = "", logicalName = "결재요청")
 public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
     private static final long serialVersionUID = 1L;
 
-    @ElDtoField(logicalName = "approval_id", physicalName = "approval_id", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    public ApprovalReqVo(){
+    }
+
+    @ElDtoField(logicalName = "approval_id", physicalName = "approval_id", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String approval_id;
 
-    @ElDtoField(logicalName = "claim_no", physicalName = "claim_no", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "claim_no", physicalName = "claim_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String claim_no;
 
-    @ElDtoField(logicalName = "emp_no", physicalName = "emp_no", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "emp_no", physicalName = "emp_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String emp_no;
 
-    @ElDtoField(logicalName = "manager_no", physicalName = "manager_no", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "manager_no", physicalName = "manager_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String manager_no;
 
-    @ElDtoField(logicalName = "status", physicalName = "status", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "status", physicalName = "status", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String status;
 
-    @ElDtoField(logicalName = "req_date", physicalName = "req_date", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
-    private String req_date;
-
-    @ElDtoField(logicalName = "process_date", physicalName = "process_date", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
-    private String process_date;
-
-    @ElDtoField(logicalName = "approval_memo", physicalName = "approval_memo", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "approval_memo", physicalName = "approval_memo", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String approval_memo;
 
-    @ElDtoField(logicalName = "search_claim_no", physicalName = "SC_claim_no", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "search_claim_no", physicalName = "SC_claim_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String SC_claim_no;
 
-    @ElDtoField(logicalName = "search_emp_no", physicalName = "SC_emp_no", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "search_emp_no", physicalName = "SC_emp_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String SC_emp_no;
 
-    @ElDtoField(logicalName = "search_manager_no", physicalName = "SC_manager_no", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "search_manager_no", physicalName = "SC_manager_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String SC_manager_no;
 
-    @ElDtoField(logicalName = "search_status", physicalName = "SC_status", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "search_status", physicalName = "SC_status", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String SC_status;
 
     @ElVoField(physicalName = "approval_id")
     public String getApproval_id(){
-        return approval_id;
+        String ret = this.approval_id;
+        return ret;
     }
 
     @ElVoField(physicalName = "approval_id")
@@ -58,7 +56,8 @@ public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "claim_no")
     public String getClaim_no(){
-        return claim_no;
+        String ret = this.claim_no;
+        return ret;
     }
 
     @ElVoField(physicalName = "claim_no")
@@ -68,7 +67,8 @@ public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "emp_no")
     public String getEmp_no(){
-        return emp_no;
+        String ret = this.emp_no;
+        return ret;
     }
 
     @ElVoField(physicalName = "emp_no")
@@ -78,7 +78,8 @@ public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "manager_no")
     public String getManager_no(){
-        return manager_no;
+        String ret = this.manager_no;
+        return ret;
     }
 
     @ElVoField(physicalName = "manager_no")
@@ -88,7 +89,8 @@ public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "status")
     public String getStatus(){
-        return status;
+        String ret = this.status;
+        return ret;
     }
 
     @ElVoField(physicalName = "status")
@@ -96,29 +98,10 @@ public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.status = status;
     }
 
-    @ElVoField(physicalName = "req_date")
-    public String getReq_date(){
-        return req_date;
-    }
-
-    @ElVoField(physicalName = "req_date")
-    public void setReq_date(String req_date){
-        this.req_date = req_date;
-    }
-
-    @ElVoField(physicalName = "process_date")
-    public String getProcess_date(){
-        return process_date;
-    }
-
-    @ElVoField(physicalName = "process_date")
-    public void setProcess_date(String process_date){
-        this.process_date = process_date;
-    }
-
     @ElVoField(physicalName = "approval_memo")
     public String getApproval_memo(){
-        return approval_memo;
+        String ret = this.approval_memo;
+        return ret;
     }
 
     @ElVoField(physicalName = "approval_memo")
@@ -128,51 +111,79 @@ public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "SC_claim_no")
     public String getSC_claim_no(){
-        return SC_claim_no;
+        String ret = this.SC_claim_no;
+        return ret;
     }
 
     @ElVoField(physicalName = "SC_claim_no")
-    public void setSC_claim_no(String SC_claim_no) {
+    public void setSC_claim_no(String SC_claim_no){
         this.SC_claim_no = SC_claim_no;
     }
 
     @ElVoField(physicalName = "SC_emp_no")
     public String getSC_emp_no(){
-        return SC_emp_no;
+        String ret = this.SC_emp_no;
+        return ret;
     }
 
     @ElVoField(physicalName = "SC_emp_no")
-    public void setSC_emp_no(String SC_emp_no) {
+    public void setSC_emp_no(String SC_emp_no){
         this.SC_emp_no = SC_emp_no;
     }
 
     @ElVoField(physicalName = "SC_manager_no")
     public String getSC_manager_no(){
-        return SC_manager_no;
+        String ret = this.SC_manager_no;
+        return ret;
     }
 
     @ElVoField(physicalName = "SC_manager_no")
-    public void setSC_manager_no(String SC_manager_no) {
+    public void setSC_manager_no(String SC_manager_no){
         this.SC_manager_no = SC_manager_no;
     }
 
     @ElVoField(physicalName = "SC_status")
     public String getSC_status(){
-        return SC_status;
+        String ret = this.SC_status;
+        return ret;
     }
 
     @ElVoField(physicalName = "SC_status")
-    public void setSC_status(String SC_status) {
+    public void setSC_status(String SC_status){
         this.SC_status = SC_status;
     }
 
     @Override
     public String toString() {
-        return "ApprovalReqVo [approval_id=" + approval_id + ",claim_no=" + claim_no + ",emp_no=" + emp_no + ",manager_no=" + manager_no + ",status=" + status + ",req_date=" + req_date + ",process_date=" + process_date + ",approval_memo=" + approval_memo + ",SC_claim_no=" + SC_claim_no + ",SC_emp_no=" + SC_emp_no + ",SC_manager_no=" + SC_manager_no + ",SC_status=" + SC_status + "]";
+        StringBuilder sb = new StringBuilder();
+        sb.append("ApprovalReqVo [");
+        sb.append("approval_id").append("=").append(approval_id).append(",");
+        sb.append("claim_no").append("=").append(claim_no).append(",");
+        sb.append("emp_no").append("=").append(emp_no).append(",");
+        sb.append("manager_no").append("=").append(manager_no).append(",");
+        sb.append("status").append("=").append(status).append(",");
+        sb.append("approval_memo").append("=").append(approval_memo).append(",");
+        sb.append("SC_claim_no").append("=").append(SC_claim_no).append(",");
+        sb.append("SC_emp_no").append("=").append(SC_emp_no).append(",");
+        sb.append("SC_manager_no").append("=").append(SC_manager_no).append(",");
+        sb.append("SC_status").append("=").append(SC_status);
+        sb.append("]");
+        return sb.toString();
+
     }
 
     public boolean isFixedLengthVo() {
         return false;
     }
+
+    @Override
+    public void _xStreamEnc() {
+    }
+
+
+    @Override
+    public void _xStreamDec() {
+    }
+
 
 }
