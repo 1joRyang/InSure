@@ -1,26 +1,30 @@
-/* 기본 메뉴 항목 스타일 */
+/* 전체 메뉴 항목 스타일 */
 .menu-item {
-    cursor: pointer;
-    padding: 10px;
-    height: 43px; /* padding 포함해서 43px로 맞춤 */
-    display: flex;
-    align-items: center;
     font-size: 14px;
-    color: #333;
-    transition: background-color 0.2s;
-}
-
-/* 메뉴 hover 효과 */
-.menu-item:hover {
-    background-color: #f5f5f5;
+    padding: 10px;
+    height: 23px;
+    line-height: 23px;
+    cursor: pointer;
+    color: black;
+    transition: background-color 0.2s ease;
 }
 
 /* 선택된 메뉴 항목 스타일 */
 .menu-item.selected {
-    background-color: #CFE4F9;
-    color: #003366;
-    border-left: 4px solid #3B82F6; /* 파란색 왼쪽 강조선 */
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
-    font-weight: bold;
+	border-bottom-right-radius: 20px;
+	background-color: rgb(97 199 255 / 49%);
+	border-top-right-radius: 20px;
+	color: #3674B5;
+	font-weight: 600;
+	border-left: 4px solid #3674B5; /* 왼쪽 강조선 */
+}
+
+/* 마우스 오버 효과 */
+.menu-item:hover {
+	border-bottom-right-radius: 20px;
+    background-color: rgb(97 199 255 / 49%);
+	border-top-right-radius: 20px;
+	color: #3674B5;
+	font-weight: 600;
+	border-left: 4px solid #3674B5; /* 왼쪽 강조선 */
 }

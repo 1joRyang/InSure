@@ -23,7 +23,6 @@
             <if test="claim_no     != null">   CLAIM_NO      </if>
             <if test="emp_no       != null"> , EMP_NO        </if>
             <if test="manager_no   != null"> , MANAGER_NO    </if>
-             , STATUS  
             <if test="approval_memo!= null"> , APPROVAL_MEMO </if>
         )
         VALUES  
@@ -31,7 +30,6 @@
             <if test="claim_no     != null">  #{claim_no}      </if>
             <if test="emp_no       != null"> , #{emp_no}        </if>
             <if test="manager_no   != null"> , #{manager_no}    </if>
-            ,'결재 대기'
             <if test="approval_memo!= null"> , #{approval_memo} </if> 
         )          
     </insert>	
@@ -62,7 +60,7 @@
     <select id="selectApprovalReq" parameterType="com.demo.proworks.approvalreq.vo.ApprovalReqVo" resultType="com.demo.proworks.approvalreq.vo.ApprovalReqVo">
     	<!-- 결재요청를 상세 조회한다. -->	
         SELECT     /* QueryID : com.demo.proworks.approvalreq.selectApprovalReq */
-            APPROVAL_ID, CLAIM_NO, EMP_NO, MANAGER_NO, STATUS, APPROVAL_MEMO
+            APPROVAL_ID, CLAIM_NO, EMP_NO, MANAGER_NO, APPROVAL_MEMO
         FROM APPROVAL_REQ 
         WHERE 
                 APPROVAL_ID   = #{approval_id}  			
@@ -71,7 +69,7 @@
     <select id="selectListApprovalReq" parameterType="com.demo.proworks.approvalreq.vo.ApprovalReqVo" resultType="com.demo.proworks.approvalreq.vo.ApprovalReqVo">
     	<!-- 결재요청 목록을 조회한다. -->
            SELECT    /* QueryID : com.demo.proworks.approvalreq.selectListApprovalReq */
-               APPROVAL_ID, CLAIM_NO, EMP_NO, MANAGER_NO, STATUS, APPROVAL_MEMO		       
+               APPROVAL_ID, CLAIM_NO, EMP_NO, MANAGER_NO, APPROVAL_MEMO		       
            FROM (
                SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
                FROM (				
@@ -87,9 +85,6 @@
                         </if>
                         <if test="SC_manager_no != null and SC_manager_no != ''">
                              AND MANAGER_NO like '%${SC_manager_no}%'
-                        </if>
-                        <if test="SC_status != null and SC_status != ''">
-                             AND STATUS like '%${SC_status}%'
                         </if>	     																														
                ) S, (SELECT @ROWNUM := 0) TMP
            ) A
@@ -111,9 +106,6 @@
             </if>
             <if test="SC_manager_no != null and SC_manager_no != ''">
                  AND MANAGER_NO like '%${SC_manager_no}%'
-            </if>
-            <if test="SC_status != null and SC_status != ''">
-                 AND STATUS like '%${SC_status}%'
             </if>
     </select>
 
