@@ -1,16 +1,26 @@
 package com.demo.proworks.employee.web;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.demo.proworks.cmmn.ProworksUserHeader;
 import com.demo.proworks.employee.service.EmployeeService;
 import com.demo.proworks.employee.vo.EmployeeVo;
 import com.demo.proworks.employee.vo.LoginVo;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.demo.proworks.employee.vo.EmployeeListVo;
 
 import com.inswave.elfw.annotation.ElDescription;
@@ -44,22 +54,220 @@ public class EmployeeController {
 	protected LoginProcessor loginProcess;
     
 	/**
-	 * 로그인을 처리한다.
+	 * 직원(실무자/관리자) 로그인을 처리한다.
 	 * @param loginVo 로그인 정보 LoginVo
 	 * @param request 요청 정보 HttpServletRequest
 	 * @throws Exception
 	 */
 	@ElService(key = "EmployeeLogin")
     @RequestMapping(value = "EmployeeLogin")
-    @ElDescription(sub = "실무자로그인", desc = "실무자로그인을 처리한다.")
-    public void login(LoginVo loginVo, HttpServletRequest request) throws Exception {
-    	String id = loginVo.getId();
+    @ElDescription(sub = "실무자/관리자 로그인", desc = "직원 로그인을 처리한다.")
+	public void login(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    
+        try {
+            // 1. 원시 JSON 문자열 읽기
+            StringBuilder sb = new StringBuilder();
+            BufferedReader reader = request.getReader();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            String jsonString = sb.toString();
+            
+            AppLog.debug("받은 JSON 문자열: " + jsonString);
+            
+            // 2. JSON 수동 파싱 (ObjectMapper 사용)
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(jsonString);
+            
+            // 3. 각 필드 추출 (null 체크 포함)
+            String empNo = jsonNode.get("empNo") != null ? jsonNode.get("empNo").asText() : null;
+            String empPw = jsonNode.get("empPw") != null ? jsonNode.get("empPw").asText() : null;
+            String loginType = jsonNode.get("loginType") != null ? jsonNode.get("loginType").asText() : null;
+            
+            AppLog.debug("파싱된 데이터 - empNo: " + empNo + ", empPw: " + empPw + ", loginType: " + loginType);
+            
+            // 4. 입력값 검증
+            if (empNo == null || empNo.trim().isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                sendErrorResponse(response, "아이디가 입력되지 않았습니다.");
+                return;
+            }
+            
+            if (empPw == null || empPw.trim().isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                sendErrorResponse(response, "비밀번호가 입력되지 않았습니다.");
+                return;
+            }
+
+
+            
+            // 프레임워크의 로그인 프로세스를 호출 (UserController와 동일한 순서)
+            LoginInfo info = loginProcess.processLogin(request, empNo, "EMPLOYEE", empPw);
+            
+            System.out.println(" 로그인 결과: " + info.toString());
+
+
+
+			            
+
+
+            if (info.isSuc()) {
+                // 로그인 성공 처리
+                try {
+                    ProworksUserHeader userHeader = (ProworksUserHeader) request.getSession().getAttribute("userHeader");
+
+                    if (userHeader != null) {
+                        Map<String, Object> elData = new HashMap<>();
+                        Map<String, Object> responseMap = new HashMap<>();
+
+                        responseMap.put("status", "SUCCESS");
+                        responseMap.put("empName", userHeader.getTestUserName());
+                        responseMap.put("role", userHeader.getUserRole());
+
+                        elData.put("dma_login_response", responseMap);
+
+                        String jsonResponse = mapper.writeValueAsString(elData);
+
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write(jsonResponse);
+
+                    } else {
+                        throw new Exception("로그인 후 세션 정보를 가져오는 데 실패했습니다.");
+                    }
+
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    AppLog.error("로그인 성공 후 세션 처리 중 에러", e);
+                    sendErrorResponse(response, "로그인 처리 중 오류가 발생했습니다.");
+                }
+
+            } else {
+                // 로그인 실패 처리
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                sendErrorResponse(response, "로그인 실패: 아이디 또는 비밀번호가 올바르지 않습니다.");
+            }
+            
+        } catch (Exception e) {
+            AppLog.error("JSON 파싱 중 오류 발생", e);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            sendErrorResponse(response, "요청 데이터를 처리할 수 없습니다: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 에러 응답을 보내는 헬퍼 메서드
+     */
+    private void sendErrorResponse(HttpServletResponse response, String errorMessage) throws IOException {
+        Map<String, Object> errorData = new HashMap<>();
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("errorMsg", errorMessage);
+        errorData.put("error", errorMap);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonErrorResponse = mapper.writeValueAsString(errorData);
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(jsonErrorResponse);
+    }
+	
+    /*public void login(LoginVo loginVo, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    	//int id = loginVo.getEmpNo();
+    	String id = loginVo.getUserId();
     	String pw = loginVo.getPw();
     	
-    	LoginInfo info = loginProcess.processLogin(request, id, pw);
+    	//LoginInfo info = loginProcess.processLogin(request, id, pw);
     	
-    	AppLog.debug("- Login 정보 : " + info.toString());
-    }
+    	Object[] params = {"EMPLOYEE", pw};
+    	
+    	System.out.println(">>>>> 1. 화면에서 입력받은 id: " + id);
+	    System.out.println(">>>>> 1. 화면에서 입력받은 pw: " + pw);
+    	
+    	// processLogin(request, id, pw, params[0], params[1], ...);
+        LoginInfo info = loginProcess.processLogin(request, id, "EMPLOYEE", pw);
+        AppLog.debug("- Login 정보 : " + info.toString()); 
+    	
+    	 if (info.isSuc()) {
+    	 
+    	 
+    		 	// loginProcess가 세션을 만들지 않는 것에 대비하여, 여기서 직접 세션을 생성합니다.
+		        HttpSession session = request.getSession(true);
+		        
+		        session.setAttribute("loginInfo", info); // info 객체나 user_id 등을 저장
+		        session.setMaxInactiveInterval(30 * 60); // 예: 세션 유효 시간 30분 설정
+		        
+		        System.out.println(">>>>> [DEBUG] 세션 강제 생성 완료! Session ID: " + session.getId());
+		        
+		   try {
+		     
+		        ProworksUserHeader userHeader = (ProworksUserHeader) request.getSession().getAttribute("userHeader");
+		        
+		        
+		         // DB에서 사용자 정보 조회
+		        EmployeeVo searchEmpVo = new EmployeeVo();
+		        searchEmpVo.setEmpNo(id);
+	            EmployeeVo empInfo = employeeService.selectEmployee(searchEmpVo);
+	            
+	            
+	             //if (empInfo != null) {
+	             
+	             if (userHeader != null) {
+	                String employeeId = empInfo.getEmpNo(); // DB에서 가져온 실제 id 값
+	                
+	                
+	                System.out.println(">>>>> DB에서 조회한 실무자 ID: " + employeeId);
+	                
+	                // 로그인 성공 및 세션 정보 조회 성공
+                    Map<String, Object> elData = new HashMap<>();
+                    Map<String, Object> responseMap = new HashMap<>();	              			            
+		            
+		            responseMap.put("status", "SUCCESS");
+                    //responseMap.put("empName", empInfo.getEmpName());
+                    //responseMap.put("role", empInfo.getRole());
+                    responseMap.put("empName", userHeader.getTestUserName());
+                    responseMap.put("role", userHeader.getUserRole());
+                    
+		            elData.put("dma_login_response", responseMap);
+		            
+            
+		            ObjectMapper mapper = new ObjectMapper();
+		            String jsonResponse = mapper.writeValueAsString(elData);
+		
+		            response.setContentType("application/json");
+		            response.setCharacterEncoding("UTF-8");
+		            response.getWriter().write(jsonResponse);
+
+			        } else {
+			            //response.getWriter().write(jsonErrorResponse);
+			             throw new Exception("로그인 후 세션 정보를 가져오는 데 실패했습니다.");
+			        }
+			        
+			    } catch (Exception e) {
+                // 세션 처리 중 발생한 에러에 대한 응답
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                AppLog.error("로그인 성공 후 세션 처리 중 에러", e);
+                // (필요 시 에러 응답 JSON 생성)
+            }
+
+        } else {
+            // 로그인 실패 시 처리
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            Map<String, Object> errorData = new HashMap<>();
+            Map<String, String> errorMap = new HashMap<>();
+            errorMap.put("errorMsg", "로그인 실패: 아이디 또는 비밀번호가 올바르지 않습니다.");
+            errorData.put("error", errorMap);
+
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonErrorResponse = mapper.writeValueAsString(errorData);
+            
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(jsonErrorResponse);
+        }
+    }*/
+
     /**
      * 실무자,관리자정보 목록을 조회합니다.
      *

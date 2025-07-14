@@ -1,5 +1,6 @@
 package com.demo.proworks.cmmn;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +16,8 @@ import com.inswave.elfw.util.ElBeanUtils;
 
 import com.demo.proworks.emp.service.EmpService;
 import com.demo.proworks.emp.vo.EmpVo;
+import com.demo.proworks.employee.service.EmployeeService;
+import com.demo.proworks.employee.vo.EmployeeVo;
 import com.demo.proworks.user.dao.UserDAO;
 import com.demo.proworks.user.service.UserService;
 import com.demo.proworks.user.vo.UserVo;
@@ -97,8 +100,11 @@ public class ProworksLoginAdapter extends LoginAdapter {
 		// Controller에서 보낸 '신호'와 '비밀번호'를 꺼냅니다.
 	    String loginType = (String) params[0];
 	    String rawPassword  = (String) params[1];
-	    System.out.println("id"+loginType);
-	    System.out.println("pw"+rawPassword);
+	    System.out.println("id 입니다 "+id);
+//	    System.out.println("pw"+rawPassword);
+	    System.out.println("로그 " + Arrays.toString(params));
+	    System.out.println((String)params[0]);
+	    System.out.println((String)params[1]);
 	
 	    try {
 	        if ("USER".equals(loginType)) {	            	            
@@ -116,7 +122,6 @@ public class ProworksLoginAdapter extends LoginAdapter {
 			    UserVo userVoParam = new UserVo();
 			
 			    // 2. 컨트롤러에서 전달받은 id 값을 UserVo에 담아줍니다.
-			    //    (이 'id'는 login 메소드의 파라미터로 넘어온 값입니다.)
 			    userVoParam.setUserId(id);
 			    //userVoParam.setPw(rawPassword);
 			
@@ -164,11 +169,25 @@ public class ProworksLoginAdapter extends LoginAdapter {
 	            }*/
 	        } else if ("EMPLOYEE".equals(loginType)) {
 	            // --- 실무자 비밀번호 검증 ---
-	            EmpService empService = (EmpService) ElBeanUtils.getBean("empServiceImpl");
-	            EmpVo resEmpVo = empService.selectEmp(new EmpVo(Integer.parseInt(id)));
-	            if (resEmpVo == null || !rawPassword.equals(String.valueOf(resEmpVo.getMgr()))) {
-	                throw new LoginException("실무자 아이디 또는 비밀번호가 일치하지 않습니다.");
-	            }
+	            EmployeeService empService = (EmployeeService) ElBeanUtils.getBean("employeeServiceImpl");
+	            PasswordEncoder passwordEncoder = (PasswordEncoder) ElBeanUtils.getBean("passwordEncoder");
+	            
+	            
+	            EmployeeVo empVoParam = new EmployeeVo();
+	            empVoParam.setEmpNo(id);
+	            System.out.println("empVoParam: "+ empVoParam);
+	            EmployeeVo storedEmp = empService.selectEmployee(empVoParam);
+	            
+	            System.out.println("storedEmp " + storedEmp);
+	          
+	             // 3. 직원 존재 여부 및 암호화된 비밀번호를 비교합니다.
+			    // ※ EmpVo에 DB의 암호화된 비밀번호를 반환하는 getPassword() 메소드가 있다고 가정합니다.
+			    if (storedEmp == null || !passwordEncoder.matches(rawPassword, storedEmp.getEmpPw())) {
+			        throw new LoginException("실무자 아이디 또는 비밀번호가 일치하지 않습니다.");
+			    }
+	            
+	        
+
 	        } else {
 	            throw new LoginException("지원하지 않는 로그인 방식입니다.");
 	        }

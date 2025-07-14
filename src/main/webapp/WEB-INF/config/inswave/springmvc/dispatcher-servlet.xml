@@ -21,7 +21,7 @@
     <bean id="controllerInterceptorAdvice" class="com.inswave.elfw.intercept.ElControllerInterceptor" />          
 	<aop:config>        
 	    <aop:pointcut id="controllerInterceptorPointcut" 
-	        expression="execution(* com.demo..*Controller.*(..)) and !execution(* com.demo.proworks.user.web.UserController.login(..)) and !execution(* com.demo.proworks.user.web.UserController.simpleLogin(..))" />
+	        expression="execution(* com.demo..*Controller.*(..)) and !execution(* com.demo.proworks.user.web.UserController.login(..)) and !execution(* com.demo.proworks.user.web.UserController.simpleLogin(..)) and !execution(* com.demo.proworks.employee.web.EmployeeController.login(..))" /> 
 	
 	    <aop:advisor advice-ref="controllerInterceptorAdvice"
 	        pointcut-ref="controllerInterceptorPointcut" id="controllerInterceptorAdvisor" order="0"/>

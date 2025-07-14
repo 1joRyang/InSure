@@ -12,6 +12,8 @@ import com.inswave.elfw.util.ElBeanUtils;
 
 import com.demo.proworks.emp.service.EmpService;
 import com.demo.proworks.emp.vo.EmpVo;
+import com.demo.proworks.employee.service.EmployeeService;
+import com.demo.proworks.employee.vo.EmployeeVo;
 import com.demo.proworks.user.service.UserService;
 import com.demo.proworks.user.vo.UserVo;
 
@@ -116,15 +118,16 @@ public class ProworksSessionDataAdapter extends SessionDataAdapter {
             userHeader.setUserRole("USER"); 
 
         } else if ("EMPLOYEE".equals(loginType)) { // 관리자 로그인 타입
-            EmpService empService = (EmpService) ElBeanUtils.getBean("empServiceImpl");
-            EmpVo empVo = new EmpVo();
-            empVo.setEmpno(Integer.parseInt(id));
-            EmpVo resEmpVo = empService.selectEmp(empVo);
+            EmployeeService empService = (EmployeeService) ElBeanUtils.getBean("employeeServiceImpl");
+            EmployeeVo empVoParam = new EmployeeVo();
+            
+            empVoParam.setEmpNo(id);
+            EmployeeVo resEmpVo = empService.selectEmployee(empVoParam);
             
             if (resEmpVo == null) throw new AdapterException("세션 정보를 생성할 관리자가 없습니다. ID: " + id);
 
-            userHeader.setTestUserName(resEmpVo.getEname()); // 관리자 이름 설정
-            userHeader.setUserRole("ADMIN");
+            userHeader.setTestUserName(resEmpVo.getEmpName()); // 관리자 이름 설정
+            userHeader.setUserRole(resEmpVo.getRole());
         }
         
         AppLog.debug("세션 생성 완료. 사용자: " + userHeader.getTestUserName() + ", 역할: " + userHeader.getUserRole());
