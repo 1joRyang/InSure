@@ -74,7 +74,8 @@
             <if test="ID              != null"> , ID               = #{ID}               </if>
             <if test="claim_content   != null"> , CLAIM_CONTENT    = #{claim_content}    </if>
             <if test="disease_code    != null"> , DISEASE_CODE     = #{disease_code}     </if>
-            <if test="date_of_accident!= null"> , DATE_OF_ACCIDENT = #{date_of_accident} </if>                 
+            <if test="date_of_accident!= null"> , DATE_OF_ACCIDENT = #{date_of_accident} </if>
+            <if test="disaster_code    != null"> , DISASTER_CODE     = #{disaster_code}     </if>                 
         WHERE   
                 CLAIM_NO         = #{claim_no}        
     </update>
@@ -90,7 +91,7 @@
     <select id="selectClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo" resultType="com.demo.proworks.claim.vo.ClaimVo">
     	<!-- 청구를 상세 조회한다. -->	
         SELECT     /* QueryID : com.demo.proworks.claim.selectClaim */
-            CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT
+            CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT, DISASTER_CODE
         FROM CLAIM 
         WHERE 
                 CLAIM_NO         = #{claim_no}        			
@@ -99,7 +100,7 @@
     <select id="selectListClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo" resultType="com.demo.proworks.claim.vo.ClaimVo">
     <!-- 청구 목록을 조회한다. 🔥 캐시 우회를 위한 임시 수정 -->
     SELECT    /* QueryID : com.demo.proworks.claim.selectListClaim NOCACHE */
-    CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT,
+    CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT, DISASTER_CODE
         NOW() as CACHE_BUSTER		       
     FROM (
     SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE

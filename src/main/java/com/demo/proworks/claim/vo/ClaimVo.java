@@ -6,46 +6,53 @@ import com.inswave.elfw.annotation.ElVoField;
 import com.fasterxml.jackson.annotation.JsonFilter;
 
 @JsonFilter("elExcludeFilter")
-@ElDto(FldYn = "", logicalName = "청구")
+@ElDto(FldYn = "", delimeterYn = "", logicalName = "청구")
 public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
     private static final long serialVersionUID = 1L;
 
-    @ElDtoField(logicalName = "claim_no", physicalName = "claim_no", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    public ClaimVo(){
+    }
+
+    @ElDtoField(logicalName = "claim_no", physicalName = "claim_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String claim_no;
 
-    @ElDtoField(logicalName = "claim_type", physicalName = "claim_type", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "claim_type", physicalName = "claim_type", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String claim_type;
 
-    @ElDtoField(logicalName = "receipt_date", physicalName = "receipt_date", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "receipt_date", physicalName = "receipt_date", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String receipt_date;
 
-    @ElDtoField(logicalName = "status", physicalName = "status", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "status", physicalName = "status", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String status;
 
-    @ElDtoField(logicalName = "emp_no", physicalName = "emp_no", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "emp_no", physicalName = "emp_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String emp_no;
 
-    @ElDtoField(logicalName = "ID", physicalName = "ID", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "ID", physicalName = "ID", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String ID;
 
-    @ElDtoField(logicalName = "claim_content", physicalName = "claim_content", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "claim_content", physicalName = "claim_content", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String claim_content;
 
-    @ElDtoField(logicalName = "disease_code", physicalName = "disease_code", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "disease_code", physicalName = "disease_code", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String disease_code;
 
-    @ElDtoField(logicalName = "date_of_accident", physicalName = "date_of_accident", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "date_of_accident", physicalName = "date_of_accident", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String date_of_accident;
 
-    @ElDtoField(logicalName = "search_receipt_date", physicalName = "SC_receipt_date", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "search_receipt_date", physicalName = "SC_receipt_date", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String SC_receipt_date;
 
-    @ElDtoField(logicalName = "search_ID", physicalName = "SC_ID", type = "String", typeKind = "", fldYn = "", length = 0, dotLen = 0, baseValue = "", desc = "")
+    @ElDtoField(logicalName = "search_ID", physicalName = "SC_ID", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String SC_ID;
+
+    @ElDtoField(logicalName = "disaster_code", physicalName = "disaster_code", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String disaster_code;
 
     @ElVoField(physicalName = "claim_no")
     public String getClaim_no(){
-        return claim_no;
+        String ret = this.claim_no;
+        return ret;
     }
 
     @ElVoField(physicalName = "claim_no")
@@ -55,7 +62,8 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "claim_type")
     public String getClaim_type(){
-        return claim_type;
+        String ret = this.claim_type;
+        return ret;
     }
 
     @ElVoField(physicalName = "claim_type")
@@ -65,7 +73,8 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "receipt_date")
     public String getReceipt_date(){
-        return receipt_date;
+        String ret = this.receipt_date;
+        return ret;
     }
 
     @ElVoField(physicalName = "receipt_date")
@@ -75,7 +84,8 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "status")
     public String getStatus(){
-        return status;
+        String ret = this.status;
+        return ret;
     }
 
     @ElVoField(physicalName = "status")
@@ -85,7 +95,8 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "emp_no")
     public String getEmp_no(){
-        return emp_no;
+        String ret = this.emp_no;
+        return ret;
     }
 
     @ElVoField(physicalName = "emp_no")
@@ -95,7 +106,8 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "ID")
     public String getID(){
-        return ID;
+        String ret = this.ID;
+        return ret;
     }
 
     @ElVoField(physicalName = "ID")
@@ -105,7 +117,8 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "claim_content")
     public String getClaim_content(){
-        return claim_content;
+        String ret = this.claim_content;
+        return ret;
     }
 
     @ElVoField(physicalName = "claim_content")
@@ -115,7 +128,8 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "disease_code")
     public String getDisease_code(){
-        return disease_code;
+        String ret = this.disease_code;
+        return ret;
     }
 
     @ElVoField(physicalName = "disease_code")
@@ -125,7 +139,8 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "date_of_accident")
     public String getDate_of_accident(){
-        return date_of_accident;
+        String ret = this.date_of_accident;
+        return ret;
     }
 
     @ElVoField(physicalName = "date_of_accident")
@@ -135,31 +150,70 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "SC_receipt_date")
     public String getSC_receipt_date(){
-        return SC_receipt_date;
+        String ret = this.SC_receipt_date;
+        return ret;
     }
 
     @ElVoField(physicalName = "SC_receipt_date")
-    public void setSC_receipt_date(String SC_receipt_date) {
+    public void setSC_receipt_date(String SC_receipt_date){
         this.SC_receipt_date = SC_receipt_date;
     }
 
     @ElVoField(physicalName = "SC_ID")
     public String getSC_ID(){
-        return SC_ID;
+        String ret = this.SC_ID;
+        return ret;
     }
 
     @ElVoField(physicalName = "SC_ID")
-    public void setSC_ID(String SC_ID) {
+    public void setSC_ID(String SC_ID){
         this.SC_ID = SC_ID;
+    }
+
+    @ElVoField(physicalName = "disaster_code")
+    public String getDisaster_code(){
+        String ret = this.disaster_code;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "disaster_code")
+    public void setDisaster_code(String disaster_code){
+        this.disaster_code = disaster_code;
     }
 
     @Override
     public String toString() {
-        return "ClaimVo [claim_no=" + claim_no + ",claim_type=" + claim_type + ",receipt_date=" + receipt_date + ",status=" + status + ",emp_no=" + emp_no + ",ID=" + ID + ",claim_content=" + claim_content + ",disease_code=" + disease_code + ",date_of_accident=" + date_of_accident + ",SC_receipt_date=" + SC_receipt_date + ",SC_ID=" + SC_ID + "]";
+        StringBuilder sb = new StringBuilder();
+        sb.append("ClaimVo [");
+        sb.append("claim_no").append("=").append(claim_no).append(",");
+        sb.append("claim_type").append("=").append(claim_type).append(",");
+        sb.append("receipt_date").append("=").append(receipt_date).append(",");
+        sb.append("status").append("=").append(status).append(",");
+        sb.append("emp_no").append("=").append(emp_no).append(",");
+        sb.append("ID").append("=").append(ID).append(",");
+        sb.append("claim_content").append("=").append(claim_content).append(",");
+        sb.append("disease_code").append("=").append(disease_code).append(",");
+        sb.append("date_of_accident").append("=").append(date_of_accident).append(",");
+        sb.append("SC_receipt_date").append("=").append(SC_receipt_date).append(",");
+        sb.append("SC_ID").append("=").append(SC_ID).append(",");
+        sb.append("disaster_code").append("=").append(disaster_code);
+        sb.append("]");
+        return sb.toString();
+
     }
 
     public boolean isFixedLengthVo() {
         return false;
     }
+
+    @Override
+    public void _xStreamEnc() {
+    }
+
+
+    @Override
+    public void _xStreamDec() {
+    }
+
 
 }

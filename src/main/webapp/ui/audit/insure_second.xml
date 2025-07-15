@@ -16,6 +16,7 @@
         				<w2:key dataType="text" name="claim_content" id="claim_content"></w2:key>
         				<w2:key dataType="text" name="disease_code" id="disease_code"></w2:key>
         				<w2:key dataType="date" name="date_of_accident" id="date_of_accident"></w2:key>
+        				<w2:key dataType="text" name="disaster_code" id="disaster_code"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
         		<w2:dataMap baseNode="map" id="dm_claimuser">
@@ -221,18 +222,17 @@ scwin.btn_next_onclick = function (e) {
     let hcode2 = ipt_hcode2.getValue();
     let hcode2Date = ipt_hcodeDate.getValue();
 
-    if (hcode1 !== "") {
+    if (hcode1 !== "" && hcode2Date !== "") {
         isHcode = true;
         dm_claim.set("disease_code", hcode1);
-    } else if (hcode2 !== "" && hcode2Date !== "") {
-        isHcode = true;
-        dm_claim.set("disease_code", hcode2);
         dm_claim.set("date_of_accident", hcode2Date);
-    } else if (hcode2 !== "" && hcode2Date === "") {
-        missingFields.push("청구내역 및 처리정보 (사인코드 입력시 날짜 선택은 필수입니다)");
     } else {
-        missingFields.push("청구내역 및 처리정보 (병명코드 혹은 사인코드는 필수 입력입니다.)");
+        missingFields.push("청구내역 및 처리정보 (병명코드, 재해 일자는 필수 입력입니다.)");
     }
+    
+    if (hcode2 !== "" ) {
+        dm_claim.set("disaster_code", hcode2);  
+    } 
 
     if (isClaimOffset && isDateDrop && isHcode) {
         // 서브미션 호출
@@ -462,7 +462,7 @@ function openHcodePopup(link) {
     						<xf:group class="" id="" style="">
     							<w2:textbox style="width: 150px;height: 23px;" id="" label="병명 코드"></w2:textbox>
     							<xf:input class="" id="ipt_hcode1" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    								meta_snippetName="10_10 InputBox_조회버튼" placeholder="" style="" ev:onclick="scwin.ipt_hcode1_onclick" ref="">
+    								meta_snippetName="10_10 InputBox_조회버튼" placeholder="" style="" ev:onclick="scwin.ipt_hcode1_onclick" ref="data:dm_claim.disease_code">
     							</xf:input>
     							<xf:trigger class="btn_cm search icon" id="btn_hcode1" meta_snippetCategory="10_입력폼"
     								meta_snippetName="10_10 InputBox_조회버튼" style="" type="button">
@@ -472,7 +472,7 @@ function openHcodePopup(link) {
     						<xf:group class="" id="" style="">
     							<w2:textbox id="" label="사인 코드" style="width: 150px;height: 23px;"></w2:textbox>
     							<xf:input class="" id="ipt_hcode2" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    								meta_snippetName="10_10 InputBox_조회버튼" placeholder="" style="" ev:onclick="scwin.ipt_hcode2_onclick">
+    								meta_snippetName="10_10 InputBox_조회버튼" placeholder="" style="" ev:onclick="scwin.ipt_hcode2_onclick" ref="data:dm_claim.disaster_code">
     							</xf:input>
     							<xf:trigger class="btn_cm search icon" id="" meta_snippetCategory="10_입력폼"
     								meta_snippetName="10_10 InputBox_조회버튼" style="" type="button">
