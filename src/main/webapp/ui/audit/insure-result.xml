@@ -1615,7 +1615,42 @@ function openClaimReturnPopup(link) {
     };
 
     $p.openPopup(link, opts);
-}]]></script>
+}
+
+
+//Request for supple
+scwin.btn_supplement_onclick = function (e) {
+     openReqSupplePopup("/InsWebApp/ui/assignment/reqSupplePopup.xml");
+};
+
+
+function openReqSupplePopup(link) {
+    requires("uiplugin.popup");
+    var winWid = $(window).width();
+    var winHei = $(window).height();
+    var popWid = 600;  
+    var popHei = 350;
+    var sumLeft = (winWid - popWid) / 2;
+    var sumTop = (winHei - popHei) / 2;
+
+    var opts = {
+        "id": "claim_return_popup",
+        "type": "litewindow",
+        "width": popWid + "px",
+        "height": popHei + "px",
+        "top": sumTop,
+        "left": sumLeft,
+        "popupName": "보완 요청",
+        "modal": true,
+        "useIFrame": false,
+        "title": "보완 요청",
+        "useATagBtn": false,
+        "frameMode": "wframe",
+    };
+
+    $p.openPopup(link, opts);
+}
+]]></script>
 	</head>
 	<body ev:onpageload="scwin.onpageload">
 		<w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/hearder.xml"></w2:wframe>
@@ -1855,7 +1890,7 @@ function openClaimReturnPopup(link) {
 							<xf:trigger class="btn_secondary" id="btn_return" type="button" ev:onclick="scwin.btn_return_onclick">
 								<xf:label>반송요청</xf:label>
 							</xf:trigger>
-							<xf:trigger class="btn_secondary" id="btn_supplement" type="button">
+							<xf:trigger class="btn_secondary" id="btn_supplement" type="button" ev:onclick="scwin.btn_supplement_onclick">
 								<xf:label>보완요청</xf:label>
 							</xf:trigger>
 						</xf:group>

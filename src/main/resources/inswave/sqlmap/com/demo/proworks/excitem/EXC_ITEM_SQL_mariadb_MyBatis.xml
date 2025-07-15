@@ -28,7 +28,6 @@
 		        SELECT *
 		        FROM EXC_ITEM
 		        WHERE 1=1
-		        AND TREATMENT_ID = #{treatment_id}
 		        AND CLAIM_NO = #{claim_no}
 		    ) S, (SELECT @ROWNUM := 0) TMP
 		) A
