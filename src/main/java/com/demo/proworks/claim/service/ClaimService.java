@@ -1,6 +1,7 @@
 package com.demo.proworks.claim.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.demo.proworks.claim.vo.ClaimNClaimResultVo;
 import com.demo.proworks.claim.vo.ClaimNoVo;
@@ -81,6 +82,18 @@ public interface ClaimService {
 	 * @throws Exception
 	 */
 	public int deleteClaim(ClaimVo claimVo) throws Exception;
+
+	
+	/**
+     * 청구 정보와 첨부파일 정보를 DB에 최종 저장
+     * 생성자: 이지현
+     * @param  claimData 세션에 저장된 모든 청구 정보
+     * @throws Exception
+     */
+	public void saveFinalClaim(Map<String, Object> claimData) throws Exception;
+	
+	
+
 
 	public ClaimUserEmpVo findUsernameAndEmpNameByClaimNo(ClaimNoVo claimVo) throws Exception;
 

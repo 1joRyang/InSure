@@ -1,75 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet href="/InsWebApp/cm/css/claimPopup.css" type="text/css"?>
+<?xml-stylesheet href="/InsWebApp/cm/css/claimPage.css" type="text/css"?>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ev="http://www.w3.org/2001/xml-events"
-      xmlns:w2="http://www.inswave.com/websquare"
-      xmlns:xf="http://www.w3.org/2002/xforms">
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
     <head>
         <w2:type>COMPONENT</w2:type>
         <w2:buildDate/>
         <w2:MSA/>
         <xf:model>
-            <w2:dataCollection baseNode="map">
-                <w2:dataMap id="dateData">
-                    <w2:keyInfoList>
-                        <w2:keyInfo id="selectedDate" dataType="text"></w2:keyInfo>
-                    </w2:keyInfoList>
-                </w2:dataMap>
-            </w2:dataCollection>
+            <w2:dataCollection baseNode="map"/>
             <w2:workflowCollection/>
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
-        <w2:layout css="true" src="/InsWebApp/cm/css/claimPage.css"></w2:layout>
         <script lazy="false" type="text/javascript"><![CDATA[
             scwin.onpageload = function() {
-                var today = new Date();
-                var formattedDate = WebSquare.util.dateToString(today, "yyyy-MM-dd");
-                dateData.set("selectedDate", formattedDate);
-
-                var initialDate = $p.getParam("initialDate");
-                if (initialDate) {
-                    dateData.set("selectedDate", initialDate);
-                }
+                // Additional JS logic can go here if needed
+                var today = WebSquare.date.getCurrentServerDate("yyyyMMdd");
+                dp_spinner.setValue(today);
             };
 
-            scwin.onClickConfirm = function() {
-                var selectedDate = dateData.get("selectedDate");
-                $p.closePopup({ date: selectedDate });
-            };
+            
 
-            scwin.onClickCancel = function() {
-                $p.closePopup();
-            };
-        ]]></script>
+
+scwin.btn_enter_onclick = function (e) {
+    var selectedDate = dp_spinner.getValue();
+
+    $p.parent().scwin.setAccidentDate(selectedDate);
+
+    $p.closePopup();
+};
+]]></script>
     </head>
-    <body>
-        <xf:group class="popup-wrapper">
-            <xf:group class="date-picker-container">
-                <xf:group class="popup-header">
-                    <w2:textbox class="popup-title" label="년/월/일 선택"></w2:textbox>
-                    <xf:trigger class="popup-close-button" ev:onclick="scwin.onClickCancel">
-                        <w2:image src="/images/close_icon.png" alt="닫기" style="width: 24px; height: 24px;"></w2:image>
-                    </xf:trigger>
-                </xf:group>
-                <xf:group class="date-picker-content">
-                    <w2:datePicker id="datePicker"
-                        ref="data:dateData.selectedDate"
-                        class="custom-date-picker"
-                        renderType="spinner"
-                        type="date"
-                        weekView="false"
-                        dateFormat="yyyy년 MM월 dd일"
-                        startYear="1950"
-                        endYear="2050"
-                        style="width:100%; height: 200px;">
-                    </w2:datePicker>
-                </xf:group>
-                <xf:group class="popup-footer button-group">
-                    <w2:button id="btn_cancel" class="cancel-button" label="취소" ev:onclick="scwin.onClickCancel"></w2:button>
-                    <w2:button id="btn_confirm" class="confirm-button" label="확인" ev:onclick="scwin.onClickConfirm"></w2:button>
-                </xf:group>
-            </xf:group>
+    <body ev:onpageload="scwin.onpageload">
+        <xf:group class="pop_contents" id="pop_contents" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true"
+        	meta_snippetName="0_02 팝업페이지시작">
+
+        	<!-- Title Section -->
+
+        	<!-- Agreement Section -->
+        	<xf:group style="height:205px;" id="" class="agreement_section">
+
+        		<!-- Agreement Items -->
+        		<w2:datePicker style="position: relative;width: 300px;height: 200px;" id="dp_spinner"></w2:datePicker>
+        	</xf:group>
+
+        	<!-- Final Consent Section -->
+        	<xf:group style="height:44px;" id="final_consent_section"></xf:group>
+
+        	<xf:group style="height: 200px;" id="" class="consent_group">
+        		<w2:textbox class="consent_checkbox" label="확인" style="" id="btn_enter" ev:onclick="scwin.btn_enter_onclick"/>
+        	</xf:group>
         </xf:group>
     </body>
 </html>
