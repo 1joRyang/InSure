@@ -20,24 +20,13 @@
     		
         INSERT INTO INS_IMAGE_FILE   /* QueryID : com.demo.proworks.insimagefile.insertInsimagefile */
         ( 
-            
-            ORIGINAL_FILE_NAME
-            <if test="stored_file_name  != null"> , STORED_FILE_NAME   </if>
-            <if test="file_path         != null"> , FILE_PATH          </if>
-            <if test="file_size         != null"> , FILE_SIZE          </if>
-            <if test="file_type         != null"> , FILE_TYPE          </if>
-            <if test="claim_no          != null"> , CLAIM_NO           </if>
-            , CREATED_AT
+            claim_no,
+        	s3_object_key
         )
         VALUES  
         ( 
-            #{original_file_name}
-            <if test="stored_file_name  != null"> , #{stored_file_name}   </if>
-            <if test="file_path         != null"> , #{file_path}          </if>
-            <if test="file_size         != null"> , #{file_size}          </if>
-            <if test="file_type         != null"> , #{file_type}          </if>
-            <if test="claim_no          != null"> , #{claim_no}           </if>
-            , NOW() 
+            #{claim_no},
+        	#{file_path}
         )          
     </insert>	
 	

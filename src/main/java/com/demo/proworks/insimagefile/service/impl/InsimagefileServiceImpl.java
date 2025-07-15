@@ -130,7 +130,7 @@ public class InsimagefileServiceImpl implements InsimagefileService {
 	
 	/**
      * 보험금 청구 서류(이미지)를 파일로 저장하고 DB에 기록 한다.
-     */
+     
     @Override
 	public void saveImageFiles(List<MultipartFile> files, String claimType) throws Exception {
 		String uploadPath = "C:/inswave/uploads/";
@@ -158,6 +158,6 @@ public class InsimagefileServiceImpl implements InsimagefileService {
 		
 		}
    
-	}
+	}*/
 	
 }

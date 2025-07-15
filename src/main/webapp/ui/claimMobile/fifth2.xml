@@ -38,8 +38,13 @@
     	<w2:css src="/css/custom.css"></w2:css>
     	<w2:js src="/js/final_check.js"></w2:js>
     	<w2:engine-version>5.0.0</w2:engine-version>
-    	<script lazy="false" type="text/javascript"><![CDATA[
+    	<script lazy="false" type="text/javascript"><![CDATA[scwin.isEditMode = false;
 scwin.onpageload = function() {
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'edit') {
+        scwin.isEditMode = true;
+        btnNext.setLabel("수정");;
+    }
     // 미리보기 부모영역 찾기
     var previewBox = document.querySelector('[id$="previewBox"]');
 
@@ -150,7 +155,12 @@ scwin.sbm_getS3Url_submitdone = function (e) {
 
 // 최종 파일 키 목록 서버세션 저장함수
 scwin.saveFileKeysToServer = function() {
-    var postData = { "s3FileKeys": scwin.uploadedFileKeys };
+    // 1. join(',')을 사용해 배열을 쉼표로 구분된 하나의 문자열로 변환
+    // ["key1.jpg", "key2.jpg"] -> "key1.jpg,key2.jpg"
+    var s3KeysAsString = scwin.uploadedFileKeys.join(',');
+
+    // 2. 변환된 문자열 서버 전송
+    var postData = { "s3FileKeys": s3KeysAsString };
     dma_step5.setJSON(postData);
     $p.executeSubmission("sbm_saveStep5");
 };
@@ -240,8 +250,12 @@ scwin.camera_callback = function(r){
 
 
 scwin.sbm_saveStep5_submitdone = function (e) {
+    if (scwin.isEditMode) {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/sixth2.xml";
+    } else {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/sixth2.xml"
+    }
     
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/sixth.xml"
 };
 
 

@@ -80,7 +80,8 @@ public interface InsimagefileService {
      *
      * @param  param InsimagefileListVo 클라이언트에서 전송한 이미지 데이터 목록
      * @throws Exception
-     */
+     
 	public void saveImageFiles(List<MultipartFile> files, String claimType) throws Exception;
+	 	*/
 	
 }

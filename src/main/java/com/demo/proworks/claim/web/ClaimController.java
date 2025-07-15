@@ -15,7 +15,6 @@ import com.demo.proworks.claim.vo.ClaimUserVo;
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
 import com.inswave.elfw.annotation.ElValidator;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 /**  
  * @subject     : 청구 관련 처리를 담당하는 컨트롤러
@@ -98,7 +97,9 @@ public class ClaimController {
     @ElService(key="CLAIMIns")    
     @RequestMapping(value="CLAIMIns")
     @ElDescription(sub="청구 등록처리",desc="청구를 등록 처리 한다.")
-    public void insertClaim(ClaimVo claimVo) throws Exception {    	 
+    public void insertClaim(ClaimVo claimVo) throws Exception {
+    
+    	System.out.println(claimVo.toString());
     	claimService.insertClaim(claimVo);   
     }
        

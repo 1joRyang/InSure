@@ -37,5 +37,23 @@ public class S3ServiceImpl implements S3Service {
 		return amazonS3Client.generatePresignedUrl(request);
 	}
 	
+	@Override
+	public URL generatePresignedGetUrl(String bucketName, String objectKey) {
+	
+		// URL 유효시간 설정
+		Date expiration = new Date();
+		long expTimeMillis = expiration.getTime();
+		expTimeMillis += 1000 * 60 * 10;	// 10분
+		expiration.setTime(expTimeMillis);
+		
+		GeneratePresignedUrlRequest request =
+				new GeneratePresignedUrlRequest(bucketName, objectKey)
+					.withMethod(HttpMethod.GET)
+					.withExpiration(expiration);
+		
+
+		return amazonS3Client.generatePresignedUrl(request);
+	}
+	
 
 }
