@@ -14,21 +14,9 @@
         <w2:publicInfo method=""/>
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
-	scwin.initpub(); 
-};
-
-scwin.initpub = function() {
-    var link = WebSquare.net.getParameter( "link" );
-    m_container.setSrc(link);
-    
+	
 };
 ]]></script>
     </head>
-    <body ev:onpageload="scwin.onpageload" class="mobile">
-    	<xf:group style="" id="m_wrap" class="m_wrap">
-    		<w2:wframe style="" id="" src="/InsWebApp/ui/cmmn/m_header.xml" class="wfm_m_header"></w2:wframe>
-    		<w2:wframe style="" id="m_container" class="m_container" src="/InsWebApp/main/main.xml"></w2:wframe>
-    		<w2:wframe style="" id="" class="wfm_m_footer" src="/InsWebApp/ui/cmmn/m_footer.xml"></w2:wframe>
-    	</xf:group>
-    </body>
+    <body ev:onpageload="scwin.onpageload"/>
 </html>

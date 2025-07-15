@@ -142,6 +142,7 @@ localStorage.setItem("claimNo", "a52d86a3-5629-11f0-b4f3-bc2411231130");
 localStorage.setItem("ID", "1");
 
 scwin.onpageload = function() {
+    // todo: 다른 사람 조회시 이전 버튼 없애기
     dm_header.set("claimNo", localStorage.getItem("claimNo"));
     // todo: 값에 맞게 바인딩
     dm_header.set("patient", "홍길동");
@@ -321,10 +322,17 @@ function openHcodePopup(link) {
 	$p.openPopup(link, opts);
 }
 
-
 scwin.sbm_updateClaim_submitdone = function (e) {
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/table-test.xml";
     $p.closePopup("img_popup");
+};
+
+function openPopup(link) {
+
+}
+
+scwin.grd_insure_oncellclick = function (rowIndex, columnIndex, columnId) {
+    // TODO: 모달 띄우기
 };
 ]]></script>
     </head>
@@ -349,7 +357,7 @@ scwin.sbm_updateClaim_submitdone = function (e) {
     					</xf:group>
     					<xf:group adaptiveThreshold="" style="height: 250px;" id="" class="gvwbox">
     						<w2:gridView scrollByColumnAdaptive="false" focusMode="row" dataList="data:dl_subinsu" scrollByColumn="false"
-    							style="height: 250px;" autoFit="allColumn" id="" class="gvw" checkReadOnlyOnPasteEnable="">
+    							style="height: 250px;" autoFit="allColumn" id="grd_insure" class="gvw" checkReadOnlyOnPasteEnable="" ev:oncellclick="scwin.grd_insure_oncellclick">
     							<w2:caption style="" id="caption2" value="this is a grid caption."></w2:caption>
     							<w2:header style="" id="header2">
     								<w2:row style="" id="row3">

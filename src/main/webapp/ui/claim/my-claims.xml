@@ -7,7 +7,48 @@
         <w2:buildDate/>
         <w2:MSA/>
         <xf:model>
-        	<w2:dataCollection baseNode="map" />
+        	<w2:dataCollection baseNode="map">
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_claimWait" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+        				<w2:column dataType="text" name="user_name" id="user_name"></w2:column>
+        				<w2:column dataType="text" name="receipt_date" id="receipt_date"></w2:column>
+        				<w2:column dataType="text" name="deadline" id="deadline"></w2:column>
+        				<w2:column dataType="text" name="emp_name" id="emp_name"></w2:column>
+        				<w2:column dataType="text" name="status" id="status"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_claimDone" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+        				<w2:column dataType="text" name="user_name" id="user_name"></w2:column>
+        				<w2:column dataType="text" name="receipt_date" id="receipt_date"></w2:column>
+        				<w2:column dataType="text" name="deadline" id="deadline"></w2:column>
+        				<w2:column dataType="text" name="emp_name" id="emp_name"></w2:column>
+        				<w2:column dataType="text" name="status" id="status"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_approvalWait" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+        				<w2:column dataType="text" name="user_name" id="user_name"></w2:column>
+        				<w2:column dataType="text" name="receipt_date" id="receipt_date"></w2:column>
+        				<w2:column dataType="text" name="deadline" id="deadline"></w2:column>
+        				<w2:column dataType="text" name="emp_name" id="emp_name"></w2:column>
+        				<w2:column dataType="text" name="status" id="status"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_claimReturn" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+        				<w2:column dataType="text" name="user_name" id="user_name"></w2:column>
+        				<w2:column dataType="text" name="receipt_date" id="receipt_date"></w2:column>
+        				<w2:column dataType="text" name="deadline" id="deadline"></w2:column>
+        				<w2:column dataType="text" name="emp_name" id="emp_name"></w2:column>
+        				<w2:column dataType="text" name="status" id="status"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        	</w2:dataCollection>
         	<w2:workflowCollection />
         	<xf:submission id="sbm_getWaitList" action="" method="post" mediatype="application/json" ref="" target="" encoding="UTF-8"
         		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
@@ -21,7 +62,7 @@
         		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_getApprovalDoneList" action="" method="post" mediatype="application/json" ref="" target="" encoding="UTF-8"
+        	<xf:submission id="sbm_getReturnList" action="" method="post" mediatype="application/json" ref="" target="" encoding="UTF-8"
         		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
@@ -30,13 +71,15 @@
         <w2:publicInfo method=""/>
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
-	// todo: 관리자냐 실무자냐 > tab 이름 바꾸기/숨기기
+	// todo: 관리자냐 실무자냐 > tab 이름 바꾸기/숨기기 (이건 sidebar)
 
     // 가져오기
-    // 실무자면 claim에서
-    // 관리자면 approval_req..에서
+    $c.sbm.execute(sbm_getWaitList);
+    $c.sbm.execute(sbm_getDoneList);
+    $c.sbm.execute(sbm_getApprovalList);
+    $c.sbm.execute(sbm_getReturnList);
 };
-]]></script>
+                                                                                                                                                                                                                                                                       ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
@@ -68,6 +111,7 @@ scwin.onpageload = function() {
     				<w2:tabs disabled="false" style="" id="tab1" label="심사 대기"></w2:tabs>
     				<w2:tabs disabled="false" style="" id="tab3" label="심사 완료"></w2:tabs>
     				<w2:tabs disabled="false" style="width:70px;height:30px" id="tabs6" label="결재 중"></w2:tabs>
+    				<w2:tabs disabled="false" style="width:70px;height:30px" id="tabs7" label="반송"></w2:tabs>
     				<w2:content alwaysDraw="false" style="height: 100%;" id="content2">
     					<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
     						meta_snippetName="6_01 그리드" style="">
@@ -299,6 +343,7 @@ scwin.onpageload = function() {
     						</w2:gridView>
     					</xf:group>
     				</w2:content>
+    				<w2:content alwaysDraw="false" style="height:0px" id="content7"></w2:content>
     			</w2:tabControl>
     		</xf:group>
     	</xf:group>
