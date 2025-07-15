@@ -130,7 +130,7 @@
         	</xf:submission>
         	<xf:submission id="sbm_updateClaim" action="/InsWebApp/CLAIMUpd.pwkjson" method="post" mediatype="application/json"
         		ref='data:json,{"id":"dm_claim","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
-        		customHandler="" mode="asynchronous" processMsg="저장 중..." ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        		customHandler="" mode="asynchronous" processMsg="저장 중..." ev:submit="" ev:submitdone="scwin.sbm_updateClaim_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -252,9 +252,6 @@ scwin.btn_next_onclick = function (e) {
             $c.sbm.execute(sbm_insertOffset); 
         }
         $c.sbm.execute(sbm_updateClaim);
-
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/table-test.xml";
-        $p.closePopup("img_popup");
     }
     else {
         alert("다음 항목의 입력을 확인하세요\n" + missingFields.join(", "));
@@ -324,6 +321,11 @@ function openHcodePopup(link) {
 	$p.openPopup(link, opts);
 }
 
+
+scwin.sbm_updateClaim_submitdone = function (e) {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/table-test.xml";
+    $p.closePopup("img_popup");
+};
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">

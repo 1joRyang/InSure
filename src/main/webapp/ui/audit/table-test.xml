@@ -163,7 +163,7 @@ scwin.claimNo = localStorage.getItem("claimNo");
 scwin.treatmentId = 0;
 scwin.isEdit = false; // false > insert | true > update
 scwin.nextClick = false;
-scwin.isGetTreatId = false;
+scwin.isGetTreatId = false; // insert 끝내고 treatmentId 가져오기.......
 
 scwin.onpageload = function() {
     dm_header.set("claimNo", scwin.claimNo);
@@ -200,10 +200,10 @@ function getInsure() {
 }
 
 scwin.sbm_getTreatment_submitdone = function (e) {
+
     if (scwin.isGetTreatId) {
-        // treatmentId 저장
-        scwin.treatmentId = dm_treatment.getJSON().treatment_id;
-        console.log(scwin.treatmentId);
+        localStorage.setItem("treatmentId", dm_treatment.getJSON().treatment_id)
+        scwin.treatmentId = localStorage.getItem("treatmentId");
 
         dm_result.set("claim_no", scwin.claimNo);
         dm_result.set("treatment_id", scwin.treatmentId);
@@ -225,9 +225,9 @@ scwin.sbm_getTreatment_submitdone = function (e) {
 
     // 값이 있으면 수정
     if (ipt_department.getValue() !== "") {
-        // treatmentId 여기서 저장
-        localStorage.setItem("treatmentId", dm_treatment.getJSON().treatment_id);
+        localStorage.setItem("treatmentId", dm_treatment.getJSON().treatment_id)
         scwin.treatmentId = localStorage.getItem("treatmentId");
+
         scwin.isEdit = true;
 
         dm_getExc.set("claim_no", scwin.claimNo);
@@ -348,9 +348,6 @@ scwin.date_drop_onchange = function (info) {
 
 function saveInsure(idx = -1) {
     if (sel_hospital.getValue() && ipt_department.getValue()&& ipt_hospitalName.getValue() && ipt_patientType.getValue()) {
-        // todo: 여기 저장해야하는지 확인
-        localStorage.removeItem("treatementId");
-
         dm_treatment.set("claim_no", scwin.claimNo);
 
         // todo: 이미지 모달.. setSrc
@@ -374,7 +371,11 @@ scwin.sbm_insertTreatment_submitdone = function (e) {
 scwin.sbm_updateClaimItems_submitdone = function (e) {
 
     if (scwin.nextClick) {
-        //location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-result.xml";
+        localStorage.removeItem("excTotal");
+        localStorage.removeItem("exc");
+        localStorage.removeItem("treatmentId");
+        
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-result.xml";
         return;
     }
 
@@ -388,6 +389,8 @@ scwin.sbm_updateClaimItems_submitdone = function (e) {
 
     scwin.createEmptyTable();
     resetExclusionCells(); 
+
+    localStorage.removeItem("treatmentId");
     
     getInsure();
 };
