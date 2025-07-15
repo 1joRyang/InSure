@@ -13,45 +13,87 @@
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
         <script lazy="false" type="text/javascript"><![CDATA[
+
+
+
 scwin.onpageload = function() {
-	
+    // todo: img 리스트 조회
+
+
+
+
+    
 };
 
 scwin.btn_next_onclick = function (e) {
     // 페이지 이동
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/emp/insure_second.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_second.xml";
 };
 
 scwin.btn_img_next_onclick = function (e) {
-
+    // todo: img 옮기기
 };
 
 scwin.btn_img_def_onclick = function (e) {
-
+    // todo: img 옮기기
 };
+
+scwin.btn_change_onclick = function (e) {
+    // 담당자 변경 팝업 호출
+    openChangeAssigneePopup("/InsWebApp/ui/assignment/change-assignee-popup.xml");
+};
+
+// 담당자 변경 팝업 함수
+function openChangeAssigneePopup(link) {
+    requires("uiplugin.popup"); 
+    var winWid = $(window).width();
+    var winHei = $(window).height();
+    var popWid = 600;  // 담당자 변경 팝업에 적합한 크기
+    var popHei = 350;
+    var sumLeft = (winWid - popWid) / 2;
+    var sumTop = (winHei - popHei) / 2;
+                    
+    var opts = {
+        "id" : "change_assignee_popup",
+        "type" : "litewindow",
+        "width" : popWid + "px",
+        "height" : popHei + "px",
+        "top" : sumTop, 
+        "left" : sumLeft,
+        "popupName" : "담당자 변경",
+        "modal" : true, 
+        "useIFrame" : false,
+        "title" : "담당자 변경",
+        "useATagBtn" : false,
+        "frameMode" : "wframe",
+    };
+
+    $p.openPopup(link, opts);
+}
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
     		style="">
     		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
-    			style="">
+    			style="margin-bottom: 30px;">
     			<w2:textbox class="pgt_tit" id="" label="청구번호" style="" tagname=""></w2:textbox>
     			<w2:textbox class="pgt_tit" id="" label="피보험자" style="" tagname=""></w2:textbox>
     		</xf:group>
-    		<xf:group style="width: 100%;display: flex;justify-content: center;align-items: center;" id="">
+    		<xf:group style="width: 100%;display: flex;justify-content: center;align-items: center;" id="imgbox">
     			<xf:trigger anchorWithGroupClass="" class="btn_cm left icon" id="btn_img_def" meta_snippetCategory="08_버튼"
     				meta_snippetKeyComponent="true" meta_snippetName="8_03 아이콘삭제버튼" style="" type="button" ev:onclick="scwin.btn_img_def_onclick">
     				<xf:label><![CDATA[Delete]]></xf:label>
     			</xf:trigger>
-    			<xf:image src="/InsWebApp/images/sample/insure/test.png" style="margin: 10px;height: 500px;" id=""></xf:image>
+    			<xf:image src="/InsWebApp/images/sample/insure/test.png" style="margin: 10px;height: 600px;" id=""></xf:image>
     			<xf:trigger anchorWithGroupClass="" class="btn_cm right icon" id="btn_img_next" meta_snippetCategory="08_버튼"
     				meta_snippetKeyComponent="true" meta_snippetName="8_03 아이콘삭제버튼" style="" type="button" ev:onclick="scwin.btn_img_next_onclick">
     				<xf:label><![CDATA[Delete]]></xf:label>
     			</xf:trigger>
     		</xf:group>
+    		<xf:group style="width: 100%;" id=""></xf:group>
     		<xf:group class="btnbox" id="" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true" meta_snippetName="8_04 전체제어버튼"
-    			style="">
+    			style="margin-top: 40px;">
     			<xf:group class="rt" id="" style="">
     				<xf:trigger class="btn_cm" id="" style="" type="button">
     					<xf:label><![CDATA[닫기]]></xf:label>
@@ -59,7 +101,7 @@ scwin.btn_img_def_onclick = function (e) {
     				<xf:trigger class="btn_cm" id="" style="" type="button">
     					<xf:label><![CDATA[반송]]></xf:label>
     				</xf:trigger>
-    				<xf:trigger class="btn_cm " id="" style="" type="button">
+    				<xf:trigger class="btn_cm " id="btn_change" style="" type="button" ev:onclick="scwin.btn_change_onclick">
     					<xf:label><![CDATA[처리자변경]]></xf:label>
     				</xf:trigger>
     				<xf:trigger style="" id="btn_next" type="button" class="btn_cm pt" ev:onclick="scwin.btn_next_onclick">

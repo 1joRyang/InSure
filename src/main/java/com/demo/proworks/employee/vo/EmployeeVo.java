@@ -13,8 +13,8 @@ public class EmployeeVo extends com.demo.proworks.cmmn.ProworksCommVO {
     public EmployeeVo(){
     }
 
-    @ElDtoField(logicalName = "emp_no", physicalName = "empNo", type = "int", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
-    private int empNo;
+    @ElDtoField(logicalName = "emp_no", physicalName = "empNo", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String empNo;
 
     @ElDtoField(logicalName = "emp_name", physicalName = "empName", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String empName;
@@ -28,13 +28,17 @@ public class EmployeeVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "role", physicalName = "role", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String role;
 
+    @ElDtoField(logicalName = "emp_pw", physicalName = "empPw", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String empPw;
+
     @ElVoField(physicalName = "empNo")
-    public int getEmpNo(){
-        return empNo;
+    public String getEmpNo(){
+        String ret = this.empNo;
+        return ret;
     }
 
     @ElVoField(physicalName = "empNo")
-    public void setEmpNo(int empNo){
+    public void setEmpNo(String empNo){
         this.empNo = empNo;
     }
 
@@ -82,6 +86,17 @@ public class EmployeeVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.role = role;
     }
 
+    @ElVoField(physicalName = "empPw")
+    public String getEmpPw(){
+        String ret = this.empPw;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "empPw")
+    public void setEmpPw(String empPw){
+        this.empPw = empPw;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -90,7 +105,8 @@ public class EmployeeVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("empName").append("=").append(empName).append(",");
         sb.append("status").append("=").append(status).append(",");
         sb.append("deptId").append("=").append(deptId).append(",");
-        sb.append("role").append("=").append(role);
+        sb.append("role").append("=").append(role).append(",");
+        sb.append("empPw").append("=").append(empPw);
         sb.append("]");
         return sb.toString();
 

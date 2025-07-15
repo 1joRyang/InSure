@@ -4,85 +4,87 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--
-	@subject     : 부서정보 관련 처리를 담당하는 Sql Mapper
+	@subject : 부서정보 관련 처리를 담당하는 Sql Mapper
 	@description : 부서정보 관련 처리를 담당하는 Sql Mapper
-	@author      : hyunwoo
-	@since       : 2025/07/01
+	@author : hyunwoo
+	@since : 2025/07/01
 	@modification
 	===========================================================
-	DATE              AUTHOR             DESC
+	DATE AUTHOR DESC
 	===========================================================
-	2025/07/01              hyunwoo             최초 생성
- -->
+	2025/07/01 hyunwoo 최초 생성
+-->
 <mapper namespace="com.demo.proworks.insdept">
-    <insert id="insertInsDept" parameterType="com.demo.proworks.insdept.vo.InsDeptVo">
-    	<!-- 부서정보를 등록한다. -->	
-    		
-        INSERT INTO INS_DEPT   /* QueryID : com.demo.proworks.insdept.insertInsDept */
-        ( 
-            DEPT_ID
-            <if test="dept_name!= null"> , DEPT_NAME </if>
-        )
-        VALUES  
-        ( 
-            #{dept_id}
-            <if test="dept_name!= null"> , #{dept_name} </if> 
-        )          
-    </insert>	
-	
-    <update id="updateInsDept" parameterType="com.demo.proworks.insdept.vo.InsDeptVo">
-    	<!-- 부서정보를 갱신한다. -->
-    	
-        UPDATE INS_DEPT    /* QueryID : com.demo.proworks.insdept.updateInsDept */      
-      	  SET  
-                DEPT_ID   = #{dept_id}          	                       
-            <if test="dept_name!= null"> , DEPT_NAME = #{dept_name} </if>                 
-        WHERE   
-                DEPT_ID   = #{dept_id}  
-    </update>
-	
-    <delete id="deleteInsDept" parameterType="com.demo.proworks.insdept.vo.InsDeptVo">
-    	<!-- 부서정보를 삭제한다. -->
-    	
-        DELETE FROM INS_DEPT   /* QueryID : com.demo.proworks.insdept.deleteInsDept */ 
-        WHERE   
-                DEPT_ID   = #{dept_id}          
-    </delete>
-	
-    <select id="selectInsDept" parameterType="com.demo.proworks.insdept.vo.InsDeptVo" resultType="com.demo.proworks.insdept.vo.InsDeptVo">
-    	<!-- 부서정보를 상세 조회한다. -->	
-        SELECT     /* QueryID : com.demo.proworks.insdept.selectInsDept */
-            DEPT_ID, DEPT_NAME
-        FROM INS_DEPT 
-        WHERE 
-                DEPT_ID   = #{dept_id}  			
-    </select>
-	
-    <select id="selectListInsDept" parameterType="com.demo.proworks.insdept.vo.InsDeptVo" resultType="com.demo.proworks.insdept.vo.InsDeptVo">
-    	<!-- 부서정보 목록을 조회한다. -->
-           SELECT    /* QueryID : com.demo.proworks.insdept.selectListInsDept */
-               DEPT_ID, DEPT_NAME		       
-           FROM (
-               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
-               FROM (				
-                   SELECT 
-                       *  		                  
-                   FROM INS_DEPT
-                   WHERE  1=1    		
-	     																														
-               ) S, (SELECT @ROWNUM := 0) TMP
-           ) A
-            WHERE PAGE = #{pageIndex}
-    </select>
-	
-    <select id="selectListCountInsDept" parameterType="com.demo.proworks.insdept.vo.InsDeptVo" resultType="long">
-    <!-- 부서정보 목록의 카운트를 조회한다. -->
-    
-         SELECT    /* QueryID : com.demo.proworks.insdept.selectListCountInsDept */
-             COUNT(*) totcnt  		                  
-         FROM INS_DEPT
-         WHERE  1=1    		
+	<insert id="insertInsDept" parameterType="com.demo.proworks.insdept.vo.InsDeptVo">
+		<!-- 부서정보를 등록한다. -->
 
-    </select>
+		INSERT INTO INS_DEPT /* QueryID : com.demo.proworks.insdept.insertInsDept */
+		(
+		DEPT_ID
+		<if test="dept_name!= null"> , DEPT_NAME </if>
+		) VALUES ( #{dept_id}
+		<if test="dept_name!= null"> , #{dept_name} </if>
+		)
+	</insert>
+
+	<update id="updateInsDept" parameterType="com.demo.proworks.insdept.vo.InsDeptVo">
+		<!-- 부서정보를 갱신한다. -->
+
+		UPDATE INS_DEPT /* QueryID : com.demo.proworks.insdept.updateInsDept */
+		SET
+		DEPT_ID = #{dept_id}
+		<if test="dept_name!= null"> , DEPT_NAME = #{dept_name} </if>
+		WHERE
+		DEPT_ID = #{dept_id}
+	</update>
+
+	<delete id="deleteInsDept" parameterType="com.demo.proworks.insdept.vo.InsDeptVo">
+		<!-- 부서정보를 삭제한다. -->
+
+		DELETE FROM INS_DEPT /* QueryID : com.demo.proworks.insdept.deleteInsDept */
+		WHERE
+		DEPT_ID = #{dept_id}
+	</delete>
+
+	<select id="selectInsDept" parameterType="com.demo.proworks.insdept.vo.InsDeptVo"
+		resultType="com.demo.proworks.insdept.vo.InsDeptVo">
+		<!-- 부서정보를 상세 조회한다. -->
+		SELECT /* QueryID : com.demo.proworks.insdept.selectInsDept */
+		DEPT_ID, DEPT_NAME
+		FROM INS_DEPT
+		WHERE
+		DEPT_ID = #{dept_id}
+	</select>
+
+	<select id="selectListInsDept" parameterType="com.demo.proworks.insdept.vo.InsDeptVo"
+		resultType="com.demo.proworks.insdept.vo.InsDeptVo">
+		<!-- 부서정보 목록을 조회한다. -->
+		SELECT /* QueryID : com.demo.proworks.insdept.selectListInsDept */
+		DEPT_ID, DEPT_NAME
+		FROM (
+		SELECT S.*, CEIL((@ROWNUM:=@ROWNUM+1) / #{pageSize}) AS PAGE
+		FROM (
+		SELECT
+		*
+		FROM INS_DEPT
+		WHERE 1=1
+		<if test="dept_name != null and dept_name != ''">
+			AND DEPT_NAME = #{dept_name}
+		</if>
+		) S, (SELECT @ROWNUM := 0) TMP
+		) A
+		WHERE PAGE = #{pageIndex}
+	</select>
+
+
+	<select id="selectListCountInsDept" parameterType="com.demo.proworks.insdept.vo.InsDeptVo" resultType="long">
+		<!-- 부서정보 목록의 카운트를 조회한다. -->
+
+		SELECT /* QueryID : com.demo.proworks.insdept.selectListCountInsDept */
+		COUNT(*) totcnt
+		FROM INS_DEPT
+		WHERE 1=1
+
+	</select>
 
 </mapper>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 제외항목 관련 처리를 담당하는 Sql Mapper
+	@description : 제외항목 관련 처리를 담당하는 Sql Mapper
+	@author      : Inswave
+	@since       : 2025/07/03
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/07/03              Inswave             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.excitem">
+
+	<select id="selectExcItemListR" parameterType="com.demo.proworks.excitem.vo.ExcItemVo" resultType="com.demo.proworks.excitem.vo.ExcItemVo">
+    	<!-- 제외항목를 상세 조회한다. -->	
+		SELECT		/* QueryID : com.demo.proworks.excitem.selectListExcItem */
+		    EXC_ID, ITEM_ID, TREATMENT_ID, CLAIM_NO, EXC_REASON, EXC_COST, EXC_CATEGORY
+		FROM (
+		    SELECT
+		        S.*,
+		        CEIL((@ROWNUM:=@ROWNUM+1) / 100) AS PAGE
+		    FROM (
+		        SELECT *
+		        FROM EXC_ITEM
+		        WHERE 1=1
+		        AND TREATMENT_ID = #{treatment_id}
+		        AND CLAIM_NO = #{claim_no}
+		    ) S, (SELECT @ROWNUM := 0) TMP
+		) A
+		WHERE PAGE = 1
+    </select>
+	
+    <insert id="insertExcItem" parameterType="com.demo.proworks.excitem.vo.ExcItemVo">
+    	<!-- 제외항목를 등록한다. -->	
+    		
+        INSERT INTO EXC_ITEM   /* QueryID : com.demo.proworks.excitem.insertExcItem */
+        ( 
+            EXC_ID
+            , ITEM_ID
+            , TREATMENT_ID
+            , CLAIM_NO
+            <if test="exc_reason  != null"> , EXC_REASON   </if>
+            <if test="exc_cost    != null"> , EXC_COST     </if>
+            <if test="exc_category!= null"> , EXC_CATEGORY </if>
+        )
+        VALUES  
+        ( 
+            #{exc_id}
+            , #{item_id}
+            , #{treatment_id}
+            , #{claim_no}
+            <if test="exc_reason  != null"> , #{exc_reason}   </if>
+            <if test="exc_cost    != null"> , #{exc_cost}     </if>
+            <if test="exc_category!= null"> , #{exc_category} </if> 
+        )          
+    </insert>	
+	
+    <update id="updateExcItem" parameterType="com.demo.proworks.excitem.vo.ExcItemVo">
+    	<!-- 제외항목를 갱신한다. -->
+    	
+        UPDATE EXC_ITEM    /* QueryID : com.demo.proworks.excitem.updateExcItem */      
+      	  SET  
+                EXC_ID       = #{exc_id}      
+         ,  ITEM_ID      = #{item_id}     
+         ,  TREATMENT_ID = #{treatment_id}
+         ,  CLAIM_NO     = #{claim_no}            	                       
+            <if test="exc_reason  != null"> , EXC_REASON   = #{exc_reason}   </if>
+            <if test="exc_cost    != null"> , EXC_COST     = #{exc_cost}     </if>
+            <if test="exc_category!= null"> , EXC_CATEGORY = #{exc_category} </if>                 
+        WHERE   
+                EXC_ID       = #{exc_id}      
+         AND ITEM_ID      = #{item_id}     
+         AND TREATMENT_ID = #{treatment_id}
+         AND CLAIM_NO     = #{claim_no}    
+    </update>
+	
+    <delete id="deleteExcItem" parameterType="com.demo.proworks.excitem.vo.ExcItemVo">
+    	<!-- 제외항목를 삭제한다. -->
+    	
+        DELETE FROM EXC_ITEM   /* QueryID : com.demo.proworks.excitem.deleteExcItem */ 
+        WHERE   
+                EXC_ID       = #{exc_id}      
+         AND ITEM_ID      = #{item_id}     
+         AND TREATMENT_ID = #{treatment_id}
+         AND CLAIM_NO     = #{claim_no}            
+    </delete>
+	
+    <select id="selectExcItem" parameterType="com.demo.proworks.excitem.vo.ExcItemVo" resultType="com.demo.proworks.excitem.vo.ExcItemVo">
+    	<!-- 제외항목를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.excitem.selectExcItem */
+            EXC_ID, ITEM_ID, TREATMENT_ID, CLAIM_NO, EXC_REASON, EXC_COST, EXC_CATEGORY
+        FROM EXC_ITEM 
+        WHERE 
+                EXC_ID       = #{exc_id}      
+         AND ITEM_ID      = #{item_id}     
+         AND TREATMENT_ID = #{treatment_id}
+         AND CLAIM_NO     = #{claim_no}    			
+    </select>
+	
+    <select id="selectListExcItem" parameterType="com.demo.proworks.excitem.vo.ExcItemVo" resultType="com.demo.proworks.excitem.vo.ExcItemVo">
+    	<!-- 제외항목 목록을 조회한다. -->
+           SELECT    /* QueryID : com.demo.proworks.excitem.selectListExcItem */
+               EXC_ID, ITEM_ID, TREATMENT_ID, CLAIM_NO, EXC_REASON, EXC_COST, EXC_CATEGORY		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM EXC_ITEM
+                   WHERE  1=1    		
+	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountExcItem" parameterType="com.demo.proworks.excitem.vo.ExcItemVo" resultType="long">
+    <!-- 제외항목 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.excitem.selectListCountExcItem */
+             COUNT(*) totcnt  		                  
+         FROM EXC_ITEM
+         WHERE  1=1    		
+
+    </select>
+
+</mapper>

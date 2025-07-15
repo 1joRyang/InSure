@@ -25,6 +25,7 @@
             <if test="status  != null"> , STATUS   </if>
             <if test="deptId != null"> , DEPT_ID  </if>
             <if test="role    != null"> , ROLE     </if>
+            <if test="empPw    != null"> , EMP_PW     </if>
         )
         VALUES  
         ( 
@@ -32,7 +33,8 @@
             <if test="empName!= null"> , #{empName} </if>
             <if test="status  != null"> , #{status}   </if>
             <if test="deptId != null"> , #{deptId}  </if>
-            <if test="role    != null"> , #{role}     </if> 
+            <if test="role    != null"> , #{role}     </if> 
+            <if test="empPw    != null"> , #{empPw}      </if>
         )          
     </insert>	
 	
@@ -41,11 +43,12 @@
     	
         UPDATE EMPLOYEE    /* QueryID : com.demo.proworks.employee.updateEmployee */      
       	  SET  
-                EMP_NO   = #{empNo}          	                       
+                EMP_NO   = #{empNo}          	                       
             <if test="empName!= null"> , EMP_NAME = #{empName} </if>
             <if test="status  != null"> , STATUS   = #{status}   </if>
             <if test="deptId != null"> , DEPT_ID  = #{deptId}  </if>
-            <if test="role    != null"> , ROLE     = #{role}     </if>                 
+            <if test="role    != null"> , ROLE     = #{role}     </if>
+            <if test="empPw    != null"> , EMP_PW  = #{empPw}   </if>                 
         WHERE   
                 EMP_NO   = #{empNo}  
     </update>
@@ -55,22 +58,22 @@
     	
         DELETE FROM EMPLOYEE   /* QueryID : com.demo.proworks.employee.deleteEmployee */ 
         WHERE   
-                EMP_NO   = #{empNo}          
+                EMP_NO   = #{empNo}          
     </delete>
 	
     <select id="selectEmployee" parameterType="com.demo.proworks.employee.vo.EmployeeVo" resultType="com.demo.proworks.employee.vo.EmployeeVo">
     	<!-- 실무자,관리자정보를 상세 조회한다. -->	
         SELECT     /* QueryID : com.demo.proworks.employee.selectEmployee */
-            EMP_NO as empNo, EMP_NAME as empName, STATUS as status, DEPT_ID as deptId, ROLE as role
+            EMP_NO as empNo, EMP_NAME as empName, STATUS as status, DEPT_ID as deptId, ROLE as role, EMP_PW as empPw
         FROM EMPLOYEE 
         WHERE 
-                EMP_NO   = #{empNo}  			
+                EMP_NO   = #{empNo}  			
     </select>
 	
     <select id="selectListEmployee" parameterType="com.demo.proworks.employee.vo.EmployeeVo" resultType="com.demo.proworks.employee.vo.EmployeeVo">
     	<!-- 실무자,관리자정보 목록을 조회한다. -->
            SELECT    /* QueryID : com.demo.proworks.employee.selectListEmployee */
-               EMP_NO as empNo, EMP_NAME as empName, STATUS as status, DEPT_ID as deptId, ROLE as role		       
+               EMP_NO as empNo, EMP_NAME as empName, STATUS as status, DEPT_ID as deptId, ROLE as role, EMP_PW as empPw	       
            FROM (
                SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
                FROM (				
@@ -93,5 +96,101 @@
          WHERE  1=1    		
 
     </select>
+<!--=======================================================================================================  -->
+	<select id="selectListEmployeeForRule" parameterType="com.demo.proworks.employee.vo.EmployeeVo"
+		resultType="com.demo.proworks.employee.vo.EmployeeVo">
+		SELECT
+		EMP_NO AS empNo,
+		EMP_NAME AS empName,
+		STATUS AS status,
+		DEPT_ID AS deptId,
+		ROLE AS role,
+		EMP_PW AS empPw
+		FROM EMPLOYEE
+		WHERE 1=1
+		<if test="deptId != null and deptId != ''">
+			AND DEPT_ID = #{deptId}
+		</if>
+		<if test="status != null and status != ''">
+			AND STATUS = #{status}
+		</if>
+		<if test="role != null and role != ''">
+			AND ROLE = #{role}
+		</if>
+		<if test="pageSize != null and pageIndex != null">
+			LIMIT #{pageSize} OFFSET ( (#{pageIndex} - 1) * #{pageSize} )
+		</if>
+	</select>
+
+
+
+	<!-- 🔥 부서ID와 상태 조건으로 직원 목록 조회 (배정 전용) -->
+	<select id="selectEmployeesByDeptAndStatus" parameterType="com.demo.proworks.employee.vo.EmployeeVo" 
+		resultType="com.demo.proworks.employee.vo.EmployeeVo">
+		SELECT /* QueryID : com.demo.proworks.employee.selectEmployeesByDeptAndStatus */
+			EMP_NO as empNo, 
+			EMP_NAME as empName, 
+			STATUS as status, 
+			DEPT_ID as deptId, 
+			ROLE as role,
+			EMP_PW AS empPw
+		FROM EMPLOYEE
+		WHERE 1=1
+			<if test="deptId != null and deptId != ''">
+			AND DEPT_ID = #{deptId}
+			</if>
+			<if test="status != null and status != ''">
+			AND STATUS = #{status}
+			</if>
+		ORDER BY EMP_NO
+	</select>
+
+	<!-- 🔥 부서별 마지막 배정된 직원 조회 (라운드로빈용) -->
+	<select id="selectLastAssignedEmployeeInDept" parameterType="string" resultType="java.lang.Integer">
+		SELECT /* QueryID : com.demo.proworks.employee.selectLastAssignedEmployeeInDept */
+			CAST(MAX(c.EMP_NO) AS SIGNED) as lastEmpNo
+		FROM CLAIM c
+		JOIN EMPLOYEE e ON c.EMP_NO = e.EMP_NO
+		WHERE e.DEPT_ID = #{deptId}
+		  AND e.STATUS = '재직중'
+		  AND c.EMP_NO IS NOT NULL
+	</select>
+
+	<!-- 🔥 다음 배정할 직원 조회 (라운드로빈 방식) -->
+	<select id="selectNextEmployeeForAssignment" parameterType="com.demo.proworks.employee.vo.EmployeeVo" 
+		resultType="com.demo.proworks.employee.vo.EmployeeVo">
+		SELECT /* QueryID : com.demo.proworks.employee.selectNextEmployeeForAssignment */
+			EMP_NO as empNo, 
+			EMP_NAME as empName, 
+			STATUS as status, 
+			DEPT_ID as deptId, 
+			ROLE as role,
+			EMP_PW AS empPw
+		FROM EMPLOYEE
+		WHERE DEPT_ID = #{deptId}
+		  AND STATUS = '재직중'
+		  <if test="lastEmpNo != null">
+		  AND EMP_NO > #{lastEmpNo}
+		  </if>
+		ORDER BY EMP_NO
+		LIMIT 1
+	</select>
+
+	<!-- 🔥 부서의 첫 번째 직원 조회 (라운드로빈 순환용) -->
+	<select id="selectFirstEmployeeInDept" parameterType="string" 
+		resultType="com.demo.proworks.employee.vo.EmployeeVo">
+		SELECT /* QueryID : com.demo.proworks.employee.selectFirstEmployeeInDept */
+			EMP_NO as empNo, 
+			EMP_NAME as empName, 
+			STATUS as status, 
+			DEPT_ID as deptId, 
+			ROLE as role,
+			EMP_PW AS empPw
+		FROM EMPLOYEE
+		WHERE DEPT_ID = #{deptId}
+		  AND STATUS = '재직중'
+		ORDER BY EMP_NO
+		LIMIT 1
+	</select>
 
 </mapper>
