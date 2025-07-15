@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+        	<w2:dataCollection baseNode="map">
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_claimWait" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+        				<w2:column dataType="text" name="user_name" id="user_name"></w2:column>
+        				<w2:column dataType="text" name="receipt_date" id="receipt_date"></w2:column>
+        				<w2:column dataType="text" name="deadline" id="deadline"></w2:column>
+        				<w2:column dataType="text" name="emp_name" id="emp_name"></w2:column>
+        				<w2:column dataType="text" name="status" id="status"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_claimDone" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+        				<w2:column dataType="text" name="user_name" id="user_name"></w2:column>
+        				<w2:column dataType="text" name="receipt_date" id="receipt_date"></w2:column>
+        				<w2:column dataType="text" name="deadline" id="deadline"></w2:column>
+        				<w2:column dataType="text" name="emp_name" id="emp_name"></w2:column>
+        				<w2:column dataType="text" name="status" id="status"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_approvalWait" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+        				<w2:column dataType="text" name="user_name" id="user_name"></w2:column>
+        				<w2:column dataType="text" name="receipt_date" id="receipt_date"></w2:column>
+        				<w2:column dataType="text" name="deadline" id="deadline"></w2:column>
+        				<w2:column dataType="text" name="emp_name" id="emp_name"></w2:column>
+        				<w2:column dataType="text" name="status" id="status"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_claimReturn" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+        				<w2:column dataType="text" name="user_name" id="user_name"></w2:column>
+        				<w2:column dataType="text" name="receipt_date" id="receipt_date"></w2:column>
+        				<w2:column dataType="text" name="deadline" id="deadline"></w2:column>
+        				<w2:column dataType="text" name="emp_name" id="emp_name"></w2:column>
+        				<w2:column dataType="text" name="status" id="status"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        	</w2:dataCollection>
+        	<w2:workflowCollection />
+        	<xf:submission id="sbm_getWaitList" action="" method="post" mediatype="application/json" ref="" target="" encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
+        		ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getDoneList" action="" method="post" mediatype="application/json" ref="" target="" encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
+        		ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getApprovalList" action="" method="post" mediatype="application/json" ref="" target="" encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
+        		ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getReturnList" action="" method="post" mediatype="application/json" ref="" target="" encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
+        		ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        <script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = function() {
+	// todo: 관리자냐 실무자냐 > tab 이름 바꾸기/숨기기 (이건 sidebar)
+
+    // 가져오기
+    $c.sbm.execute(sbm_getWaitList);
+    $c.sbm.execute(sbm_getDoneList);
+    $c.sbm.execute(sbm_getApprovalList);
+    $c.sbm.execute(sbm_getReturnList);
+};
+                                                                                                                                                                                                                                                                       ]]></script>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+    	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
+    		style="height: 100%;">
+    		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
+    			style="">
+    			<w2:textbox class="pgt_tit" id="" label="담당 청구 내역" style="" tagname=""></w2:textbox>
+    		</xf:group>
+    		<xf:group style="width: 100%;" id="">
+    			<xf:group class="lybox" id="" meta_snippetCategory="01_화면분할" meta_snippetKeyComponent="true"
+    				meta_snippetName="1_01 가변 2단 분할" style="width: 50%;">
+    				<xf:group adaptiveThreshold="" class=" col_5" id="" style="display: flex;font-size: 15px;gap: 10px">
+    					<w2:textbox id="" label="사번:"
+    						style="height:30px;text-align:center;line-height:28px;box-sizing:border-box;font-weight: 600">
+    					</w2:textbox>
+    					<w2:textbox id="" label="" style="height:30px;text-align:center;line-height:28px;box-sizing:border-box;"></w2:textbox>
+    				</xf:group>
+    				<xf:group adaptiveThreshold="" class=" col_5" id="" style="display: flex;font-size: 15px;gap: 10px">
+    					<w2:textbox id="" label="이름: "
+    						style="height:30px;text-align:center;line-height:28px;box-sizing:border-box;font-weight: 600">
+    					</w2:textbox>
+    					<w2:textbox id="" label="" style="height:30px;text-align:center;line-height:28px;box-sizing:border-box;"></w2:textbox>
+    				</xf:group>
+    			</xf:group>
+    		</xf:group>
+    		<xf:group class="tbcbox" id="" meta_snippetCategory="04_탭" meta_snippetKeyComponent="true" meta_snippetName="4_02 서브탭"
+    			style="">
+    			<w2:tabControl alwaysDraw="false" style="margin-top: 20px;" id="" class="tbc_sub">
+    				<w2:tabs disabled="false" style="" id="tab1" label="심사 대기"></w2:tabs>
+    				<w2:tabs disabled="false" style="" id="tab3" label="심사 완료"></w2:tabs>
+    				<w2:tabs disabled="false" style="width:70px;height:30px" id="tabs6" label="결재 중"></w2:tabs>
+    				<w2:tabs disabled="false" style="width:70px;height:30px" id="tabs7" label="반송"></w2:tabs>
+    				<w2:content alwaysDraw="false" style="height: 100%;" id="content2">
+    					<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
+    						meta_snippetName="6_01 그리드" style="">
+    						<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dataList1"
+    							focusMode="row" id="" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 100%;margin-top: 20px;">
+    							<w2:caption id="caption1" style="" value="this is a grid caption."></w2:caption>
+    							<w2:header id="header2" style="">
+    								<w2:row id="row3" style="">
+    									<w2:column blockSelect="false" displayMode="label" id="column12" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column11" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column10" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column9" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column8" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column7" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column6" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column5" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column4" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column3" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    								</w2:row>
+    							</w2:header>
+    							<w2:gBody id="gBody2" style="">
+    								<w2:row id="row4" style="">
+    									<w2:column blockSelect="false" displayMode="label" id="col1" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col2" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col3" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col4" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col5" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col6" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col7" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col8" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col9" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col10" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    								</w2:row>
+    							</w2:gBody>
+    						</w2:gridView>
+    					</xf:group>
+    				</w2:content>
+    				<w2:content alwaysDraw="false" style="height: 100%;" id="content3">
+    					<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
+    						meta_snippetName="6_01 그리드" style="">
+    						<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dataList1"
+    							focusMode="row" id="" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 100%;margin-top: 20px;">
+    							<w2:caption id="caption2" style="" value="this is a grid caption."></w2:caption>
+    							<w2:header id="header2" style="">
+    								<w2:row id="row3" style="">
+    									<w2:column blockSelect="false" displayMode="label" id="column12" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column11" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column10" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column9" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column8" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column7" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column6" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column5" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column4" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column3" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    								</w2:row>
+    							</w2:header>
+    							<w2:gBody id="gBody2" style="">
+    								<w2:row id="row4" style="">
+    									<w2:column blockSelect="false" displayMode="label" id="col1" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col2" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col3" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col4" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col5" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col6" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col7" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col8" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col9" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col10" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    								</w2:row>
+    							</w2:gBody>
+    						</w2:gridView>
+    					</xf:group>
+    				</w2:content>
+    				<w2:content alwaysDraw="false" style="height: 100%;" id="content6">
+    					<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
+    						meta_snippetName="6_01 그리드" style="">
+    						<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dataList1"
+    							focusMode="row" id="" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 153px;">
+    							<w2:caption id="caption4" style="" value="this is a grid caption."></w2:caption>
+    							<w2:header id="header2" style="">
+    								<w2:row id="row3" style="">
+    									<w2:column blockSelect="false" displayMode="label" id="column12" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column11" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column10" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column9" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column8" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column7" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column6" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column5" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column4" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="column3" inputType="text"
+    										removeBorderStyle="false" value="타이틀" width="70">
+    									</w2:column>
+    								</w2:row>
+    							</w2:header>
+    							<w2:gBody id="gBody2" style="">
+    								<w2:row id="row4" style="">
+    									<w2:column blockSelect="false" displayMode="label" id="col1" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col2" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col3" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col4" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col5" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col6" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col7" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col8" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col9" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    									<w2:column blockSelect="false" displayMode="label" id="col10" inputType="text"
+    										removeBorderStyle="false" width="70">
+    									</w2:column>
+    								</w2:row>
+    							</w2:gBody>
+    						</w2:gridView>
+    					</xf:group>
+    				</w2:content>
+    				<w2:content alwaysDraw="false" style="height:0px" id="content7"></w2:content>
+    			</w2:tabControl>
+    		</xf:group>
+    	</xf:group>
+    </body>
+</html>

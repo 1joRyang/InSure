@@ -45,18 +45,18 @@ public class ClaimItemController {
     @ElService(key="CLAIMITEMList")
     @RequestMapping(value="CLAIMITEMList")    
     @ElDescription(sub="청구 아이템들 목록조회",desc="페이징을 처리하여 청구 아이템들 목록 조회를 한다.")               
-    public ClaimItemListVo selectListClaimItem(ClaimItemVo claimItemVo) throws Exception {    	   	
+    public List<ClaimItemVo> selectListClaimItem(ClaimItemVo claimItemVo) throws Exception {    	   	
 
         List<ClaimItemVo> claimItemList = claimItemService.selectListClaimItem(claimItemVo);                  
-        long totCnt = claimItemService.selectListCountClaimItem(claimItemVo);
+//      long totCnt = claimItemService.selectListCountClaimItem(claimItemVo);
 	
-		ClaimItemListVo retClaimItemList = new ClaimItemListVo();
-		retClaimItemList.setClaimItemVoList(claimItemList); 
-		retClaimItemList.setTotalCount(totCnt);
-		retClaimItemList.setPageSize(claimItemVo.getPageSize());
-		retClaimItemList.setPageIndex(claimItemVo.getPageIndex());
+//		ClaimItemListVo retClaimItemList = new ClaimItemListVo();
+//		retClaimItemList.setClaimItemVoList(claimItemList); 
+//		retClaimItemList.setTotalCount(totCnt);
+//		retClaimItemList.setPageSize(claimItemVo.getPageSize());
+//		retClaimItemList.setPageIndex(claimItemVo.getPageIndex());
 
-        return retClaimItemList;            
+        return claimItemList;            
     }  
         
     /**

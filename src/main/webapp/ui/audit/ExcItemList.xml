@@ -11,7 +11,7 @@
 					<w2:keyInfo>
 						
 						<w2:key dataType="text" id="pageIndex" name="페이지_번호" defaultValue="1"></w2:key>
-						<w2:key dataType="text" id="pageSize" name="페이지_건수" defaultValue="10"></w2:key>
+						<w2:key dataType="text" id="pageSize" name="페이지_건수" defaultValue="100"></w2:key>
 					</w2:keyInfo>
 					<w2:data use="false"></w2:data>
 				</w2:dataMap>

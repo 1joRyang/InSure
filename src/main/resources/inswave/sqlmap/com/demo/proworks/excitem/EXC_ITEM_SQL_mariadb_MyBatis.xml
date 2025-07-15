@@ -18,21 +18,22 @@
 
 	<select id="selectExcItemListR" parameterType="com.demo.proworks.excitem.vo.ExcItemVo" resultType="com.demo.proworks.excitem.vo.ExcItemVo">
     	<!-- 제외항목를 상세 조회한다. -->	
-		SELECT		/* QueryID : com.demo.proworks.excitem.selectListExcItem */
-		    EXC_ID, ITEM_ID, TREATMENT_ID, CLAIM_NO, EXC_REASON, EXC_COST, EXC_CATEGORY
-		FROM (
-		    SELECT
-		        S.*,
-		        CEIL((@ROWNUM:=@ROWNUM+1) / 100) AS PAGE
-		    FROM (
-		        SELECT *
-		        FROM EXC_ITEM
-		        WHERE 1=1
-		        AND TREATMENT_ID = #{treatment_id}
-		        AND CLAIM_NO = #{claim_no}
-		    ) S, (SELECT @ROWNUM := 0) TMP
-		) A
-		WHERE PAGE = 1
+        SELECT    /* QueryID : com.demo.proworks.excitem.selectListExcItem */
+               EXC_ID, ITEM_ID, TREATMENT_ID, CLAIM_NO, EXC_REASON, EXC_COST, EXC_CATEGORY		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM EXC_ITEM
+                   WHERE  1=1    		
+	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE  
+            PAGE = 1 
+            <if test="treatment_id != null">AND TREATMENT_ID = #{treatment_id}</if>
+	         AND CLAIM_NO     = #{claim_no}    
     </select>
 	
     <insert id="insertExcItem" parameterType="com.demo.proworks.excitem.vo.ExcItemVo">
@@ -117,6 +118,7 @@
                ) S, (SELECT @ROWNUM := 0) TMP
            ) A
             WHERE PAGE = #{pageIndex}
+            
     </select>
 	
     <select id="selectListCountExcItem" parameterType="com.demo.proworks.excitem.vo.ExcItemVo" resultType="long">

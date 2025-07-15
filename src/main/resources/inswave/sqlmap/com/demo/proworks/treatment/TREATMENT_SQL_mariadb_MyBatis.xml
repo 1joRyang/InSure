@@ -20,8 +20,7 @@
     		
         INSERT INTO TREATMENT   /* QueryID : com.demo.proworks.treatment.insertTreatment */
         ( 
-            TREATMENT_ID
-            , CLAIM_NO
+            CLAIM_NO
             <if test="department    != null"> , DEPARTMENT     </if>
             <if test="treatment_date!= null"> , TREATMENT_DATE </if>
             <if test="patient_type  != null"> , PATIENT_TYPE   </if>
@@ -30,8 +29,7 @@
         )
         VALUES  
         ( 
-            #{treatment_id}
-            , #{claim_no}
+             #{claim_no}
             <if test="department    != null"> , #{department}     </if>
             <if test="treatment_date!= null"> , #{treatment_date} </if>
             <if test="patient_type  != null"> , #{patient_type}   </if>
@@ -72,7 +70,7 @@
             TREATMENT_ID, CLAIM_NO, DEPARTMENT, TREATMENT_DATE, PATIENT_TYPE, HOSPITAL_NAME, HOSPITAL_GRADE
         FROM TREATMENT 
         WHERE 
-                TREATMENT_ID   = #{treatment_id}  
+                TREATMENT_DATE   = #{treatment_date}  
          AND CLAIM_NO       = #{claim_no}      			
     </select>
 	

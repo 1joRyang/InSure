@@ -16059,7 +16059,6 @@ function searchHcode() {
     );
 
     let merged = mergeUniqueRows(result1, dl_hcode1.getAllFilteredJSON());
-    console.log("MERGE", merged);
 
     dl_result.setJSON(merged);
 }
@@ -16076,18 +16075,18 @@ scwin.ipt_hcode1_onkeydown = function (e) {
 
 scwin.btn_confirm_onclick = function (e) {
     $p.parent().ipt_hcode1.setValue(localStorage.getItem("hcode1"));
-    $p.closePopup("mf_hcode_popup");
+    localStorage.removeItem("hcode1");
+    $p.closePopup();
 };
 
 scwin.btn_close_onclick = function (e) {
     localStorage.removeItem("hcode1");
-    $p.closePopup("mf_hcode_popup");
+    $p.closePopup();
 };
 
 scwin.grd_result_oncellclick = function (rowIndex, columnIndex, columnId) {
     // localStorage에 저장
     localStorage.setItem("hcode1", grd_result.getRowData(rowIndex)[0]);
-    console.log(grd_result.getRowData(rowIndex)[0]);
 };
 ]]></script>
     </head>

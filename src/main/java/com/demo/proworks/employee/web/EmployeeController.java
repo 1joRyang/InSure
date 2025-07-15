@@ -52,6 +52,17 @@ public class EmployeeController {
 	
     @Resource(name = "loginProcess")
 	protected LoginProcessor loginProcess;
+	
+	/**
+	 * 특정 조건으로 가져오기
+	 */
+	 @ElService(key = "EmployeeForRule")
+    @RequestMapping(value = "EmployeeForRule")
+    @ElDescription(sub = "특정 조건으로 실무자 조회", desc = "특정 조건으로 실무자 조회 (deptId, status, role)\r\n")
+    public List<EmployeeVo> selectEmpForRule(EmployeeVo employeeVo) throws Exception {
+		List<EmployeeVo> employeeList = employeeService.selectListEmployeeForRule(employeeVo);  
+		return employeeList;
+    }
     
 	/**
 	 * 직원(실무자/관리자) 로그인을 처리한다.
