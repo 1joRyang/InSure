@@ -17,6 +17,7 @@
         				<w2:key dataType="text" name="disease_code" id="disease_code"></w2:key>
         				<w2:key dataType="date" name="date_of_accident" id="date_of_accident"></w2:key>
         				<w2:key dataType="text" name="disaster_code" id="disaster_code"></w2:key>
+        				<w2:key dataType="text" name="status" id="status"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
         		<w2:dataMap baseNode="map" id="dm_claimuser">
@@ -116,7 +117,7 @@
         	</xf:submission>
         	<xf:submission id="sbm_getClaim" action="/InsWebApp/CLAIMUpdView.pwkjson" method="post" mediatype="application/json" ref=""
         		target='data:json,{"id":"dm_claim","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
-        		mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        		mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getClaim_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getSubInsu" action="/InsWebApp/INSURANCESubList.pwkjson" method="post" mediatype="application/json"
         		ref='data:json,{"id":"dm_claimuser","key":"elData"}' target='data:json,{"id":"dl_subinsu","key":"subInsuranceListVoList"}'
@@ -165,12 +166,23 @@ scwin.onpageload = function() {
 
     scwin.genList.push(scwin.index);
 	gen_date.insertChild(scwin.index++);   
+
+};
+
+let isDateDrop = false;
+
+scwin.sbm_getClaim_submitdone = function (e) {
+    // 대기, 결재중 아니면 그냥 넘어가게
+    let status = dm_claim.getJSON().status;
+    if (status !== "대기" && status !== "결재중") {
+        isDateDrop = true;
+    }
+    
 };
         
 scwin.btn_next_onclick = function (e) {
     let missingFields = [];
     let isClaimOffset = false;
-    let isDateDrop = false;
     let isHcode = false;
     let isSaveOffset = false;
 
@@ -310,7 +322,9 @@ function openHcodePopup(link) {
 				};
 
 	$p.openPopup(link, opts);
-}]]></script>
+}
+
+]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
         <w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/header.xml"></w2:wframe>
