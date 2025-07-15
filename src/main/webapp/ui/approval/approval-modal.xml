@@ -26,6 +26,12 @@
         				<w2:key dataType="text" name="dept_name" id="dept_name"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dm_claim">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
+        				<w2:key dataType="text" name="status" id="status"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
         	<xf:submission id="sbm_insertApprovalReq" action="/InsWebApp/APPROVALREQIns.pwkjson" method="post" mediatype="application/json"
@@ -33,12 +39,16 @@
         		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getManager" action="/InsWebApp/EmployeeForRule.pwkjson" method="post" mediatype="application/json" ref=""
-        		target='data:json,{"id":"dl_manager","key":"employeeVoList"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
-        		mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        		target='data:json,{"id":"dl_manager","key":"employeeVoList"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getManager_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getDeptName" action="/InsWebApp/insdept0001UpdView.pwkjson" method="post" mediatype="application/json"
-        		ref="" target='data:json,{"id":"dm_deptName","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg=""
-        		ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        		ref="" target='data:json,{"id":"dm_deptName","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="로딩중.." ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_updateClaim" action="/InsWebApp/CLAIMUpd.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_claim","key":"elData"}' target="" encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_updateClaim_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -47,13 +57,19 @@
 
 scwin.onpageload = function() {
     scwin.emp = JSON.parse(localStorage.getItem("employee"));
-    console.log(scwin.emp)
 	ipt_claimNo.setValue(localStorage.getItem("claimNo"));
+    
     ipt_emp.setValue(scwin.emp.empName);
+
+    dm_claim.set("claim_no", localStorage.getItem("claimNo"));
 
     $c.sbm.execute(sbm_getDeptName, {"elData": {"dept_id": scwin.emp.deptId}});
 
     $c.sbm.execute(sbm_getManager, {"elData": {"deptId": scwin.emp.deptId, "role": "관리자"}});
+};
+
+scwin.sbm_getManager_submitdone = function (e) {
+    select_manager.setSelectedIndex(0);
 };
 
 scwin.btn_close_onclick = function (e) {
@@ -64,11 +80,21 @@ scwin.btn_close_onclick = function (e) {
 scwin.btn_confirm_onclick = function (e) {
     dm_approvalReq.set("emp_no", scwin.emp.empNo);
     $c.sbm.execute(sbm_insertApprovalReq);
+
+    dm_claim.set("status", "결재중");
+    console.log(dm_claim.getJSON());
+    $c.sbm.execute(sbm_updateClaim);
 };
 
 scwin.sbm_insertApprovalReq_submitdone = function (e) {
+    // todo: 청구상태 업데이트
+    
+};
+
+scwin.sbm_updateClaim_submitdone = function (e) {
     $p.closePopup();
 };
+
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
@@ -95,8 +121,8 @@ scwin.sbm_insertApprovalReq_submitdone = function (e) {
     			</xf:group>
     			<xf:group style="flex: 1;">
     				<w2:textbox label="담당자" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;"></w2:textbox>
-    				<xf:select1 allOption="" appearance="minimal" chooseOption="true" chooseOptionLabel="선택" class="" direction="auto"
-    					disabled="false" disabledClass="w2selectbox_disabled" id="selectbox2" ref="data:dm_approvalReq.manager_no" renderType=""
+    				<xf:select1 allOption="" appearance="minimal" chooseOption="" chooseOptionLabel="선택" class="" direction="auto"
+    					disabled="false" disabledClass="w2selectbox_disabled" id="select_manager" ref="data:dm_approvalReq.manager_no" renderType=""
     					style="width: 100%;" submenuSize="auto">
     					<xf:choices>
     						<xf:itemset nodeset="data:dl_manager">

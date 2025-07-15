@@ -25,9 +25,6 @@ public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "manager_no", physicalName = "manager_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String manager_no;
 
-    @ElDtoField(logicalName = "status", physicalName = "status", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
-    private String status;
-
     @ElDtoField(logicalName = "approval_memo", physicalName = "approval_memo", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String approval_memo;
 
@@ -39,9 +36,6 @@ public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElDtoField(logicalName = "search_manager_no", physicalName = "SC_manager_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String SC_manager_no;
-
-    @ElDtoField(logicalName = "search_status", physicalName = "SC_status", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
-    private String SC_status;
 
     @ElVoField(physicalName = "approval_id")
     public String getApproval_id(){
@@ -85,17 +79,6 @@ public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElVoField(physicalName = "manager_no")
     public void setManager_no(String manager_no){
         this.manager_no = manager_no;
-    }
-
-    @ElVoField(physicalName = "status")
-    public String getStatus(){
-        String ret = this.status;
-        return ret;
-    }
-
-    @ElVoField(physicalName = "status")
-    public void setStatus(String status){
-        this.status = status;
     }
 
     @ElVoField(physicalName = "approval_memo")
@@ -142,17 +125,6 @@ public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.SC_manager_no = SC_manager_no;
     }
 
-    @ElVoField(physicalName = "SC_status")
-    public String getSC_status(){
-        String ret = this.SC_status;
-        return ret;
-    }
-
-    @ElVoField(physicalName = "SC_status")
-    public void setSC_status(String SC_status){
-        this.SC_status = SC_status;
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -161,12 +133,10 @@ public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("claim_no").append("=").append(claim_no).append(",");
         sb.append("emp_no").append("=").append(emp_no).append(",");
         sb.append("manager_no").append("=").append(manager_no).append(",");
-        sb.append("status").append("=").append(status).append(",");
         sb.append("approval_memo").append("=").append(approval_memo).append(",");
         sb.append("SC_claim_no").append("=").append(SC_claim_no).append(",");
         sb.append("SC_emp_no").append("=").append(SC_emp_no).append(",");
-        sb.append("SC_manager_no").append("=").append(SC_manager_no).append(",");
-        sb.append("SC_status").append("=").append(SC_status);
+        sb.append("SC_manager_no").append("=").append(SC_manager_no);
         sb.append("]");
         return sb.toString();
 

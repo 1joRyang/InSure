@@ -483,7 +483,7 @@ function openHcodePopup(link) {
     							<w2:textbox id="" label="재해 일자" style="width: 150px;height: 23px;"></w2:textbox>
     							<w2:inputCalendar calendarValueType="yearMonthDate" focusOnDateSelect="false" footerDiv="true" id="ipt_hcodeDate"
     								meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true" meta_snippetName="10_11 기간조회" renderDiv="true" renderType=""
-    								rightAlign="false" style="" ref="">
+    								rightAlign="false" style="" ref="data:dm_claim.date_of_accident">
     							</w2:inputCalendar>
     						</xf:group>
     					</xf:group>
