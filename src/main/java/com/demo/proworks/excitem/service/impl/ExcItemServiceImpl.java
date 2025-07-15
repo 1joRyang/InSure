@@ -37,7 +37,7 @@ public class ExcItemServiceImpl implements ExcItemService {
 	 */
 	public List<ExcItemVo> selectListExcItemR(ExcItemVo excItemVo) throws Exception {
 		List<ExcItemVo> list = excItemDAO.selectListExcItemR(excItemVo);	
-	
+		System.out.println("★★ DB에서 select된 행 수 = " + list.size());
 		return list;
 	}
 

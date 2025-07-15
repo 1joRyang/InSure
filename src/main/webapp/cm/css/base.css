@@ -1401,12 +1401,54 @@ div.exup_wrap {width:100%;padding:19px;border:0;box-sizing:border-box}
 .processbar .dot {display:inline-block;width:6px;height:6px;margin:0 1px;border-radius:10px;background:var(--ws-gray-300)}
 .processbar .dot.on {background:var(--ws-primary-500)}
 
-/* login page */
+/* login page
 .login_wrap {overflow:hidden;position:relative;width:100%;min-width:1000px;height:100%;min-height:700px}
 .login_wrap::before {content:'';position:absolute;top:-25px;left:-260px;width:1521px;height:1454px;background:url(../images/base/bg_login_inswave.png) no-repeat}
 .login_wrap .login_logo {position:absolute;top:48px;left:48px}
 .login_wrap .login_logo a {display:block;width:60px;height:52px;background:url(../images/base/img_login_inswave.svg) no-repeat}
 .login_wrap .login_container {position:absolute;top:180px;right:20%;width:360px}
+.login_wrap .login_header {font-size:18px;text-align:left;letter-spacing:-1px}
+.login_wrap .login_header .login_info {margin-top:6px;font-size:28px;font-weight:bold}
+.login_wrap .login_contents {margin-top:32px}
+.login_wrap .login_contents ul li + li {margin-top:24px}
+.login_wrap .login_contents ul li .tit {margin-left:4px;font-weight:bold}
+.login_wrap .login_contents ul li .w2input {width:100%;height:50px;margin-top:5px;border-radius:3px;box-sizing:border-box}
+.login_wrap .login_contents .login_form {position:relative}
+.login_wrap .login_contents .login_form .w2input {padding-right:40px}
+.login_wrap .login_contents .login_form .btn_login_delete {position:absolute;top:21px;right:16px;width:20px;height:20px;background:url(../images/base/ico_delete.svg) no-repeat center;text-indent:-9999px}
+.login_wrap .login_contents .login_form .btn_login_password {position:absolute;top:21px;right:16px;width:20px;height:20px;background:url(../images/base/ico_login_password.svg) no-repeat center;text-indent:-9999px}
+.login_wrap .login_contents .grp_password {display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.login_wrap .login_contents .grp_password .w2checkbox_label {font-size:12px}
+.login_wrap .login_contents .grp_password .link_password {font-size:12px;text-decoration:underline}
+.login_wrap .login_contents .login_btn {margin-top:36px}
+.login_wrap .login_contents .login_btn .btn_login {display:block;width:100%;height:50px;border:none;border-radius:4px;background:var(--ws-gray-800);color:var(--ws-gray-0);font-weight:bold;line-height:50px;text-align:center}
+.login_wrap .login_contents .login_account {display:flex;align-items:center;justify-content:center;margin-top:27px}
+.login_wrap .login_contents .login_account .link_account {margin-left:10px;color:var(--ws-primary-500);text-decoration:underline}
+*/
+
+/* login page */
+.login_wrap {
+    overflow:hidden;
+    position:relative;
+    width:100%;
+    min-width:1000px;
+    height:100vh;
+    min-height:700px;
+}
+.login_wrap::before {content:'';position:absolute;top:-25px;left:-260px;width:1521px;height:1454px;background:url(../images/base/bg_login_inswave.png) no-repeat}
+.login_wrap .login_logo {position:absolute;top:48px;left:48px}
+.login_wrap .login_logo a {display:block;width:60px;height:52px;background:url(../images/base/img_login_inswave.svg) no-repeat}
+
+/* 로그인 컨테이너를 정확히 중앙 배치 */
+.login_wrap .login_container {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 360px !important;
+    z-index: 10 !important;
+}
+
 .login_wrap .login_header {font-size:18px;text-align:left;letter-spacing:-1px}
 .login_wrap .login_header .login_info {margin-top:6px;font-size:28px;font-weight:bold}
 .login_wrap .login_contents {margin-top:32px}

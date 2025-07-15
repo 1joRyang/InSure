@@ -32,7 +32,7 @@
            ) A
             WHERE  
             PAGE = 1 
-            AND TREATMENT_ID = #{treatment_id}
+            <if test="treatment_id != null">AND TREATMENT_ID = #{treatment_id}</if>
 	         AND CLAIM_NO     = #{claim_no}    
     </select>
 	

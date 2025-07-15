@@ -181,6 +181,7 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.disaster_code = disaster_code;
     }
 
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

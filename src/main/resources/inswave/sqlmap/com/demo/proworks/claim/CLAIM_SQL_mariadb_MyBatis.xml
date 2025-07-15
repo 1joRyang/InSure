@@ -4,33 +4,34 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--
-	@subject     : 청구 관련 처리를 담당하는 Sql Mapper
+	@subject : 청구 관련 처리를 담당하는 Sql Mapper
 	@description : 청구 관련 처리를 담당하는 Sql Mapper
-	@author      : Inswave
-	@since       : 2025/07/01
+	@author : Inswave
+	@since : 2025/07/01
 	@modification
 	===========================================================
-	DATE              AUTHOR             DESC
+	DATE AUTHOR DESC
 	===========================================================
-	2025/07/01              Inswave             최초 생성
- -->
+	2025/07/01 Inswave 최초 생성
+-->
 <mapper namespace="com.demo.proworks.claim">
-	<select id="selectClaimJoinClaimResult" parameterType="com.demo.proworks.claim.vo.ClaimUserVo" resultType="com.demo.proworks.claim.vo.ClaimNClaimResultVo">
-	    <!-- 기지급이력 조회 (insure-second.xml에서 사용) todo: 고객id 넘기기-->
-	    SELECT 
-	        CR.CLAIM_NO, 
-	        C.RECEIPT_DATE, 
-	        CR.AMOUNT, 
-	        C.STATUS
-	    FROM 
-	        CLAIM_RESULT CR
-	    JOIN 
-	        CLAIM C ON CR.CLAIM_NO = C.CLAIM_NO
-	    WHERE 
-	        C.STATUS = '완료' 
-	        AND C.ID = #{ID}
+	<select id="selectClaimJoinClaimResult" parameterType="com.demo.proworks.claim.vo.ClaimUserVo"
+		resultType="com.demo.proworks.claim.vo.ClaimNClaimResultVo">
+		<!-- 기지급이력 조회 (insure-second.xml에서 사용) todo: 고객id 넘기기 -->
+		SELECT
+		CR.CLAIM_NO,
+		C.RECEIPT_DATE,
+		CR.AMOUNT,
+		C.STATUS
+		FROM
+		CLAIM_RESULT CR
+		JOIN
+		CLAIM C ON CR.CLAIM_NO = C.CLAIM_NO
+		WHERE
+		C.STATUS = '완료'
+		AND C.ID
+		= #{ID}
 	</select>
-
 	
     <insert id="insertClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo">
     	<!-- 청구를 등록한다. -->	
@@ -134,5 +135,114 @@
                  AND ID like '%${SC_ID}%'
             </if>
     </select>
+
+
+	<select id="findUsernameAndEmpNameByClaimNo" parameterType="com.demo.proworks.claim.vo.ClaimNoVo"
+		resultType="com.demo.proworks.claim.vo.ClaimUserEmpVo">
+		SELECT
+		c.claim_no,
+		u.user_name,
+		e.emp_name
+		FROM CLAIM c
+		LEFT JOIN USER u ON c.ID = u.ID
+		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+		WHERE c.claim_no = #{claim_no}
+	</select>
+
+	<!-- 청구와 직원 정보 조인 조회 -->
+	<select id="selectClaimEmployeeList" parameterType="com.demo.proworks.claim.vo.ClaimEmployeeVo"
+		resultType="com.demo.proworks.claim.vo.ClaimEmployeeVo">
+		SELECT /* QueryID : com.demo.proworks.claim.selectClaimEmployeeList */
+		c.claim_no,
+		c.claim_type,
+		e.emp_name,
+		c.status
+		FROM CLAIM c
+		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+		WHERE 1=1
+		<if test="SC_claim_type != null and SC_claim_type != ''">
+			AND c.claim_type = #{SC_claim_type}
+		</if>
+		<if test="SC_status != null and SC_status != ''">
+			AND c.status = #{SC_status}
+		</if>
+		<if test="SC_emp_name != null and SC_emp_name != ''">
+			AND e.emp_name LIKE CONCAT('%', #{SC_emp_name}, '%')
+		</if>
+		ORDER BY c.claim_no DESC
+	</select>
+
+	<!-- 청구와 직원 정보 조인 조회 카운트 -->
+	<select id="selectClaimEmployeeListCount" parameterType="com.demo.proworks.claim.vo.ClaimEmployeeVo"
+		resultType="long">
+		SELECT /* QueryID : com.demo.proworks.claim.selectClaimEmployeeListCount */
+		COUNT(*) as totcnt
+		FROM CLAIM c
+		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+		WHERE 1=1
+		<if test="SC_claim_type != null and SC_claim_type != ''">
+			AND c.claim_type = #{SC_claim_type}
+		</if>
+		<if test="SC_status != null and SC_status != ''">
+			AND c.status = #{SC_status}
+		</if>
+		<if test="SC_emp_name != null and SC_emp_name != ''">
+			AND e.emp_name LIKE CONCAT('%', #{SC_emp_name}, '%')
+		</if>
+	</select>
+
+	<!-- 청구와 사용자, 직원, 결과 정보 전체 조인 조회 -->
+	<select id="selectClaimFullJoinList" parameterType="com.demo.proworks.claim.vo.ClaimFullJoinVo"
+		resultType="com.demo.proworks.claim.vo.ClaimFullJoinVo">
+		SELECT /* QueryID : com.demo.proworks.claim.selectClaimFullJoinList */
+		c.claim_no,
+		c.claim_type,
+		u.user_name,
+		r.amount,
+		e.emp_name,
+		c.status
+		FROM CLAIM c
+		LEFT JOIN USER u ON c.ID = u.ID
+		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+		LEFT JOIN CLAIM_RESULT r ON c.claim_no = r.claim_no
+		WHERE 1=1
+		<if test="SC_claim_type != null and SC_claim_type != ''">
+			AND c.claim_type = #{SC_claim_type}
+		</if>
+		<if test="SC_status != null and SC_status != ''">
+			AND c.status = #{SC_status}
+		</if>
+		<if test="SC_emp_name != null and SC_emp_name != ''">
+			AND e.emp_name LIKE CONCAT('%', #{SC_emp_name}, '%')
+		</if>
+		<if test="SC_user_name != null and SC_user_name != ''">
+			AND u.user_name LIKE CONCAT('%', #{SC_user_name}, '%')
+		</if>
+		ORDER BY c.claim_no DESC
+	</select>
+
+	<!-- 청구와 사용자, 직원, 결과 정보 전체 조인 조회 카운트 -->
+	<select id="selectClaimFullJoinListCount" parameterType="com.demo.proworks.claim.vo.ClaimFullJoinVo"
+		resultType="long">
+		SELECT /* QueryID : com.demo.proworks.claim.selectClaimFullJoinListCount */
+		COUNT(*) as totcnt
+		FROM CLAIM c
+		LEFT JOIN USER u ON c.ID = u.ID
+		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+		LEFT JOIN CLAIM_RESULT r ON c.claim_no = r.claim_no
+		WHERE 1=1
+		<if test="SC_claim_type != null and SC_claim_type != ''">
+			AND c.claim_type = #{SC_claim_type}
+		</if>
+		<if test="SC_status != null and SC_status != ''">
+			AND c.status = #{SC_status}
+		</if>
+		<if test="SC_emp_name != null and SC_emp_name != ''">
+			AND e.emp_name LIKE CONCAT('%', #{SC_emp_name}, '%')
+		</if>
+		<if test="SC_user_name != null and SC_user_name != ''">
+			AND u.user_name LIKE CONCAT('%', #{SC_user_name}, '%')
+		</if>
+	</select>
 
 </mapper>
