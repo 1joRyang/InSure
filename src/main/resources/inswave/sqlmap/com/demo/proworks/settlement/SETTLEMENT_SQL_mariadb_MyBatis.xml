@@ -60,14 +60,16 @@
 		DELETE FROM SETTLEMENT /* QueryID : com.demo.proworks.settlement.deleteSettlement */
 		WHERE
 		TREATMENT_ID = #{treatment_id}
-		AND CLAIM_NO = #{claim_no}
+		AND CLAIM_NO =
+		#{claim_no}
 	</delete>
 
 	<select id="selectSettlement" parameterType="com.demo.proworks.settlement.vo.SettlementVo"
 		resultType="com.demo.proworks.settlement.vo.SettlementVo">
 		<!-- 정산정보를 상세 조회한다. -->
 		SELECT /* QueryID : com.demo.proworks.settlement.selectSettlement */
-		FINAL_DUE, HOSPITAL_PREPAID, DEDUCATION_AMT, REFUND_AMT, TREATMENT_ID, CLAIM_NO
+		FINAL_DUE, HOSPITAL_PREPAID, DEDUCATION_AMT, REFUND_AMT, TREATMENT_ID,
+		CLAIM_NO
 		FROM SETTLEMENT
 		WHERE
 		TREATMENT_ID = #{treatment_id}
@@ -78,7 +80,8 @@
 		resultType="com.demo.proworks.settlement.vo.SettlementVo">
 		<!-- 정산정보 목록을 조회한다. -->
 		SELECT /* QueryID : com.demo.proworks.settlement.selectListSettlement */
-		FINAL_DUE, HOSPITAL_PREPAID, DEDUCATION_AMT, REFUND_AMT, TREATMENT_ID, CLAIM_NO
+		FINAL_DUE, HOSPITAL_PREPAID, DEDUCATION_AMT, REFUND_AMT,
+		TREATMENT_ID, CLAIM_NO
 		FROM (
 		SELECT S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
 		FROM (
@@ -127,11 +130,33 @@
 		FROM SETTLEMENT s
 		LEFT JOIN TREATMENT t
 		ON s.claim_no = t.claim_no
+		AND
+		s.treatment_id = t.treatment_id
+		WHERE 1=1
+		<if test="SC_claim_no != null and SC_claim_no != ''">
+			AND s.claim_no = #{SC_claim_no}
+		</if>
+	</select>
+
+	<select id="selectSettlementSummary" parameterType="com.demo.proworks.settlement.vo.SettlementSummaryVo"
+		resultType="com.demo.proworks.settlement.vo.SettlementSummaryVo">
+		<!-- 정산정보 집계 데이터를 조회한다. -->
+
+		SELECT /* QueryID : com.demo.proworks.settlement.selectSettlementSummary */
+		s.claim_no,
+		SUM(s.final_due) AS total_final_due,
+		SUM(s.refund_amt) AS total_refund_amt,
+		SUM(s.hospital_prepaid) AS total_hp_prepaid,
+		SUM(s.deducation_amt) AS total_deducation_amt
+		FROM SETTLEMENT s
+		LEFT JOIN TREATMENT t
+		ON s.claim_no = t.claim_no
 		AND s.treatment_id = t.treatment_id
 		WHERE 1=1
 		<if test="SC_claim_no != null and SC_claim_no != ''">
 			AND s.claim_no = #{SC_claim_no}
 		</if>
+		GROUP BY s.claim_no
 	</select>
 
 </mapper>
