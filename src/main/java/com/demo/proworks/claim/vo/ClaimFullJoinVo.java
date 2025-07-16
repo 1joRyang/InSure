@@ -8,13 +8,11 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 @JsonFilter("elExcludeFilter")
 @ElDto(FldYn = "", delimeterYn = "", logicalName = "청구-사용자-직원-결과 조인 VO")
 public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
-
     private static final long serialVersionUID = 1L;
 
     public ClaimFullJoinVo(){
     }
 
-    // CLAIM 테이블 필드들
     @ElDtoField(logicalName = "claim_no", physicalName = "claim_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "청구번호", attr = "")
     private String claim_no;
 
@@ -24,19 +22,15 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "status", physicalName = "status", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "상태", attr = "")
     private String status;
 
-    // USER 테이블 필드들
     @ElDtoField(logicalName = "user_name", physicalName = "user_name", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "사용자명", attr = "")
     private String user_name;
 
-    // EMPLOYEE 테이블 필드들
     @ElDtoField(logicalName = "emp_name", physicalName = "emp_name", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "직원명", attr = "")
     private String emp_name;
 
-    // CLAIM_RESULT 테이블 필드들
     @ElDtoField(logicalName = "amount", physicalName = "amount", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "지급금액", attr = "")
     private String amount;
 
-    // 검색 조건용 필드들
     @ElDtoField(logicalName = "SC_claim_type", physicalName = "SC_claim_type", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "검색_청구유형", attr = "")
     private String SC_claim_type;
 
@@ -49,10 +43,16 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "SC_user_name", physicalName = "SC_user_name", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "검색_사용자명", attr = "")
     private String SC_user_name;
 
-    // getter/setter methods
+    @ElDtoField(logicalName = "rrn", physicalName = "rrn", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String rrn;
+
+    @ElDtoField(logicalName = "id", physicalName = "id", type = "int", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private int id;
+
     @ElVoField(physicalName = "claim_no")
     public String getClaim_no(){
-        return this.claim_no;
+        String ret = this.claim_no;
+        return ret;
     }
 
     @ElVoField(physicalName = "claim_no")
@@ -62,7 +62,8 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "claim_type")
     public String getClaim_type(){
-        return this.claim_type;
+        String ret = this.claim_type;
+        return ret;
     }
 
     @ElVoField(physicalName = "claim_type")
@@ -72,7 +73,8 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "status")
     public String getStatus(){
-        return this.status;
+        String ret = this.status;
+        return ret;
     }
 
     @ElVoField(physicalName = "status")
@@ -82,7 +84,8 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "user_name")
     public String getUser_name(){
-        return this.user_name;
+        String ret = this.user_name;
+        return ret;
     }
 
     @ElVoField(physicalName = "user_name")
@@ -92,7 +95,8 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "emp_name")
     public String getEmp_name(){
-        return this.emp_name;
+        String ret = this.emp_name;
+        return ret;
     }
 
     @ElVoField(physicalName = "emp_name")
@@ -102,7 +106,8 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "amount")
     public String getAmount(){
-        return this.amount;
+        String ret = this.amount;
+        return ret;
     }
 
     @ElVoField(physicalName = "amount")
@@ -112,7 +117,8 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "SC_claim_type")
     public String getSC_claim_type(){
-        return this.SC_claim_type;
+        String ret = this.SC_claim_type;
+        return ret;
     }
 
     @ElVoField(physicalName = "SC_claim_type")
@@ -122,7 +128,8 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "SC_status")
     public String getSC_status(){
-        return this.SC_status;
+        String ret = this.SC_status;
+        return ret;
     }
 
     @ElVoField(physicalName = "SC_status")
@@ -132,7 +139,8 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "SC_emp_name")
     public String getSC_emp_name(){
-        return this.SC_emp_name;
+        String ret = this.SC_emp_name;
+        return ret;
     }
 
     @ElVoField(physicalName = "SC_emp_name")
@@ -142,12 +150,34 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
 
     @ElVoField(physicalName = "SC_user_name")
     public String getSC_user_name(){
-        return this.SC_user_name;
+        String ret = this.SC_user_name;
+        return ret;
     }
 
     @ElVoField(physicalName = "SC_user_name")
     public void setSC_user_name(String SC_user_name){
         this.SC_user_name = SC_user_name;
+    }
+
+    @ElVoField(physicalName = "rrn")
+    public String getRrn(){
+        String ret = this.rrn;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "rrn")
+    public void setRrn(String rrn){
+        this.rrn = rrn;
+    }
+
+    @ElVoField(physicalName = "id")
+    public int getId(){
+        return id;
+    }
+
+    @ElVoField(physicalName = "id")
+    public void setId(int id){
+        this.id = id;
     }
 
     @Override
@@ -156,16 +186,19 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("ClaimFullJoinVo [");
         sb.append("claim_no").append("=").append(claim_no).append(",");
         sb.append("claim_type").append("=").append(claim_type).append(",");
-        sb.append("user_name").append("=").append(user_name).append(",");
-        sb.append("amount").append("=").append(amount).append(",");
-        sb.append("emp_name").append("=").append(emp_name).append(",");
         sb.append("status").append("=").append(status).append(",");
+        sb.append("user_name").append("=").append(user_name).append(",");
+        sb.append("emp_name").append("=").append(emp_name).append(",");
+        sb.append("amount").append("=").append(amount).append(",");
         sb.append("SC_claim_type").append("=").append(SC_claim_type).append(",");
         sb.append("SC_status").append("=").append(SC_status).append(",");
         sb.append("SC_emp_name").append("=").append(SC_emp_name).append(",");
-        sb.append("SC_user_name").append("=").append(SC_user_name);
+        sb.append("SC_user_name").append("=").append(SC_user_name).append(",");
+        sb.append("rrn").append("=").append(rrn).append(",");
+        sb.append("id").append("=").append(id);
         sb.append("]");
         return sb.toString();
+
     }
 
     public boolean isFixedLengthVo() {
@@ -176,7 +209,10 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
     public void _xStreamEnc() {
     }
 
+
     @Override
     public void _xStreamDec() {
     }
+
+
 }

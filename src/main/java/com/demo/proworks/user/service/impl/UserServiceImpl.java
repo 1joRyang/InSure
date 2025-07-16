@@ -242,6 +242,18 @@ public class UserServiceImpl implements UserService {
 	}
 
 
+	/**
+	 * 주민번호로 사용자 기본정보를 조회한다.
+	 *
+	 * @param rrn 주민등록번호
+	 * @return 사용자 기본정보
+	 * @throws Exception
+	 */
+	@Override
+	public UserVo selectUserByRrn(String rrn) throws Exception {
+	    UserVo userVo = userDAO.selectUserByRrn(rrn);
+	    return userVo;
+	}
 
 
     /**

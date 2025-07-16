@@ -297,4 +297,17 @@ public class ClaimServiceImpl implements ClaimService {
 	}
 
 
+	/**
+	 * 사용자 주민번호로 청구목록 조회 (사용자, 직원, 결과 정보 조인)
+	 *
+	 * @param claimFullJoinVo 청구-전체조인 VO (주민번호 포함)
+	 * @return 사용자의 청구목록
+	 * @throws Exception
+	 */
+	@Override
+	public List<ClaimFullJoinVo> selectUserClaimsByRrn(ClaimFullJoinVo claimFullJoinVo) throws Exception {
+	    List<ClaimFullJoinVo> list = claimDAO.selectUserClaimsByRrn(claimFullJoinVo);
+	    return list;
+	}
+
 }

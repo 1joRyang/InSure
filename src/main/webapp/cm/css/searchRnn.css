@@ -1,0 +1,263 @@
+@font-face {
+    font-family: 'Pretendard Variable';
+    font-weight: 45 920;
+    font-style: normal;
+    font-display: swap;
+    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+}
+
+
+* {
+       margin: 0;
+       padding: 0;
+       box-sizing: border-box;
+   }
+
+   body {
+       font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+       background-color: #f8f9fa;
+       color: #333;
+       line-height: 1.6;
+   }
+
+   .container {
+       max-width: 1200px;
+       margin: 0 auto;
+       padding: 20px;
+   }
+
+   .header {
+       background: white;
+       padding: 20px;
+       border-radius: 8px;
+       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+       margin-bottom: 20px;
+   }
+
+   .header h1 {
+       font-size: 24px;
+       font-weight: bold;
+       margin-bottom: 20px;
+       color: #333;
+   }
+
+   .search-section {
+       display: flex;
+       gap: 10px;
+       align-items: center;
+       margin-bottom: 20px;
+   }
+
+   .search-row {
+       display: flex;
+       gap: 10px;
+       align-items: center;
+   }
+
+   .search-input {
+       padding: 10px 15px;
+       border: 2px solid #ddd;
+       border-radius: 6px;
+       font-size: 14px;
+       width: 200px;
+   }
+
+   .search-input:focus {
+       outline: none;
+       border-color: #007bff;
+   }
+
+   .search-btn {
+       background: #28a745;
+       color: white;
+       border: none;
+       padding: 10px 20px;
+       border-radius: 6px;
+       font-size: 14px;
+       cursor: pointer;
+       font-weight: bold;
+   }
+
+   .search-btn:hover {
+       background: #218838;
+   }
+
+   .info-section {
+       background: white;
+       padding: 20px;
+       border-radius: 8px;
+       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+       margin-bottom: 20px;
+   }
+
+   .info-title {
+       font-size: 16px;
+       font-weight: bold;
+       margin-bottom: 15px;
+       color: #333;
+   }
+
+   .info-row {
+       display: grid;
+       grid-template-columns: 1fr 1fr 1fr;
+       gap: 15px;
+       margin-bottom: 15px;
+   }
+
+   .info-group {
+       display: flex;
+       flex-direction: column;
+       gap: 5px;
+   }
+
+   .info-label {
+       font-size: 12px;
+       color: #666;
+       font-weight: bold;
+   }
+
+   .info-input {
+       padding: 8px 12px;
+       border: 1px solid #ddd;
+       border-radius: 4px;
+       font-size: 14px;
+   }
+
+   .info-input:focus {
+       outline: none;
+       border-color: #007bff;
+   }
+
+   .results-title {
+       font-size: 18px;
+       font-weight: bold;
+       margin-bottom: 15px;
+       color: #333;
+   }
+
+   .gvw {
+       font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+       background: white;
+       border-radius: 8px;
+       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+       overflow: hidden;
+       min-height: 400px; /* 최소 높이 설정 */
+   }
+
+   .gvw-header {
+       font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+       background: #f8f9fa;
+       border-bottom: 1px solid #dee2e6;
+   }
+
+   .gvw-body {
+       max-height: 350px; /* 스크롤 영역 높이 설정 */
+       overflow-y: auto; /* 세로 스크롤 추가 */
+   }
+
+   #header-row,
+   #gvw-row {
+       font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+       display: grid;
+       grid-template-columns: 180px 150px 100px 120px 100px 100px; /* 컬럼 너비 증가 */
+       border-bottom: 1px solid #dee2e6;
+       min-height: 45px; /* 행 높이 증가 */
+   }
+
+   #gvw-row:last-child {
+       border-bottom: none;
+   }
+
+   .gvw-column {
+       font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+       padding: 15px; /* 패딩 증가 */
+       font-size: 14px;
+       border-right: 1px solid #dee2e6;
+       display: flex;
+       align-items: center;
+   }
+
+   .gvw-column:last-child {
+       border-right: none;
+   }
+
+   .gvw-header .gvw-column {
+       font-weight: bold;
+       background: #f8f9fa;
+       color: #495057;
+   }
+
+   #gBody #gvw-row:nth-child(even) {
+       background: #f8f9fa;
+   }
+
+   #gBody #gvw-row:hover {
+       background: #e9ecef;
+   }
+
+   .status-badge {
+       padding: 4px 8px;
+       border-radius: 12px;
+       font-size: 12px;
+       font-weight: bold;
+       text-align: center;
+       min-width: 60px;
+   }
+
+   .status-complete {
+       background: #d4edda;
+       color: #155724;
+   }
+
+   .status-progress {
+       background: #cce5ff;
+       color: #004085;
+   }
+
+   .status-urgent {
+       background: #f8d7da;
+       color: #721c24;
+   }
+
+   .amount {
+       text-align: right;
+       font-family: monospace;
+   }
+
+   @media (max-width: 768px) {
+       .container {
+           padding: 10px;
+       }
+       
+       .search-section {
+           flex-direction: column;
+           align-items: stretch;
+       }
+       
+       .search-row {
+           flex-direction: column;
+       }
+       
+       .search-input {
+           width: 100%;
+       }
+       
+       .info-row {
+           grid-template-columns: 1fr;
+       }
+       
+       #header-row,
+       #gvw-row {
+           grid-template-columns: 1fr;
+       }
+       
+       .gvw-column {
+           border-right: none;
+           border-bottom: 1px solid #dee2e6;
+       }
+
+       .gvw-body {
+           max-height: 300px; /* 모바일에서는 높이 조정 */
+       }
+   }
+   
