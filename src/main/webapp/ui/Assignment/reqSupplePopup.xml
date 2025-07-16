@@ -53,7 +53,9 @@ scwin.btn_submit_onclick = function (e) {
 // 보완요청 등록 성공 처리
 scwin.sbm_insertAdditionalReq_submitdone = function (e) {
     console.log("보완요청 처리 성공:", e);
-        
+    $p.closePopup();
+    alert("보완 요청 완료");
+    return true;
 };
 
 // 보완요청 등록 실패 처리
@@ -64,7 +66,6 @@ scwin.sbm_insertAdditionalReq_submiterror = function (e) {
     if (e.responseJSON && e.responseJSON.elHeader && e.responseJSON.elHeader.resMsg) {
         errorMsg = e.responseJSON.elHeader.resMsg;
     }
-    
     console.log(errorMsg);
 };
 

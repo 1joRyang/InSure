@@ -52,22 +52,19 @@ scwin.btn_submit_onclick = function (e) {
     console.log(dma_additionalReq.get("additional_memo"));
     console.log(dma_additionalReq.get("claim_no"));
 
-
+    
     // 서버로 데이터 전송
     $p.executeSubmission("sbm_insertAdditionalReq");
 };
 
 // 추가요청 등록 성공 처리
 scwin.sbm_insertAdditionalReq_submitdone = function (e) {
-/*     $p.alert("추가요청이 등록되었습니다.", function () {
-        $p.closePopup();
-        // 부모 창에서 목록 새로고침이 필요한 경우
-        if (parent && parent.scwin && parent.scwin.fn_search) {
-            parent.scwin.fn_search();
-        }
-    }); */
+
     console.log(e);
     
+    $p.closePopup();
+    alert("반려 처리 되었습니다.");
+    return true;
 };
 
 // 추가요청 등록 실패 처리
