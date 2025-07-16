@@ -32,8 +32,8 @@ scwin.createTable = function (result) {
     
     // 데이터 처리
     let processedData = [];
-    let dataRows = result.data.rows;
-    let originalHeaders = result.data.headers;
+    let dataRows = result;
+    let originalHeaders = ["본인부담금", "공단부담금", "전액본인부담", "선택진료료", "선택진료료 외"];
     
     // 1단계: rowName 순서대로 기본 구조 생성
     let rowNameDataMap = new Map();
@@ -464,7 +464,6 @@ function calculateMainTableTotal() {
 							if (j !== 1) {
 								patientTotal += cellValue;
 							}
-							console.log(total, patientTotal);
 		                }
 		            }
 		        }
@@ -498,8 +497,6 @@ function openExclusionModal(rowIndex, colIndex, td) {
 	
 	localStorage.setItem('itemId', rowIndex);
 	localStorage.setItem('excId', colIndex);
-	// todo: treatmentId localStorage 저장..
-	localStorage.setItem("treatmentId", 1);
 	
 	requires("uiplugin.popup"); 
 	var winWid = $(window).width();
@@ -527,7 +524,7 @@ function openExclusionModal(rowIndex, colIndex, td) {
 					}
 				};
 				
-	$p.openPopup("/InsWebApp/ui/audit/exec-popup.xml", opts);
+	$p.openPopup("/InsWebApp/ui/audit/exc-popup.xml", opts);
 }
 
 scwin.updateColumnTotal = function (colIndex) {

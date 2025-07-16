@@ -16,25 +16,36 @@
         <script lazy="false" type="text/javascript"><![CDATA[
             scwin.onpageload = function() {
                 // Additional JS logic can go here if needed
+                btn_agree.addClass("disabled");
             };
-        ]]></script>
+        
+scwin.agreement_select_onviewchange = function (info) {
+    console.log("========체크박스 이벤트 발생!");
+    console.log("========전달받은 info 객체", info);
+    console.log("========info.value : ", info.value);
+    console.log("========typeof info.value : ", typeof info.value);
+    if(info.value == "1"){
+        btn_agree.removeClass("disabled");
+        console.log("버튼 활성화!");
+    } else {
+        btn_agree.addClass("disabled");
+        console.log("버튼 비활성화!");
+    }
+};
+
+
+
+scwin.btn_agree_onclick = function (e) {
+    if(!btn_agree.hasClass("disabled")){
+        $p.parent().scwin.popup_callback("agree");
+        //location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/second.xml"
+    }
+};
+]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
         <xf:group class="pop_contents" id="pop_contents" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true"
         	meta_snippetName="0_02 팝업페이지시작">
-        	<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
-        		style="">
-        		<w2:textbox class="pgt_tit" id="" label="보험금을 청구하려면 동의가 필요해요" style="" tagname=""></w2:textbox>
-        		<xf:group class="breadcrumb" id="" style="">
-        			<xf:group id="" style="" tagname="ul">
-        				<xf:group id="" style="" tagname="li">
-        				</xf:group>
-        			</xf:group>
-        		</xf:group>
-        		<xf:trigger class="btn_x" id="" style="" type="button">
-        			<xf:label></xf:label>
-        		</xf:trigger>
-        	</xf:group>
 
         	<!-- Title Section -->
 
@@ -42,10 +53,10 @@
         	<xf:group style="height:205px;" id="" class="agreement_section">
         		<xf:group style="height:46px;display:flex;align-items:center;" id="" class="select_agreement">
         			<xf:select selectedindex="-1" id="agreement_select" appearance="full" style="height:41px;font-weight:bolder;" cols=""
-        				rows="" ref="">
+        				rows="" ref="" ev:onviewchange="scwin.agreement_select_onviewchange">
         				<xf:choices>
         					<xf:item>
-        						<xf:label><![CDATA[  [필수} 항목 전체 동의]]></xf:label>
+        						<xf:label><![CDATA[  [필수] 항목 전체 동의]]></xf:label>
         						<xf:value><![CDATA[1]]></xf:value>
         					</xf:item>
         				</xf:choices>
@@ -72,7 +83,7 @@
         	<xf:group style="height:44px;" id="final_consent_section"></xf:group>
 
         	<xf:group style="height: 200px;" id="" class="consent_group">
-        		<w2:textbox class="consent_checkbox" label="동의" style="" />
+        		<w2:textbox class="consent_checkbox" label="동의" style="" id="btn_agree" ev:onclick="scwin.btn_agree_onclick"/>
         	</xf:group>
         </xf:group>
     </body>

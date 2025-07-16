@@ -126,6 +126,8 @@ scwin.grd_exec_oncellclick = function (rowIndex, columnIndex, columnId) {
 };
 
 scwin.btn_close_onclick = function (e) {
+    localStorage.removeItem("excId");
+    localStorage.removeItem("itemId");
     $p.closePopup();
 };
 

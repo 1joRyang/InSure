@@ -16,6 +16,8 @@
         				<w2:key dataType="text" name="claim_content" id="claim_content"></w2:key>
         				<w2:key dataType="text" name="disease_code" id="disease_code"></w2:key>
         				<w2:key dataType="date" name="date_of_accident" id="date_of_accident"></w2:key>
+        				<w2:key dataType="text" name="disaster_code" id="disaster_code"></w2:key>
+        				<w2:key dataType="text" name="status" id="status"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
         		<w2:dataMap baseNode="map" id="dm_claimuser">
@@ -100,6 +102,12 @@
         				</w2:row>
         			</w2:data>
         		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dm_header">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="청구번호" id="claimNo"></w2:key>
+        				<w2:key dataType="text" name="피보험자" id="patient"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
         	<xf:submission id="sbm_befClaim" action="/InsWebApp/CLAIMnCResultList.pwkjson" method="post" mediatype="application/json"
@@ -109,7 +117,7 @@
         	</xf:submission>
         	<xf:submission id="sbm_getClaim" action="/InsWebApp/CLAIMUpdView.pwkjson" method="post" mediatype="application/json" ref=""
         		target='data:json,{"id":"dm_claim","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
-        		mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        		mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getClaim_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getSubInsu" action="/InsWebApp/INSURANCESubList.pwkjson" method="post" mediatype="application/json"
         		ref='data:json,{"id":"dm_claimuser","key":"elData"}' target='data:json,{"id":"dl_subinsu","key":"subInsuranceListVoList"}'
@@ -122,7 +130,7 @@
         	</xf:submission>
         	<xf:submission id="sbm_updateClaim" action="/InsWebApp/CLAIMUpd.pwkjson" method="post" mediatype="application/json"
         		ref='data:json,{"id":"dm_claim","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
-        		customHandler="" mode="asynchronous" processMsg="저장 중..." ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        		customHandler="" mode="asynchronous" processMsg="저장 중..." ev:submit="" ev:submitdone="scwin.sbm_updateClaim_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -134,6 +142,11 @@ localStorage.setItem("claimNo", "a52d86a3-5629-11f0-b4f3-bc2411231130");
 localStorage.setItem("ID", "1");
 
 scwin.onpageload = function() {
+    // todo: 다른 사람 조회시 이전 버튼 없애기
+    dm_header.set("claimNo", localStorage.getItem("claimNo"));
+    // todo: 값에 맞게 바인딩
+    dm_header.set("patient", "홍길동");
+
     dm_claim.set("claim_no", localStorage.getItem("claimNo"));
     let reqData = {"elData":{"ID": localStorage.getItem("ID")}};
     $c.sbm.execute(sbm_befClaim, reqData);
@@ -142,14 +155,35 @@ scwin.onpageload = function() {
     let request = {"claimVo": {"claim_no": localStorage.getItem("claimNo")}};
     $c.sbm.execute(sbm_getClaim, request);
 
+    var jsnOptions = {
+        id: "img_popup",
+        type: "browserPopup", //필수 고정
+        width: "800px",
+        height: "600px",
+        popupName: "청구 영수증"
+    };
+
+    $p.openPopup("/InsWebApp/ui/audit/img_modal.xml", jsnOptions);
+
     scwin.genList.push(scwin.index);
 	gen_date.insertChild(scwin.index++);   
+
+};
+
+let isDateDrop = false;
+
+scwin.sbm_getClaim_submitdone = function (e) {
+    // 대기, 결재중 아니면 그냥 넘어가게
+    let status = dm_claim.getJSON().status;
+    if (status !== "대기" && status !== "결재중") {
+        isDateDrop = true;
+    }
+    
 };
         
 scwin.btn_next_onclick = function (e) {
     let missingFields = [];
     let isClaimOffset = false;
-    let isDateDrop = false;
     let isHcode = false;
     let isSaveOffset = false;
 
@@ -201,18 +235,17 @@ scwin.btn_next_onclick = function (e) {
     let hcode2 = ipt_hcode2.getValue();
     let hcode2Date = ipt_hcodeDate.getValue();
 
-    if (hcode1 !== "") {
+    if (hcode1 !== "" && hcode2Date !== "") {
         isHcode = true;
         dm_claim.set("disease_code", hcode1);
-    } else if (hcode2 !== "" && hcode2Date !== "") {
-        isHcode = true;
-        dm_claim.set("disease_code", hcode2);
         dm_claim.set("date_of_accident", hcode2Date);
-    } else if (hcode2 !== "" && hcode2Date === "") {
-        missingFields.push("청구내역 및 처리정보 (사인코드 입력시 날짜 선택은 필수입니다)");
     } else {
-        missingFields.push("청구내역 및 처리정보 (병명코드 혹은 사인코드는 필수 입력입니다.)");
+        missingFields.push("청구내역 및 처리정보 (병명코드, 재해 일자는 필수 입력입니다.)");
     }
+    
+    if (hcode2 !== "" ) {
+        dm_claim.set("disaster_code", hcode2);  
+    } 
 
     if (isClaimOffset && isDateDrop && isHcode) {
         // 서브미션 호출
@@ -220,8 +253,6 @@ scwin.btn_next_onclick = function (e) {
             $c.sbm.execute(sbm_insertOffset); 
         }
         $c.sbm.execute(sbm_updateClaim);
-
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-ocr.xml";
     }
     else {
         alert("다음 항목의 입력을 확인하세요\n" + missingFields.join(", "));
@@ -229,7 +260,8 @@ scwin.btn_next_onclick = function (e) {
 };
 
 scwin.btn_befo_onclick = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_modal.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
+    //parent.WebSquare.util.getComponentById("web_container").setSrc("/InsWebApp/ui/audit/insure_first.xml");
 };
 
 scwin.btn_add_date_onclick = function (e) {
@@ -288,15 +320,36 @@ function openHcodePopup(link) {
 				};
 
 	$p.openPopup(link, opts);
-}]]></script>
+}
+
+scwin.sbm_updateClaim_submitdone = function (e) {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/table-test.xml";
+    $p.closePopup("img_popup");
+};
+
+function openPopup(link) {
+
+}
+
+scwin.grd_insure_oncellclick = function (rowIndex, columnIndex, columnId) {
+    // TODO: 모달 띄우기
+};
+]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
+        <w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/header.xml"></w2:wframe>
     	<xf:group style="width: 100%;display: flex; overflow-x: hidden;" id="">
-    		<xf:group style="width: 9%;background-color: #6E6D6D;" id=""></xf:group>
-    		<xf:group style="width: 89%;" id="" class="sub_contents ">
-    			<xf:group style="" id="" class="pgtbox">
-    				<w2:textbox tagname="" style="" id="" label="화면타이틀" class="pgt_tit"></w2:textbox>
-    			</xf:group>
+    		<xf:group style="width: 100%;" id="" class="sub_contents ">
+    			<xf:group class="pgtbox" style="justify-content: space-between;">
+                    <xf:group style="display: flex;" id="">
+                        <w2:textbox ref="" label="청구번호: " class="pgt_tit"></w2:textbox>
+                        <w2:textbox ref="data:dm_header.claimNo" style="padding-left: 10px;" id="" label="" class="pgt_tit"></w2:textbox>
+                    </xf:group>
+                    <xf:group style="display: flex;" id="">
+                        <w2:textbox style="float: right;;" label="피보험자: " class="pgt_tit"></w2:textbox>
+                        <w2:textbox id="" label="" style="padding-left: 10px;" ref="data:dm_header.patient" class="pgt_tit"></w2:textbox>
+                    </xf:group>
+                </xf:group>
     			<xf:group style="" id="" class="lybox">
     				<xf:group adaptiveThreshold="" style="" id="" class=" col_5">
     					<xf:group style="" id="" class="titbox">
@@ -304,7 +357,7 @@ function openHcodePopup(link) {
     					</xf:group>
     					<xf:group adaptiveThreshold="" style="height: 250px;" id="" class="gvwbox">
     						<w2:gridView scrollByColumnAdaptive="false" focusMode="row" dataList="data:dl_subinsu" scrollByColumn="false"
-    							style="height: 250px;" autoFit="allColumn" id="" class="gvw" checkReadOnlyOnPasteEnable="">
+    							style="height: 250px;" autoFit="allColumn" id="grd_insure" class="gvw" checkReadOnlyOnPasteEnable="" ev:oncellclick="scwin.grd_insure_oncellclick">
     							<w2:caption style="" id="caption2" value="this is a grid caption."></w2:caption>
     							<w2:header style="" id="header2">
     								<w2:row style="" id="row3">
@@ -433,7 +486,7 @@ function openHcodePopup(link) {
     						<xf:group class="" id="" style="">
     							<w2:textbox style="width: 150px;height: 23px;" id="" label="병명 코드"></w2:textbox>
     							<xf:input class="" id="ipt_hcode1" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    								meta_snippetName="10_10 InputBox_조회버튼" placeholder="" style="" ev:onclick="scwin.ipt_hcode1_onclick" ref="">
+    								meta_snippetName="10_10 InputBox_조회버튼" placeholder="" style="" ev:onclick="scwin.ipt_hcode1_onclick" ref="data:dm_claim.disease_code">
     							</xf:input>
     							<xf:trigger class="btn_cm search icon" id="btn_hcode1" meta_snippetCategory="10_입력폼"
     								meta_snippetName="10_10 InputBox_조회버튼" style="" type="button">
@@ -443,7 +496,7 @@ function openHcodePopup(link) {
     						<xf:group class="" id="" style="">
     							<w2:textbox id="" label="사인 코드" style="width: 150px;height: 23px;"></w2:textbox>
     							<xf:input class="" id="ipt_hcode2" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    								meta_snippetName="10_10 InputBox_조회버튼" placeholder="" style="" ev:onclick="scwin.ipt_hcode2_onclick">
+    								meta_snippetName="10_10 InputBox_조회버튼" placeholder="" style="" ev:onclick="scwin.ipt_hcode2_onclick" ref="data:dm_claim.disaster_code">
     							</xf:input>
     							<xf:trigger class="btn_cm search icon" id="" meta_snippetCategory="10_입력폼"
     								meta_snippetName="10_10 InputBox_조회버튼" style="" type="button">
@@ -454,7 +507,7 @@ function openHcodePopup(link) {
     							<w2:textbox id="" label="재해 일자" style="width: 150px;height: 23px;"></w2:textbox>
     							<w2:inputCalendar calendarValueType="yearMonthDate" focusOnDateSelect="false" footerDiv="true" id="ipt_hcodeDate"
     								meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true" meta_snippetName="10_11 기간조회" renderDiv="true" renderType=""
-    								rightAlign="false" style="" ref="">
+    								rightAlign="false" style="" ref="data:dm_claim.date_of_accident">
     							</w2:inputCalendar>
     						</xf:group>
     					</xf:group>

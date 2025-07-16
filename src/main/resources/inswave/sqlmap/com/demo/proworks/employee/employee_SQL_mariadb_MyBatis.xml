@@ -96,16 +96,14 @@
          WHERE  1=1    		
 
     </select>
-<!--=======================================================================================================  -->
-	<select id="selectListEmployeeForRule" parameterType="com.demo.proworks.employee.vo.EmployeeVo"
-		resultType="com.demo.proworks.employee.vo.EmployeeVo">
+
+	<select id="selectListEmployeeForRule" parameterType="com.demo.proworks.employee.vo.EmployeeVo" resultType="com.demo.proworks.employee.vo.EmployeeVo">
 		SELECT
-		EMP_NO AS empNo,
-		EMP_NAME AS empName,
-		STATUS AS status,
-		DEPT_ID AS deptId,
-		ROLE AS role,
-		EMP_PW AS empPw
+		EMP_NO as empNo,
+		EMP_NAME as empName,
+		STATUS as status,
+		DEPT_ID as deptId,
+		ROLE as role
 		FROM EMPLOYEE
 		WHERE 1=1
 		<if test="deptId != null and deptId != ''">
@@ -116,9 +114,6 @@
 		</if>
 		<if test="role != null and role != ''">
 			AND ROLE = #{role}
-		</if>
-		<if test="pageSize != null and pageIndex != null">
-			LIMIT #{pageSize} OFFSET ( (#{pageIndex} - 1) * #{pageSize} )
 		</if>
 	</select>
 

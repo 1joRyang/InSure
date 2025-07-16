@@ -31,6 +31,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 	
 	@Resource(name = "messageSource")
 	private MessageSource messageSource;
+	
+	public List<EmployeeVo> selectListEmployeeForRule(EmployeeVo employeeVo) throws Exception {
+		List<EmployeeVo> list = employeeDAO.selectListEmployeeForRule(employeeVo);	
+	
+		return list;
+	}
 
     /**
      * 실무자,관리자정보 목록을 조회합니다.

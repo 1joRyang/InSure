@@ -17,6 +17,8 @@ import com.demo.proworks.employee.vo.EmployeeVo;
  * 
  */
 public interface EmployeeService {
+
+	public List<EmployeeVo> selectListEmployeeForRule(EmployeeVo employeeVo) throws Exception;
 	
     /**
      * 실무자,관리자정보 페이징 처리하여 목록을 조회한다.

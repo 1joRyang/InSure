@@ -1,4 +1,4 @@
-let data_rows = [
+scwin.data_rows = [
         {
             "col1": "진찰료",
             "col2": "3889",
@@ -251,13 +251,3 @@ let data_rows = [
     
     let headers = ["본인부담금", "공단부담금", "전액본인부담", "선택진료료", "선택진료료 외"];
     
-scwin.result = {
-        'success': true,
-        'message': 'OCR 처리가 완료되었습니다.',
-        'data': {
-            'headers': headers,
-            'rows': data_rows,
-            'total_rows': data_rows.length,
-            'total_columns': headers.length
-        }
-    };

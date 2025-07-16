@@ -1,5 +1,6 @@
 package com.demo.proworks.user.web;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.demo.proworks.claim.service.ClaimService;
+import com.demo.proworks.claim.vo.ClaimVo;
 import com.demo.proworks.cmmn.ProworksUserHeader;
 import com.demo.proworks.user.service.UserService;
 import com.demo.proworks.user.vo.UserVo;
@@ -52,7 +55,11 @@ public class UserController {
 	
     /** UserService */
     @Resource(name = "userServiceImpl")
-    private UserService userService;
+    private UserService userService;  
+    
+    /** ClaimService */
+    @Resource(name = "claimServiceImpl")
+    private ClaimService claimService;
 	
     @Resource(name = "loginProcess")
 	protected LoginProcessor loginProcess;
@@ -160,48 +167,7 @@ public class UserController {
 		        response.getWriter().write(jsonErrorResponse);
 		    }
 		}
-	        /*if (userHeader != null) {
-	            try {
-	                // 2. userHeader 객체에서 userId를 직접 가져옵니다.
-	                //String customerId = userHeader.getUserId();
-	                int customerId = id; 
-	
-	                // 3. 가져온 userId로 응답 JSON을 생성합니다.
-	                Map<String, Object> elData = new HashMap<>();
-	                Map<String, Integer> responseMap = new HashMap<>();
-	                responseMap.put("id", customerId);
-	                elData.put("dma_login_response", responseMap);
-	
-	                ObjectMapper mapper = new ObjectMapper();
-	                String jsonResponse = mapper.writeValueAsString(elData);
-	
-	                response.setContentType("application/json");
-	                response.setCharacterEncoding("UTF-8");
-	                response.getWriter().write(jsonResponse);
-	
-	            } catch (Exception e) {
-	                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	                response.getWriter().write("{\"error\":\"응답 생성 중 오류가 발생했습니다.\"}");
-	                AppLog.error("JSON 응답 생성 실패", e);
-	            }
-	        } else {
-	             // 이 경우는 거의 발생하지 않지만, 만약을 대비한 방어 코드
-	             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	             response.getWriter().write("{\"error\":\"세션에서 userHeader를 찾을 수 없습니다.\"}");
-	        }
-	    } else {
-	        // 로그인 실패 시 처리
-	        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-	        Map<String, String> errorMap = new HashMap<>();
-	        errorMap.put("error", "로그인 실패: 아이디 또는 비밀번호가 올바르지 않습니다.");
-	        
-	        ObjectMapper mapper = new ObjectMapper();
-	        String jsonErrorResponse = mapper.writeValueAsString(errorMap);
-	        response.setContentType("application/json");
-	        response.setCharacterEncoding("UTF-8");
-	        response.getWriter().write(jsonErrorResponse);
-	    }
-	}*/
+	       
     
     
     
@@ -340,80 +306,7 @@ public class UserController {
 	        response.getWriter().write(jsonErrorResponse);
 	    }
 	}
-	    
-    /*try {
-        // 2. 로직 최적화: 비밀번호 검증을 먼저 수행합니다.
-        // 이 메서드가 '사용자 없음'과 '비밀번호 틀림'을 모두 처리해줍니다.
-        boolean isSimplePasswordValid = userService.checkSimplePassword(user_id, simple_pw);
-        
-        System.out.println(isSimplePasswordValid);
-        
 
-        if (isSimplePasswordValid) {
-            // 비밀번호 검증 성공!
-            AppLog.debug("간편 비밀번호 인증 성공 - 사용자 ID: " + user_id);
-
-            // 2. 로직 최적화: 인증 성공 후에만 DB에서 사용자 정보를 조회하여 응답값을 만듭니다.
-            UserVo searchUserVo = new UserVo();
-            searchUserVo.setUserId(user_id);
-            UserVo userInfo = userService.selectUser(searchUserVo);
-
-            if (userInfo == null) {
-                // 이 경우는 거의 발생하지 않지만 (checkSimplePassword 직후라), 안전을 위해 추가
-                throw new Exception("인증 후 사용자 정보를 조회하는데 실패했습니다.");
-            }
-
-            int customerId = userInfo.getId();
-            System.out.println(">>>>> DB에서 조회한 사용자 ID: " + customerId);
-
-            // 세션에 로그인 정보 저장 (필요시)
-            request.getSession().setAttribute("connectedUserId", customerId);
-
-            // 응답 JSON 생성
-            Map<String, Object> elData = new HashMap<>();
-            Map<String, Object> responseMap = new HashMap<>();
-            responseMap.put("id", customerId);
-            // 약속했던 대로 dma_login_response 키를 사용합니다.
-            elData.put("dma_login_response", responseMap);
-
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonResponse = mapper.writeValueAsString(elData);
-
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(jsonResponse);
-
-        } else {
-            // 비밀번호 검증 실패 (사용자가 없거나, 비밀번호가 틀림)
-            AppLog.warn("간편 비밀번호 인증 실패 - 사용자 ID: " + user_id);
-
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401: 인증 실패
-            Map<String, Object> errorMap = new HashMap<>();
-            errorMap.put("error", "아이디 또는 간편 비밀번호가 올바르지 않습니다.");
-            errorMap.put("status", "failed");
-
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonErrorResponse = mapper.writeValueAsString(errorMap);
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(jsonErrorResponse);
-        }
-
-    } catch (Exception e) {
-        AppLog.error("간편 비밀번호 로그인 처리 중 오류 발생", e);
-
-        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        Map<String, Object> errorMap = new HashMap<>();
-        errorMap.put("error", "로그인 처리 중 오류가 발생했습니다.");
-        errorMap.put("status", "server_error");
-
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonErrorResponse = mapper.writeValueAsString(errorMap);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(jsonErrorResponse);
-    }
-}*/
 
     /**
      * 간편비밀번호를 등록(임시저장)한다. (1단계)
@@ -552,5 +445,49 @@ public class UserController {
     public void deleteUser(UserVo userVo) throws Exception {
         userService.deleteUser(userVo);
     }
-   
+    
+	/**
+	 * 사용자정보와 청구목록을 통합 조회한다.
+	 *
+	 * @param userVo 사용자정보
+	 * @return 사용자정보 + 청구목록
+	 * @throws Exception
+	 */
+	@ElService(key = "UserInfoWithClaimsView")
+	@RequestMapping(value = "UserInfoWithClaimsView")
+	@ElDescription(sub = "사용자정보 및 청구목록 통합조회", desc = "사용자정보와 해당 사용자의 청구목록을 함께 조회한다.")
+	public Map<String, Object> selectUserInfoWithBills(UserVo userVo) throws Exception {	   
+	    
+	    Map<String, Object> result = new HashMap<>();
+	    
+	    // 사용자 정보 조회
+	    UserVo userInfo = userService.selectUser(userVo);
+	    
+	    
+	    if (userInfo != null) {
+        // 조회된 사용자 ID를 사용해서 청구목록 조회
+        ClaimVo claimVo = new ClaimVo();
+        claimVo.setID(String.valueOf(userInfo.getId())); 
+        
+         // 페이징 설정
+        claimVo.setPageSize(100);
+        claimVo.setPageIndex(1);
+	    
+	    
+	    // 청구목록 조회
+	    List<ClaimVo> claimList = claimService.selectListClaim(claimVo);
+	    
+	    result.put("userInfo", userInfo);
+	    result.put("claimList", claimList);
+	    
+	    } else {
+        // 사용자 정보가 없거나 ID가 null인 경우
+        result.put("userInfo", userInfo);
+        result.put("claimList", new ArrayList<>());
+	    }
+	
+	    return result;
+	}
+		    
+     
 }
