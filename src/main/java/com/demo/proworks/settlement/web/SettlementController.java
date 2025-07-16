@@ -13,12 +13,14 @@ import org.springframework.web.client.RestTemplate;
 
 import com.demo.proworks.settlement.service.SettlementService;
 import com.demo.proworks.settlement.vo.SettlementListVo;
+import com.demo.proworks.settlement.vo.SettlementSummaryVo;
 import com.demo.proworks.settlement.vo.SettlementVo;
 import com.demo.proworks.settlement.vo.SettlementTreatmentVo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
 import com.inswave.elfw.annotation.ElValidator;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * @subject : 정산정보 관련 처리를 담당하는 컨트롤러
@@ -132,7 +134,21 @@ public class SettlementController {
 		List<SettlementTreatmentVo> list = settlementService.selectSettlementTreatment(settlementTreatmentVo);
 		return list;
 	}
-
+		/**
+	 * 정산정보 집계 데이터를 조회합니다.
+	 *
+	 * @param settlementSummaryVo 정산집계정보
+	 * @return 집계 조회 결과
+	 * @throws Exception
+	 */
+	@ElService(key = "SETTLEMENTSummary")
+	@RequestMapping(value = "SETTLEMENTSummary")
+	@ElDescription(sub = "정산집계정보 조회", desc = "정산정보를 청구번호별로 집계하여 조회한다.")
+	public SettlementSummaryVo selectSettlementSummary(SettlementSummaryVo settlementSummaryVo) throws Exception {
+		SettlementSummaryVo result = settlementService.selectSettlementSummary(settlementSummaryVo);
+		return result;
+	}
+	
 	/// =====================================================
 	@ElService(key = "SETTLEMENTMemoGenerate")
 	@RequestMapping(value = "SETTLEMENTMemoGenerate")

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import com.inswave.elfw.exception.ElException;
 import com.demo.proworks.settlement.vo.SettlementVo;
 import com.demo.proworks.settlement.vo.SettlementTreatmentVo;
+import com.demo.proworks.settlement.vo.SettlementSummaryVo;
 import com.demo.proworks.settlement.dao.SettlementDAO;
 
 /**  
@@ -99,6 +100,17 @@ public class SettlementDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbs
      */
     public List<SettlementTreatmentVo> selectSettlementTreatment(SettlementTreatmentVo vo) throws ElException {
         return (List<SettlementTreatmentVo>) list("com.demo.proworks.settlement.selectSettlementTreatment", vo);
+    }
+
+    /**
+     * 정산정보 집계 데이터를 조회한다.
+     *  
+     * @param  SettlementSummaryVo 정산집계정보
+     * @return SettlementSummaryVo 정산집계정보
+     * @throws ElException
+     */
+    public SettlementSummaryVo selectSettlementSummary(SettlementSummaryVo vo) throws ElException {
+        return (SettlementSummaryVo) selectByPk("com.demo.proworks.settlement.selectSettlementSummary", vo);
     }
 
 }

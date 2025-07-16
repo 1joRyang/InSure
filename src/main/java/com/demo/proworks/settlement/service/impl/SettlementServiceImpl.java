@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.demo.proworks.settlement.service.SettlementService;
 import com.demo.proworks.settlement.vo.SettlementVo;
 import com.demo.proworks.settlement.vo.SettlementTreatmentVo;
+import com.demo.proworks.settlement.vo.SettlementSummaryVo;
 import com.demo.proworks.settlement.dao.SettlementDAO;
 
 /**  
@@ -137,6 +138,22 @@ public class SettlementServiceImpl implements SettlementService {
 	public List<SettlementTreatmentVo> selectSettlementTreatment(SettlementTreatmentVo settlementTreatmentVo) throws Exception {
 		List<SettlementTreatmentVo> list = settlementDAO.selectSettlementTreatment(settlementTreatmentVo);
 		return list;
+	}
+	
+    /**
+     * 정산정보 집계 데이터를 조회한다.
+     *
+     * @process
+     * 1. 정산정보를 청구번호별로 집계하여 조회한다.
+     * 2. 결과 SettlementSummaryVo을(를) 리턴한다.
+     * 
+     * @param  settlementSummaryVo 정산집계정보 SettlementSummaryVo
+     * @return 정산집계정보 SettlementSummaryVo
+     * @throws Exception
+     */
+	public SettlementSummaryVo selectSettlementSummary(SettlementSummaryVo settlementSummaryVo) throws Exception {
+		SettlementSummaryVo result = settlementDAO.selectSettlementSummary(settlementSummaryVo);
+		return result;
 	}
 	
 }

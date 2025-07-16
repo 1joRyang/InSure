@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.demo.proworks.assignrule.service.AssignRuleService;
 import com.demo.proworks.assignrule.vo.AssignRuleVo;
+import com.demo.proworks.assignrule.vo.EmployeeAssignRuleVo;
 import com.demo.proworks.assignrule.dao.AssignRuleDAO;
 import com.demo.proworks.claim.dao.ClaimDAO;
 import com.demo.proworks.claim.vo.ClaimVo;
@@ -187,11 +188,12 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 			EmployeeVo employeeVo = new EmployeeVo();
 			employeeVo.setDeptId(deptId);
 			employeeVo.setStatus("재직중"); // 상태 조건 추가
+			employeeVo.setRole("실무자"); // 역할 조건 추가
 
 			List<EmployeeVo> empList = employeeDAO.selectListEmployeeForRule(employeeVo);
 
 			if (empList == null || empList.isEmpty()) {
-				throw new Exception("해당 부서에 '재직중' 직원이 없습니다. 부서 ID: " + deptId);
+				throw new Exception("해당 부서에 '재직중' 상태의 '실무자' 직원이 없습니다. 부서 ID: " + deptId);
 			}
 
 			return String.valueOf(empList.get(0).getEmpNo());
@@ -269,13 +271,13 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 			}
 			
 			if (employeeCount == 0) {
-				throw new Exception("부서 '" + assignDeptName + "'에 재직중인 직원이 없습니다.");
+				throw new Exception("부서 '" + assignDeptName + "'에 재직중인 실무자 직원이 없습니다.");
 			}
 
 			System.out.println("[DEBUG] 부서 " + assignDeptName + "(ID: " + targetDeptId + ")에 재직중인 직원 수: " + employeeCount);
 
 			// ✅ ③ 라운드로빈 방식으로 다음 배정할 직원 선택
-			EmployeeVo assignedEmployee = selectNextEmployeeRoundRobin(targetDeptId.toString());
+			EmployeeAssignRuleVo assignedEmployee = selectNextEmployeeRoundRobin(targetDeptId.toString());
 			
 			if (assignedEmployee == null) {
 				throw new Exception("배정 가능한 직원을 찾을 수 없습니다.");
@@ -313,20 +315,20 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 	 * @param deptId 부서 ID
 	 * @return 다음 배정할 직원 정보
 	 */
-	private EmployeeVo selectNextEmployeeRoundRobin(String deptId) throws Exception {
+	private EmployeeAssignRuleVo selectNextEmployeeRoundRobin(String deptId) throws Exception {
 		try {
 			// 1. 마지막 배정된 직원 번호 조회
 			Integer lastEmpNo = employeeDAO.selectLastAssignedEmployeeInDept(deptId);
 			System.out.println("[DEBUG] 부서 " + deptId + "의 마지막 배정 직원: " + lastEmpNo);
 			
 			// 2. 다음 직원 조회
-			EmployeeVo searchVo = new EmployeeVo();
+			EmployeeAssignRuleVo searchVo = new EmployeeAssignRuleVo();
 			searchVo.setDeptId(deptId);
 			if (lastEmpNo != null) {
-				searchVo.setEmpNo(lastEmpNo.toString());
+				searchVo.setLastEmpNo(lastEmpNo.toString());
 			}
 			
-			EmployeeVo nextEmployee = employeeDAO.selectNextEmployeeForAssignment(searchVo);
+			EmployeeAssignRuleVo nextEmployee = employeeDAO.selectNextEmployeeForAssignment(searchVo);
 			
 			// 3. 다음 직원이 없으면 처음부터 다시 시작 (라운드로빈)
 			if (nextEmployee == null) {
@@ -463,7 +465,7 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 	public String runAutoAssignmentBatch() throws Exception {
 		try {
 			// 🔥 디버깅을 위한 직접 SQL 실행
-			System.out.println("[DEBUG] 🔥 미배정 청구 조회 시작");
+			System.out.println("[DEBUG]  미배정 청구 조회 시작");
 			
 			// 🔥 1단계: 전체 청구 수 확인 (강제로 새로운 쿼리)
 			try {
@@ -477,7 +479,7 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 			List<ClaimVo> allClaims = claimDAO.selectListClaim(new ClaimVo());
 			System.out.println("[DEBUG] 전체 청구 수: " + (allClaims != null ? allClaims.size() : 0));
 			
-			// 🔥 각 청구의 상세 정보 출력
+			//  각 청구의 상세 정보 출력
 			if (allClaims != null) {
 				for (ClaimVo claim : allClaims) {
 					System.out.println(String.format("[DEBUG] 청구 상세 - NO: %s, TYPE: %s, EMP_NO: %s", 
@@ -485,11 +487,11 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 				}
 			}
 			
-			// 🔥 2단계: 미배정 청구 조회
+			//  2단계: 미배정 청구 조회
 			List<ClaimVo> unassignedClaims = assignRuleDAO.selectUnassignedClaims();
 			System.out.println("[DEBUG] 미배정 청구 수: " + (unassignedClaims != null ? unassignedClaims.size() : 0));
 			
-			// 🔥 3단계: 각 청구의 EMP_NO 상태 확인
+			//  3단계: 각 청구의 EMP_NO 상태 확인
 			if (allClaims != null && allClaims.size() > 0) {
 				for (int i = 0; i < Math.min(allClaims.size(), 10); i++) { // 최대 10건만 확인
 					ClaimVo claim = allClaims.get(i);
@@ -509,7 +511,7 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 				}
 			}
 			
-			// 🔥 4단계: 배정규칙 확인
+			//  4단계: 배정규칙 확인
 			List<AssignRuleVo> assignRules = assignRuleDAO.selectAllAssignRules();
 			System.out.println("[DEBUG] 배정규칙 수: " + (assignRules != null ? assignRules.size() : 0));
 			
@@ -526,7 +528,7 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 				}
 			}
 
-			// 🔥 성공적으로 처리되었다면 정상 메시지 반환 (예외 던지지 않음)
+			//  성공적으로 처리되었다면 정상 메시지 반환 (예외 던지지 않음)
 			String resultMessage = String.format("배치 배정 완료 - 성공: %d건, 실패: %d건, 총: %d건", 
 					successCount, failCount, results.size());
 			
@@ -536,7 +538,6 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 		} catch (Exception e) {
 			System.err.println("[ERROR] 배치 자동 배정 중 오류 발생: " + e.getMessage());
 			e.printStackTrace();
-			// 🔥 여기서 예외를 다시 던지면 ProWorks에서 오류로 처리할 수 있음
 			throw new Exception("배치 자동 배정 중 오류 발생: " + e.getMessage(), e);
 		}
 	}
