@@ -293,4 +293,23 @@ public class UserServiceImpl implements UserService {
 		return userDAO.deleteUser(userVo);
 	}
 	
+	/**
+     * 숫자 ID로 사용자의 상세 정보를 조회 한다.
+	 * 생성자 : J
+     *
+     * @process
+     * 1. 사용자정보를 삭제 처리 한다.
+     * 
+     * @param  userId 사용자의 숫자 ID (Primary Key)
+     * @return 조회된 사용자 정보
+     * @throws Exception
+     */
+    @Override
+	public UserVo getUserInfo(long userId) throws Exception {
+    	
+    	UserVo paramVo = new UserVo();
+    	paramVo.setId((int) userId);
+    	return userDAO.selectUserById(paramVo);
+	}
+	
 }

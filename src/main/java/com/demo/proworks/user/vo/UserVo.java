@@ -34,6 +34,12 @@ public class UserVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "account", physicalName = "account", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String account;
 
+    @ElDtoField(logicalName = "default_bank_code", physicalName = "default_bank_code", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String default_bank_code;
+
+    @ElDtoField(logicalName = "default_bank_name", physicalName = "default_bank_name", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String default_bank_name;
+
     @ElVoField(physicalName = "id")
     public int getId(){
         return id;
@@ -110,6 +116,28 @@ public class UserVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.account = account;
     }
 
+    @ElVoField(physicalName = "default_bank_code")
+    public String getDefault_bank_code(){
+        String ret = this.default_bank_code;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "default_bank_code")
+    public void setDefault_bank_code(String default_bank_code){
+        this.default_bank_code = default_bank_code;
+    }
+
+    @ElVoField(physicalName = "default_bank_name")
+    public String getDefault_bank_name(){
+        String ret = this.default_bank_name;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "default_bank_name")
+    public void setDefault_bank_name(String default_bank_name){
+        this.default_bank_name = default_bank_name;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -120,7 +148,9 @@ public class UserVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("simplePw").append("=").append(simplePw).append(",");
         sb.append("rrn").append("=").append(rrn).append(",");
         sb.append("userName").append("=").append(userName).append(",");
-        sb.append("account").append("=").append(account);
+        sb.append("account").append("=").append(account).append(",");
+        sb.append("default_bank_code").append("=").append(default_bank_code).append(",");
+        sb.append("default_bank_name").append("=").append(default_bank_name);
         sb.append("]");
         return sb.toString();
 

@@ -82,7 +82,7 @@
     <select id="selectUser" parameterType="com.demo.proworks.user.vo.UserVo" resultType="com.demo.proworks.user.vo.UserVo">
 <!-- 사용자정보를 상세 조회한다. -->	
         SELECT     /* QueryID : com.demo.proworks.user.selectUser */
-            ID as id, USER_ID as userId, PW as pw, SIMPLE_PW as simplePw, RRN as rrn, USER_NAME as userName, ACCOUNT as account
+            ID as id, USER_ID as userId, PW as pw, SIMPLE_PW as simplePw, RRN as rrn, USER_NAME as userName, ACCOUNT as account, DEFAULT_BANK_CODE as default_bank_code, DEFAULT_BANK_NAME as default_bank_name
         FROM USER 
         WHERE 
                 USER_ID        = #{userId}
@@ -114,5 +114,20 @@
          WHERE  1=1    		
 
     </select>
+    
+    <select id="selectUserById" parameterType="com.demo.proworks.user.vo.UserVo" resultType="com.demo.proworks.user.vo.UserVo">
+	<!-- 계좌조회를 위해 채번된 id로 사용자정보를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.user.selectUserById */
+        ID as id,
+        user_id as userId,
+        user_name as userName,
+        account,
+        default_bank_code,
+        default_bank_name
+    FROM
+        USER
+    WHERE
+        ID = #{id}
+	</select>
 
 </mapper>
