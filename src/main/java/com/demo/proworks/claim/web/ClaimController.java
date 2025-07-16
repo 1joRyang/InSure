@@ -95,46 +95,6 @@ public class ClaimController {
 		return selectClaimVo;
 	}
 
-	/**
-	 * 청구를 등록 처리 한다.
-	 *
-	 * @param claimVo 청구
-	 * @throws Exception
-	 */
-	@ElService(key = "CLAIMIns")
-	@RequestMapping(value = "CLAIMIns")
-	@ElDescription(sub = "청구 등록처리", desc = "청구를 등록 처리 한다.")
-	public void insertClaim(ClaimVo claimVo) throws Exception {
-		claimService.insertClaim(claimVo);
-	}
-
-	/**
-	 * 청구를 갱신 처리 한다.
-	 *
-	 * @param claimVo 청구
-	 * @throws Exception
-	 */
-	@ElService(key = "CLAIMUpd")
-	@RequestMapping(value = "CLAIMUpd")
-	@ElValidator(errUrl = "/claim/claimRegister", errContinue = true)
-	@ElDescription(sub = "청구 갱신처리", desc = "청구를 갱신 처리 한다.")
-	public void updateClaim(ClaimVo claimVo) throws Exception {
-
-		claimService.updateClaim(claimVo);
-	}
-
-	/**
-	 * 청구를 삭제 처리한다.
-	 *
-	 * @param claimVo 청구
-	 * @throws Exception
-	 */
-	@ElService(key = "CLAIMDel")
-	@RequestMapping(value = "CLAIMDel")
-	@ElDescription(sub = "청구 삭제처리", desc = "청구를 삭제 처리한다.")
-	public void deleteClaim(ClaimVo claimVo) throws Exception {
-		claimService.deleteClaim(claimVo);
-	}
 
 	/**
 	 * 청구 번호로 사용자,실무자 찾기
