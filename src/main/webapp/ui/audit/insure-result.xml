@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare"
 	xmlns:xf="http://www.w3.org/2002/xforms">
-	<head>
+	<head meta_screenName="심사 결과 창">
 		<w2:type>COMPONENT</w2:type>
 		<w2:buildDate />
 		<w2:MSA />
@@ -249,7 +249,7 @@
 			<xf:submission id="sbm_saveClaimResult" ref='data:json,{"id":"dma_claimResult","key":"claimResultVo"}'
 				target='data:json,{"id":"dma_result","key":"elData"}' action="/InsWebApp/CLAIMRESULTSave.pwkjson" method="post"
 				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_saveClaimResult_submitdone"
-				ev:submiterror="scwin.sbm_saveClaimResult_submiterror">
+				ev:submiterror="scwin.sbm_saveClaimResult_submiterror" processMsg="청구 메모 저장중입니다">
 			</xf:submission>
 
 			<!-- CLAIM_RESULT 업데이트 -->
@@ -494,15 +494,12 @@ scwin.showLoading = function (show) {
         } else if (typeof gcm !== 'undefined' && gcm.win && typeof gcm.win.showLoading === 'function') {
             gcm.win.showLoading(show);
         } else {
-            console.log("Loading indicator:", show);
         }
     } catch (e) {
-        console.log("Loading indicator error:", e);
     }
 };
 
 scwin.onpageload = function () {
-    console.log("=== 페이지 로드 시작 ===");
 
     localStorage.setItem("claim_no", "a52d86a3-5629-11f0-b4f3-bc2411231130");
 
@@ -527,7 +524,6 @@ scwin.onpageload = function () {
 scwin.sbm_selectSettlementTreatment = function () {
     var claimNo = dma_search.get("claim_no");
     if (!claimNo) {
-        console.error("청구번호가 없습니다.")
         alert("청구번호가 설정되지 않았습니다.")
         return;
     }
@@ -536,7 +532,6 @@ scwin.sbm_selectSettlementTreatment = function () {
     try {
         $p.executeSubmission("sbm_selectSettlementTreatment");
     } catch (error) {
-        console.error("Submission 실행 오류:", error);
         alert("정산치료 조회 중 오류가 발생했습니다: " + error.message);
     }
 }
@@ -551,13 +546,11 @@ scwin.searchSettlementData = function () {
 
 // 제외 항목 조회
 scwin.searchExcludedItems = function () {
-    console.log("=== 제외항목 조회 시작 ===");
 
     var claimNo = dma_search.get("claim_no");
     
     dma_excludedItemsSearch.set("SC_claim_no", claimNo);
     dma_excludedItemsSearch.set("claim_no", claimNo); // 백업 파라미터
-    console.log(dma_excludedItemsSearch.get("claim_no"));
     //청구 번호 없으면 
     if (!dma_excludedItemsSearch.get("claim_no")) {
         console.log("제외항목 조회 스킵 - 청구번호 없음");
@@ -568,21 +561,14 @@ scwin.searchExcludedItems = function () {
 
     // dma_excludedItemsSearch가 정의되어 있는지 확인
     if (typeof dma_excludedItemsSearch !== 'undefined') {
-        console.log("dma_excludedItemsSearch 존재 확인됨");
         dma_excludedItemsSearch.set("SC_claim_no", claimNo);
         dma_excludedItemsSearch.set("claim_no", claimNo); // 백업 파라미터
-        console.log("dma_excludedItemsSearch 파라미터 설정 완료");
-        console.log(dma_excludedItemsSearch.get("claim_no"));
     } else {
-        console.error("dma_excludedItemsSearch가 정의되지 않음! XML에 DataMap을 추가해야 합니다.");
 
         // 대안: 기존 dma_search 사용
-        console.log("대안으로 dma_search 사용");
         if (typeof dma_search !== 'undefined') {
             dma_search.set("claim_no", claimNo);
-            console.log("dma_search에 claim_no 설정 완료");
         } else {
-            console.error("dma_search도 정의되지 않음!");
             scwin.calculateTotalExcludedAmount();
             scwin.searchInsuranceProducts();
             return;
@@ -590,84 +576,21 @@ scwin.searchExcludedItems = function () {
     }
 
     try {
-        console.log("sbm_selectExcludedItems submission 실행 시도");
         $p.executeSubmission("sbm_selectExcludedItems");
-        console.log("sbm_selectExcludedItems submission 실행 성공");
     } catch (error) {
-        console.error("제외항목 조회 submission 실행 오류:", error);
         scwin.calculateTotalExcludedAmount();
         scwin.searchInsuranceProducts();
     }
 };
-// scwin.setTestExcludedItems = function () {
-//     console.log("=== 테스트 제외항목 데이터 설정 ===");
-
-//     var claimNo = dma_search.get("claim_no");
-//     var testExcludedData = [
-//         {
-//             exc_id: 1,
-//             item_id: 101,
-//             treatment_id: 1,
-//             claim_no: claimNo,
-//             exc_reason: "비급여 진료비",
-//             exc_cost: 50000,
-//             exc_category: "1",
-//             category_name: "치과, 한방치료 비급여 의료비"
-//         },
-//         {
-//             exc_id: 2,
-//             item_id: 102,
-//             treatment_id: 1,
-//             claim_no: claimNo,
-//             exc_reason: "선택진료비",
-//             exc_cost: 30000,
-//             exc_category: "8",
-//             category_name: "제비용(TV시청료, 전화료, 제증명료 등)"
-//         },
-//         {
-//             exc_id: 3,
-//             item_id: 103,
-//             treatment_id: 10,
-//             claim_no: claimNo,
-//             exc_reason: "한방치료비",
-//             exc_cost: 25000,
-//             exc_category: "1",
-//             category_name: "치과, 한방치료 비급여 의료비"
-//         },
-//         {
-//             exc_id: 4,
-//             item_id: 104,
-//             treatment_id: 15,
-//             claim_no: claimNo,
-//             exc_reason: "건강검진비",
-//             exc_cost: 40000,
-//             exc_category: "3",
-//             category_name: "건강검진, 예방접종, 인공유산"
-//         }
-//     ];
-
-//     dlt_excludedItems.setJSON(testExcludedData);
-//     console.log("테스트 제외항목 데이터 설정 완료, 행 수:", dlt_excludedItems.getRowCount());
-
-//     // 각 항목 확인
-//     for (var i = 0; i < testExcludedData.length; i++) {
-//         console.log("테스트 제외항목[" + i + "]:", testExcludedData[i].exc_reason, testExcludedData[i].exc_cost + "원");
-//     }
-// };
 // // 제외항목 조회 성공 콜백
 scwin.sbm_selectExcludedItems_submitdone = function (e) {
-    console.log("=== 제외항목 조회 완료 콜백 실행 ===");
-    console.log("제외항목 응답 전체:", e);
 
     var responseData = e.responseJSON;
-    console.log("responseJSON:", responseData);
 
     // elHeader 확인
     var elHeader = responseData ? responseData.elHeader : null;
-    console.log("elHeader:", elHeader);
 
     if (!responseData) {
-        console.error("응답 데이터 없음");
         scwin.calculateTotalExcludedAmount();
         scwin.searchInsuranceProducts();
         return;
@@ -675,7 +598,6 @@ scwin.sbm_selectExcludedItems_submitdone = function (e) {
 
     // resSuc 확인
     if (elHeader && elHeader.resSuc === false) {
-        console.error("제외항목 조회 서버 오류:", elHeader.resMsg);
         scwin.calculateTotalExcludedAmount();
         scwin.searchInsuranceProducts();
         return;
@@ -685,41 +607,30 @@ scwin.sbm_selectExcludedItems_submitdone = function (e) {
     var excludedItemsData = null;
 
     if (responseData.elData) {
-        console.log("elData 존재, 타입:", typeof responseData.elData);
-        console.log("elData 내용:", responseData.elData);
 
         // 여러 가능한 구조 확인
         if (Array.isArray(responseData.elData)) {
             excludedItemsData = responseData.elData;
-            console.log("elData가 직접 배열:", excludedItemsData.length + "건");
         } else if (responseData.elData.excItemVoList) {
             excludedItemsData = responseData.elData.excItemVoList;
-            console.log("excItemVoList로 수신:", excludedItemsData.length + "건");
         } else if (responseData.elData.excludedItemsList) {
             excludedItemsData = responseData.elData.excludedItemsList;
-            console.log("excludedItemsList로 수신:", excludedItemsData.length + "건");
         } else {
             // 모든 키 확인
             var keys = Object.keys(responseData.elData);
-            console.log("elData의 모든 키들:", keys);
 
             if (keys.length > 0) {
                 var firstKey = keys[0];
-                console.log("첫 번째 키:", firstKey, "값 타입:", typeof responseData.elData[firstKey]);
 
                 if (Array.isArray(responseData.elData[firstKey])) {
                     excludedItemsData = responseData.elData[firstKey];
-                    console.log("첫 번째 키(" + firstKey + ")로 데이터 추출:", excludedItemsData.length + "건");
                 }
             }
         }
     } else {
-        console.log("elData가 없음");
     }
 
     if (excludedItemsData && Array.isArray(excludedItemsData) && excludedItemsData.length > 0) {
-        console.log("제외항목 데이터 수신 성공, 개수:", excludedItemsData.length);
-        console.log("첫 번째 제외항목 샘플:", excludedItemsData[0]);
 
         // 카테고리명 추가 처리
         excludedItemsData.forEach(function (item, index) {
@@ -767,11 +678,9 @@ scwin.sbm_selectExcludedItems_submitdone = function (e) {
 
         // DataList에 설정
         dlt_excludedItems.setJSON(excludedItemsData);
-        console.log("dlt_excludedItems 설정 완료, 최종 행 수:", dlt_excludedItems.getRowCount());
 
         // 설정 후 데이터 검증
         var verifyCount = dlt_excludedItems.getRowCount();
-        console.log("검증: 제외항목 최종 개수:", verifyCount);
 
         for (var i = 0; i < Math.min(verifyCount, 3); i++) {
             console.log("검증: 제외항목[" + i + "]:",
