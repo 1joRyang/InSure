@@ -46,9 +46,6 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "search_ID", physicalName = "SC_ID", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String SC_ID;
 
-    @ElDtoField(logicalName = "disaster_code", physicalName = "disaster_code", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
-    private String disaster_code;
-
     @ElVoField(physicalName = "claim_no")
     public String getClaim_no(){
         String ret = this.claim_no;
@@ -170,18 +167,6 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.SC_ID = SC_ID;
     }
 
-    @ElVoField(physicalName = "disaster_code")
-    public String getDisaster_code(){
-        String ret = this.disaster_code;
-        return ret;
-    }
-
-    @ElVoField(physicalName = "disaster_code")
-    public void setDisaster_code(String disaster_code){
-        this.disaster_code = disaster_code;
-    }
-
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -196,8 +181,7 @@ public class ClaimVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("disease_code").append("=").append(disease_code).append(",");
         sb.append("date_of_accident").append("=").append(date_of_accident).append(",");
         sb.append("SC_receipt_date").append("=").append(SC_receipt_date).append(",");
-        sb.append("SC_ID").append("=").append(SC_ID).append(",");
-        sb.append("disaster_code").append("=").append(disaster_code);
+        sb.append("SC_ID").append("=").append(SC_ID);
         sb.append("]");
         return sb.toString();
 

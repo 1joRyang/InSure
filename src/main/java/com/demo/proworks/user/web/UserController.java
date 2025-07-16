@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.demo.proworks.claim.service.ClaimService;
+import com.demo.proworks.claim.vo.ClaimFullJoinVo;
 import com.demo.proworks.claim.vo.ClaimVo;
 import com.demo.proworks.cmmn.ProworksUserHeader;
 import com.demo.proworks.user.service.UserService;
@@ -446,48 +447,25 @@ public class UserController {
         userService.deleteUser(userVo);
     }
     
+    
+    
+    
 	/**
-	 * 사용자정보와 청구목록을 통합 조회한다.
+	 * 주민번호로 사용자 기본정보 조회
 	 *
 	 * @param userVo 사용자정보
-	 * @return 사용자정보 + 청구목록
+	 * @return 사용자 기본정보
 	 * @throws Exception
 	 */
-	@ElService(key = "UserInfoWithClaimsView")
-	@RequestMapping(value = "UserInfoWithClaimsView")
-	@ElDescription(sub = "사용자정보 및 청구목록 통합조회", desc = "사용자정보와 해당 사용자의 청구목록을 함께 조회한다.")
-	public Map<String, Object> selectUserInfoWithBills(UserVo userVo) throws Exception {	   
+	@ElService(key = "UserInfoByRrn")
+	@RequestMapping(value = "UserInfoByRrn")
+	@ElDescription(sub = "주민번호로 사용자정보 조회", desc = "주민번호로 사용자 기본정보를 조회한다.")
+	public UserVo selectUserInfoByRrn(UserVo userVo) throws Exception {
 	    
-	    Map<String, Object> result = new HashMap<>();
+	    // 주민번호로 사용자 정보 조회
+	    String rrn = userVo.getRrn();
+	    UserVo userInfo = userService.selectUserByRrn(rrn);
 	    
-	    // 사용자 정보 조회
-	    UserVo userInfo = userService.selectUser(userVo);
-	    
-	    
-	    if (userInfo != null) {
-        // 조회된 사용자 ID를 사용해서 청구목록 조회
-        ClaimVo claimVo = new ClaimVo();
-        claimVo.setID(String.valueOf(userInfo.getId())); 
-        
-         // 페이징 설정
-        claimVo.setPageSize(100);
-        claimVo.setPageIndex(1);
-	    
-	    
-	    // 청구목록 조회
-	    List<ClaimVo> claimList = claimService.selectListClaim(claimVo);
-	    
-	    result.put("userInfo", userInfo);
-	    result.put("claimList", claimList);
-	    
-	    } else {
-        // 사용자 정보가 없거나 ID가 null인 경우
-        result.put("userInfo", userInfo);
-        result.put("claimList", new ArrayList<>());
-	    }
-	
-	    return result;
+	    return userInfo;
 	}
-		    
-     
 }
