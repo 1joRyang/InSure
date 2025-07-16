@@ -16,6 +16,8 @@
         	<w2:key dataType="text" name="search_status" id="SC_status"></w2:key>
         	<w2:key dataType="text" name="search_emp_name" id="SC_emp_name"></w2:key>
         	<w2:key dataType="text" name="search_user_name" id="SC_user_name"></w2:key>
+        	<!-- 통합 검색 필드 추가 -->
+        	<w2:key dataType="text" name="search_text" id="SC_search_text"></w2:key>
         	<w2:key nullYN="" defaultValue="1" dataType="text" name="페이지번호" length="" id="pageIndex" encYN=""></w2:key>
         	 <w2:key nullYN="" defaultValue="10" dataType="text" name="페이지사이즈" length="" id="pageSize" encYN=""></w2:key>
         	  <w2:key dataType="text" name="페이지건수" id="totalPageCount"></w2:key>
@@ -126,29 +128,137 @@ scwin.onpageload = async function() {
     // 기본적으로 전체 조인 데이터를 조회
     scwin.searchClaimFullJoin();
     
-    
     // 기존 청구 목록도 조회 (비교용)
     await $c.sbm.execute($p, sbm_claimList);
 };
 
 // 전체 조인 조회 함수 (새로 추가)
+// 개선된 검색 함수
 scwin.searchClaimFullJoin = function() {
+    console.log("검색 시작");
+    
+    // input_search 값 가져오기
+    var searchText = input_search.getValue();
+    
+    console.log("검색어:", searchText);
+    
+    // 모든 검색 조건 초기화
+    dmp_claimFullJoinVo.set("SC_claim_type", "");
+    dmp_claimFullJoinVo.set("SC_status", "");
+    dmp_claimFullJoinVo.set("SC_emp_name", "");
+    dmp_claimFullJoinVo.set("SC_user_name", "");
+    
+    // input_search 값을 SC_search_text에 설정
+    // 이것만으로 SQL에서 4개 컬럼을 동시에 검색함
+    if (searchText && searchText.trim() !== "") {
+        dmp_claimFullJoinVo.set("SC_search_text", searchText.trim());
+        console.log("통합 검색 실행 - 검색 대상:");
+        console.log("- 청구유형 (claim_type)");
+        console.log("- 상태 (status)");  
+        console.log("- 직원명 (emp_name)");
+        console.log("- 고객명 (user_name)");
+    } else {
+        dmp_claimFullJoinVo.set("SC_search_text", "");
+        console.log("전체 조회 실행");
+    }
+    
+    // 페이징 초기화
+    dmp_claimFullJoinVo.set("pageIndex", "1");
+    
     // 서브미션 실행
     $c.sbm.execute($p, sbm_claimFullJoinList);
 };
 
-// 전체 조인 조회 성공 콜백
-scwin.sbm_claimFullJoinList_submitdone = function(e) {
+// 실시간 검색 (디바운싱 적용)
+var searchTimeout;
+scwin.input_search_onkeyup = function(e) {
+    clearTimeout(searchTimeout);
     
-    var resultCount = dlt_claimFullJoinList.getRowCount();
-    
+    if (e.keyCode === 13) { // Enter key - 즉시 검색
+        scwin.searchClaimFullJoin();
+    } else {
+        // 2글자 이상일 때 0.5초 후 자동 검색
+        var currentValue = input_search.getValue();
+        if (currentValue && currentValue.trim().length >= 2) {
+            searchTimeout = setTimeout(function() {
+                console.log("자동 검색 실행:", currentValue);
+                scwin.searchClaimFullJoin();
+            }, 500);
+        } else if (!currentValue || currentValue.trim() === "") {
+            // 검색어가 비어있으면 전체 조회
+            searchTimeout = setTimeout(function() {
+                scwin.searchClaimFullJoin();
+            }, 500);
+        }
+    }
 };
 
 
+// 페이징 처리
+scwin.changePage = function(page) {
+    dmp_claimFullJoinVo.set("pageIndex", page);
+    scwin.searchClaimFullJoin();
+};
 
-// 기존 검색 버튼 이벤트
+// 정렬 기능
+scwin.sortGrid = function(field, order) {
+    dmp_claimFullJoinVo.set("sortField", field);
+    dmp_claimFullJoinVo.set("sortOrder", order);
+    scwin.searchClaimFullJoin();
+};
+// 전체 조인 조회 성공 콜백
+scwin.sbm_claimFullJoinList_submitdone = function(e) {
+    var resultCount = dlt_claimFullJoinList.getRowCount();
+    var searchText = input_search.getValue();
+    
+    console.log("조회 완료 - 총 " + resultCount + "건");
+    
+    if (searchText && searchText.trim() !== "") {
+        console.log("검색어 '" + searchText + "'로 " + resultCount + "건 조회됨");
+        
+        // 검색 결과가 없을 때 사용자에게 알림
+        if (resultCount === 0) {
+            alert("'" + searchText + "' 검색 결과가 없습니다.\n\n검색 대상:\n- 청구유형\n- 상태\n- 직원명\n- 고객명");
+        }
+    } else {
+        console.log("전체 데이터 " + resultCount + "건 조회됨");
+    }
+};
+
+// 전체 조인 조회 실패 콜백
+scwin.sbm_claimFullJoinList_submiterror = function(e) {
+    console.error("조회 실패:", e);
+    alert("데이터 조회 중 오류가 발생했습니다.");
+};
+
+// 검색 버튼 이벤트
 scwin.btn_search_onclick = function() {
-    console.log("기존 검색 버튼 클릭");
+    console.log("검색 버튼 클릭");
+    scwin.searchClaimFullJoin();
+};
+
+// 엔터키 검색 이벤트
+scwin.input_search_onkeyup = function(e) {
+    if (e.keyCode === 13) { // Enter key
+        scwin.searchClaimFullJoin();
+    }
+};
+
+// 초기화 버튼 이벤트
+scwin.btn_reset_onclick = function() {
+    console.log("검색 초기화");
+    
+    // 입력 필드 초기화
+    input_search.setValue("");
+    
+    // 데이터맵 검색 조건 초기화
+    dmp_claimFullJoinVo.set("SC_search_text", "");
+    dmp_claimFullJoinVo.set("SC_claim_type", "");
+    dmp_claimFullJoinVo.set("SC_status", "");
+    dmp_claimFullJoinVo.set("SC_emp_name", "");
+    dmp_claimFullJoinVo.set("SC_user_name", "");
+    
+    // 전체 조회 실행
     scwin.searchClaimFullJoin();
 };
 
@@ -184,21 +294,16 @@ scwin.grd_claimFullJoin_ondblclick = function(row, col) {
 // 그리드 더블클릭 이벤트 (상세 조회용)
 scwin.grd_claimEmployee_ondblclick = function(row, col) {
     try {
-        var selectedData = dlt_claimEmployeeList.getRowJSON(row);
+        var selectedData = dlt_claimFullJoinList.getRowJSON(row);
         console.log("선택된 청구 정보:", selectedData);
         
         if (selectedData && selectedData.claim_no) {
             var detailMsg = "청구번호: " + (selectedData.claim_no || "없음") + "\n" +
                           "청구유형: " + (selectedData.claim_type || "없음") + "\n" +
-                          "직원명: " + (selectedData.emp_name || "없음") + "\n" +
+                          "고객명: " + (selectedData.user_name || "없음") + "\n" +
+                          "지급금액: " + (selectedData.amount || "없음") + "\n" +
+                          "담당직원: " + (selectedData.emp_name || "없음") + "\n" +
                           "상태: " + (selectedData.status || "없음");
-            
-            if (selectedData.receipt_date) {
-                detailMsg += "\n접수일자: " + selectedData.receipt_date;
-            }
-            if (selectedData.claim_content) {
-                detailMsg += "\n청구내용: " + selectedData.claim_content;
-            }
             
             alert(detailMsg);
         } else {
@@ -219,6 +324,29 @@ scwin.debugData = function() {
     console.log("dmp_claimEmployeeVo:", dmp_claimEmployeeVo.getJSON());
     console.log("dlt_claimEmployeeList 행 수:", dlt_claimEmployeeList.getRowCount());
     console.log("dlt_claimEmployeeList 데이터:", dlt_claimEmployeeList.getJSON());
+};
+
+scwin.checkSearchCondition = function() {
+    console.log("=== 현재 검색 조건 ===");
+    console.log("input_search 값:", input_search.getValue());
+    console.log("SC_search_text:", dmp_claimFullJoinVo.get("SC_search_text"));
+    console.log("SC_claim_type:", dmp_claimFullJoinVo.get("SC_claim_type"));
+    console.log("SC_status:", dmp_claimFullJoinVo.get("SC_status"));
+    console.log("SC_emp_name:", dmp_claimFullJoinVo.get("SC_emp_name"));
+    console.log("SC_user_name:", dmp_claimFullJoinVo.get("SC_user_name"));
+    
+    console.log("\n=== SQL에서 실행될 검색 로직 ===");
+    var searchText = dmp_claimFullJoinVo.get("SC_search_text");
+    if (searchText && searchText !== "") {
+        console.log("통합 검색 모드:");
+        console.log("검색어 '" + searchText + "'가 다음 컬럼들에서 검색됨:");
+        console.log("- claim_type LIKE '%" + searchText + "%'");
+        console.log("- status LIKE '%" + searchText + "%'");
+        console.log("- emp_name LIKE '%" + searchText + "%'");
+        console.log("- user_name LIKE '%" + searchText + "%'");
+    } else {
+        console.log("전체 조회 모드");
+    }
 };]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
@@ -226,46 +354,45 @@ scwin.debugData = function() {
     		style="">
     		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
     			style="">
-    			<w2:textbox class="pgt_tit" id="" label="청구번호 조회 (확장 버전)" style="" tagname="h2"></w2:textbox>
+    			<w2:textbox class="pgt_tit" id="" label="청구번호 조회 (검색 기능)" style="" tagname="h2"></w2:textbox>
     		</xf:group>
 
     		<!-- 검색 조건 영역 -->
+    		<xf:group id="" style="margin-bottom:15px; padding:10px; background-color:#f5f5f5; border-radius:5px;">
+    			<w2:textbox id="" label="검색 조건" style="font-weight:bold; display:inline-block; margin-right:10px; color:#333;"></w2:textbox>
+    			<br/>
+    			<xf:group id="" style="margin-top:10px;">
+    				<w2:span id="" label="검색어" style="display:inline-block; width:60px; font-weight:bold;"></w2:span>
+    				<xf:input id="input_search" style="width:200px; margin-right:10px;" 
+    					placeholder="청구유형, 고객명, 담당직원, 상태 검색" 
+    					ev:onkeyup="scwin.input_search_onkeyup">
+    				</xf:input>
+    				<xf:trigger class="btn_cm" id="btn_search" style="background-color: #4CAF50; margin-right:5px;" 
+    					type="button" ev:onclick="scwin.btn_search_onclick">
+    					<xf:label><![CDATA[검색]]></xf:label>
+    				</xf:trigger>
+    				<xf:trigger class="btn_cm" id="btn_reset" style="background-color: #f44336;" 
+    					type="button" ev:onclick="scwin.btn_reset_onclick">
+    					<xf:label><![CDATA[초기화]]></xf:label>
+    				</xf:trigger>
+    			</xf:group>
+    			<xf:group id="" style="margin-top:8px;">
+    				<w2:textbox id="" label="※ 청구유형, 고객명, 담당직원명, 상태 중 하나 이상 포함된 데이터를 검색합니다." 
+    					style="font-size:12px; color:#666;"></w2:textbox>
+    			</xf:group>
+    		</xf:group>
 
     		<!-- 조회 결과 표시 영역 -->
-
-    		<!-- 전체 조인 결과 -->
-
-    		<!-- 전체 조인 그리드 -->
-
-    		<!-- 구분선 -->
-
-    		<!-- 기존 청구번호 검색 영역 (원본 유지) -->
-    		<xf:group id="">
-    			<w2:span meta_snippetCategory="10_입력폼" meta_snippetName="10_16 출력텍스트" meta_snippetKeyComponent="true" style="" id=""
-    				label="청구번호">
-    			</w2:span>
-    		</xf:group>
-    		<xf:group id="">
-    			<xf:input meta_snippetCategory="10_입력폼" meta_snippetName="10_10 InputBox_조회버튼" meta_snippetKeyComponent="true"
-    				style="width:150px;" id="" placeholder="" class="">
-    			</xf:input>
-    			<xf:trigger class="btn_cm" id="btn_search" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true"
-    				meta_snippetName="8_01 기본버튼" style="background-color: #95d782" type="button" ev:onclick="scwin.btn_search_onclick">
-    				<xf:label><![CDATA[검색]]></xf:label>
-    			</xf:trigger>
-    		</xf:group>
-
-    		<!-- 기존 청구-직원 조인 결과 -->
     		<xf:group id="" style="margin-bottom:10px;">
     			<w2:textbox id="" label="청구 목록" style="font-weight:bold; display:inline-block; margin-right:10px; color:#1976D2;"></w2:textbox>
     		</xf:group>
 
-    		<!-- 청구-직원 조인 그리드 (기존) -->
+    		<!-- 전체 조인 그리드 -->
     		<xf:group adaptiveThreshold="" class="gvwbox" id="" style="">
     			<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dlt_claimFullJoinList"
-    				focusMode="row" id="grd_claimEmployee" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 300px;"
+    				focusMode="row" id="grd_claimEmployee" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 400px;"
     				ev:ondblclick="scwin.grd_claimEmployee_ondblclick">
-    				<w2:caption id="caption2" style="" value="청구-직원 조인 정보 그리드"></w2:caption>
+    				<w2:caption id="caption2" style="" value="청구 정보 그리드"></w2:caption>
     				<w2:header id="header2" style="">
     					<w2:row id="row3" style="">
     						<w2:column removeBorderStyle="false" width="100" inputType="text" id="column7" value="청구번호" blockSelect="false"
@@ -277,11 +404,11 @@ scwin.debugData = function() {
     						<w2:column removeBorderStyle="false" width="100" inputType="text" id="column9" value="고객명" blockSelect="false"
     							displayMode="label">
     						</w2:column>
-    						<w2:column removeBorderStyle="false" width="80" inputType="text" id="column10" value="지급금액" blockSelect="false"
+    						<w2:column removeBorderStyle="false" width="100" inputType="text" id="column10" value="지급금액" blockSelect="false"
     							displayMode="label">
     						</w2:column>
-    						<w2:column width="70" inputType="text" style="" id="column5" value="담당자" displayMode="label"></w2:column>
-    						<w2:column width="70" inputType="text" style="" id="column6" value="상태" displayMode="label"></w2:column>
+    						<w2:column width="100" inputType="text" style="" id="column5" value="담당직원" displayMode="label"></w2:column>
+    						<w2:column width="80" inputType="text" style="" id="column6" value="상태" displayMode="label"></w2:column>
     					</w2:row>
     				</w2:header>
     				<w2:gBody id="gBody2" style="">
@@ -295,11 +422,11 @@ scwin.debugData = function() {
     						<w2:column removeBorderStyle="false" width="100" inputType="text" id="user_name" blockSelect="false"
     							displayMode="label">
     						</w2:column>
-    						<w2:column removeBorderStyle="false" width="80" inputType="text" id="amount" blockSelect="false"
+    						<w2:column removeBorderStyle="false" width="100" inputType="text" id="amount" blockSelect="false"
     							displayMode="label" displayFormat="#,### 원" defaultValue="0">
     						</w2:column>
-    						<w2:column width="70" inputType="text" style="" id="emp_name" value="" displayMode="label"></w2:column>
-    						<w2:column width="70" inputType="text" style="" id="status" value="" displayMode="label"></w2:column>
+    						<w2:column width="100" inputType="text" style="" id="emp_name" value="" displayMode="label"></w2:column>
+    						<w2:column width="80" inputType="text" style="" id="status" value="" displayMode="label"></w2:column>
     					</w2:row>
     				</w2:gBody>
     			</w2:gridView>
