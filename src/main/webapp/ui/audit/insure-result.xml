@@ -202,12 +202,16 @@
 				method="post" mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
 				processMsg="정산정보 리스트를 조회 중입니다." ev:submit="" ev:submitdone="scwin.sbm_settlementList_submitdone" ev:submiterror="" abortTrigger="">
 			</xf:submission>
-
+			<xf:submission id="sbm_selectClaimResult" ref='data:json,{"id":"dma_claimResult","key":"claimResultVo"}'
+				target='data:json,{"id":"dma_claimResult","key":"elData"}' action="/InsWebApp/CLAIMRESULTList.pwkjson" method="post"
+				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_selectClaimResult_submitdone"
+				ev:submiterror="scwin.sbm_selectClaimResult_submiterror">
+			</xf:submission>
 			<!-- 정산정보 단건 조회 -->
 			<xf:submission id="sbm_selectSettlement" ref='data:json,{"id":"dma_search","key":"settlementVo"}'
 				target='data:json,{"id":"dma_settlementInfo","key":"elData"}' action="/InsWebApp/SETTLEMENTUpdView.pwkjson" method="post"
 				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_selectSettlement_submitdone"
-				ev:submiterror="scwin.sbm_selectSettlement_submiterror">
+				ev:submiterror="">
 			</xf:submission>
 			<!-- 제외항목 목록 조회 - EXCITEMListR 사용 -->
 			<!-- <xf:submission id="sbm_selectExcludedItems" ref='data:json,{"id":"dma_search","key":"excItemVo"}'
@@ -518,9 +522,21 @@ scwin.onpageload = function () {
     scwin.sbm_selectSettlementTreatment();
     scwin.sbm_selectSettlementSummary();
     scwin.searchExcludedItems();
+    scwin.loadExistingMemo();
 
 };
-
+scwin.loadExistingMemo = function() {
+    console.log("메모 불러오기")
+    var claimNo = localStorage.getItem("claim_no");
+    if (claimNo) {
+        dma_claimResult.set("claim_no", claimNo);
+        console.log("메모 불러오기 서브미션 실 행")
+        $p.executeSubmission("sbm_selectClaimResult");
+    }else{
+        console.log("메모 불러오기할 claim넘버가 없어요");
+    
+    }
+};
 scwin.sbm_selectSettlementTreatment = function () {
     var claimNo = dma_search.get("claim_no");
     if (!claimNo) {
@@ -1143,7 +1159,7 @@ scwin.loadClaimUserEmpInfo = function (e) {
 scwin.prepareClaimResultData = function () {
     var claimNo = dma_search.get("claim_no");
     var memo = txt_examMemo.getValue() || "";
-    var refundAmount = dma_settlementInfo.get("refund_amt") || "0";
+    var refundAmount = dma_settlementSummary.get("total_refund_amt") || "0";
 
     // 현재 날짜 (YYYY-MM-DD 형식)
     var currentDate = new Date();
@@ -1183,11 +1199,11 @@ scwin.btn_complete_onclick = function () {
 
     // CLAIM_RESULT 데이터 준비
     var resultData = scwin.prepareClaimResultData();
-
+        console.log(resultData);
     if (confirm(
         "최종 심사를 완료하시겠습니까?\n\n" +
         "- 청구번호: " + resultData.claim_no +
-        "\n- 지급금액: " + scwin.resultData.amount + "원" +
+        "\n- 지급금액: " + resultData.amount + "원" +
         "\n- 처리일자: " + resultData.date
     )) {
         scwin.showLoading(true);
@@ -1504,7 +1520,7 @@ function openClaimReturnPopup(link) {
     var winWid = $(window).width();
     var winHei = $(window).height();
     var popWid = 600;  // 담당자 변경 팝업에 적합한 크기
-    var popHei = 350;
+    var popHei = 250;
     var sumLeft = (winWid - popWid) / 2;
     var sumTop = (winHei - popHei) / 2;
 
@@ -1538,7 +1554,7 @@ function openReqSupplePopup(link) {
     var winWid = $(window).width();
     var winHei = $(window).height();
     var popWid = 600;  
-    var popHei = 350;
+    var popHei = 250;
     var sumLeft = (winWid - popWid) / 2;
     var sumTop = (winHei - popHei) / 2;
 
@@ -1559,6 +1575,43 @@ function openReqSupplePopup(link) {
 
     $p.openPopup(link, opts);
 }
+
+scwin.sbm_selectClaimResult_submitdone = function(e) {
+    console.log("메모 가지고오기 : ", e);
+    var responseData = e.responseJSON;
+    
+    if (responseData && responseData.elData && responseData.elData.claimResultVoList) {
+        var claimResultList = responseData.elData.claimResultVoList;
+        
+        // 배열이 있고, 첫 번째 항목이 있는지 확인
+        if (Array.isArray(claimResultList) && claimResultList.length > 0) {
+            var firstResult = claimResultList[0];
+            
+            if (firstResult.claim_memo) {
+                // 기존 메모가 있으면 텍스트박스에 설정
+                txt_examMemo.setValue(firstResult.claim_memo);
+                console.log("기존 메모 로드 완료:", firstResult.claim_memo);
+                
+                // 다른 데이터도 설정 (옵션)
+                if (firstResult.amount) {
+                    dma_claimResult.set("amount", firstResult.amount);
+                }
+                if (firstResult.date) {
+                    dma_claimResult.set("date", firstResult.date);
+                }
+            } else {
+                console.log("저장된 메모가 없습니다.");
+            }
+        } else {
+            console.log("claimResultVoList가 비어있습니다.");
+        }
+    } else {
+        console.log("응답 데이터 구조가 예상과 다릅니다.");
+    }
+};
+scwin.sbm_selectClaimResult_submiterror = function (e) {
+    console.log(" 메모 불러오기 오류 났음 " , e);
+};
 ]]></script>
 	</head>
 	<body ev:onpageload="scwin.onpageload">
@@ -1776,8 +1829,7 @@ function openReqSupplePopup(link) {
 					<!-- 메모 생성 버튼 -->
 
 					<!-- 메모 입력 영역 -->
-					<xf:textarea class="memo_textarea" id="txt_examMemo" ref="data:dma_settlementInfo.generated_memo"
-						placeholder="심사메모 생성 버튼을 클릭하여 AI가 자동으로 생성한 메모를 확인하세요."
+					<xf:textarea class="memo_textarea" id="txt_examMemo" ref="data:dma_claimResult.claim_memo" placeholder="심사메모 생성 버튼을 클릭하여 AI가 자동으로 생성한 메모를 확인하세요."
 						style="width: 100%;                min-height: 200px;                padding: 15px;                border: 1px solid #ddd;                border-radius: 4px;                resize: vertical;                font-family: 'Noto Sans KR', sans-serif;                font-size: 14px;                line-height: 1.6;"></xf:textarea>
 
 					<!-- 메모 관련 버튼 -->
@@ -1808,14 +1860,8 @@ function openReqSupplePopup(link) {
 							<xf:trigger class="btn_secondary" id="btn_approval" type="button">
 								<xf:label>결재신청</xf:label>
 							</xf:trigger>
-							<xf:trigger class="btn_secondary" id="btn_payment" type="button">
-								<xf:label>지급처리</xf:label>
-							</xf:trigger>
-						</xf:group>
-
-						<xf:group id="" style="margin-top:20px;">
-							<xf:trigger class="btn_primary" id="btn_complete" type="button" style="width:100%;padding:16px;font-size:16px;"
-								ev:onclick="scwin.btn_complete_onclick">
+							<xf:trigger ev:onclick="scwin.btn_complete_onclick" style="width:100%;padding:16px;font-size:16px;" id="btn_complete"
+								type="button" class="btn_primary">
 								<xf:label>최종 심사 완료</xf:label>
 							</xf:trigger>
 						</xf:group>
