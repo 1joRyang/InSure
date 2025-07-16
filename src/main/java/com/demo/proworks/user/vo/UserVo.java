@@ -34,6 +34,12 @@ public class UserVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "account", physicalName = "account", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String account;
 
+    @ElDtoField(logicalName = "bank", physicalName = "bank", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String bank;
+
+    @ElDtoField(logicalName = "phone_number", physicalName = "phone_number", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String phone_number;
+
     @ElVoField(physicalName = "id")
     public int getId(){
         return id;
@@ -110,6 +116,28 @@ public class UserVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.account = account;
     }
 
+    @ElVoField(physicalName = "bank")
+    public String getBank(){
+        String ret = this.bank;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "bank")
+    public void setBank(String bank){
+        this.bank = bank;
+    }
+
+    @ElVoField(physicalName = "phone_number")
+    public String getPhone_number(){
+        String ret = this.phone_number;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "phone_number")
+    public void setPhone_number(String phone_number){
+        this.phone_number = phone_number;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -120,7 +148,9 @@ public class UserVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("simplePw").append("=").append(simplePw).append(",");
         sb.append("rrn").append("=").append(rrn).append(",");
         sb.append("userName").append("=").append(userName).append(",");
-        sb.append("account").append("=").append(account);
+        sb.append("account").append("=").append(account).append(",");
+        sb.append("bank").append("=").append(bank).append(",");
+        sb.append("phone_number").append("=").append(phone_number);
         sb.append("]");
         return sb.toString();
 
