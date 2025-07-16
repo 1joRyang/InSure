@@ -247,7 +247,6 @@ public class AssignRuleDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbs
                 return 0;
             }
             
-            // 🔥 안전한 타입 변환
             if (countObj instanceof Long) {
                 return ((Long) countObj).intValue();
             } else if (countObj instanceof Integer) {
