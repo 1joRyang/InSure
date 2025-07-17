@@ -9,7 +9,7 @@
         <w2:MSA/>
         <xf:model>
         	<w2:dataCollection baseNode="map">
-        		<w2:dataList baseNode="list" repeatNode="map" id="dl_imgList" saveRemovedData="true">
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_imgKey" saveRemovedData="true">
         			<w2:columnInfo>
         				<w2:column dataType="text" name="file_path" id="file_path"></w2:column>
         				<w2:column dataType="text" name="file_id" id="file_id"></w2:column>
@@ -41,11 +41,34 @@
         				</w2:row>
         			</w2:data>
         		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_imgList" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="imgSrc" id="imgSrc"></w2:column>
+        				<w2:column dataType="text" name="imgTitle" id="imgTitle"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dm_img">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="presignedUrl" id="presignedUrl"></w2:key>
+        				<w2:key dataType="text" name="objectKey" id="objectKey"></w2:key>
+        				<w2:key dataType="text" name="filename" id="filename"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dm_objectKey">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="objectKey" id="objectKey"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
         	<xf:submission id="sbm_getS3Key" action="/InsWebApp/InsimagefileList.pwkjson" method="post" mediatype="application/json" ref=""
-        		target='data:json,{"id":"dl_imgList","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
-        		ev:submitdone="scwin.sbm_getS3Key_submitdone" ev:submiterror="" abortTrigger="">
+        		target='data:json,{"id":"dl_imgKey","key":"elData.insimagefileVoList"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getS3Key_submitdone" ev:submiterror=""
+        		abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getImg" action="/InsWebApp/getS3ViewUrl.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_objectKey","key":"param"}' target='data:json,{"id":"dm_img","key":"elData"}' encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getImg_submitdone"
+        		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -57,18 +80,42 @@ scwin.onpageload = function () {
     let claim = JSON.parse(localStorage.getItem("claim"));
     let req = {"elData": {"claim_no": claim.claimNo}};
     $c.sbm.execute(sbm_getS3Key, req);
-
-    scwin.renderImageList();
-    scwin.renderFullImageViewer();
-    scwin.highlightSelectedThumbnail(1);
 };
 
 scwin.sbm_getS3Key_submitdone = function (e) {
-    console.log(dl_imgList.getAllJSON());
+    const imgList = dl_imgKey.getAllJSON();
+    scwin._imgTotalCount = imgList.length;
+    scwin._imgLoadCount = 0;
+
+    if (!imgList || imgList.length === 0) return;
+
+    // 이미지 요청 보내기
+    imgList.forEach((item) => {
+        dm_objectKey.set("objectKey", item.file_path);
+        $c.sbm.execute(sbm_getImg);
+    });
+};
+
+scwin.sbm_getImg_submitdone = function (e) {
+    const imgData = dm_img.getJSON(); 
+    const imgUrl = imgData?.presignedUrl;
+
+    const rowIndex = dl_imgList.insertRow();
+    dl_imgList.setCellData(rowIndex, "imgSrc", imgUrl);
+    dl_imgList.setCellData(rowIndex, "imgTitle", scwin._imgLoadCount + 1);
+  
+    scwin._imgLoadCount++;
+
+    if (scwin._imgLoadCount === scwin._imgTotalCount) {
+        scwin.renderImageList();
+        scwin.renderFullImageViewer();
+        scwin.highlightSelectedThumbnail(1);
+    }
 };
 
 // 썸네일 목록
 scwin.renderImageList = function () {
+    console.log(dl_imgList.getAllJSON())
     const len = dl_imgList.getRowCount();
     const targetGrp = $p.getComponentById("imgList");
 
@@ -80,13 +127,12 @@ scwin.renderImageList = function () {
             style: "padding: 10px; width: 90%; margin-bottom:6px; display:flex; flex-direction: column; align-items:center;"
         }, targetGrp);
 
-        const imgThumb = $p.dynamicCreate("thumb_img_" + i, "image", {
-            src: imgInfo[0],
-            alt: i,
-            tabindex: "-1",
-            style: "width: 90%; cursor: pointer;"
-        }, cmpGroup);
-        imgThumb.bind("onclick", scwin.onThumbnailClick);
+        const imgThumb = document.createElement("img");
+        imgThumb.src = imgInfo[0];
+        imgThumb.alt = i;
+        imgThumb.style.cssText = "width: 90%; cursor: pointer;";
+        imgThumb.addEventListener("click", scwin.onThumbnailClick);
+        cmpGroup.appendChild(imgThumb);
 
         const imgTitle = $p.dynamicCreate("thumb_txt_" + i, "output", {
             style: "font-size:15px; color:#FFF;"
@@ -113,17 +159,20 @@ scwin.renderFullImageViewer = function () {
         const row = dl_imgList.getRowData(i);
 
         const visible = i === 0 ? "block" : "none";
-        const img = $p.dynamicCreate("viewer_img_" + i, "image", {
-            src: row[0],
-            alt: "viewer_img_" + i,
-            style: `
-                width: 100%;
-                max-width: 800px;
-                display: ${visible};
-                margin: auto;
-                object-fit: contain;
-            `
-        }, container);
+
+        const img = document.createElement("img");
+        img.id = "viewer_img_" + i;
+        img.src = row[0];
+        img.alt = "viewer_img_" + i;
+        img.style.cssText = `
+            width: 100%;
+            max-width: 800px;
+            display: ${visible};
+            margin: auto;
+            object-fit: contain;
+        `;
+
+        container.appendChild(img);
     }
 
     scwin.zoomScale = 1;
@@ -172,7 +221,7 @@ scwin.onThumbnailClick = function (e) {
 // 줌 조절 함수
 scwin.adjustZoom = function (factor) {
     scwin.zoomScale *= factor;
-
+    
     const container = $p.getComponentById("imgContainer");
     const children = container.getChildren();
     const currentId = "mf_viewer_img_" + (scwin.currentImgIndex - 1);
@@ -188,7 +237,6 @@ scwin.adjustZoom = function (factor) {
     }
 };
 
-// XML에 정의된 버튼 핸들러
 scwin.btn_plus_onclick = function (e) {
     scwin.adjustZoom(1.1);
 };
@@ -196,7 +244,6 @@ scwin.btn_plus_onclick = function (e) {
 scwin.btn_minus_onclick = function (e) {
     scwin.adjustZoom(0.9);
 };
-
 
 ]]></script>
     </head>
