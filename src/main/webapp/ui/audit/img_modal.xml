@@ -8,41 +8,45 @@
         <w2:buildDate/>
         <w2:MSA/>
         <xf:model>
-            <w2:dataCollection baseNode="map">
-            	<w2:dataList baseNode="list" repeatNode="map" id="dl_imgList" saveRemovedData="true">
-            		<w2:columnInfo>
-            			<w2:column dataType="text" name="이미지링크" id="imgSrc"></w2:column>
-            			<w2:column dataType="text" name="이미지제목" id="imgTitle"></w2:column>
-            		</w2:columnInfo>
-            		<w2:data use="true">
-            			<w2:row>
-            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></imgSrc>
-            				<imgTitle><![CDATA[1]]></imgTitle>
-            			</w2:row>
-            			<w2:row>
-            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/test.png]]></imgSrc>
-            				<imgTitle><![CDATA[2]]></imgTitle>
-            			</w2:row>
-            			<w2:row>
-            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></imgSrc>
-            				<imgTitle><![CDATA[1]]></imgTitle>
-            			</w2:row>
-            			<w2:row>
-            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/test.png]]></imgSrc>
-            				<imgTitle><![CDATA[2]]></imgTitle>
-            			</w2:row>
-            			<w2:row>
-            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></imgSrc>
-            				<imgTitle><![CDATA[1]]></imgTitle>
-            			</w2:row>
-            			<w2:row>
-            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/test.png]]></imgSrc>
-            				<imgTitle><![CDATA[2]]></imgTitle>
-            			</w2:row>
-            		</w2:data>
-            	</w2:dataList>
-            </w2:dataCollection>
-            <w2:workflowCollection/>
+        	<w2:dataCollection baseNode="map">
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_imgList" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="file_path" id="file_path"></w2:column>
+        				<w2:column dataType="text" name="file_id" id="file_id"></w2:column>
+        			</w2:columnInfo>
+        			<w2:data use="true">
+        				<w2:row>
+        					<file_path><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></file_path>
+        					<file_id><![CDATA[1]]></file_id>
+        				</w2:row>
+        				<w2:row>
+        					<file_path><![CDATA[/InsWebApp/images/sample/insure/test.png]]></file_path>
+        					<file_id><![CDATA[2]]></file_id>
+        				</w2:row>
+        				<w2:row>
+        					<file_path><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></file_path>
+        					<file_id><![CDATA[1]]></file_id>
+        				</w2:row>
+        				<w2:row>
+        					<file_path><![CDATA[/InsWebApp/images/sample/insure/test.png]]></file_path>
+        					<file_id><![CDATA[2]]></file_id>
+        				</w2:row>
+        				<w2:row>
+        					<file_path><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></file_path>
+        					<file_id><![CDATA[1]]></file_id>
+        				</w2:row>
+        				<w2:row>
+        					<file_path><![CDATA[/InsWebApp/images/sample/insure/test.png]]></file_path>
+        					<file_id><![CDATA[2]]></file_id>
+        				</w2:row>
+        			</w2:data>
+        		</w2:dataList>
+        	</w2:dataCollection>
+        	<w2:workflowCollection />
+        	<xf:submission id="sbm_getS3Key" action="/InsWebApp/InsimagefileList.pwkjson" method="post" mediatype="application/json" ref=""
+        		target='data:json,{"id":"dl_imgList","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getS3Key_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
@@ -50,9 +54,17 @@
 scwin.currentImgIndex = 1;
 
 scwin.onpageload = function () {
+    let claim = JSON.parse(localStorage.getItem("claim"));
+    let req = {"elData": {"claim_no": claim.claimNo}};
+    $c.sbm.execute(sbm_getS3Key, req);
+
     scwin.renderImageList();
     scwin.renderFullImageViewer();
     scwin.highlightSelectedThumbnail(1);
+};
+
+scwin.sbm_getS3Key_submitdone = function (e) {
+    console.log(dl_imgList.getAllJSON());
 };
 
 // 썸네일 목록
@@ -184,6 +196,8 @@ scwin.btn_plus_onclick = function (e) {
 scwin.btn_minus_onclick = function (e) {
     scwin.adjustZoom(0.9);
 };
+
+
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload" style="">

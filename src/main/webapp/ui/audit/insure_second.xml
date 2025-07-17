@@ -158,8 +158,8 @@ scwin.onpageload = function() {
     var jsnOptions = {
         id: "img_popup",
         type: "browserPopup", //필수 고정
-        width: "800px",
-        height: "600px",
+        width: "1000px",
+        height: "800px",
         popupName: "청구 영수증"
     };
 
