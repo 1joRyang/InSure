@@ -128,4 +128,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 		return employeeDAO.deleteEmployee(employeeVo);
 	}
 	
+	/**
+     * 사원 번호로 이름을 조회한다.
+     * 생성자 : J
+     */
+	public String getEmpNameByNo(String empNo) throws Exception {
+		return employeeDAO.selectEmpNameByNo(empNo);
+	}
+	
 }

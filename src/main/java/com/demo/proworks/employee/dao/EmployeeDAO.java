@@ -159,6 +159,21 @@ public class EmployeeDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstr
 	public EmployeeVo selectFirstEmployeeInDept(String deptId) throws ElException {
 		return (EmployeeVo) selectByPk("com.demo.proworks.employee.selectFirstEmployeeInDept", deptId);
 	}
+	
+	/*=============================================================================================*/
+	
+	/**
+     * 사원번호로 직원 이름을 조회한다.
+	 * 생성자 J
+     * @param empNo 사원번호
+     * @return String 직원 이름
+     * @throws Exception
+     */
+    public String selectEmpNameByNo(String empNo) throws Exception {
+        // "employee.selectEmpNameByNo" ID를 가진 SQL 쿼리를 실행하고
+        // 결과를 String 타입으로 반환합니다.
+        return (String) selectByPk("employee.selectEmpNameByNo", empNo);
+    }
 
 
 }

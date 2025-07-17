@@ -466,7 +466,7 @@ scwin.sbm_saveStep5_submitdone = function (e) {
                 </xf:group>
             </xf:group>
 
-            <xf:group class="content-section" id="mainContent" style="">
+            <xf:group class="content-section" id="mainContent" style="margin: 0 auto">
                 
             	<w2:textbox class="question-text1" id="" label="고객님 준비하신 서류를" style=""></w2:textbox>
             	<w2:textbox class="question-text" id="" label="등록해 주세요" style=""></w2:textbox>
