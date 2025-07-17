@@ -46,72 +46,171 @@
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
-        <script lazy="false" type="text/javascript"><![CDATA[
-scwin.onpageload = function() {
-	scwin.renderImageList();
-    
-    img.setSrc(dl_imgList.getRowData(0)[0])
+        <script lazy="false" type="text/javascript"><![CDATA[scwin.zoomScale = 1;
+scwin.currentImgIndex = 1;
+
+scwin.onpageload = function () {
+    scwin.renderImageList();
+    scwin.renderFullImageViewer();
+    scwin.highlightSelectedThumbnail(1);
 };
 
-scwin.renderImageList = function() {
-    let len = dl_imgList.getRowCount();
-    let targetGrp = $p.getComponentById("imgList");
+// 썸네일 목록
+scwin.renderImageList = function () {
+    const len = dl_imgList.getRowCount();
+    const targetGrp = $p.getComponentById("imgList");
 
-    for (var i = 0; i < len; i++) {
-        let imgInfo = dl_imgList.getRowData(i);
+    for (let i = 1; i < len + 1; i++) {
+        const imgInfo = dl_imgList.getRowData(i-1); // [imgSrc, imgTitle]
 
-        // 개별 그룹 생성
-        let cmpGroup = $p.dynamicCreate(
-            "img_item_" + i,  // ID
-            "group",          // 컴포넌트 타입
-            {
-                class: "imgGrp",
-                style: "padding: 10px; width: 90%; margin-bottom:6px; display:flex; flex-direction: column; align-items:center; justify-content:center;"
-            },
-            targetGrp
-        );
-        
-        // 이미지 추가
-        let imgResult = $p.dynamicCreate(
-            "img_" + i,
-            "image",
-            {
-                src: imgInfo[0],
-                alt: i+1,
-                style: "width: 90%; cursor: pointer;",
-            },
-            cmpGroup
-        );
-        imgResult.bind("onclick", scwin.btn_dynamic_onclick);
+        const cmpGroup = $p.dynamicCreate("thumb_item_" + i, "group", {
+            class: "imgGrp",
+            style: "padding: 10px; width: 90%; margin-bottom:6px; display:flex; flex-direction: column; align-items:center;"
+        }, targetGrp);
 
-        // 타이틀 추가 (텍스트 등)
-        let imgIdx = $p.dynamicCreate(
-            "txt_" + i,
-            "output",
-            {
-                style: "font-size:15px; color:#FFF;"
-            },
-            cmpGroup
-        );
-        imgIdx.setValue(imgInfo[1]);
+        const imgThumb = $p.dynamicCreate("thumb_img_" + i, "image", {
+            src: imgInfo[0],
+            alt: i,
+            tabindex: "-1",
+            style: "width: 90%; cursor: pointer;"
+        }, cmpGroup);
+        imgThumb.bind("onclick", scwin.onThumbnailClick);
+
+        const imgTitle = $p.dynamicCreate("thumb_txt_" + i, "output", {
+            style: "font-size:15px; color:#FFF;"
+        }, cmpGroup);
+        imgTitle.setValue(imgInfo[1]);
     }
 };
 
-scwin.btn_dynamic_onclick = function(e) {
-    let len = $p.parent().scwin.genList?.length;
-    $p.parent().gen_date?.getChild($p.parent().scwin.genList[len-1], "ipt_idx").setValue(e.target.alt);
-    img.setSrc(e.target.src);
-}
+// 이미지 뷰어 초기 렌더링 (1개만 표시)
+scwin.renderFullImageViewer = function () {
+    const container = $p.getComponentById("imgContainer");
+    const children = container.getChildren();
 
+    for (let i = 0; i < children.length; i++) {
+        const comp = children[i];
+        const id = comp.getID?.() || comp.id;
+        if (id?.startsWith("viewer_img_")) {
+            container.removeChild(comp);
+        }
+    }
+
+    const len = dl_imgList.getRowCount();
+    for (let i = 0; i < len; i++) {
+        const row = dl_imgList.getRowData(i);
+
+        const visible = i === 0 ? "block" : "none";
+        const img = $p.dynamicCreate("viewer_img_" + i, "image", {
+            src: row[0],
+            alt: "viewer_img_" + i,
+            style: `
+                width: 100%;
+                max-width: 800px;
+                display: ${visible};
+                margin: auto;
+                object-fit: contain;
+            `
+        }, container);
+    }
+
+    scwin.zoomScale = 1;
+    scwin.currentImgIndex = 0;
+};
+
+scwin.highlightSelectedThumbnail = function(index) {
+    const len = dl_imgList.getRowCount();
+    console.log(index)
+
+    for (let i = 1; i < len + 1; i++) {
+        const group = $p.getComponentById("thumb_item_" + i);
+        if (!group) continue;
+
+        if (i === index) {
+            group.addClass("selected-thumb");
+        } else {
+            group.removeClass("selected-thumb");
+        }
+    }
+};
+
+// 썸네일 클릭 시 해당 이미지만 보이게
+scwin.onThumbnailClick = function (e) {
+    const index = parseInt(e.target.alt);
+    scwin.currentImgIndex = index;
+    scwin.zoomScale = 1;
+    console.log(scwin.currentImgIndex);
+    const container = $p.getComponentById("imgContainer");
+    const children = container.getChildren();
+
+    for (let i = 0; i < children.length; i++) {
+        const comp = children[i];
+        const id = comp.getID?.() || comp.id;
+
+        if (id?.startsWith("mf_viewer_img_")) {
+            comp.setStyle("display", i === index ? "block" : "none");
+            comp.setStyle("transform", "scale(1)");
+        }
+    }
+    scwin.highlightSelectedThumbnail(index);
+
+    if (e?.target?.blur) e.target.blur();
+};
+
+// 줌 조절 함수
+scwin.adjustZoom = function (factor) {
+    scwin.zoomScale *= factor;
+
+    const container = $p.getComponentById("imgContainer");
+    const children = container.getChildren();
+    const currentId = "mf_viewer_img_" + (scwin.currentImgIndex - 1);
+    console.log(currentId)
+    for (let i = 0; i < children.length; i++) {
+        const comp = children[i];
+        const id = comp.getID?.() || comp.id;
+
+        if (id === currentId) {
+            comp.setStyle("transform", "scale(" + scwin.zoomScale + ")");
+            comp.setStyle("transform-origin", "top center");
+        }
+    }
+};
+
+// XML에 정의된 버튼 핸들러
+scwin.btn_plus_onclick = function (e) {
+    scwin.adjustZoom(1.1);
+};
+
+scwin.btn_minus_onclick = function (e) {
+    scwin.adjustZoom(0.9);
+};
 ]]></script>
     </head>
-    <body ev:onpageload="scwin.onpageload">
-    	<xf:group meta_snippetCategory="01_화면분할" meta_snippetName="1_05 좌측 고정 2단 분할_width값 200px" meta_snippetKeyComponent="true" style="height: 100%;display: flex;flex-direction: row"
-    		id="" class="">
-    		<xf:group style="width:10%;background-color:#6E6D6D;height: 100%;overflow-y: scroll;overflow-x: hidden;padding-right: 10px;" id="imgList" class="imgList"></xf:group>
-    		<xf:group style="width: 90%;height: 100%;justify-content: center;display: flex;background-color: gainsboro" id="" class="imgContainer">
+    <body ev:onpageload="scwin.onpageload" style="">
+    	<xf:group meta_snippetCategory="01_화면분할" meta_snippetName="1_05 좌측 고정 2단 분할_width값 200px" meta_snippetKeyComponent="true"
+    		style="height: 100%;display: flex;flex-direction: row;overflow: hidden;" id="" class="">
+    		<xf:group style="width:10%;background-color:#6E6D6D;height: 100%;overflow-y: scroll;overflow-x: hidden;padding-right: 10px;"
+    			id="imgList" class="imgList">
+    		</xf:group>
+    		<xf:group
+    			style="width:90%; height:100%; overflow-y:auto; display:flex; flex-direction:column; align-items:center; padding-top:20px; background-color:gainsboro;"
+    			id="imgContainer" class="imgContainer">
     			<xf:image src="" style="" id="img"></xf:image>
     		</xf:group>
+    	</xf:group>
+    	<xf:group style="position: fixed;bottom: 40px;right: 50px;" id="">
+    		<xf:trigger meta_snippetCategory="08_버튼" anchorWithGroupClass="" meta_snippetName="8_02 아이콘조회버튼"
+    			ev:onclick="scwin.btn_minus_onclick" meta_snippetKeyComponent="true"
+    			style="margin-right: 5px;width: 50px;height: 50px;z-index: 1000;filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.3));" id="btn_minus"
+    			type="button" class="btn_cm search icon">
+    			<xf:label><![CDATA[search]]></xf:label>
+    		</xf:trigger>
+    		<xf:trigger meta_snippetCategory="08_버튼" anchorWithGroupClass="" meta_snippetName="8_02 아이콘조회버튼"
+    			ev:onclick="scwin.btn_plus_onclick" meta_snippetKeyComponent="true"
+    			style="width: 50px;height: 50px;z-index: 1000;filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.3));" id="btn_plus" type="button"
+    			class="btn_cm search icon">
+    			<xf:label><![CDATA[search]]></xf:label>
+    		</xf:trigger>
     	</xf:group>
     </body>
 </html>

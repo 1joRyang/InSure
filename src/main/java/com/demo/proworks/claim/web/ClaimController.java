@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.demo.proworks.claim.service.ClaimService;
 import com.demo.proworks.claim.vo.ClaimListVo;
+import com.demo.proworks.claim.vo.ClaimListwStatusVo;
 import com.demo.proworks.claim.vo.ClaimNClaimResultVo;
 import com.demo.proworks.claim.vo.ClaimNoVo;
 import com.demo.proworks.claim.vo.ClaimUserEmpVo;
@@ -42,6 +43,39 @@ public class ClaimController {
 	/** ClaimService */
 	@Resource(name = "claimServiceImpl")
 	private ClaimService claimService;
+	
+	/**
+	 * 관리자 청구 목록 조회 (status, emp_no를 기준으로)
+	 */
+	 @ElService(key = "CLAIMManagerwStatusList")
+	@RequestMapping(value = "CLAIMManagerwStatusList")
+	@ElDescription(sub = "관리자 청구 목록 조회", desc = "관리자 청구 목록 조회")
+	public List<ClaimListwStatusVo> selectClaimWithStatusManager(ClaimVo claimVo) throws Exception {
+		List<ClaimListwStatusVo> claimList = claimService.selectClaimWithStatus(claimVo);
+		System.out.println("controller " + claimList);
+		return claimList;
+	}
+	
+	/**
+	 * 내 청구 목록 조회 (status, emp_no를 기준으로)
+	 */
+	 @ElService(key = "CLAIMwStatusList")
+	@RequestMapping(value = "CLAIMwStatusList")
+	@ElDescription(sub = "내 청구 목록 조회", desc = "내 청구 목록 조회")
+	public List<ClaimListwStatusVo> selectClaimWithStatus(ClaimVo claimVo) throws Exception {
+		List<ClaimListwStatusVo> claimList = claimService.selectClaimWithStatus(claimVo);
+		System.out.println("controller " + claimList);
+		return claimList;
+	}
+	
+	 @ElService(key = "CLAIMwStatusListWait")
+	@RequestMapping(value = "CLAIMwStatusListWait")
+	@ElDescription(sub = "내 청구 목록 조회", desc = "내 청구 목록 조회")
+	public List<ClaimListwStatusVo> selectClaimWithStatusWait(ClaimVo claimVo) throws Exception {
+		List<ClaimListwStatusVo> claimList = claimService.selectClaimWithStatusWait(claimVo);
+		System.out.println("controller " + claimList);
+		return claimList;
+	}
 
 	/**
 	 * 기지급이력 조회 (insure-second)
@@ -115,6 +149,35 @@ public class ClaimController {
 		
 		return result;
 	}
+	
+	/**
+     * 청구를 갱신 처리 한다.
+     *
+     * @param  claimVo 청구
+     * @throws Exception
+     */
+    @ElService(key="CLAIMUpd")    
+    @RequestMapping(value="CLAIMUpd")    
+    @ElValidator(errUrl="/claim/claimRegister", errContinue=true)
+    @ElDescription(sub="청구 갱신처리",desc="청구를 갱신 처리 한다.")    
+    public void updateClaim(ClaimVo claimVo) throws Exception {  
+ 
+    	claimService.updateClaim(claimVo);                                            
+    }
+    
+    /**
+     * 청구를 삭제 처리한다.
+     *
+     * @param  claimVo 청구    
+     * @throws Exception
+     */
+    @ElService(key = "CLAIMDel")    
+    @RequestMapping(value="CLAIMDel")
+    @ElDescription(sub = "청구 삭제처리", desc = "청구를 삭제 처리한다.")    
+    public void deleteClaim(ClaimVo claimVo) throws Exception {
+        claimService.deleteClaim(claimVo);
+    }
+	
 
 	/**
 	 * 청구와 직원 정보 조인 목록 조회
