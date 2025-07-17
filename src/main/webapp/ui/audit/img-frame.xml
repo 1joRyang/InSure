@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="/InsWebApp/css/img-modal.css" type="text/css"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+            <w2:dataCollection baseNode="map">
+            	<w2:dataList baseNode="list" repeatNode="map" id="dl_imgList" saveRemovedData="true">
+            		<w2:columnInfo>
+            			<w2:column dataType="text" name="이미지링크" id="imgSrc"></w2:column>
+            			<w2:column dataType="text" name="이미지제목" id="imgTitle"></w2:column>
+            		</w2:columnInfo>
+            		<w2:data use="true">
+            			<w2:row>
+            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></imgSrc>
+            				<imgTitle><![CDATA[1]]></imgTitle>
+            			</w2:row>
+            			<w2:row>
+            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/test.png]]></imgSrc>
+            				<imgTitle><![CDATA[2]]></imgTitle>
+            			</w2:row>
+            			<w2:row>
+            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></imgSrc>
+            				<imgTitle><![CDATA[1]]></imgTitle>
+            			</w2:row>
+            			<w2:row>
+            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/test.png]]></imgSrc>
+            				<imgTitle><![CDATA[2]]></imgTitle>
+            			</w2:row>
+            			<w2:row>
+            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></imgSrc>
+            				<imgTitle><![CDATA[1]]></imgTitle>
+            			</w2:row>
+            			<w2:row>
+            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/test.png]]></imgSrc>
+            				<imgTitle><![CDATA[2]]></imgTitle>
+            			</w2:row>
+            		</w2:data>
+            	</w2:dataList>
+            </w2:dataCollection>
+            <w2:workflowCollection/>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        <script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = function() {
+    // ins image에서 object key 받아서(여러개 나올거라 받은 애들로 for) s3 조회에 서브미션 던지기 
+	scwin.renderImageList();
+    
+    img.setSrc(dl_imgList.getRowData(0)[0])
+};
+
+scwin.renderImageList = function() {
+    let len = dl_imgList.getRowCount();
+    let targetGrp = $p.getComponentById("imgList");
+
+    for (var i = 0; i < len; i++) {
+        let imgInfo = dl_imgList.getRowData(i);
+
+        // 개별 그룹 생성
+        let cmpGroup = $p.dynamicCreate(
+            "img_item_" + i,  // ID
+            "group",          // 컴포넌트 타입
+            {
+                class: "imgGrp",
+                style: "padding: 10px; width: 90%; margin-bottom:6px; display:flex; flex-direction: column; align-items:center; justify-content:center;"
+            },
+            targetGrp
+        );
+        
+        // 이미지 추가
+        let imgResult = $p.dynamicCreate(
+            "img_" + i,
+            "image",
+            {
+                src: imgInfo[0],
+                alt: i+1,
+                style: "width: 90%; cursor: pointer;",
+            },
+            cmpGroup
+        );
+        imgResult.bind("onclick", scwin.btn_dynamic_onclick);
+
+        // 타이틀 추가 (텍스트 등)
+        let imgIdx = $p.dynamicCreate(
+            "txt_" + i,
+            "output",
+            {
+                style: "font-size:15px; color:#FFF;"
+            },
+            cmpGroup
+        );
+        imgIdx.setValue(imgInfo[1]);
+    }
+};
+
+scwin.btn_dynamic_onclick = function(e) {
+    let len = $p.parent().scwin.genList?.length;
+    $p.parent().gen_date?.getChild($p.parent().scwin.genList[len-1], "ipt_idx").setValue(e.target.alt);
+    img.setSrc(e.target.src);
+}
+
+]]></script>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+    	<xf:group meta_snippetCategory="01_화면분할" meta_snippetName="1_05 좌측 고정 2단 분할_width값 200px" meta_snippetKeyComponent="true" style="height: 100%;display: flex;flex-direction: row"
+    		id="" class="">
+    		<xf:group style="width:10%;background-color:#6E6D6D;height: 100%;overflow-y: scroll;overflow-x: hidden;padding-right: 10px;" id="imgList" class="imgList"></xf:group>
+    		<xf:group style="width: 90%;height: 100%;justify-content: center;display: flex;background-color: gainsboro" id="" class="imgContainer">
+    			<xf:image src="" style="" id="img"></xf:image>
+    		</xf:group>
+    	</xf:group>
+    </body>
+</html>

@@ -19,6 +19,7 @@ import com.demo.proworks.claim.vo.ClaimNoVo;
 import com.demo.proworks.claim.vo.ClaimUserEmpVo;
 import com.demo.proworks.claim.vo.ClaimEmployeeVo;
 import com.demo.proworks.claim.vo.ClaimFullJoinVo;
+import com.demo.proworks.claim.vo.ClaimListwStatusVo;
 import com.demo.proworks.claim.vo.ClaimUserVo;
 import com.demo.proworks.claim.vo.ClaimVo;
 
@@ -49,6 +50,27 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Resource(name = "messageSource")
 	private MessageSource messageSource;
+	
+	/**
+	 * 관리자 청구 목록 조회
+	 */
+	public List<ClaimListwStatusVo> selectClaimWithStatusManager(ClaimVo claimVo) throws Exception {
+		return claimDAO.selectClaimWithStatusManager(claimVo);
+	}
+	
+	/**
+	 *  내 청구 목록 조회
+	 */
+	public List<ClaimListwStatusVo> selectClaimWithStatus(ClaimVo claimVo) throws Exception {
+		System.out.println("service" + claimDAO.selectClaimWithStatus(claimVo));
+		return claimDAO.selectClaimWithStatus(claimVo);
+	}
+	
+	
+	public List<ClaimListwStatusVo> selectClaimWithStatusWait(ClaimVo claimVo) throws Exception {
+		System.out.println("service" + claimDAO.selectClaimWithStatusWait(claimVo));
+		return claimDAO.selectClaimWithStatusWait(claimVo);
+	}
 
 	public List<ClaimNClaimResultVo> selectClaimNClaimResult(ClaimUserVo claimVo) throws Exception {
 		return claimDAO.selectClaimNClaimResult(claimVo);

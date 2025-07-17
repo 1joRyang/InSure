@@ -8,6 +8,7 @@ import com.demo.proworks.claim.vo.ClaimNoVo;
 import com.demo.proworks.claim.vo.ClaimUserEmpVo;
 import com.demo.proworks.claim.vo.ClaimEmployeeVo;
 import com.demo.proworks.claim.vo.ClaimFullJoinVo;
+import com.demo.proworks.claim.vo.ClaimListwStatusVo;
 import com.demo.proworks.claim.vo.ClaimUserVo;
 import com.demo.proworks.claim.vo.ClaimVo;
 
@@ -23,6 +24,17 @@ import com.demo.proworks.claim.vo.ClaimVo;
  * 
  */
 public interface ClaimService {
+
+	/**
+	 * 관리자 청구 목록 조회
+	 */
+	public List<ClaimListwStatusVo> selectClaimWithStatusManager(ClaimVo claimVo) throws Exception;
+
+	/**
+	 *  내 청구 목록 조회
+	 */
+	public List<ClaimListwStatusVo> selectClaimWithStatus(ClaimVo claimVo) throws Exception;
+	public List<ClaimListwStatusVo> selectClaimWithStatusWait(ClaimVo claimVo) throws Exception;
 
 	/**
 	 * 기지급이력 조회
