@@ -132,22 +132,34 @@ public class ClaimServiceImpl implements ClaimService {
 	public int insertClaim(ClaimVo claimVo) throws Exception {
 		// 1. 청구 데이터 등록
 		int result = claimDAO.insertClaim(claimVo);
+		System.out.println("[청구 등록 완료] 청구번호: " + claimVo.getClaim_no() + ", claim_type: " + claimVo.getClaim_type());
 
-		// 2. 등록이 성공한 경우 항상 자동 배정 실행
+		// 2. 등록이 성공한 경우 자동 배정 실행 (실패해도 트랜잭션 롤백 안함)
 	    if (result > 0 && claimVo.getClaim_no() != null) {
 	        try {
+	            // claim_type이 기본 배정 규칙에 없는 경우 "질병"으로 임시 변경하여 배정
+	            String originalClaimType = claimVo.getClaim_type();
+	            if ("other".equals(originalClaimType)) {
+	                System.out.println("[자동 배정] claim_type 'other'를 'disease'로 변경하여 배정 진행");
+	                claimVo.setClaim_type("disease");
+	            }
+	            
 	            String assignResult = assignRuleService.assignEmployeeToClaim(claimVo.getClaim_no());
-	            // 배정 결과 로그
 	            System.out.println("[자동 배정 완료] " + assignResult);
+	            
+	            // 원래 claim_type으로 복구 (DB에는 이미 저장되었으므로 VO만 복구)
+	            claimVo.setClaim_type(originalClaimType);
+	            
 	        } catch (Exception e) {
-	            // 자동 배정 실패 시에도 청구 등록은 유지하고 로그만 남김
+	            // 자동 배정 실패 시에도 청구 등록은 유지하고 로그만 남김 (트랜잭션 롤백 방지)
 	            System.err.println("[자동 배정 실패] 청구번호: " + claimVo.getClaim_no() + ", 오류: " + e.getMessage());
+	            System.err.println("[알림] 청구 등록은 완료되었으나 자동 배정만 실패함. 수동 배정 필요.");
 	            e.printStackTrace();
-	            // 🔥 선택사항: 자동배정 실패시 예외를 던져서 전체 트랜잭션을 롤백하려면 아래 주석 해제
+	            // 🔥 중요: 자동배정 실패시 예외를 던지지 않음으로써 트랜잭션 롤백 방지
 	            // throw new Exception("자동 배정 실패: " + e.getMessage(), e);
 	        }
 	    }
-	
+	    
 	    return result;
 	}
 
