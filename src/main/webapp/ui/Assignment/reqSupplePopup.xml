@@ -26,9 +26,10 @@
         <w2:publicInfo method=""/>
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
-    var claim_no = localStorage.getItem("claim_no");
-    txt_req_supple.setValue(claim_no);
-    dma_additionalReq.set("claim_no", claim_no);
+    scwin.claim = JSON.parse(localStorage.getItem("claim"));
+
+    txt_req_supple.setValue(scwin.claim.claimNo);
+    dma_additionalReq.set("claim_no", scwin.claim.claimNo);
 };
 
 // 보완요청 등록 및 상태 업데이트

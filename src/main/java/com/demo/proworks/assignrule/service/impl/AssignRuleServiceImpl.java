@@ -206,11 +206,9 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 	/**
 	 * 🔥 청구를 실무자에게 배정한다. (개선된 버전)
 	 *
-	 * @process "청구 유형을 기반으로 부서명을 찾아서, 그 부서ID의 재직중인 직원만 조회해 자동 배정한다."
-	 *          1. 청구서 배정 정보 종합 조회 (한 번의 쿼리로 모든 정보 획득)
-	 *          2. 해당 부서의 재직중인 직원 수 확인
-	 *          3. 라운드로빈 방식으로 다음 배정할 직원 선택
-	 *          4. 청구서에 직원 배정
+	 * @process "청구 유형을 기반으로 부서명을 찾아서, 그 부서ID의 재직중인 직원만 조회해 자동 배정한다." 1. 청구서 배정 정보
+	 *          종합 조회 (한 번의 쿼리로 모든 정보 획득) 2. 해당 부서의 재직중인 직원 수 확인 3. 라운드로빈 방식으로 다음
+	 *          배정할 직원 선택 4. 청구서에 직원 배정
 	 * 
 	 * @param claimNo 청구 번호
 	 * @return 배정 결과 메시지
@@ -218,92 +216,130 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 	 */
 	@Transactional
 	public String assignEmployeeToClaim(String claimNo) throws Exception {
-		try {
-			System.out.println("[DEBUG] 🔥 개선된 자동 배정 시작 - 청구번호: " + claimNo);
+		System.out.println("========== [DEBUG] 자동 배정 시작 ==========");
+		System.out.println("[DEBUG] 대상 청구번호: " + claimNo);
 
-			// ✅ ① 청구서 배정 정보 종합 조회 (한 번의 쿼리로 모든 정보 획득)
+		try {
+			// ✅ ① 청구서 배정 정보 종합 조회
+			System.out.println("[DEBUG] 1단계: 청구서 배정 정보 조회 시작");
 			Map<String, Object> assignmentInfo = assignRuleDAO.selectClaimAssignmentInfo(claimNo);
-			
+
 			if (assignmentInfo == null) {
+				System.err.println("[ERROR] 청구서 정보를 찾을 수 없음: " + claimNo);
 				throw new Exception("청구서 정보를 찾을 수 없습니다: " + claimNo);
 			}
+
+			System.out.println("[DEBUG] 조회된 배정 정보: " + assignmentInfo.toString());
 
 			String claimType = (String) assignmentInfo.get("CLAIM_TYPE");
 			String currentEmpNo = (String) assignmentInfo.get("CURRENT_EMP_NO");
 			String assignDeptName = (String) assignmentInfo.get("ASSIGN_DEPT_NAME");
-			// 🔥 Long에서 Integer로 안전하게 변환
 			Object targetDeptIdObj = assignmentInfo.get("TARGET_DEPT_ID");
+
+			System.out.println("[DEBUG] 파싱된 정보:");
+			System.out.println("  - 청구유형: " + claimType);
+			System.out.println("  - 현재담당자: " + currentEmpNo);
+			System.out.println("  - 대상부서명: " + assignDeptName);
+			System.out.println("  - 대상부서ID객체: " + targetDeptIdObj + " (타입: "
+					+ (targetDeptIdObj != null ? targetDeptIdObj.getClass().getSimpleName() : "null") + ")");
+
+			// 🔥 Long에서 Integer로 안전하게 변환
 			Integer targetDeptId = null;
 			if (targetDeptIdObj != null) {
 				if (targetDeptIdObj instanceof Long) {
 					targetDeptId = ((Long) targetDeptIdObj).intValue();
+					System.out.println("[DEBUG] Long -> Integer 변환: " + targetDeptId);
 				} else if (targetDeptIdObj instanceof Integer) {
 					targetDeptId = (Integer) targetDeptIdObj;
+					System.out.println("[DEBUG] Integer 유지: " + targetDeptId);
 				} else if (targetDeptIdObj instanceof String) {
 					try {
 						targetDeptId = Integer.parseInt((String) targetDeptIdObj);
+						System.out.println("[DEBUG] String -> Integer 변환: " + targetDeptId);
 					} catch (NumberFormatException e) {
-						// String이 숫자가 아닌 경우
+						System.err.println("[ERROR] String을 Integer로 변환 실패: " + targetDeptIdObj);
 					}
+				} else {
+					System.err.println("[ERROR] 알 수 없는 타입: " + targetDeptIdObj.getClass().getSimpleName());
 				}
 			}
 
-			System.out.println(String.format("[DEBUG] 종합 정보 - 청구유형: %s, 현재담당자: %s, 대상부서: %s, 부서ID: %s", 
-					claimType, currentEmpNo, assignDeptName, targetDeptId));
-
 			// 이미 배정된 청구서 체크
+			System.out.println("[DEBUG] 2단계: 기존 배정 확인");
 			if (currentEmpNo != null && !currentEmpNo.trim().isEmpty()) {
-				return "이미 배정된 청구서입니다. 청구번호: " + claimNo + ", 담당자: " + currentEmpNo;
+				String message = "이미 배정된 청구서입니다. 청구번호: " + claimNo + ", 담당자: " + currentEmpNo;
+				System.out.println("[DEBUG] " + message);
+				return message;
 			}
 
 			// 배정 규칙이 없는 경우
+			System.out.println("[DEBUG] 3단계: 배정 규칙 확인");
 			if (assignDeptName == null || targetDeptId == null) {
-				throw new Exception("청구 유형 '" + claimType + "'에 대한 배정 규칙을 찾을 수 없습니다.");
+				String error = "청구 유형 '" + claimType + "'에 대한 배정 규칙을 찾을 수 없습니다.";
+				System.err.println("[ERROR] " + error);
+				throw new Exception(error);
 			}
 
 			// ✅ ② 해당 부서의 재직중인 직원 수 확인
+			System.out.println("[DEBUG] 4단계: 부서 직원 수 확인");
+			System.out.println("[DEBUG] 조회할 부서ID: " + targetDeptId);
+
 			int employeeCount = 0;
 			try {
 				employeeCount = assignRuleDAO.selectDeptEmployeeCount(targetDeptId.toString());
+				System.out.println("[DEBUG] 부서 직원 수 조회 결과: " + employeeCount);
 			} catch (Exception e) {
 				System.err.println("[ERROR] 직원 수 조회 오류: " + e.getMessage());
+				e.printStackTrace();
 				employeeCount = 0;
 			}
-			
+
 			if (employeeCount == 0) {
-				throw new Exception("부서 '" + assignDeptName + "'에 재직중인 실무자 직원이 없습니다.");
+				String error = "부서 '" + assignDeptName + "'(ID: " + targetDeptId + ")에 재직중인 실무자 직원이 없습니다.";
+				System.err.println("[ERROR] " + error);
+				throw new Exception(error);
 			}
 
-			System.out.println("[DEBUG] 부서 " + assignDeptName + "(ID: " + targetDeptId + ")에 재직중인 직원 수: " + employeeCount);
-
 			// ✅ ③ 라운드로빈 방식으로 다음 배정할 직원 선택
+			System.out.println("[DEBUG] 5단계: 라운드로빈 직원 선택");
 			EmployeeAssignRuleVo assignedEmployee = selectNextEmployeeRoundRobin(targetDeptId.toString());
-			
+
 			if (assignedEmployee == null) {
+				System.err.println("[ERROR] 배정 가능한 직원을 찾을 수 없음");
 				throw new Exception("배정 가능한 직원을 찾을 수 없습니다.");
 			}
 
 			String empNo = String.valueOf(assignedEmployee.getEmpNo());
-			System.out.println("[DEBUG] 선택된 직원: " + assignedEmployee.getEmpName() + "(" + empNo + ")");
+			System.out.println("[DEBUG] 선택된 직원:");
+			System.out.println("  - 직원번호: " + empNo);
+			System.out.println("  - 직원명: " + assignedEmployee.getEmpName());
 
 			// ✅ ④ 청구서에 직원 배정
+			System.out.println("[DEBUG] 6단계: 청구서 업데이트");
 			Map<String, Object> updateParams = new HashMap<String, Object>();
 			updateParams.put("claimNo", claimNo);
 			updateParams.put("empNo", empNo);
-			
+
+			System.out.println("[DEBUG] 업데이트 파라미터: " + updateParams.toString());
+
 			int updateResult = assignRuleDAO.updateClaimAssignment(updateParams);
+			System.out.println("[DEBUG] 업데이트 결과: " + updateResult);
 
 			if (updateResult > 0) {
-				String result = String.format("🔥 자동 배정 완료 - 청구번호: %s, 청구유형: %s, 담당부서: %s, 담당자: %s(%s)", 
-						claimNo, claimType, assignDeptName, assignedEmployee.getEmpName(), empNo);
+				String result = String.format("🔥 자동 배정 완료 - 청구번호: %s, 청구유형: %s, 담당부서: %s, 담당자: %s(%s)", claimNo,
+						claimType, assignDeptName, assignedEmployee.getEmpName(), empNo);
 				System.out.println("[DEBUG] " + result);
+				System.out.println("========== [DEBUG] 자동 배정 성공 완료 ==========");
 				return result;
 			} else {
+				System.err.println("[ERROR] 청구 업데이트 실패 - updateResult: " + updateResult);
 				throw new Exception("청구 업데이트에 실패했습니다.");
 			}
 
 		} catch (Exception e) {
-			System.err.println("[ERROR] 🔥 자동 배정 실패 - 청구번호: " + claimNo + ", 오류: " + e.getMessage());
+			System.err.println("========== [ERROR] 자동 배정 실패 ==========");
+			System.err.println("[ERROR] 청구번호: " + claimNo);
+			System.err.println("[ERROR] 오류 메시지: " + e.getMessage());
 			e.printStackTrace();
 			throw new Exception("청구 배정 중 오류 발생: " + e.getMessage(), e);
 		}
@@ -320,24 +356,24 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 			// 1. 마지막 배정된 직원 번호 조회
 			Integer lastEmpNo = employeeDAO.selectLastAssignedEmployeeInDept(deptId);
 			System.out.println("[DEBUG] 부서 " + deptId + "의 마지막 배정 직원: " + lastEmpNo);
-			
+
 			// 2. 다음 직원 조회
 			EmployeeAssignRuleVo searchVo = new EmployeeAssignRuleVo();
 			searchVo.setDeptId(deptId);
 			if (lastEmpNo != null) {
 				searchVo.setLastEmpNo(lastEmpNo.toString());
 			}
-			
+
 			EmployeeAssignRuleVo nextEmployee = employeeDAO.selectNextEmployeeForAssignment(searchVo);
-			
+
 			// 3. 다음 직원이 없으면 처음부터 다시 시작 (라운드로빈)
 			if (nextEmployee == null) {
 				nextEmployee = employeeDAO.selectFirstEmployeeInDept(deptId);
 				System.out.println("[DEBUG] 라운드로빈 순환: 부서의 첫 번째 직원으로 이동");
 			}
-			
+
 			return nextEmployee;
-			
+
 		} catch (Exception e) {
 			throw new Exception("라운드로빈 직원 선택 중 오류: " + e.getMessage(), e);
 		}
@@ -466,7 +502,7 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 		try {
 			// 🔥 디버깅을 위한 직접 SQL 실행
 			System.out.println("[DEBUG]  미배정 청구 조회 시작");
-			
+
 			// 🔥 1단계: 전체 청구 수 확인 (강제로 새로운 쿼리)
 			try {
 				// 직접 SQL로 COUNT 확인
@@ -475,29 +511,29 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 			} catch (Exception e) {
 				System.out.println("[DEBUG] COUNT 조회 오류: " + e.getMessage());
 			}
-			
+
 			List<ClaimVo> allClaims = claimDAO.selectListClaim(new ClaimVo());
 			System.out.println("[DEBUG] 전체 청구 수: " + (allClaims != null ? allClaims.size() : 0));
-			
-			//  각 청구의 상세 정보 출력
+
+			// 각 청구의 상세 정보 출력
 			if (allClaims != null) {
 				for (ClaimVo claim : allClaims) {
-					System.out.println(String.format("[DEBUG] 청구 상세 - NO: %s, TYPE: %s, EMP_NO: %s", 
+					System.out.println(String.format("[DEBUG] 청구 상세 - NO: %s, TYPE: %s, EMP_NO: %s",
 							claim.getClaim_no(), claim.getClaim_type(), claim.getEmp_no()));
 				}
 			}
-			
-			//  2단계: 미배정 청구 조회
+
+			// 2단계: 미배정 청구 조회
 			List<ClaimVo> unassignedClaims = assignRuleDAO.selectUnassignedClaims();
 			System.out.println("[DEBUG] 미배정 청구 수: " + (unassignedClaims != null ? unassignedClaims.size() : 0));
-			
-			//  3단계: 각 청구의 EMP_NO 상태 확인
+
+			// 3단계: 각 청구의 EMP_NO 상태 확인
 			if (allClaims != null && allClaims.size() > 0) {
 				for (int i = 0; i < Math.min(allClaims.size(), 10); i++) { // 최대 10건만 확인
 					ClaimVo claim = allClaims.get(i);
 					String empNo = claim.getEmp_no();
 					String status = "UNKNOWN";
-					
+
 					if (empNo == null) {
 						status = "NULL";
 					} else if (empNo.trim().isEmpty()) {
@@ -505,16 +541,15 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 					} else {
 						status = "HAS_VALUE(" + empNo + ")";
 					}
-					
-					System.out.println(String.format("[DEBUG] 청구 %s: EMP_NO = %s", 
-							claim.getClaim_no(), status));
+
+					System.out.println(String.format("[DEBUG] 청구 %s: EMP_NO = %s", claim.getClaim_no(), status));
 				}
 			}
-			
-			//  4단계: 배정규칙 확인
+
+			// 4단계: 배정규칙 확인
 			List<AssignRuleVo> assignRules = assignRuleDAO.selectAllAssignRules();
 			System.out.println("[DEBUG] 배정규칙 수: " + (assignRules != null ? assignRules.size() : 0));
-			
+
 			List<String> results = assignAllUnassignedClaims();
 
 			int successCount = 0;
@@ -528,10 +563,10 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 				}
 			}
 
-			//  성공적으로 처리되었다면 정상 메시지 반환 (예외 던지지 않음)
-			String resultMessage = String.format("배치 배정 완료 - 성공: %d건, 실패: %d건, 총: %d건", 
-					successCount, failCount, results.size());
-			
+			// 성공적으로 처리되었다면 정상 메시지 반환 (예외 던지지 않음)
+			String resultMessage = String.format("배치 배정 완료 - 성공: %d건, 실패: %d건, 총: %d건", successCount, failCount,
+					results.size());
+
 			System.out.println("[INFO] " + resultMessage);
 			return resultMessage;
 
