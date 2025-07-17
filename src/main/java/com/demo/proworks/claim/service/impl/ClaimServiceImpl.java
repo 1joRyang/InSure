@@ -133,28 +133,22 @@ public class ClaimServiceImpl implements ClaimService {
 		// 1. 청구 데이터 등록
 		int result = claimDAO.insertClaim(claimVo);
 
-		// 2. 등록이 성공한 경우 자동 배정 실행
-		if (result > 0 && claimVo.getClaim_no() != null) {
-			try {
-				// 자동 배정 설정 확인
-				String autoAssignEnabled = assignRuleService.getAutoAssignConfig();
-
-				// 자동 배정이 활성화된 경우에만 실행
-				if ("true".equals(autoAssignEnabled)) {
-					// 신규 청구에 대해 자동 배정 실행
-					String assignResult = assignRuleService.assignEmployeeToClaim(claimVo.getClaim_no());
-
-					// 배정 결과 로그 (필요시 추가 처리)
-					System.out.println("[자동 배정] " + assignResult);
-				}
-			} catch (Exception e) {
-				// 자동 배정 실패 시에도 청구 등록은 유지하고 로그만 남김
-				System.err.println("[자동 배정 실패] 청구번호: " + claimVo.getClaim_no() + ", 오류: " + e.getMessage());
-				e.printStackTrace();
-			}
-		}
-
-		return result;
+		// 2. 등록이 성공한 경우 항상 자동 배정 실행
+	    if (result > 0 && claimVo.getClaim_no() != null) {
+	        try {
+	            String assignResult = assignRuleService.assignEmployeeToClaim(claimVo.getClaim_no());
+	            // 배정 결과 로그
+	            System.out.println("[자동 배정 완료] " + assignResult);
+	        } catch (Exception e) {
+	            // 자동 배정 실패 시에도 청구 등록은 유지하고 로그만 남김
+	            System.err.println("[자동 배정 실패] 청구번호: " + claimVo.getClaim_no() + ", 오류: " + e.getMessage());
+	            e.printStackTrace();
+	            // 🔥 선택사항: 자동배정 실패시 예외를 던져서 전체 트랜잭션을 롤백하려면 아래 주석 해제
+	            // throw new Exception("자동 배정 실패: " + e.getMessage(), e);
+	        }
+	    }
+	
+	    return result;
 	}
 
 	/**
@@ -208,7 +202,12 @@ public class ClaimServiceImpl implements ClaimService {
 		claimVo.setDate_of_accident(accidentDateStr);
 
 		// 자동 생성된 claimDao.insertClaim 메소드 호출
-		claimDAO.insertClaim(claimVo);
+//		claimDAO.insertClaim(claimVo);
+		int insertResult = this.insertClaim(claimVo);
+
+		if (insertResult <= 0) {	
+			throw new Exception("청구 정보 저장에 실패했습니다.");
+		}
 		
 		System.out.println("CLAIM 테이블 저장 완료: " + claimVo.getClaim_no());
 
