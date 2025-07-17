@@ -169,13 +169,15 @@ scwin.sbm_SimpleLogin_submitdone = function (e) {
                 location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml";
                 
             } else {
-                // 로그인 실패 시
+                // 로그인 실패 시 - PIN 번호 틀림
                 var message = loginResponse.resultMessage || "비밀번호가 일치하지 않습니다.";
                 
+                // Alert 창 표시
+                alert(message);
+                
+                // 기존 txt_info 메시지도 유지
                 if (typeof txt_info !== 'undefined') {
                     txt_info.setValue(message);
-                } else {
-                    alert(message);
                 }
                 
                 scwin.pinValue = "";
@@ -185,10 +187,10 @@ scwin.sbm_SimpleLogin_submitdone = function (e) {
             // 응답 형식 오류
             console.error("응답 형식 오류:", e);
             
+            alert("서버 응답에 오류가 있습니다.");
+            
             if (typeof txt_info !== 'undefined') {
                 txt_info.setValue("서버 응답에 오류가 있습니다.");
-            } else {
-                alert("서버 응답에 오류가 있습니다.");
             }
             
             scwin.pinValue = "";
@@ -198,10 +200,10 @@ scwin.sbm_SimpleLogin_submitdone = function (e) {
     } catch (error) {
         console.error("간편로그인 결과 처리 중 오류:", error);
         
+        alert("로그인 처리 중 오류가 발생했습니다.");
+        
         if (typeof txt_info !== 'undefined') {
             txt_info.setValue("로그인 처리 중 오류가 발생했습니다.");
-        } else {
-            alert("로그인 처리 중 오류가 발생했습니다.");
         }
         
         scwin.pinValue = "";
@@ -222,8 +224,7 @@ scwin.btn_delete_onclick = function (e) {
         scwin.pinValue = scwin.pinValue.slice(0, -1);
         scwin.updatePinDots();
     }
-};
-]]></script>
+};]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload"
     	style="display: flex;flex-direction: column;justify-content: space-between;align-items: center;width: 100%;max-width: 450px;height: 100vh;margin: 0 auto;">

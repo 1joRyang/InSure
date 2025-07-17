@@ -42,12 +42,14 @@ scwin.sbm_UserLogin_submitdone = function (e) {
     var hasSimplePassword = false;
     
     try {
-       
-        if (e && e.responseJSON && e.responseJSON.dma_login_response) {                   
-                customerId = e.responseJSON.dma_login_response.id;
-                userIdString = e.responseJSON.dma_login_response.userId; 
-                hasSimplePassword = e.responseJSON.dma_login_response.hasSimplePassword || false;
-            }
+        // 응답 전체 구조 확인을 위한 로그
+        console.log("전체 응답 데이터:", e);
+        
+        if (e && e.responseJSON && e.responseJSON.dma_login_response) {
+            customerId = e.responseJSON.dma_login_response.id;
+            userIdString = e.responseJSON.dma_login_response.userId;
+            hasSimplePassword = e.responseJSON.dma_login_response.hasSimplePassword || false;
+        }
         
         if (customerId && userIdString) {
             // User 객체 생성
@@ -57,27 +59,24 @@ scwin.sbm_UserLogin_submitdone = function (e) {
                 hasSimplePassword: hasSimplePassword
             };
             
-             // User 로그인 시: Employee 정보 삭제, User 정보 저장
+            // User 로그인 시: Employee 정보 삭제, User 정보 저장
             localStorage.removeItem("employee");
             localStorage.removeItem("simple");  // 새로운 User 로그인이므로 기존 Simple도 삭제
             localStorage.setItem("user", JSON.stringify(user));
             
-            
-
             console.log("User 로그인 완료, Employee/Simple 정보 삭제됨");
             console.log("저장된 user:", user);
-
             
-             if (hasSimplePassword) {
+            if (hasSimplePassword) {
                 // 간편비밀번호가 있으면 -> 간편비밀번호 로그인 페이지
                 location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/simple_pw_login.xml&userId=" + customerId;
             } else {
                 // 간편비밀번호가 없으면 -> 간편비밀번호 등록 페이지
                 location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/add_simple_pw.xml&userId=" + customerId;
             }
-
         } else {
-            alert("사용자 정보를 받아오는 데 실패했습니다. 관리자에게 문의하세요.");
+            // 로그인 실패 - 아이디/비밀번호 불일치 또는 응답 데이터 없음
+            alert("아이디 또는 비밀번호가 올바르지 않습니다. 다시 확인해주세요.");
             return;
         }
         
@@ -86,19 +85,41 @@ scwin.sbm_UserLogin_submitdone = function (e) {
         alert("로그인 처리 중 오류가 발생했습니다.");
         return;
     }
-    
-    //location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml";
 };
 
 scwin.login_btn_onclick = function (e) {
+    // 데이터 설정 전에 로그 출력
+    console.log("로그인 버튼 클릭");
+    console.log("입력된 userId:", ibx_userid.getValue());
+    console.log("입력된 pw:", ibx_userpw.getValue());
+    
+    // 기존 데이터 초기화 후 새로 설정
+    dma_login_request.set("userId", ibx_userid.getValue());
+    dma_login_request.set("pw", ibx_userpw.getValue());
     dma_login_request.set("loginType", "USER");
-    var reqData = {"elData":dma_login_request.getJSON()};
+    
+    // 설정 후 확인
+    console.log("설정된 데이터맵:", dma_login_request.getJSON());
+    
+    var reqData = {"elData": dma_login_request.getJSON()};
+    console.log("최종 전송 데이터:", reqData);
+    
     $c.sbm.execute(sbm_UserLogin, reqData);
 };
-scwin.sbm_EmployeeLogin_submitdone = function (e) {
 
+scwin.ibx_userpw_onkeydown = function (e) {
+    // 엔터 키(keyCode 13)가 눌렸을 때 로그인 버튼 클릭
+    if (e.keyCode === 13) {
+        scwin.login_btn_onclick(e);
+    }
 };
-]]></script>
+
+scwin.ibx_userid_onkeydown = function (e) {
+    // 엔터 키(keyCode 13)가 눌렸을 때 비밀번호 필드로 포커스 이동
+    if (e.keyCode === 13) {
+        ibx_userpw.focus();
+    }
+};]]></script>
     	<w2:require as="udc_notification" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/notification.xml"></w2:require>
     </head>
     <body ev:onpageload="scwin.onpageload" class="body">
@@ -111,12 +132,12 @@ scwin.sbm_EmployeeLogin_submitdone = function (e) {
     		<xf:group meta_snippetCategory="00_화면시작" meta_snippetName="0_01 페이지시작" meta_snippetKeyComponent="true" style="" id=""
     			class="input-group">
     			<w2:textbox style="" id="" label="아이디" class="input-group input-label"></w2:textbox>
-    			<xf:input ref="data:dma_login_request.userId" style="" id="" class="input-group input-field" placeholder="아이디를 입력하세요"></xf:input>
+    			<xf:input ref="data:dma_login_request.userId" style="" id="ibx_userid" class="input-group input-field" placeholder="아이디를 입력하세요" ev:onkeydown="scwin.ibx_userid_onkeydown"></xf:input>
     		</xf:group>
     		<xf:group class="input-group" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
     			style="">
     			<w2:textbox class="input-group input-label" id="" label="비밀번호" style=""></w2:textbox>
-    			<xf:secret class="input-group input-field" id="" ref="data:dma_login_request.pw" style="" placeholder="비밀번호를 입력하세요"></xf:secret>
+    			<xf:secret class="input-group input-field" id="ibx_userpw" ref="data:dma_login_request.pw" style="" placeholder="비밀번호를 입력하세요" ev:onkeydown="scwin.ibx_userpw_onkeydown"></xf:secret>
     		</xf:group>
     		<xf:group style="" id="" class="checkbox-group">
     			<xf:select selectedindex="-1" id="" appearance="full" style="" class="checkbox-group checkbox"></xf:select>
