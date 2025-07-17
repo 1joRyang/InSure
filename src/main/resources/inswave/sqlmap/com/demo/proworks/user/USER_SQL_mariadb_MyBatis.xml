@@ -4,29 +4,29 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--
-	@subject     : 사용자정보 관련 처리를 담당하는 Sql Mapper
+	@subject : 사용자정보 관련 처리를 담당하는 Sql Mapper
 	@description : 사용자정보 관련 처리를 담당하는 Sql Mapper
-	@author      : 임소희
-	@since       : 2025/07/01
+	@author : 임소희
+	@since : 2025/07/01
 	@modification
 	===========================================================
-	DATE              AUTHOR             DESC
+	DATE AUTHOR DESC
 	===========================================================
-	2025/07/01              임소희             최초 생성
- -->
+	2025/07/01 임소희 최초 생성
+-->
 <mapper namespace="com.demo.proworks.user">
 
 	<select id="selectPasswordByUserId" parameterType="String" resultType="String">
-        SELECT 
-               PW as pw
-          FROM USER
-         WHERE USER_ID = #{userId}
-    </select>
-    
-    <update id="updateSimplePassword" parameterType="com.demo.proworks.user.vo.UserVo">
-	    UPDATE USER
-	       SET simple_pw = #{simplePw}
-	     WHERE user_id = #{userId}
+		SELECT
+		PW as pw
+		FROM USER
+		WHERE USER_ID = #{userId}
+	</select>
+
+	<update id="updateSimplePassword" parameterType="com.demo.proworks.user.vo.UserVo">
+		UPDATE USER
+		SET simple_pw = #{simplePw}
+		WHERE user_id = #{userId}
 	</update>
 
 
@@ -64,7 +64,8 @@
     	
         UPDATE USER    /* QueryID : com.demo.proworks.user.updateUser */      
       	  SET  
-                ID        = #{id}               	                       
+                ID        = #{id}       
+        	                       
             <if test="userId  != null"> , USER_ID   = #{userId}   </if>
             <if test="pw       != null"> , PW        = #{pw}        </if>
             <if test="simplePw!= null"> , SIMPLE_PW = #{simplePw} </if>
@@ -72,7 +73,8 @@
             <if test="userName!= null"> , USER_NAME = #{userName} </if>
             <if test="account  != null"> , ACCOUNT   = #{account}   </if>
             <if test="phone_number  != null"> , PHONE_NUMBER = #{phone_number}   </if>
-                 
+
+                 
         WHERE   
                 ID        = #{id}       
     </update>
@@ -142,16 +144,16 @@
 
     </select>
     	
+
 	<!-- 주민번호로 사용자 기본정보 조회 -->
-	<select id="selectUserByRrn" parameterType="String" 
-	        resultType="com.demo.proworks.user.vo.UserVo">
-	    SELECT /* QueryID : com.demo.proworks.user.selectUserByRrn */
-	        ID as id, 
-	        USER_NAME as userName,
-	        RRN as rrn,
-	        PHONE_NUMBER as phone_number
-	    FROM USER 
-	    WHERE rrn = #{rrn}
+	<select id="selectUserByRrn" parameterType="String" resultType="com.demo.proworks.user.vo.UserVo">
+		SELECT /* QueryID : com.demo.proworks.user.selectUserByRrn */
+		ID as id,
+		USER_NAME as userName,
+		RRN as rrn,
+		PHONE_NUMBER as phone_number
+		FROM USER
+		WHERE rrn = #{rrn}
 
 	</select>
 
