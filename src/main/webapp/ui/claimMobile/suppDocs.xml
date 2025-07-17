@@ -10,9 +10,6 @@
     	<xf:model>
     		<xf:instance>
     			<data xmlns="" />
-                    <dma_request>
-                        <claimNo></claimNo>
-                    </dma_request>
     		</xf:instance>
     		<w2:dataCollection baseNode="map">
     			<w2:dataMap baseNode="map" id="elData">
@@ -37,6 +34,23 @@
     					<w2:key dataType="text" name="보완요청사유" id="additionalMemo"></w2:key>
     				</w2:keyInfo>
     			</w2:dataMap>
+    			<w2:dataMap baseNode="map" id="dma_getS3Url">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="name1" id="filename"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    			<w2:dataMap baseNode="map" id="dma_s3_info">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="업로드URL" id="presignedUrl"></w2:key>
+    					<w2:key dataType="text" name="파일키" id="objectKey"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    			<w2:dataMap baseNode="map" id="dma_final_docs">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="청구번호" id="claimNo"></w2:key>
+    					<w2:key dataType="text" name="s3fileKeys" id="s3fileKeys"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
     		</w2:dataCollection>
     		<xf:submission id="submission1" action="/InsWebApp/submitClaim.pwkjson" method="post" mediatype="application/json"
     			ref='data:json,{"id":"elData","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
@@ -53,8 +67,20 @@
     			ev:submiterror="scwin.sbm_submitFinalClaim_submiterror" abortTrigger="">
     		</xf:submission>
     		<xf:submission id="sbm_getSupplementInfo" action="/InsWebApp/getSupplementInfo.pwkjson" method="post"
-    			mediatype="application/json" ref='data:json,{"id":"dma_request","key":"elData"}' target='data:json,{"id":"dma_suppInfo","key":"elData"}' encoding="UTF-8" instance="" replace=""
-    			errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getSupplementInfo_submitdone" ev:submiterror="" abortTrigger="">
+    			mediatype="application/json" ref='data:json,{"id":"dma_request","key":"elData"}'
+    			target='data:json,{"id":"dma_suppInfo","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+    			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getSupplementInfo_submitdone" ev:submiterror=""
+    			abortTrigger="">
+    		</xf:submission>
+    		<xf:submission id="sbm_getS3Url" action="/InsWebApp/getS3UploadUrl.pwkjson" method="post" mediatype="application/json"
+    			ref='data:json,{"id":"dma_getS3Url","key":"elData"}' target="" encoding="UTF-8" instance="" replace=""
+    			errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getS3Url_submitdone"
+    			ev:submiterror="" abortTrigger="">
+    		</xf:submission>
+    		<xf:submission id="sbm_addSupplementDocs" action="/InsWebApp/addSupplementDocs.pwkjson" method="post"
+    			mediatype="application/json" ref='data:json,{"id":"dma_final_docs","key":"elData"}' target="" encoding="UTF-8" instance="" replace=""
+    			errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+    			ev:submitdone="scwin.sbm_addSupplementDocs_submitdone" ev:submiterror="" abortTrigger="">
     		</xf:submission>
     	</xf:model>
     	<w2:leaf>true</w2:leaf>
@@ -62,7 +88,10 @@
     	<w2:css src="/css/custom.css"></w2:css>
     	<w2:js src="/js/final_check.js"></w2:js>
     	<w2:engine-version>5.0.0</w2:engine-version>
-        <script lazy="false" type="text/javascript"><![CDATA[
+        <script lazy="false" type="text/javascript"><![CDATA[scwin.uploadQueue = [];
+scwin.uploadedFileKeys = [];
+scwin.currentFileForUpload = null;
+
 scwin.onpageload = function() {
     // 1. URL에서 claimNo 가져오기
     const urlParams = new URLSearchParams(window.location.search);
@@ -191,13 +220,89 @@ scwin.dataURItoBlob = function(dataURI){
 };
 
 scwin.btnNext_onclick = function () {
-
+    const previewBox = document.querySelector('[id$="previewBox"]');
+    const images = previewBox.querySelectorAll('img');
+    if (images.length === 0) {
+        alert("보완 서류를 등록해주세요.");
+        return;
+    }
+    scwin.uploadQueue = [];
+    scwin.uploadedFileKeys = [];
+    images.forEach(img => scwin.uploadQueue.push(img.src));
+    scwin.processNextFileInQueue();
 };
+
+// 순차적 업로드 처리 함수
+scwin.processNextFileInQueue = function(){
+    if (scwin.uploadQueue.length > 0) {
+        scwin.currentFileForUpload = scwin.uploadQueue[0];
+        dma_getS3Url.set("filename", "supplement-image.jpg");
+        $p.executeSubmission("sbm_getS3Url");
+    } else {
+        console.log("모든 파일 업로드 완료. DB에 최종 정보 저장 시도");
+        scwin.saveFileKeysToServer();
+    }
+}
 
 
 scwin.sbm_getSupplementInfo_submitdone = function (e) {
     console.log("6. 서버로부터 최종 응답 받음:", e.responseJSON); 
 };
+
+scwin.sbm_getS3Url_submitdone = function (e) {
+    const presignedUrl = e.responseJSON.elData.presignedUrl;
+    const objectKey = e.responseJSON.elData.objectKey;
+    const imageSrc = scwin.uploadQueue.shift();
+
+    console.log("서버로부터 받은 presignedUrl:", presignedUrl);
+    console.log("서버로부터 받은 objectKey:", presignedUrl);
+
+    if (!presignedUrl) {
+        alert("파일 업로드 URL을 받아오지 못했습니다.");
+        return;
+    }
+
+    // Base64데이터를 Blob으로 변환
+    const byteString = atob(imageSrc.split(',')[1]);
+    const mimeString = imageSrc.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([ab], {type : mimeString});
+
+    // fetch API를 사용해 S3로 직접 파일 업로드
+    fetch(presignedUrl, {method: 'PUT', body:blob})
+        .then(response => {
+            if(response.ok) {
+                console.log(objectKey + "S3 업로드 성공");
+                scwin.uploadedFileKeys.push(objectKey);
+                scwin.processNextFileInQueue();
+            } else { throw new Error("S3 업로드 실패");}
+        })
+        .catch(error => {
+            console.error(error);
+            alert("파일 업로드 중 오류가 발생했습니다.");
+        });
+};
+
+scwin.sbm_addSupplementDocs_submitdone = function (e) {
+    alert("보완 서류가 정상적으로 제출되었습니다.");
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
+};
+
+scwin.saveFileKeysToServer = function() {
+    // 이 화면에서 조회했던 청구번호 가져옴
+    const claimNo = dma_suppInfo.get("claimNo");
+    // S3 업로드에 성공한 파일 키를 쉼표로 연결
+    const s3KeysString = scwin.uploadedFileKeys.join(',');
+
+    dma_final_docs.set("claimNo", claimNo);
+    dma_final_docs.set("s3fileKeys", s3KeysString);
+
+    $p.executeSubmission("sbm_addSupplementDocs");
+}
 ]]></script>
     	<style type="text/css"><![CDATA[/* custom.css */
 

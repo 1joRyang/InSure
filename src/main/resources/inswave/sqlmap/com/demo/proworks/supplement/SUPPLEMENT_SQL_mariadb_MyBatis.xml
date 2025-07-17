@@ -8,11 +8,14 @@
             c.claim_type AS claimType,      -- 청구유형
             c.status AS status,             -- 현재 상태
             c.emp_no AS empNo,              -- 담당자 사원번호
+            e.emp_name        AS empName,	-- 심사자 이름
             s.additional_memo AS additionalMemo -- 심사자 보완 요청 내용
         FROM
             CLAIM AS c
         LEFT JOIN
             ADDITIONAL_REQ AS s ON c.claim_no = s.claim_no
+        LEFT JOIN
+        	EMPLOYEE AS e ON c.emp_no = e.emp_no
         WHERE
             c.claim_no = #{claimNo}       -- 파라미터로 받은 청구번호
             AND c.ID = #{ID};             -- 파라미터로 받은 사용자 ID (ProworksCommVO에 ID 필드가 있다고 가정)

@@ -82,10 +82,17 @@ public class SupplementController {
         // 서비스를 호출하여 결과를 반환합니다.
         return supplementService.selectSupplementInfo(paramVo);
     }
-    	
-    	 
-   
-
     
+    
+    /**
+     * 보완 서류 파일 정보를 DB에 추가한다.
+     */
+    @ElService(key = "addSupplementDocs")
+    @RequestMapping(value = "addSupplementDocs")    
+    @ElDescription(sub = "보완 서류 파일 정보를 DB에 추가", desc = "보완 서류 파일 정보를 DB에 추가한다.")               
+    public void addSupplementDocs(SuppVo paramVo) throws Exception {
+        supplementService.addSupplementDocs(paramVo);
+    }
+    	 
     
 }
