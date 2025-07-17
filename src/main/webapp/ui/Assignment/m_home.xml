@@ -32,7 +32,7 @@ scwin.onpageload = function() {
     scwin.onMenuClick = function(menuType) {
         switch(menuType) {
             case 'premium':
-                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/claimPage.xml"
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/first.xml"
                 break;
             case 'claim':
                 alert("제품 서류 내역 확인하기");
