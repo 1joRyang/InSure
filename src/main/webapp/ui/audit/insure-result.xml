@@ -1230,39 +1230,6 @@ scwin.sbm_updateClaimResult_submiterror = function (e) {
     alert("CLAIM_RESULT 업데이트 중 오류가 발생했습니다.");
 };
 
-// 정산 정보 상태 업데이트 함수
-// scwin.updateSettlementStatus = function () {
-//     console.log("정산 정보 상태 업데이트 시작");
-
-//     // 정산 정보 업데이트 submission 실행
-//     $p.executeSubmission("sbm_updateSettlement", {
-//         success: function (e) {
-//             console.log("정산 정보 업데이트 성공");
-
-//             // 보험 상품 상태 업데이트
-//             var rowCount = dlt_insuranceProducts.getRowCount();
-//             for (var i = 0; i < rowCount; i++) {
-//                 dlt_insuranceProducts.setCellData(i, "status", "지급완료");
-//             }
-
-//             // 상태 배지 업데이트
-//             spn_status.removeClass("status_pending");
-//             spn_status.addClass("status_completed");
-//             spn_status.setValue("심사완료");
-
-//             alert("심사가 완료되었습니다.\nCLAIM_RESULT 테이블에 결과가 저장되었습니다.");
-//         },
-//         error: function (e) {
-//             scwin.showLoading(false);
-//             console.error("정산 정보 업데이트 실패:", e);
-
-//             // 상태는 되돌리지만 CLAIM_RESULT는 이미 저장됨
-//             dma_settlementInfo.set("status", "심사중");
-//             alert("CLAIM_RESULT는 저장되었지만, 정산 정보 업데이트에 실패했습니다.");
-//         }
-//     });
-// };
-
 
 // 1. 수정된 콜백 함수 - 서버 응답에 따른 데이터 처리
 scwin.sbm_selectSettlementTreatment_submitdone = function (e) {
