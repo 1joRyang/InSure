@@ -31,6 +31,7 @@ import com.demo.proworks.user.vo.UserListVo;
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
 import com.inswave.elfw.annotation.ElValidator;
+import com.inswave.elfw.exception.ElException;
 import com.inswave.elfw.log.AppLog;
 import com.inswave.elfw.login.LoginException;
 import com.inswave.elfw.login.LoginInfo;
@@ -447,6 +448,33 @@ public class UserController {
         userService.deleteUser(userVo);
     }
     
+
+     /**
+     * 로그인한 사용자의 기본 정보를 조회한다.
+     */
+    @ElService(key = "getUserInfo")    
+    @RequestMapping(value = "getUserInfo")
+    @ElDescription(sub = "로그인 사용자 정보 조회", desc = "세션의 ID를 이용해 사용자의 상세 정보를 조회한다.")    
+    public Map<String, Object> getUserInfo(HttpServletRequest request) throws Exception {
+        HttpSession session = request.getSession();
+        
+        Number userIdObj = (Number) session.getAttribute("connectedUserId"); 
+      
+        if (userIdObj == null) {
+            throw new ElException("ERROR.LOGIN.004", new String[]{"로그인 정보가 없습니다. 다시 로그인해주세요."});
+        }
+        
+        long loginUserId = userIdObj.longValue();
+        UserVo userInfo = userService.getUserInfo(loginUserId);
+        
+        Map<String, Object> responseWrapper = new HashMap<>();
+        
+        responseWrapper.put("userVo", userInfo);
+        
+        return responseWrapper;
+    }
+   
+
     
     
     
@@ -468,4 +496,5 @@ public class UserController {
 	    
 	    return userInfo;
 	}
+
 }

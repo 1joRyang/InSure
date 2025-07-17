@@ -55,7 +55,8 @@
             <if test="userName!= null"> , #{userName} </if>
             <if test="account  != null"> , #{account}   </if>
             <if test="bank  != null"> , #{bank}   </if>
-            <if test="phone_number  != null"> , #{phone_number}   </if> 
+            <if test="phone_number  != null"> , #{phone_number}   </if>
+ 
         )          
     </insert>	
 	
@@ -64,7 +65,8 @@
     	
         UPDATE USER    /* QueryID : com.demo.proworks.user.updateUser */      
       	  SET  
-                ID        = #{id}               	                       
+                ID        = #{id}       
+        	                       
             <if test="userId  != null"> , USER_ID   = #{userId}   </if>
             <if test="pw       != null"> , PW        = #{pw}        </if>
             <if test="simplePw!= null"> , SIMPLE_PW = #{simplePw} </if>
@@ -72,7 +74,8 @@
             <if test="userName!= null"> , USER_NAME = #{userName} </if>
             <if test="account  != null"> , ACCOUNT   = #{account}   </if>
             <if test="bank  != null"> , BANK = #{bank}   </if>
-            <if test="phone_number  != null"> , PHONE_NUMBER = #{phone_number}   </if>                 
+            <if test="phone_number  != null"> , PHONE_NUMBER = #{phone_number}   </if>
+                 
         WHERE   
                 ID        = #{id}       
     </update>
@@ -82,13 +85,16 @@
     	
         DELETE FROM USER   /* QueryID : com.demo.proworks.user.deleteUser */ 
         WHERE   
-                ID        = #{id}               
+                ID        = #{id}       
+        
     </delete>
 	
     <select id="selectUser" parameterType="com.demo.proworks.user.vo.UserVo" resultType="com.demo.proworks.user.vo.UserVo">
 <!-- 사용자정보를 상세 조회한다. -->	
         SELECT     /* QueryID : com.demo.proworks.user.selectUser */
-            ID as id, USER_ID as userId, PW as pw, SIMPLE_PW as simplePw, RRN as rrn, USER_NAME as userName, ACCOUNT as account, BANK as bank, PHONE_NUMBER as phone_number
+
+            ID as id, USER_ID as userId, PW as pw, SIMPLE_PW as simplePw, RRN as rrn, USER_NAME as userName, ACCOUNT as account, DEFAULT_BANK_CODE as default_bank_code, DEFAULT_BANK_NAME as default_bank_name
+
         FROM USER 
         WHERE 
                 USER_ID        = #{userId}
@@ -121,6 +127,21 @@
 
     </select>
     
+
+    <select id="selectUserById" parameterType="com.demo.proworks.user.vo.UserVo" resultType="com.demo.proworks.user.vo.UserVo">
+	<!-- 계좌조회를 위해 채번된 id로 사용자정보를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.user.selectUserById */
+        ID as id,
+        user_id as userId,
+        user_name as userName,
+        account,
+        default_bank_code,
+        default_bank_name
+    FROM
+        USER
+    WHERE
+        ID = #{id}
+
     
     	
 	<!-- 주민번호로 사용자 기본정보 조회 -->
@@ -133,6 +154,7 @@
 	        PHONE_NUMBER as phone_number
 	    FROM USER 
 	    WHERE rrn = #{rrn}
+
 	</select>
 
 </mapper>

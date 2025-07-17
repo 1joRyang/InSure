@@ -34,8 +34,11 @@ public class UserVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "account", physicalName = "account", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String account;
 
-    @ElDtoField(logicalName = "bank", physicalName = "bank", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
-    private String bank;
+    @ElDtoField(logicalName = "default_bank_code", physicalName = "default_bank_code", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String default_bank_code;
+
+    @ElDtoField(logicalName = "default_bank_name", physicalName = "default_bank_name", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String default_bank_name;
 
     @ElDtoField(logicalName = "phone_number", physicalName = "phone_number", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String phone_number;
@@ -116,15 +119,26 @@ public class UserVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.account = account;
     }
 
-    @ElVoField(physicalName = "bank")
-    public String getBank(){
-        String ret = this.bank;
+    @ElVoField(physicalName = "default_bank_code")
+    public String getDefault_bank_code(){
+        String ret = this.default_bank_code;
         return ret;
     }
 
-    @ElVoField(physicalName = "bank")
-    public void setBank(String bank){
-        this.bank = bank;
+    @ElVoField(physicalName = "default_bank_code")
+    public void setDefault_bank_code(String default_bank_code){
+        this.default_bank_code = default_bank_code;
+    }
+
+    @ElVoField(physicalName = "default_bank_name")
+    public String getDefault_bank_name(){
+        String ret = this.default_bank_name;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "default_bank_name")
+    public void setDefault_bank_name(String default_bank_name){
+        this.default_bank_name = default_bank_name;
     }
 
     @ElVoField(physicalName = "phone_number")
@@ -149,8 +163,12 @@ public class UserVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("rrn").append("=").append(rrn).append(",");
         sb.append("userName").append("=").append(userName).append(",");
         sb.append("account").append("=").append(account).append(",");
-        sb.append("bank").append("=").append(bank).append(",");
+
+        sb.append("default_bank_code").append("=").append(default_bank_code).append(",");
+        sb.append("default_bank_name").append("=").append(default_bank_name);
+
         sb.append("phone_number").append("=").append(phone_number);
+
         sb.append("]");
         return sb.toString();
 

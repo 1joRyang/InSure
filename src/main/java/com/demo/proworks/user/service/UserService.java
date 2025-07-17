@@ -125,4 +125,15 @@ public interface UserService {
      */
 	public int deleteUser(UserVo userVo) throws Exception;
 	
+	/**
+     * 숫자 ID로 사용자의 상세 정보를 조회합니다.
+     * 생성자 : J
+     * @param  userId 사용자의 숫자 ID (Primary Key)
+     * @return 조회된 사용자 정보
+     * @throws Exception
+     */
+	public UserVo getUserInfo(long userId) throws Exception;
+	
+	
+	
 }

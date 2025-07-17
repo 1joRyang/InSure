@@ -127,5 +127,16 @@ public class UserDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstractD
     public int deleteUser(UserVo vo) throws ElException {
         return delete("com.demo.proworks.user.deleteUser", vo);
     }
+    
+        /**
+     * 사용자정보를 id로 상세 조회한다.
+     *  
+     * @param  UserVo 사용자정보
+     * @return UserVo 사용자정보
+     * @throws ElException
+     */
+    public UserVo selectUserById(UserVo vo) throws ElException {
+        return (UserVo) selectByPk("com.demo.proworks.user.selectUserById", vo);
+    }
 
 }

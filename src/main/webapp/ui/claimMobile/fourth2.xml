@@ -64,6 +64,9 @@
     			<w2:dataMap baseNode="map" id="dma_claimData">
     				<w2:keyInfo></w2:keyInfo>
     			</w2:dataMap>
+    			<w2:dataMap baseNode="map" id="dma_userInfo">
+    				<w2:keyInfo></w2:keyInfo>
+    			</w2:dataMap>
     		</w2:dataCollection>
     		<xf:submission id="sbm_saveStep4" action="/InsWebApp/saveStep4.pwkjson" method="post" mediatype="application/json"
     			ref='data:json,{"id":"dma_step4","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
@@ -73,6 +76,10 @@
     			target='data:json,{"id":"dma_claimData","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
     			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getClaimData_submitdone" ev:submiterror="" abortTrigger="">
     		</xf:submission>
+    		<xf:submission id="sbm_getUserInfo" action="/InsWebApp/getUserInfo.pwkjson" method="post" mediatype="application/json" ref=""
+    			target='data:json,dma_userInfo' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+    			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getUserInfo_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
     	</xf:model>
     	<w2:leaf>true</w2:leaf>
     	<w2:fileName>final_check.xml</w2:fileName>
@@ -81,15 +88,9 @@
     	<w2:engine-version>5.0.0</w2:engine-version>
         <script lazy="false" type="text/javascript"><![CDATA[scwin.isEditMode = false;
 scwin.onpageload = function() {
-    var urlParams = new URLSearchParams(window.location.search);
-    
-    if (urlParams.get('mode') === 'edit') {
-        scwin.isEditMode = true;
-        $p.executeSubmission("sbm_getClaimData");
-    } else {
-        //기본값으로 자동이체계좌 설정
-        rdo_account_option.setValue("DEFAULT");
-    }
+    // 로그인한 사용자 기본 정보 서버에 요청
+    $p.executeSubmission("sbm_getUserInfo");
+
 };
 
 scwin.sbm_getClaimData_submitdone = function (e) {
@@ -108,17 +109,25 @@ scwin.sbm_getClaimData_submitdone = function (e) {
 
 // 계좌선택옵션 라디오 버튼 값 바뀔 때 실행
 scwin.onAccountOptionChange = function(info){
-    console.log("====라디오버튼 이벤트 발생! =====");
-    console.log("====전달받은 info 객체: ", info);
-    console.log("새로운 값(info.value): ", info.value);
+    var grpDefault = $p.getComponentById("grp_default_account");
+    var grpNew = $p.getComponentById("grp_new_account");
+
     if(info.value === "DEFAULT"){
-        //자동이체 계좌 선택시 기본계좌 보여주고 새 계좌 입력 숨김
-        grp_default_account.show();
-        grp_new_account.hide();
+        var dataMap = $p.getComponentById("dma_userInfo");
+        var userInfo = dataMap.getJSON();
+
+        if (userInfo && userInfo.userName) {
+            var displayText = userInfo.default_bank_name + " | " + userInfo.account + " | 예금주 : " + userInfo.userName;
+            var txtBox = $p.getComponentById("txt_default_account");
+            txtBox.setLabel(displayText);
+        }
+        grpDefault.show();
+        grpNew.hide();
+
     } else if (info.value === "NEW"){
         //새 계좌 선택시 기본계좌 숨김, 새 계좌 입력 보여줌
-        grp_default_account.hide();
-        grp_new_account.show();
+        grpDefault.hide();
+        grpNew.show();
     }
 };
 
@@ -180,6 +189,31 @@ scwin.onHolderNameKeyup = function(e) {
     }
 };
 
+// (최초, 수정) 사용자 정보 조회 성공했을 때 실행
+scwin.sbm_getUserInfo_submitdone = function (e) {
+    console.log("=========e.responseJSON :", e.responseJSON);
+    var dataMap = $p.getComponentById("dma_userInfo");
+
+    var actualUserInfo = e.responseJSON.userVo;
+    console.log("=======actualUserInfo :" , actualUserInfo);
+    if(actualUserInfo) {
+        dataMap.setJSON(actualUserInfo);
+
+        var displayText = actualUserInfo.default_bank_name + " | " + actualUserInfo.account + " | 예금주 : " + actualUserInfo.userName;
+        var txtBox = $p.getComponentById("txt_default_account");
+        txtBox.setLabel(displayText);
+    }
+
+    var urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.get('mode') === 'edit') {
+        scwin.isEditMode = true;
+        $p.executeSubmission("sbm_getClaimData");
+    } else {
+        //기본값으로 자동이체계좌 설정
+        rdo_account_option.setValue("DEFAULT");
+    }
+};
 ]]></script>
     	<style type="text/css"><![CDATA[/* custom.css */
 
@@ -410,7 +444,7 @@ scwin.onHolderNameKeyup = function(e) {
                 </xf:select1>
 
                 <xf:group id="grp_default_account" class="infoBox" style="margin-top:15px;">
-                    <w2:textbox id="txt_default_account" label="KB국민은행 | 256745-12-3457865 | 예금주:홍길동" style="font-weight:500;"></w2:textbox>
+                    <w2:textbox id="txt_default_account" label="" style="font-weight:500;"></w2:textbox>
                 </xf:group>
 
                 <xf:group id="grp_new_account" class="" style="margin-top:15px; display:none;">

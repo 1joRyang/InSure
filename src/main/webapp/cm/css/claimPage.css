@@ -883,3 +883,42 @@ html, body {
     color: #ccc;
     cursor: not-allowed;
 }
+
+/* 모바일 보완 페이지*/
+.notification-box {
+   	background-color: #fffbeb;
+    border: 1px solid #ffe58f;
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 14px;
+    color: #5c3a00;
+}
+
+/* Claim Info Section */
+.claim-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #1d1d1d;
+    margin-bottom: 16px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    color: #555;
+    }
+
+.info-value {
+    color: #1d1d1d;
+    font-weight: 500;
+}

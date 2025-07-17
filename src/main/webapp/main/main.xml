@@ -124,7 +124,15 @@ scwin.udc_camera1_onCapture = function (result) {
 
 scwin.udc_gallery1_openGallery = function (result) {
 
-};]]>
+};
+scwin.anchor1_onclick = function () {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/first.xml"
+};
+
+scwin.anchor2_onclick = function () {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/suppDocs.xml"
+};
+]]>
 		</script>
 		<w2:require as="udc_notification" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/notification.xml"></w2:require>
 		<w2:require as="udc_camera" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/camera.xml"></w2:require>
@@ -166,7 +174,7 @@ scwin.udc_gallery1_openGallery = function (result) {
 					<xf:group class="sec02" id="" style="" tagname="section">
 						<xf:group class="grp_mico" id="" style="" tagname="ul">
 							<xf:group id="" style="" tagname="li">
-								<w2:anchor class="mico01" id="" outerDiv="false" style="">
+								<w2:anchor class="mico01" id="anchor2" outerDiv="false" style="" ev:onclick="scwin.anchor2_onclick">
 									<xf:label><![CDATA[거래이력]]></xf:label>
 								</w2:anchor>
 							</xf:group>
@@ -211,7 +219,7 @@ scwin.udc_gallery1_openGallery = function (result) {
 						<xf:group class="swiper-container grp_mbanner" id="">
 							<xf:group class="swiper-wrapper" id="" style="" tagname="ul">
 								<xf:group class="swiper-slide" id="" style="" tagname="li">
-									<w2:anchor class="mbanner03" id="" outerDiv="false" style="" escape="false">
+									<w2:anchor class="mbanner03" id="anchor1" outerDiv="false" style="" escape="false" ev:onclick="scwin.anchor1_onclick">
 										<xf:label><![CDATA[공동구매로 고금리를!<br/>모이면 금리가 오르는 예금]]></xf:label>
 									</w2:anchor>
 								</xf:group>
