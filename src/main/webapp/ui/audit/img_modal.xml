@@ -14,31 +14,7 @@
         				<w2:column dataType="text" name="file_path" id="file_path"></w2:column>
         				<w2:column dataType="text" name="file_id" id="file_id"></w2:column>
         			</w2:columnInfo>
-        			<w2:data use="true">
-        				<w2:row>
-        					<file_path><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></file_path>
-        					<file_id><![CDATA[1]]></file_id>
-        				</w2:row>
-        				<w2:row>
-        					<file_path><![CDATA[/InsWebApp/images/sample/insure/test.png]]></file_path>
-        					<file_id><![CDATA[2]]></file_id>
-        				</w2:row>
-        				<w2:row>
-        					<file_path><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></file_path>
-        					<file_id><![CDATA[1]]></file_id>
-        				</w2:row>
-        				<w2:row>
-        					<file_path><![CDATA[/InsWebApp/images/sample/insure/test.png]]></file_path>
-        					<file_id><![CDATA[2]]></file_id>
-        				</w2:row>
-        				<w2:row>
-        					<file_path><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></file_path>
-        					<file_id><![CDATA[1]]></file_id>
-        				</w2:row>
-        				<w2:row>
-        					<file_path><![CDATA[/InsWebApp/images/sample/insure/test.png]]></file_path>
-        					<file_id><![CDATA[2]]></file_id>
-        				</w2:row>
+        			<w2:data use="false">
         			</w2:data>
         		</w2:dataList>
         		<w2:dataList baseNode="list" repeatNode="map" id="dl_imgList" saveRemovedData="true">
@@ -200,19 +176,14 @@ scwin.onThumbnailClick = function (e) {
     const index = parseInt(e.target.alt);
     scwin.currentImgIndex = index;
     scwin.zoomScale = 1;
-    console.log(scwin.currentImgIndex);
-    const container = $p.getComponentById("imgContainer");
-    const children = container.getChildren();
 
-    for (let i = 0; i < children.length; i++) {
-        const comp = children[i];
-        const id = comp.getID?.() || comp.id;
+    const images = document.querySelectorAll('[id^="viewer_img_"]');
+    
+    images.forEach((img, i) => {
+        img.style.display = i === (index - 1) ? "block" : "none";
+        img.style.transform = "scale(1)";
+    });
 
-        if (id?.startsWith("mf_viewer_img_")) {
-            comp.setStyle("display", i === index ? "block" : "none");
-            comp.setStyle("transform", "scale(1)");
-        }
-    }
     scwin.highlightSelectedThumbnail(index);
 
     if (e?.target?.blur) e.target.blur();
@@ -221,19 +192,13 @@ scwin.onThumbnailClick = function (e) {
 // 줌 조절 함수
 scwin.adjustZoom = function (factor) {
     scwin.zoomScale *= factor;
-    
-    const container = $p.getComponentById("imgContainer");
-    const children = container.getChildren();
-    const currentId = "mf_viewer_img_" + (scwin.currentImgIndex - 1);
-    console.log(currentId)
-    for (let i = 0; i < children.length; i++) {
-        const comp = children[i];
-        const id = comp.getID?.() || comp.id;
 
-        if (id === currentId) {
-            comp.setStyle("transform", "scale(" + scwin.zoomScale + ")");
-            comp.setStyle("transform-origin", "top center");
-        }
+    const currentId = "viewer_img_" + (scwin.currentImgIndex - 1);
+    const targetImg = document.getElementById(currentId);
+
+    if (targetImg) {
+        targetImg.style.transform = "scale(" + scwin.zoomScale + ")";
+        targetImg.style.transformOrigin = "top center";
     }
 };
 
@@ -244,7 +209,6 @@ scwin.btn_plus_onclick = function (e) {
 scwin.btn_minus_onclick = function (e) {
     scwin.adjustZoom(0.9);
 };
-
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload" style="">
@@ -267,9 +231,9 @@ scwin.btn_minus_onclick = function (e) {
     			<xf:label><![CDATA[search]]></xf:label>
     		</xf:trigger>
     		<xf:trigger meta_snippetCategory="08_버튼" anchorWithGroupClass="" meta_snippetName="8_02 아이콘조회버튼"
-    			ev:onclick="scwin.btn_plus_onclick" meta_snippetKeyComponent="true"
+    			meta_snippetKeyComponent="true"
     			style="width: 50px;height: 50px;z-index: 1000;filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.3));" id="btn_plus" type="button"
-    			class="btn_cm search icon">
+    			class="btn_cm search icon" ev:onclick="scwin.btn_plus_onclick">
     			<xf:label><![CDATA[search]]></xf:label>
     		</xf:trigger>
     	</xf:group>
