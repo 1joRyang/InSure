@@ -8,41 +8,44 @@
         <w2:buildDate/>
         <w2:MSA/>
         <xf:model>
-            <w2:dataCollection baseNode="map">
-            	<w2:dataList baseNode="list" repeatNode="map" id="dl_imgList" saveRemovedData="true">
-            		<w2:columnInfo>
-            			<w2:column dataType="text" name="이미지링크" id="imgSrc"></w2:column>
-            			<w2:column dataType="text" name="이미지제목" id="imgTitle"></w2:column>
-            		</w2:columnInfo>
-            		<w2:data use="true">
-            			<w2:row>
-            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></imgSrc>
-            				<imgTitle><![CDATA[1]]></imgTitle>
-            			</w2:row>
-            			<w2:row>
-            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/test.png]]></imgSrc>
-            				<imgTitle><![CDATA[2]]></imgTitle>
-            			</w2:row>
-            			<w2:row>
-            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></imgSrc>
-            				<imgTitle><![CDATA[1]]></imgTitle>
-            			</w2:row>
-            			<w2:row>
-            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/test.png]]></imgSrc>
-            				<imgTitle><![CDATA[2]]></imgTitle>
-            			</w2:row>
-            			<w2:row>
-            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/img2.png]]></imgSrc>
-            				<imgTitle><![CDATA[1]]></imgTitle>
-            			</w2:row>
-            			<w2:row>
-            				<imgSrc><![CDATA[/InsWebApp/images/sample/insure/test.png]]></imgSrc>
-            				<imgTitle><![CDATA[2]]></imgTitle>
-            			</w2:row>
-            		</w2:data>
-            	</w2:dataList>
-            </w2:dataCollection>
-            <w2:workflowCollection/>
+        	<w2:dataCollection baseNode="map">
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_imgKey" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="file_path" id="file_path"></w2:column>
+        				<w2:column dataType="text" name="file_id" id="file_id"></w2:column>
+        			</w2:columnInfo>
+        			<w2:data use="false">
+        			</w2:data>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_imgList" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="imgSrc" id="imgSrc"></w2:column>
+        				<w2:column dataType="text" name="imgTitle" id="imgTitle"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dm_img">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="presignedUrl" id="presignedUrl"></w2:key>
+        				<w2:key dataType="text" name="objectKey" id="objectKey"></w2:key>
+        				<w2:key dataType="text" name="filename" id="filename"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dm_objectKey">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="objectKey" id="objectKey"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        	</w2:dataCollection>
+        	<w2:workflowCollection />
+        	<xf:submission id="sbm_getS3Key" action="/InsWebApp/InsimagefileList.pwkjson" method="post" mediatype="application/json" ref=""
+        		target='data:json,{"id":"dl_imgKey","key":"elData.insimagefileVoList"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getS3Key_submitdone" ev:submiterror=""
+        		abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getImg" action="/InsWebApp/getS3ViewUrl.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_objectKey","key":"param"}' target='data:json,{"id":"dm_img","key":"elData"}' encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getImg_submitdone"
+        		ev:submiterror="" abortTrigger="">
+        	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
@@ -50,13 +53,45 @@
 scwin.currentImgIndex = 1;
 
 scwin.onpageload = function () {
-    scwin.renderImageList();
-    scwin.renderFullImageViewer();
-    scwin.highlightSelectedThumbnail(1);
+    let claim = JSON.parse(localStorage.getItem("claim"));
+    let req = {"elData": {"claim_no": claim.claimNo}};
+    $c.sbm.execute(sbm_getS3Key, req);
+};
+
+scwin.sbm_getS3Key_submitdone = function (e) {
+    const imgList = dl_imgKey.getAllJSON();
+    scwin._imgTotalCount = imgList.length;
+    scwin._imgLoadCount = 0;
+
+    if (!imgList || imgList.length === 0) return;
+
+    // 이미지 요청 보내기
+    imgList.forEach((item) => {
+        dm_objectKey.set("objectKey", item.file_path);
+        $c.sbm.execute(sbm_getImg);
+    });
+};
+
+scwin.sbm_getImg_submitdone = function (e) {
+    const imgData = dm_img.getJSON(); 
+    const imgUrl = imgData?.presignedUrl;
+
+    const rowIndex = dl_imgList.insertRow();
+    dl_imgList.setCellData(rowIndex, "imgSrc", imgUrl);
+    dl_imgList.setCellData(rowIndex, "imgTitle", scwin._imgLoadCount + 1);
+  
+    scwin._imgLoadCount++;
+
+    if (scwin._imgLoadCount === scwin._imgTotalCount) {
+        scwin.renderImageList();
+        scwin.renderFullImageViewer();
+        scwin.highlightSelectedThumbnail(1);
+    }
 };
 
 // 썸네일 목록
 scwin.renderImageList = function () {
+    console.log(dl_imgList.getAllJSON())
     const len = dl_imgList.getRowCount();
     const targetGrp = $p.getComponentById("imgList");
 
@@ -68,13 +103,12 @@ scwin.renderImageList = function () {
             style: "padding: 10px; width: 90%; margin-bottom:6px; display:flex; flex-direction: column; align-items:center;"
         }, targetGrp);
 
-        const imgThumb = $p.dynamicCreate("thumb_img_" + i, "image", {
-            src: imgInfo[0],
-            alt: i,
-            tabindex: "-1",
-            style: "width: 90%; cursor: pointer;"
-        }, cmpGroup);
-        imgThumb.bind("onclick", scwin.onThumbnailClick);
+        const imgThumb = document.createElement("img");
+        imgThumb.src = imgInfo[0];
+        imgThumb.alt = i;
+        imgThumb.style.cssText = "width: 90%; cursor: pointer;";
+        imgThumb.addEventListener("click", scwin.onThumbnailClick);
+        cmpGroup.appendChild(imgThumb);
 
         const imgTitle = $p.dynamicCreate("thumb_txt_" + i, "output", {
             style: "font-size:15px; color:#FFF;"
@@ -101,17 +135,20 @@ scwin.renderFullImageViewer = function () {
         const row = dl_imgList.getRowData(i);
 
         const visible = i === 0 ? "block" : "none";
-        const img = $p.dynamicCreate("viewer_img_" + i, "image", {
-            src: row[0],
-            alt: "viewer_img_" + i,
-            style: `
-                width: 100%;
-                max-width: 800px;
-                display: ${visible};
-                margin: auto;
-                object-fit: contain;
-            `
-        }, container);
+
+        const img = document.createElement("img");
+        img.id = "viewer_img_" + i;
+        img.src = row[0];
+        img.alt = "viewer_img_" + i;
+        img.style.cssText = `
+            width: 100%;
+            max-width: 800px;
+            display: ${visible};
+            margin: auto;
+            object-fit: contain;
+        `;
+
+        container.appendChild(img);
     }
 
     scwin.zoomScale = 1;
@@ -139,19 +176,14 @@ scwin.onThumbnailClick = function (e) {
     const index = parseInt(e.target.alt);
     scwin.currentImgIndex = index;
     scwin.zoomScale = 1;
-    console.log(scwin.currentImgIndex);
-    const container = $p.getComponentById("imgContainer");
-    const children = container.getChildren();
 
-    for (let i = 0; i < children.length; i++) {
-        const comp = children[i];
-        const id = comp.getID?.() || comp.id;
+    const images = document.querySelectorAll('[id^="viewer_img_"]');
+    
+    images.forEach((img, i) => {
+        img.style.display = i === (index - 1) ? "block" : "none";
+        img.style.transform = "scale(1)";
+    });
 
-        if (id?.startsWith("mf_viewer_img_")) {
-            comp.setStyle("display", i === index ? "block" : "none");
-            comp.setStyle("transform", "scale(1)");
-        }
-    }
     scwin.highlightSelectedThumbnail(index);
 
     if (e?.target?.blur) e.target.blur();
@@ -161,22 +193,15 @@ scwin.onThumbnailClick = function (e) {
 scwin.adjustZoom = function (factor) {
     scwin.zoomScale *= factor;
 
-    const container = $p.getComponentById("imgContainer");
-    const children = container.getChildren();
-    const currentId = "mf_viewer_img_" + (scwin.currentImgIndex - 1);
-    console.log(currentId)
-    for (let i = 0; i < children.length; i++) {
-        const comp = children[i];
-        const id = comp.getID?.() || comp.id;
+    const currentId = "viewer_img_" + (scwin.currentImgIndex - 1);
+    const targetImg = document.getElementById(currentId);
 
-        if (id === currentId) {
-            comp.setStyle("transform", "scale(" + scwin.zoomScale + ")");
-            comp.setStyle("transform-origin", "top center");
-        }
+    if (targetImg) {
+        targetImg.style.transform = "scale(" + scwin.zoomScale + ")";
+        targetImg.style.transformOrigin = "top center";
     }
 };
 
-// XML에 정의된 버튼 핸들러
 scwin.btn_plus_onclick = function (e) {
     scwin.adjustZoom(1.1);
 };
@@ -206,9 +231,9 @@ scwin.btn_minus_onclick = function (e) {
     			<xf:label><![CDATA[search]]></xf:label>
     		</xf:trigger>
     		<xf:trigger meta_snippetCategory="08_버튼" anchorWithGroupClass="" meta_snippetName="8_02 아이콘조회버튼"
-    			ev:onclick="scwin.btn_plus_onclick" meta_snippetKeyComponent="true"
+    			meta_snippetKeyComponent="true"
     			style="width: 50px;height: 50px;z-index: 1000;filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.3));" id="btn_plus" type="button"
-    			class="btn_cm search icon">
+    			class="btn_cm search icon" ev:onclick="scwin.btn_plus_onclick">
     			<xf:label><![CDATA[search]]></xf:label>
     		</xf:trigger>
     	</xf:group>

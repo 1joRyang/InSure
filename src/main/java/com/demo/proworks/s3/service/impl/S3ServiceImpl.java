@@ -24,7 +24,7 @@ public class S3ServiceImpl implements S3Service {
 		// URL 유효시간 설정
 		Date expiration = new Date();
 		long expTimeMillis = expiration.getTime();
-		expTimeMillis += 1000 * 60 * 10;	// 10분
+		expTimeMillis += 1000 * 60 * 60;	// 10분
 		expiration.setTime(expTimeMillis);
 		
 		GeneratePresignedUrlRequest request =
@@ -43,7 +43,7 @@ public class S3ServiceImpl implements S3Service {
 		// URL 유효시간 설정
 		Date expiration = new Date();
 		long expTimeMillis = expiration.getTime();
-		expTimeMillis += 1000 * 60 * 10;	// 10분
+		expTimeMillis += 1000 * 60 * 60;	// 10분
 		expiration.setTime(expTimeMillis);
 		
 		GeneratePresignedUrlRequest request =

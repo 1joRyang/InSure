@@ -58,16 +58,16 @@
     <select id="selectInsimagefile" parameterType="com.demo.proworks.insimagefile.vo.InsimagefileVo" resultType="com.demo.proworks.insimagefile.vo.InsimagefileVo">
     	<!-- 이미지파일테이블를 상세 조회한다. -->	
         SELECT     /* QueryID : com.demo.proworks.insimagefile.selectInsimagefile */
-            FILE_ID, CLAIM_ID, ORIGINAL_FILE_NAME, STORED_FILE_NAME, FILE_PATH, FILE_SIZE, FILE_TYPE, CREATED_AT
+            FILE_ID, CLAIM_NO, S3_OBJECT_KEY as file_path, CREATED_AT
         FROM INS_IMAGE_FILE 
         WHERE 
-                FILE_ID            = #{file_id}           			
+                CLAIM_NO            = #{claim_no}           			
     </select>
 	
     <select id="selectListInsimagefile" parameterType="com.demo.proworks.insimagefile.vo.InsimagefileVo" resultType="com.demo.proworks.insimagefile.vo.InsimagefileVo">
     	<!-- 이미지파일테이블 목록을 조회한다. -->
            SELECT    /* QueryID : com.demo.proworks.insimagefile.selectListInsimagefile */
-               FILE_ID, CLAIM_ID, ORIGINAL_FILE_NAME, STORED_FILE_NAME, FILE_PATH, FILE_SIZE, FILE_TYPE, CREATED_AT		       
+               FILE_ID, CLAIM_NO, S3_OBJECT_KEY as file_path, CREATED_AT		       
            FROM (
                SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
                FROM (				
@@ -75,6 +75,7 @@
                        *  		                  
                    FROM INS_IMAGE_FILE
                    WHERE  1=1    		
+                   	AND  CLAIM_NO   = #{claim_no} 
 	     																														
                ) S, (SELECT @ROWNUM := 0) TMP
            ) A
