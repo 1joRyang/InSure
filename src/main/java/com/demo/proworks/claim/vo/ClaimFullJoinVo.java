@@ -43,6 +43,9 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "SC_user_name", physicalName = "SC_user_name", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "검색_사용자명", attr = "")
     private String SC_user_name;
 
+    @ElDtoField(logicalName = "SC_search_text", physicalName = "SC_search_text", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String SC_search_text;
+  
     @ElDtoField(logicalName = "rrn", physicalName = "rrn", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String rrn;
 
@@ -159,6 +162,16 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.SC_user_name = SC_user_name;
     }
 
+    @ElVoField(physicalName = "SC_search_text")
+    public String getSC_search_text(){
+        String ret = this.SC_search_text;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "SC_search_text")
+    public void setSC_search_text(String SC_search_text){
+        this.SC_search_text = SC_search_text;
+
     @ElVoField(physicalName = "rrn")
     public String getRrn(){
         String ret = this.rrn;
@@ -178,6 +191,7 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElVoField(physicalName = "id")
     public void setId(int id){
         this.id = id;
+
     }
 
     @Override
@@ -194,6 +208,7 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("SC_status").append("=").append(SC_status).append(",");
         sb.append("SC_emp_name").append("=").append(SC_emp_name).append(",");
         sb.append("SC_user_name").append("=").append(SC_user_name).append(",");
+        sb.append("SC_search_text").append("=").append(SC_search_text);
         sb.append("rrn").append("=").append(rrn).append(",");
         sb.append("id").append("=").append(id);
         sb.append("]");
