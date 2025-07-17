@@ -120,5 +120,19 @@
          WHERE  1=1    		
 
     </select>
+    
+    
+    	
+	<!-- 주민번호로 사용자 기본정보 조회 -->
+	<select id="selectUserByRrn" parameterType="String" 
+	        resultType="com.demo.proworks.user.vo.UserVo">
+	    SELECT /* QueryID : com.demo.proworks.user.selectUserByRrn */
+	        ID as id, 
+	        USER_NAME as userName,
+	        RRN as rrn,
+	        PHONE_NUMBER as phone_number
+	    FROM USER 
+	    WHERE rrn = #{rrn}
+	</select>
 
 </mapper>
