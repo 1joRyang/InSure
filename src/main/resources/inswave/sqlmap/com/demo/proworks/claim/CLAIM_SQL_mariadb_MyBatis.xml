@@ -15,22 +15,130 @@
 	2025/07/01 Inswave 최초 생성
 -->
 <mapper namespace="com.demo.proworks.claim">
+	<select id="selectClaimWithStatusManager" parameterType="com.demo.proworks.claim.vo.ClaimVo"
+		resultType="com.demo.proworks.claim.vo.ClaimListwStatusVo">
+		<!-- 관리자 청구내역 조회 (status, emp_no를 기준으로...) -->
+		SELECT 
+		    claim_no,
+		    user_name,
+		    receipt_date,
+		    deadline,
+		    emp_name,
+		    status,
+		    ID
+		FROM (
+		    SELECT S.*, CEIL((@ROWNUM := @ROWNUM + 1) / #{pageSize}) AS PAGE
+		    FROM (
+		        SELECT 
+		            c.claim_no, 
+		            u.user_name, 
+		            c.receipt_date, 
+		            DATE_ADD(c.receipt_date, INTERVAL 3 DAY) AS deadline, 
+		            reg.emp_name, 
+		            c.status,
+		            c.ID
+		        FROM 
+		            CLAIM c
+		        JOIN USER u ON c.ID = u.ID
+		        JOIN EMPLOYEE reg ON c.emp_no = reg.emp_no
+		        JOIN APPROVAL_REQ ar ON c.claim_no = ar.claim_no
+		        WHERE 
+		            ar.manager_no = #{emp_no}
+		            AND c.status = #{status}
+		        ORDER BY 
+		            deadline ASC
+		    ) S, (SELECT @ROWNUM := 0) TMP
+		) A
+		WHERE PAGE = #{pageIndex};
+	</select>
+	
+	<select id="selectClaimWithStatusWait" parameterType="com.demo.proworks.claim.vo.ClaimVo"
+		resultType="com.demo.proworks.claim.vo.ClaimListwStatusVo">
+		<!-- 내 청구내역 조회 (대기, emp_no를 기준으로...) -->
+		SELECT 
+		    claim_no,
+		    user_name,
+		    receipt_date,
+		    deadline,
+		    emp_name,
+		    status,
+		    ID
+		FROM (
+		    SELECT S.*, CEIL((@ROWNUM := @ROWNUM + 1) / #{pageSize}) AS PAGE
+		    FROM (
+		        SELECT 
+		            c.claim_no, 
+		            u.user_name, 
+		            c.receipt_date, 
+		            DATE_ADD(c.receipt_date, INTERVAL 3 DAY) AS deadline, 
+		            e.emp_name, 
+		            c.status,
+		            c.ID
+		        FROM 
+		            CLAIM c
+		        JOIN USER u ON c.ID = u.ID
+		        JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+		        WHERE 
+		            c.emp_no = #{emp_no}
+		            AND c.status IN ('대기', '보완', '결재완료', '결재반려')
+		        ORDER BY 
+		            c.receipt_date ASC
+		    ) S, (SELECT @ROWNUM := 0) TMP
+		) A
+		WHERE PAGE = #{pageIndex};
+	</select>
+
+	<select id="selectClaimWithStatus" parameterType="com.demo.proworks.claim.vo.ClaimVo"
+		resultType="com.demo.proworks.claim.vo.ClaimListwStatusVo">
+		<!-- 내 청구내역 조회 (status, emp_no를 기준으로...) -->
+		SELECT 
+		    claim_no,
+		    user_name,
+		    receipt_date,
+		    deadline,
+		    emp_name,
+		    status,
+		    ID
+		FROM (
+		    SELECT S.*, CEIL((@ROWNUM := @ROWNUM + 1) / #{pageSize}) AS PAGE
+		    FROM (
+		        SELECT 
+		            c.claim_no, 
+		            u.user_name, 
+		            c.receipt_date, 
+		            DATE_ADD(c.receipt_date, INTERVAL 3 DAY) AS deadline, 
+		            e.emp_name, 
+		            c.status,
+		            c.ID
+		        FROM 
+		            CLAIM c
+		        JOIN USER u ON c.ID = u.ID
+		        JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+		        WHERE 
+		            c.emp_no = #{emp_no}
+		            AND c.status = #{status}
+		        ORDER BY 
+		            c.receipt_date ASC
+		    ) S, (SELECT @ROWNUM := 0) TMP
+		) A
+		WHERE PAGE = #{pageIndex};
+	</select>
+	
 	<select id="selectClaimJoinClaimResult" parameterType="com.demo.proworks.claim.vo.ClaimUserVo"
 		resultType="com.demo.proworks.claim.vo.ClaimNClaimResultVo">
 		<!-- 기지급이력 조회 (insure-second.xml에서 사용) todo: 고객id 넘기기 -->
 		SELECT
-		CR.CLAIM_NO,
-		C.RECEIPT_DATE,
-		CR.AMOUNT,
-		C.STATUS
+			CR.CLAIM_NO,
+			C.RECEIPT_DATE,
+			CR.AMOUNT,
+			C.STATUS
 		FROM
-		CLAIM_RESULT CR
+			CLAIM_RESULT CR
 		JOIN
-		CLAIM C ON CR.CLAIM_NO = C.CLAIM_NO
+			CLAIM C ON CR.CLAIM_NO = C.CLAIM_NO
 		WHERE
-		C.STATUS = '완료'
-		AND C.ID
-		= #{ID}
+			C.STATUS = '완료'
+			AND C.ID = #{ID}
 	</select>
 	
     <insert id="insertClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo">
@@ -101,7 +209,7 @@
     <select id="selectListClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo" resultType="com.demo.proworks.claim.vo.ClaimVo">
     <!-- 청구 목록을 조회한다. 🔥 캐시 우회를 위한 임시 수정 -->
     SELECT    /* QueryID : com.demo.proworks.claim.selectListClaim NOCACHE */
-    CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT, DISASTER_CODE
+    CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT, DISASTER_CODE,
         NOW() as CACHE_BUSTER		       
     FROM (
     SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE

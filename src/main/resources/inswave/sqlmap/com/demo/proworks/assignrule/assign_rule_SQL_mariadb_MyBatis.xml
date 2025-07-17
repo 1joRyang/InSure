@@ -99,7 +99,7 @@
 		WHERE c.CLAIM_NO = #{claimNo}
 	</select>
 
-	<!-- 🔥 부서별 재직중인 직원 수 조회 -->
+	<!-- 🔥 부서별 재직중인 실무자 수 조회 -->
 	<select id="selectDeptEmployeeCount" parameterType="string" resultType="java.lang.Integer">
 		SELECT /* QueryID :
 		com.demo.proworks.assignrule.selectDeptEmployeeCount */
@@ -107,6 +107,7 @@
 		FROM EMPLOYEE
 		WHERE DEPT_ID = #{deptId}
 		AND STATUS = '재직중'
+		AND ROLE = '실무자'
 	</select>
 
 	<!-- 🔥 체구서 정보 조회 (배정용) -->

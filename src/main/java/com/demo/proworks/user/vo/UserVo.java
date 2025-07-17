@@ -40,6 +40,9 @@ public class UserVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "default_bank_name", physicalName = "default_bank_name", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String default_bank_name;
 
+    @ElDtoField(logicalName = "phone_number", physicalName = "phone_number", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String phone_number;
+
     @ElVoField(physicalName = "id")
     public int getId(){
         return id;
@@ -138,6 +141,17 @@ public class UserVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.default_bank_name = default_bank_name;
     }
 
+    @ElVoField(physicalName = "phone_number")
+    public String getPhone_number(){
+        String ret = this.phone_number;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "phone_number")
+    public void setPhone_number(String phone_number){
+        this.phone_number = phone_number;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -149,8 +163,12 @@ public class UserVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("rrn").append("=").append(rrn).append(",");
         sb.append("userName").append("=").append(userName).append(",");
         sb.append("account").append("=").append(account).append(",");
+
         sb.append("default_bank_code").append("=").append(default_bank_code).append(",");
         sb.append("default_bank_name").append("=").append(default_bank_name);
+
+        sb.append("phone_number").append("=").append(phone_number);
+
         sb.append("]");
         return sb.toString();
 

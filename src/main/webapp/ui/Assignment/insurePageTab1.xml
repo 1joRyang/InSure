@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare"
+	xmlns:xf="http://www.w3.org/2002/xforms">
+	<head>
+		<w2:type>COMPONENT</w2:type>
+		<w2:buildDate />
+		<w2:MSA />
+		<xf:model>
+			<w2:dataCollection baseNode="map" />
+			<w2:workflowCollection />
+		</xf:model>
+		<w2:layoutInfo />
+		<w2:publicInfo method="" />
+		<script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = function() {
+	
+};
+]]></script>
+	</head>
+	<body ev:onpageload="scwin.onpageload">
+		<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
+			style="">
+			<xf:group class="number_item" id="header_info"
+				style="display: flex;				justify-content: space-between;				align-items: center;				margin-bottom: 15px;">
+				<w2:span class="number_label" label="월 보험료"></w2:span>
+
+				<w2:span style="font-size: 14px;				color: #999;" id="spn_currentDate" label="2024.12.17" class="date_info"></w2:span>
+			</xf:group>
+			<xf:group id="" style="font-size: 35px">
+				<w2:span meta_snippetCategory="10_입력폼" meta_snippetName="10_16 출력텍스트" meta_snippetKeyComponent="true"
+					style="font-weight: 15px;" id="" label="5,555,555">
+				</w2:span>
+				<w2:span meta_snippetCategory="10_입력폼" meta_snippetName="10_16 출력텍스트" meta_snippetKeyComponent="true" style="" id=""
+					label="원 ">
+				</w2:span>
+				<w2:span class="arrow_icon" label="〉"></w2:span>
+			</xf:group>
+			<xf:group id="">
+				<w2:span meta_snippetCategory="10_입력폼" meta_snippetName="10_16 출력텍스트" meta_snippetKeyComponent="true" style="" id=""
+					label="내 보험">
+				</w2:span>
+			</xf:group>
+			<xf:group id="" style="background-color: #ffffff;    border-radius: 12px;    padding: 18px 20px;    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);    border: 1px solid #e0e0e0;    cursor: pointer;    transition: all 0.2s;    display: flex;    flex-direction: column;    gap: 8px;">
+				<w2:span meta_snippetCategory="10_입력폼" meta_snippetName="10_16 출력텍스트" meta_snippetKeyComponent="true" style="font-size: 20px;font-weight: 10px;font-weight: 800;margin-bottom: 0px" id="" label="종합 보험">
+				</w2:span>
+				<w2:span meta_snippetCategory="10_입력폼" meta_snippetName="10_16 출력텍스트" meta_snippetKeyComponent="true" style="" id=""
+					label="보험 이름">
+				</w2:span>
+			</xf:group>
+		</xf:group>
+	</body>
+</html>

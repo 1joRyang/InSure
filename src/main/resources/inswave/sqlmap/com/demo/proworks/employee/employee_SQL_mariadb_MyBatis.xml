@@ -148,12 +148,13 @@
 		JOIN EMPLOYEE e ON c.EMP_NO = e.EMP_NO
 		WHERE e.DEPT_ID = #{deptId}
 		  AND e.STATUS = '재직중'
+		  AND e.ROLE = '실무자'
 		  AND c.EMP_NO IS NOT NULL
 	</select>
 
 	<!-- 🔥 다음 배정할 직원 조회 (라운드로빈 방식) -->
-	<select id="selectNextEmployeeForAssignment" parameterType="com.demo.proworks.employee.vo.EmployeeVo" 
-		resultType="com.demo.proworks.employee.vo.EmployeeVo">
+	<select id="selectNextEmployeeForAssignment" parameterType="com.demo.proworks.assignrule.vo.EmployeeAssignRuleVo" 
+		resultType="com.demo.proworks.assignrule.vo.EmployeeAssignRuleVo">
 		SELECT /* QueryID : com.demo.proworks.employee.selectNextEmployeeForAssignment */
 			EMP_NO as empNo, 
 			EMP_NAME as empName, 
@@ -164,7 +165,8 @@
 		FROM EMPLOYEE
 		WHERE DEPT_ID = #{deptId}
 		  AND STATUS = '재직중'
-		  <if test="lastEmpNo != null">
+		  AND ROLE = '실무자'
+		  <if test="lastEmpNo != null and lastEmpNo != ''">
 		  AND EMP_NO > #{lastEmpNo}
 		  </if>
 		ORDER BY EMP_NO
@@ -173,7 +175,7 @@
 
 	<!-- 🔥 부서의 첫 번째 직원 조회 (라운드로빈 순환용) -->
 	<select id="selectFirstEmployeeInDept" parameterType="string" 
-		resultType="com.demo.proworks.employee.vo.EmployeeVo">
+		resultType="com.demo.proworks.assignrule.vo.EmployeeAssignRuleVo">
 		SELECT /* QueryID : com.demo.proworks.employee.selectFirstEmployeeInDept */
 			EMP_NO as empNo, 
 			EMP_NAME as empName, 
@@ -184,6 +186,7 @@
 		FROM EMPLOYEE
 		WHERE DEPT_ID = #{deptId}
 		  AND STATUS = '재직중'
+		  AND ROLE = '실무자'
 		ORDER BY EMP_NO
 		LIMIT 1
 	</select>

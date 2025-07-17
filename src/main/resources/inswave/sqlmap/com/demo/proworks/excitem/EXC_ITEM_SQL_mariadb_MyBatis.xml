@@ -18,6 +18,7 @@
 
 	<select id="selectExcItemListR" parameterType="com.demo.proworks.excitem.vo.ExcItemVo" resultType="com.demo.proworks.excitem.vo.ExcItemVo">
     	<!-- 제외항목를 상세 조회한다. -->	
+
         SELECT    /* QueryID : com.demo.proworks.excitem.selectListExcItem */
                EXC_ID, ITEM_ID, TREATMENT_ID, CLAIM_NO, EXC_REASON, EXC_COST, EXC_CATEGORY		       
            FROM (
@@ -34,6 +35,7 @@
             PAGE = 1 
             <if test="treatment_id != null">AND TREATMENT_ID = #{treatment_id}</if>
 	         AND CLAIM_NO     = #{claim_no}    
+
     </select>
 	
     <insert id="insertExcItem" parameterType="com.demo.proworks.excitem.vo.ExcItemVo">
@@ -57,7 +59,8 @@
             , #{claim_no}
             <if test="exc_reason  != null"> , #{exc_reason}   </if>
             <if test="exc_cost    != null"> , #{exc_cost}     </if>
-            <if test="exc_category!= null"> , #{exc_category} </if> 
+            <if test="exc_category!= null"> , #{exc_category} </if>
+ 
         )          
     </insert>	
 	
@@ -69,10 +72,12 @@
                 EXC_ID       = #{exc_id}      
          ,  ITEM_ID      = #{item_id}     
          ,  TREATMENT_ID = #{treatment_id}
-         ,  CLAIM_NO     = #{claim_no}            	                       
+         ,  CLAIM_NO     = #{claim_no}    
+        	                       
             <if test="exc_reason  != null"> , EXC_REASON   = #{exc_reason}   </if>
             <if test="exc_cost    != null"> , EXC_COST     = #{exc_cost}     </if>
-            <if test="exc_category!= null"> , EXC_CATEGORY = #{exc_category} </if>                 
+            <if test="exc_category!= null"> , EXC_CATEGORY = #{exc_category} </if>
+                 
         WHERE   
                 EXC_ID       = #{exc_id}      
          AND ITEM_ID      = #{item_id}     
@@ -88,7 +93,8 @@
                 EXC_ID       = #{exc_id}      
          AND ITEM_ID      = #{item_id}     
          AND TREATMENT_ID = #{treatment_id}
-         AND CLAIM_NO     = #{claim_no}            
+         AND CLAIM_NO     = #{claim_no}    
+        
     </delete>
 	
     <select id="selectExcItem" parameterType="com.demo.proworks.excitem.vo.ExcItemVo" resultType="com.demo.proworks.excitem.vo.ExcItemVo">
@@ -100,7 +106,8 @@
                 EXC_ID       = #{exc_id}      
          AND ITEM_ID      = #{item_id}     
          AND TREATMENT_ID = #{treatment_id}
-         AND CLAIM_NO     = #{claim_no}    			
+         AND CLAIM_NO     = #{claim_no}    
+			
     </select>
 	
     <select id="selectListExcItem" parameterType="com.demo.proworks.excitem.vo.ExcItemVo" resultType="com.demo.proworks.excitem.vo.ExcItemVo">

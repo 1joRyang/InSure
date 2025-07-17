@@ -28,7 +28,7 @@ scwin.initpub = function() {
     		<w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/header.xml"></w2:wframe>
     		<xf:group style="display: flex;height: 100%;flex-direction: row;flex: 1;height: calc(100% - 90px);" id="">
     			<w2:wframe src="/InsWebApp/ui/cmmn/sidebar.xml" style="z-index: 20;height: 100%;" id="sidebar" class="wfm_sidebar"></w2:wframe>
-    			<w2:wframe src="/InsWebApp/ui/audit/insure_first.xml" id="web_container" class="web_container" style="height: 100%;flex: 1;"></w2:wframe>
+    			<w2:wframe src="/InsWebApp/ui/claim/my-claims.xml" id="web_container" class="web_container" style="height: 100%;flex: 1;"></w2:wframe>
     		</xf:group>
     	</xf:group>
     </body>

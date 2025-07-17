@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.demo.proworks.settlement.vo.SettlementVo;
 import com.demo.proworks.settlement.vo.SettlementTreatmentVo;
+import com.demo.proworks.settlement.vo.SettlementSummaryVo;
 
 /**  
  * @subject     : 정산정보 관련 처리를 담당하는 인터페이스
@@ -81,5 +82,14 @@ public interface SettlementService {
      * @throws Exception
      */
 	public List<SettlementTreatmentVo> selectSettlementTreatment(SettlementTreatmentVo settlementTreatmentVo) throws Exception;
+	
+    /**
+     * 정산정보 집계 데이터를 조회한다.
+     *
+     * @param  settlementSummaryVo 정산집계정보 SettlementSummaryVo
+     * @return 정산집계정보 SettlementSummaryVo
+     * @throws Exception
+     */
+	public SettlementSummaryVo selectSettlementSummary(SettlementSummaryVo settlementSummaryVo) throws Exception;
 	
 }

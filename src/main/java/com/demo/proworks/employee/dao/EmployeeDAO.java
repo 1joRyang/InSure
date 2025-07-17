@@ -141,23 +141,23 @@ public class EmployeeDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstr
 	}
 
 	/**
-	 * 
-	 * @param employeeVo 검색 조건 (deptId, lastEmpNo 포함)
+	 * 🔥 자동배정용 - 다음 배정할 직원 조회
+	 * @param employeeAssignRuleVo 검색 조건 (deptId, lastEmpNo 포함)
 	 * @return 다음 배정할 직원
 	 * @throws ElException
 	 */
-	public EmployeeVo selectNextEmployeeForAssignment(EmployeeVo employeeVo) throws ElException {
-		return (EmployeeVo) selectByPk("com.demo.proworks.employee.selectNextEmployeeForAssignment", employeeVo);
+	public com.demo.proworks.assignrule.vo.EmployeeAssignRuleVo selectNextEmployeeForAssignment(com.demo.proworks.assignrule.vo.EmployeeAssignRuleVo employeeAssignRuleVo) throws ElException {
+		return (com.demo.proworks.assignrule.vo.EmployeeAssignRuleVo) selectByPk("com.demo.proworks.employee.selectNextEmployeeForAssignment", employeeAssignRuleVo);
 	}
 
 	/**
-	 * 
+	 * 🔥 자동배정용 - 부서의 첫 번째 직원 조회
 	 * @param deptId 부서 ID
 	 * @return 부서의 첫 번째 직원
 	 * @throws ElException
 	 */
-	public EmployeeVo selectFirstEmployeeInDept(String deptId) throws ElException {
-		return (EmployeeVo) selectByPk("com.demo.proworks.employee.selectFirstEmployeeInDept", deptId);
+	public com.demo.proworks.assignrule.vo.EmployeeAssignRuleVo selectFirstEmployeeInDept(String deptId) throws ElException {
+		return (com.demo.proworks.assignrule.vo.EmployeeAssignRuleVo) selectByPk("com.demo.proworks.employee.selectFirstEmployeeInDept", deptId);
 	}
 	
 	/*=============================================================================================*/

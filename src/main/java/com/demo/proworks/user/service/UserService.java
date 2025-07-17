@@ -89,7 +89,15 @@ public interface UserService {
 	 */
 	public boolean confirmAndSavePin(String userId, String confirmationPin, HttpSession session) throws Exception;
 		
-		
+	/**
+	 * 주민번호로 사용자 기본정보를 조회한다.
+	 *
+	 * @param rrn 주민등록번호
+	 * @return 사용자 기본정보
+	 * @throws Exception
+	 */
+	public UserVo selectUserByRrn(String rrn) throws Exception;
+			
     /**
      * 사용자정보를 등록 처리 한다.
      *

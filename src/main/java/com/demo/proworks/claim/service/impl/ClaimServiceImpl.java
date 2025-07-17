@@ -19,6 +19,7 @@ import com.demo.proworks.claim.vo.ClaimNoVo;
 import com.demo.proworks.claim.vo.ClaimUserEmpVo;
 import com.demo.proworks.claim.vo.ClaimEmployeeVo;
 import com.demo.proworks.claim.vo.ClaimFullJoinVo;
+import com.demo.proworks.claim.vo.ClaimListwStatusVo;
 import com.demo.proworks.claim.vo.ClaimUserVo;
 import com.demo.proworks.claim.vo.ClaimVo;
 
@@ -49,6 +50,27 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Resource(name = "messageSource")
 	private MessageSource messageSource;
+	
+	/**
+	 * 관리자 청구 목록 조회
+	 */
+	public List<ClaimListwStatusVo> selectClaimWithStatusManager(ClaimVo claimVo) throws Exception {
+		return claimDAO.selectClaimWithStatusManager(claimVo);
+	}
+	
+	/**
+	 *  내 청구 목록 조회
+	 */
+	public List<ClaimListwStatusVo> selectClaimWithStatus(ClaimVo claimVo) throws Exception {
+		System.out.println("service" + claimDAO.selectClaimWithStatus(claimVo));
+		return claimDAO.selectClaimWithStatus(claimVo);
+	}
+	
+	
+	public List<ClaimListwStatusVo> selectClaimWithStatusWait(ClaimVo claimVo) throws Exception {
+		System.out.println("service" + claimDAO.selectClaimWithStatusWait(claimVo));
+		return claimDAO.selectClaimWithStatusWait(claimVo);
+	}
 
 	public List<ClaimNClaimResultVo> selectClaimNClaimResult(ClaimUserVo claimVo) throws Exception {
 		return claimDAO.selectClaimNClaimResult(claimVo);
@@ -293,5 +315,21 @@ public class ClaimServiceImpl implements ClaimService {
 	public long selectClaimFullJoinListCount(ClaimFullJoinVo claimFullJoinVo) throws Exception {
 		return claimDAO.selectClaimFullJoinListCount(claimFullJoinVo);
 	}
+
+
+
+	/**
+	 * 사용자 주민번호로 청구목록 조회 (사용자, 직원, 결과 정보 조인)
+	 *
+	 * @param claimFullJoinVo 청구-전체조인 VO (주민번호 포함)
+	 * @return 사용자의 청구목록
+	 * @throws Exception
+	 */
+	@Override
+	public List<ClaimFullJoinVo> selectUserClaimsByRrn(ClaimFullJoinVo claimFullJoinVo) throws Exception {
+	    List<ClaimFullJoinVo> list = claimDAO.selectUserClaimsByRrn(claimFullJoinVo);
+	    return list;
+	}
+
 
 }

@@ -45,7 +45,22 @@ public class UserDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstractD
 	    // 프레임워크의 update 메소드를 사용하고, 쿼리 ID와 파라미터 Vo를 전달합니다.
 	    return update("com.demo.proworks.user.updateSimplePassword", userVo);
 	}
+	
+	/**
+	 * 주민번호로 사용자 기본정보를 조회한다.
+	 * 
+	 * @param rrn 주민등록번호
+	 * @return UserVo 사용자 기본정보
+	 * @throws Exception
+	 */
+	public UserVo selectUserByRrn(String rrn) throws Exception {
+	    // list 메서드를 사용해서 조회 후, 첫 번째 결과만 반환
+	    List<UserVo> userList = (List<UserVo>) list("com.demo.proworks.user.selectUserByRrn", rrn);
 	    
+	    // 결과가 있으면 첫 번째 요소 반환, 없으면 null 반환
+	    return (userList != null && userList.size() > 0) ? userList.get(0) : null;
+	}
+		    
     
     /**
      * 사용자정보 상세 조회한다.
