@@ -20,6 +20,10 @@ scwin.onpageload = function() {
 scwin.logout_onclick = function (e) {
 
 };
+
+scwin.img_logo_onclick = function (e) {
+    location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
+};
 ]]></script>
     	<w2:require as="udc_notification" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/notification.xml"></w2:require>
     </head>
@@ -28,7 +32,7 @@ scwin.logout_onclick = function (e) {
     		style="background-color: white;border-bottom: 1px solid #bfbfbf;">
     		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
     			style="margin: 0">
-    			<xf:image src="/InsWebApp/images/insure/insureLogo.png" style="width:165px;height:60px;" id=""></xf:image>
+    			<xf:image src="/InsWebApp/images/insure/insureLogo.png" style="width:165px;height:60px;" id="img_logo" ev:onclick="scwin.img_logo_onclick"></xf:image>
     			<xf:group class="breadcrumb" id="" style="">
     				<xf:group id="" style="" tagname="ul">
     					<xf:group id="" style="" tagname="li"></xf:group>
