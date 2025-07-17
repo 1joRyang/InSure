@@ -92,7 +92,8 @@
 	<select id="selectClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo" resultType="com.demo.proworks.claim.vo.ClaimVo">
 		<!-- 청구를 상세 조회한다. -->
 		SELECT /* QueryID : com.demo.proworks.claim.selectClaim */
-		CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT, DISASTER_CODE
+		CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT,
+		DISEASE_CODE, DATE_OF_ACCIDENT, DISASTER_CODE
 		FROM CLAIM
 		WHERE
 		CLAIM_NO = #{claim_no}
@@ -101,10 +102,12 @@
 	<select id="selectListClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo" resultType="com.demo.proworks.claim.vo.ClaimVo">
 		<!-- 청구 목록을 조회한다. 🔥 캐시 우회를 위한 임시 수정 -->
 		SELECT /* QueryID : com.demo.proworks.claim.selectListClaim NOCACHE */
-		CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT, DISASTER_CODE,
+		CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID,
+		CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT, DISASTER_CODE,
 		NOW() as CACHE_BUSTER
 		FROM (
-		SELECT S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+		SELECT S.*, CEIL( (@ROWNUM:=@ROWNUM+1) /
+		#{pageSize} ) AS PAGE
 		FROM (
 		SELECT
 		*
@@ -207,27 +210,9 @@
 		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
 		LEFT JOIN CLAIM_RESULT r ON c.claim_no = r.claim_no
 		WHERE 1=1
-		<if test="SC_claim_type != null and SC_claim_type != ''">
-			AND c.claim_type = #{SC_claim_type}
+		<if test="claim_no != null and claim_no != ''">
+		    AND c.claim_no LIKE CONCAT('%', #{claim_no}, '%')
 		</if>
-		<if test="SC_status != null and SC_status != ''">
-			AND c.status = #{SC_status}
-		</if>
-		<if test="SC_emp_name != null and SC_emp_name != ''">
-			AND e.emp_name LIKE CONCAT('%', #{SC_emp_name}, '%')
-		</if>
-		<if test="SC_user_name != null and SC_user_name != ''">
-			AND u.user_name LIKE CONCAT('%', #{SC_user_name}, '%')
-		</if>
-		<if test="SC_search_text != null and SC_search_text != ''">
-        AND (
-            c.claim_type LIKE CONCAT('%', #{SC_search_text}, '%')
-            OR c.status LIKE CONCAT('%', #{SC_search_text}, '%')
-            OR e.emp_name LIKE CONCAT('%', #{SC_search_text}, '%')
-            OR u.user_name LIKE CONCAT('%', #{SC_search_text}, '%')
-        )
-		</if>
-
 		ORDER BY c.claim_no DESC
 	</select>
 
