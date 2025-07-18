@@ -7,16 +7,82 @@
         <w2:buildDate/>
         <w2:MSA/>
         <xf:model>
-            <w2:dataCollection baseNode="map"/>
-            <w2:workflowCollection/>
+        	<w2:dataCollection baseNode="map">
+        		<w2:dataMap baseNode="map" id="dm_claimMemo">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="claim_memo" id="claim_memo"></w2:key>
+        				<w2:key dataType="text" name="amount" id="amount"></w2:key>
+        				<w2:key dataType="text" name="date" id="date"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        	</w2:dataCollection>
+        	<w2:workflowCollection />
+        	<xf:submission id="sbm_getMemo" action="/InsWebApp/CLAIMRESULTUpdView.pwkjson" method="post" mediatype="application/json" ref="" target='data:json,{"id":"dm_claimMemo","key":"elData"}' encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
+        		ev:submiterror="" abortTrigger="">
+        	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
-	
+	scwin.claimNo = localStorage.getItem("claimBefore");
+
+    // claim_no로 결과 받아오기
+    let req = {"elData": {"claim_no": scwin.claimNo }};
+    $c.sbm.execute(sbm_getMemo, req);
+
+};
+
+scwin.btn_confirm_onclick = function (e) {
+    $p.parent().ipt_claimNo.setValue(scwin.claimNo);
+    $p.closePopup();
+};
+
+scwin.btn_close_onclick = function (e) {
+    localStorage.removeItem("claimBefore");
+    $p.closePopup();
 };
 ]]></script>
     </head>
-    <body ev:onpageload="scwin.onpageload"/>
+    <body ev:onpageload="scwin.onpageload">
+    	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
+    		style="">
+    		<xf:group style="display: flex;" id="">
+    			<xf:group class="lybox" id="" meta_snippetCategory="01_화면분할" meta_snippetKeyComponent="true"
+    				meta_snippetName="1_01 가변 2단 분할" style="">
+    				<xf:group adaptiveThreshold="" style="" id="" class=" col_5">
+    					<w2:textbox style="width: 150px;height: 23px;" id="" label="지급금액"></w2:textbox>
+    					<xf:input ref="data:dm_claimMemo.amount" meta_snippetCategory="10_입력폼" meta_snippetName="10_12 금액"
+    						dataType="number" meta_snippetKeyComponent="true" editType="" style="width:90%;" id="" placeholder="" type="" class="tar">
+    					</xf:input>
+    					<w2:span meta_snippetCategory="10_입력폼" meta_snippetName="10_12 금액" style="" id="" label="원"></w2:span>
+    				</xf:group>
+    				<xf:group class=" col_5" id="" style="">
+    					<w2:textbox style="width: 150px;height: 23px;" id="" label="지급일"></w2:textbox>
+    					<xf:input ref="data:dm_claimMemo.date" meta_snippetCategory="10_입력폼" meta_snippetName="10_07 Inputbox_100per"
+    						meta_snippetKeyComponent="true" style="width:100%;" id="" placeholder="" class="">
+    					</xf:input>
+    				</xf:group>
+    			</xf:group>
+    		</xf:group>
+    		<xf:group style="margin-top: 20px;height: 65%" id="">
+    			<w2:textbox id="" label="심사메모" style="width: 150px;height: 23px;"></w2:textbox>
+    			<xf:textarea class="" id="" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
+    				meta_snippetName="10_09 Textarea_100per" placeholder="" style="width:100%;height: 100%;" ref="data:dm_claimMemo.claim_memo">
+    			</xf:textarea>
+    		</xf:group>
+    		<xf:group class="btnbox" id="" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true" meta_snippetName="8_05 팝업전체제어버튼"
+    			style="margin-top: 70px;">
+    			<xf:group class="rt" id="" style="">
+    				<xf:trigger class="btn_cm " id="btn_close" style="" type="button" ev:onclick="scwin.btn_close_onclick">
+    					<xf:label><![CDATA[닫기]]></xf:label>
+    				</xf:trigger>
+    				<xf:trigger class="btn_cm pt" id="btn_confirm" style="" type="button" ev:onclick="scwin.btn_confirm_onclick">
+    					<xf:label><![CDATA[상계]]></xf:label>
+    				</xf:trigger>
+    			</xf:group>
+    		</xf:group>
+    	</xf:group>
+    </body>
 </html>
