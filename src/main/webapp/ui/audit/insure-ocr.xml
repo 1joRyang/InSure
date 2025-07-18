@@ -162,7 +162,14 @@
 
 scwin.onpageload = function() {
     scwin.emp = JSON.parse(localStorage.getItem("employee"));
-    // todo: role에 따라 변경.. empName
+    // todo: role에 따라 변경.. empName readonly
+    // status 에 따라...
+    scwin.imgUrl = "";
+    window.addEventListener("message", function(event) {
+        if (event.data.type === "image_url") {
+            scwin.imgUrl = event.data.url;
+        }
+    });
     
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
     dm_header.set("claimNo", scwin.claim.claimNo);
@@ -181,16 +188,6 @@ scwin.onpageload = function() {
     });
     date_drop.setSelectedIndex(0);
     dm_treatment.set("treatment_date", date_drop.getText());
-
-    var jsnOptions = {
-        id: "img_popup",
-        type: "browserPopup", //필수 고정
-        width: "800px",
-        height: "600px",
-        popupName: "청구 영수증"
-    };
-
-    $p.openPopup("/InsWebApp/ui/audit/img_modal.xml", jsnOptions);
     
     scwin.createEmptyTable();
     getInsure();
@@ -314,29 +311,28 @@ scwin.updateExclusionCell = function(rowIndex, colIndex, newValue) {
 
 scwin.btn_ocr_onclick = function (e) {
     // OCR 버튼 클릭 시 OCR 결과를 받아서 테이블을 동적으로 업데이트
-    /**
+    
     // todo
     // 이미지 보냈을 때..
     let formData = new FormData();
-    formData.append('file', file);
+    formData.append("img_url", scwin.imgUrl);
 
-      $.ajax({
+    $.ajax({
         url: 'http://localhost:5000/process',
         type: 'POST',
         data: formData,
         contentType: false,  // multipart/form-data 자동 처리
         processData: false,  // FormData 객체를 문자열로 변환하지 않음
         success: function (response) {
-            console.log(response);
-            scwin.createTable(response);
+            console.log(response.data.rows);
+            scwin.createTable(response.data.rows);
         },
         error: function (xhr, status, error) {
             console.log(error);
         }
-      }); 
+    }); 
      
-     */
-    scwin.createTable(scwin.data_rows);
+    //scwin.createTable(scwin.data_rows);
 };
 
 scwin.btn_before_onclick = function (e) {

@@ -393,38 +393,37 @@ function createCellClickHandler(td, rowIndex, colIndex, cellValue) {
 
 // 문자열 유사도 계산 (Levenshtein Distance 기반)
 function calculateSimilarity(str1, str2) {
-    const matrix = [];
-    
-    // 빈 문자열 처리
-    if (str1.length === 0) return str2.length;
-    if (str2.length === 0) return str1.length;
-    
-    // 행렬 초기화
-    for (let i = 0; i <= str2.length; i++) {
-        matrix[i] = [i];
-    }
-    for (let j = 0; j <= str1.length; j++) {
-        matrix[0][j] = j;
-    }
-    
-    // 거리 계산
-    for (let i = 1; i <= str2.length; i++) {
-        for (let j = 1; j <= str1.length; j++) {
-            if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-                matrix[i][j] = matrix[i - 1][j - 1];
-            } else {
-                matrix[i][j] = Math.min(
-                    matrix[i - 1][j - 1] + 1, // 교체
-                    matrix[i][j - 1] + 1,     // 삽입
-                    matrix[i - 1][j] + 1      // 삭제
-                );
-            }
-        }
-    }
-    
-    // 유사도를 0~1 사이의 값으로 변환
-    const maxLength = Math.max(str1.length, str2.length);
-    return (maxLength - matrix[str2.length][str1.length]) / maxLength;
+	const matrix = [];
+
+	   // ✅ 빈 문자열인 경우 매칭으로 간주
+	   if (!str1 || !str2) return 1.0;
+
+	   // 행렬 초기화
+	   for (let i = 0; i <= str2.length; i++) {
+	       matrix[i] = [i];
+	   }
+	   for (let j = 0; j <= str1.length; j++) {
+	       matrix[0][j] = j;
+	   }
+
+	   // 거리 계산
+	   for (let i = 1; i <= str2.length; i++) {
+	       for (let j = 1; j <= str1.length; j++) {
+	           if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+	               matrix[i][j] = matrix[i - 1][j - 1];
+	           } else {
+	               matrix[i][j] = Math.min(
+	                   matrix[i - 1][j - 1] + 1, // 교체
+	                   matrix[i][j - 1] + 1,     // 삽입
+	                   matrix[i - 1][j] + 1      // 삭제
+	               );
+	           }
+	       }
+	   }
+
+	   // 유사도 계산
+	   const maxLength = Math.max(str1.length, str2.length);
+	   return (maxLength - matrix[str2.length][str1.length]) / maxLength;
 }
 
 // 가장 유사한 rowName 항목을 찾는 함수
