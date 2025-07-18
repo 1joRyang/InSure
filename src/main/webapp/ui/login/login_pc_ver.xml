@@ -126,7 +126,7 @@ scwin.sbm_EmployeeLogin_submitdone = function (e) {
             
 
             // 메인 페이지로 이동
-            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml";
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
             
         } else {
             // 로그인 실패 시 처리 - alert 추가
