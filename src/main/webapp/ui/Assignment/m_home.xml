@@ -46,6 +46,10 @@ scwin.onpageload = function() {
     };
     
 };
+
+scwin.suppDocs_onclick = function (e) {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/suppDocs.xml"
+};
 ]]></script>
         <style type="text/css"><![CDATA[
 /* Mobile Home Page Styles */
@@ -308,7 +312,7 @@ scwin.onpageload = function() {
                         <w2:span class="number_value" label=""></w2:span>
                     </xf:group>
                     
-                    <xf:group class="number_item">
+                    <xf:group class="number_item" id="suppDocs" ev:onclick="scwin.suppDocs_onclick">
                         <w2:span class="number_label" label="보완 요청"></w2:span>
                         <w2:span class="number_value" label=""></w2:span>
                     </xf:group>

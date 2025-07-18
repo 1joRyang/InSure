@@ -93,20 +93,35 @@ scwin.uploadedFileKeys = [];
 scwin.currentFileForUpload = null;
 
 scwin.onpageload = function() {
-    // 1. URL에서 claimNo 가져오기
-    const urlParams = new URLSearchParams(window.location.search);
-    const claimNo = urlParams.get('claimNo');
-    console.log("1. URL에서 가져온 claimNo:", claimNo);
+    const claimJson = localStorage.getItem("claim");
+    console.log("1. 로컬 스토리지에서 가져온 claim 데이터: ", claimJson);
 
-    if (claimNo) {
+    if(claimJson) {
+        //2. JSON 문자열을 객체로 변환
+        const claimData = JSON.parse(claimJson);
+        // 3. dataMap에 claimNo설정
+        dma_request.set("claimNo", claimData.claimNo);
+        // 4. 서브미션을 ID로만 호출
+        $p.executeSubmission("sbm_getSupplementInfo");
+        // 5. 사용한 데이터는 로컬 스토리지에서 삭제
+        localStorage.removeItem("claim");
+    } else {
+        console.error("로컬 스토리지에 claim 데이터가 없습니다.");
+    }
+    // 1. URL에서 claimNo 가져오기
+    //const urlParams = new URLSearchParams(window.location.search);
+    //const claimNo = urlParams.get('claimNo');
+    //console.log("1. URL에서 가져온 claimNo:", claimNo);
+
+    //if (claimNo) {
         // 2. dataMap에 claimNo 설정
-        dma_request.set("claimNo", claimNo);
+        //dma_request.set("claimNo", claimNo);
         
         // 3. submission을 ID로만 호출
-        $p.executeSubmission("sbm_getSupplementInfo");
-    } else {
-        console.error("URL에 claimNo 파라미터가 없습니다.");
-    }
+        //$p.executeSubmission("sbm_getSupplementInfo");
+    //} else {
+    //    console.error("URL에 claimNo 파라미터가 없습니다.");
+    //}
 
 	// 미리보기 부모영역 찾기
     var previewBox = document.querySelector('[id$="previewBox"]');
