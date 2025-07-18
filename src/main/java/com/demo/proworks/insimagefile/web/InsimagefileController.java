@@ -437,11 +437,12 @@ public class InsimagefileController {
     	// 2. 고유번호 생성
     	String claimNo = generateClaimNumber();
     	claimData.put("claimNo", claimNo);
-    	
+    	claimData.remove("claimType");
     	// 3. Service를 호출하여 DB 저장 (트랜잭션 처리)
     	claimService.saveFinalClaim(claimData);
     	
     	System.out.println("최종 청구 프로세스 완료.");
+    	session.invalidate();
     	
     	
     }

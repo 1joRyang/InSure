@@ -55,16 +55,25 @@ scwin.sbm_getClaimData_submitdone = function (e) {
 
 scwin.dateDisplayBox_onclick = function (e) {
     var popupUrl="/InsWebApp/ui/claimMobile/popupDatePicker.xml";
-
+    var popupWidth = 300;
+    var popupHeight = 380;
+    var windowWidth = window.innerWidth;
+    var windowHeight = window.innerHeight;
+    var leftPosition = (windowWidth / 2) - (popupWidth / 2);
+    var topPosition = (windowHeight / 2) - (popupHeight / 2);
     var popupOptions = {
         id:"datePickerPopup",
         type:"iframePopup",
         width: "300px",
         height: "380px",
+        width: popupWidth + "px",
+        height: popupHeight + "px",
+        left: leftPosition + "px",
+        top: topPosition + "px",
         popupName: " 년 / 월 / 일 ",
-        modal: true,
-        useFixPosition: true,
-        bottom: "0px"    
+        modal: true
+        //useFixPosition: true,
+        //bottom: "0px"    
     }
 
     $p.openPopup(popupUrl, popupOptions);

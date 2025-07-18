@@ -34,6 +34,9 @@ public class SuppVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "empName", physicalName = "empName", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String empName;
 
+    @ElDtoField(logicalName = "s3fileKeys", physicalName = "s3fileKeys", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String s3fileKeys;
+
     @ElVoField(physicalName = "claimNo")
     public String getClaimNo(){
         String ret = this.claimNo;
@@ -110,6 +113,17 @@ public class SuppVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.empName = empName;
     }
 
+    @ElVoField(physicalName = "s3fileKeys")
+    public String getS3fileKeys(){
+        String ret = this.s3fileKeys;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "s3fileKeys")
+    public void setS3fileKeys(String s3fileKeys){
+        this.s3fileKeys = s3fileKeys;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -120,7 +134,8 @@ public class SuppVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("additionalMemo").append("=").append(additionalMemo).append(",");
         sb.append("empNo").append("=").append(empNo).append(",");
         sb.append("ID").append("=").append(ID).append(",");
-        sb.append("empName").append("=").append(empName);
+        sb.append("empName").append("=").append(empName).append(",");
+        sb.append("s3fileKeys").append("=").append(s3fileKeys);
         sb.append("]");
         return sb.toString();
 
