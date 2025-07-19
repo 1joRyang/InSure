@@ -90,8 +90,74 @@ public class ProworksSessionDataAdapter extends SessionDataAdapter {
 		
 		return userHeader;
 		*/
-		
-		
+		AppLog.debug("=== [SessionDataAdapter] 세션 생성 시작 ===");
+	    AppLog.debug("- 로그인 ID: " + id);
+	    
+	    // 로그인 후에 id 기반으로 세션 정보를 세팅하여 반환한다.		
+	    ProworksUserHeader userHeader = new ProworksUserHeader();
+	    userHeader.setUserId(id);
+	    
+	    // 로그인 시 사용했던 '로그인 타입'을 가져옵니다.
+	    String loginType = (String) request.getSession().getAttribute("loginTypeForSession");
+	    AppLog.debug("- 세션에서 가져온 loginType: " + loginType);
+	    
+	    try {
+	        if ("USER".equals(loginType)) {
+	            AppLog.debug("- USER 타입으로 세션 생성 중...");
+	            
+	            UserService userService = (UserService) ElBeanUtils.getBean("userServiceImpl");
+	            UserVo userVoParam = new UserVo();
+	            userVoParam.setUserId(id);
+	            UserVo resUserVo = userService.selectUser(userVoParam);
+	            
+	            if (resUserVo == null) throw new AdapterException("세션 정보를 생성할 사용자가 없습니다. ID: " + id);
+	
+	            userHeader.setTestUserName(resUserVo.getUserName());
+	            userHeader.setUserRole("USER");
+	            
+	            AppLog.debug("- USER 세션 생성 완료: " + resUserVo.getUserName());
+	
+	        } else if ("EMPLOYEE".equals(loginType)) {
+	            AppLog.debug("- EMPLOYEE 타입으로 세션 생성 중...");
+	            
+	            EmployeeService empService = (EmployeeService) ElBeanUtils.getBean("employeeServiceImpl");
+	            EmployeeVo empVoParam = new EmployeeVo();
+	            
+	            empVoParam.setEmpNo(id);
+	            EmployeeVo resEmpVo = empService.selectEmployee(empVoParam);
+	            
+	            if (resEmpVo == null) {
+	                AppLog.error("- EMPLOYEE 정보 조회 실패: ID=" + id);
+	                throw new AdapterException("세션 정보를 생성할 관리자가 없습니다. ID: " + id);
+	            }
+	
+	            userHeader.setTestUserName(resEmpVo.getEmpName());
+	            userHeader.setUserRole(resEmpVo.getRole());
+	            
+	            AppLog.debug("- EMPLOYEE 세션 생성 완료: " + resEmpVo.getEmpName() + ", 역할: " + resEmpVo.getRole());
+	            
+	        } else {
+	            AppLog.error("- 알 수 없는 로그인 타입: " + loginType);
+	            throw new AdapterException("알 수 없는 로그인 타입입니다: " + loginType);
+	        }
+	        
+	        AppLog.debug("- 최종 UserHeader 정보:");
+	        AppLog.debug("  * UserId: " + userHeader.getUserId());
+	        AppLog.debug("  * UserName: " + userHeader.getTestUserName());
+	        AppLog.debug("  * UserRole: " + userHeader.getUserRole());
+	        
+	        AppLog.debug("=== [SessionDataAdapter] 세션 생성 완료 ===");
+	
+	    } catch (Exception e) {
+	        AppLog.error("setSessionData Error", e);
+	        throw new AdapterException("세션 데이터 생성 중 오류가 발생했습니다: " + e.getMessage());
+	    } finally {
+	        request.getSession().removeAttribute("loginTypeForSession");
+	    }
+	
+	    return userHeader;
+	}
+		/*
 		
 		// 로그인 후에 id 기반으로 세션 정보를 세팅하여 반환한다.		
 		ProworksUserHeader userHeader = new ProworksUserHeader();
@@ -142,6 +208,6 @@ public class ProworksSessionDataAdapter extends SessionDataAdapter {
 
 		return userHeader;
 		
-		}
+		}*/
 
 }

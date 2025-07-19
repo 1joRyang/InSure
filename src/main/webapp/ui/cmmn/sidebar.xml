@@ -60,6 +60,7 @@ scwin.search_claimNum_onclick = function () {
 scwin.search_personNum_onclick = function () {
     removeSClass();
     search_personNum.addClass("selected");
+    movePage("/InsWebApp/ui/employee/SearchRrn.xml");
 };
 
 scwin.vacation_onclick = function () {

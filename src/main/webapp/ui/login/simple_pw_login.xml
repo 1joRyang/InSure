@@ -166,7 +166,7 @@ scwin.sbm_SimpleLogin_submitdone = function (e) {
                 }
                 
                 // 로그인 성공 시 메인 페이지로 이동
-                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml";
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
                 
             } else {
                 // 로그인 실패 시 - PIN 번호 틀림
