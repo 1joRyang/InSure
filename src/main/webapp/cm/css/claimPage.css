@@ -283,7 +283,7 @@ html, body {
 
 .selection-box-container:active,
 .selection-box-container.selected {
-    border-color: #ffc107; /* 선택 시 노란색 테두리 */
+    border-color: #4FACFE; /* 선택 시 노란색 테두리 */
 }
 
 .selection-box-icon {

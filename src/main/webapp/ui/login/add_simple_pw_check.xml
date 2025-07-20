@@ -142,7 +142,7 @@ scwin.sbm_Simplepw_registerCheck_submitdone = function (e) {
     if (resData && resData.resultCode === "OK") {
         // 성공 시: 메인페이지로 이동
         //location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/insure_login_mobile.xml&userId=" + localStorage.getItem("userId");
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
     
     } else {
         // 실패 시: 안내 문구 변경 및 입력값 초기화

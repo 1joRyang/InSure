@@ -506,17 +506,17 @@ scwin.sbm_saveStep5_submitdone = function (e) {
             		<xf:group class="infoSection" style="">
             			<w2:span class="sectionTitle" label="유의사항"></w2:span>
             			<xf:group class="infoBox">
-            				<xf:group style="width:363px;height:42px;display:flex;align-items:center;" id="">
-            					<xf:image src="../../images/insure/file.png" style="width:29px;height:32px;" id=""></xf:image>
-            					<w2:textbox id="" label="파일 10장씩, 최대 30장까지" style="width:181px;height:23px;"></w2:textbox>
+            				<xf:group style="display:flex;align-items:center; gap: 8px;" id="">
+            					<xf:image src="../../images/insure/file.png" style="width:29px;height:32px; flex-shrink: 0;" id=""></xf:image>
+            					<w2:textbox id="" label="파일 10장씩, 최대 30장까지" style=""></w2:textbox>
             				</xf:group>
-            				<xf:group id="" style="width:363px;height:42px;display:flex;align-items:center;">
-            					<xf:image id="" src="../../images/insure/picture.png" style="width:29px;height:32px;"></xf:image>
-            					<w2:textbox id="" label="확장자가 JPG, JPEG, PNG 파일만 등록" style="width:330px;height:23px;"></w2:textbox>
+            				<xf:group id="" style="display:flex;align-items:center; gap: 8px;">
+            					<xf:image id="" src="../../images/insure/picture.png" style="width:29px;height:32px; flex-shrink: 0;"></xf:image>
+            					<w2:textbox id="" label="확장자가 JPG, JPEG, PNG 파일만 등록" style="word-break: keep-all;"></w2:textbox>
             				</xf:group>
-            				<xf:group id="" style="width:363px;height:42px;display:flex;align-items:center;">
-            					<xf:image id="" src="../../images/insure/documents.png" style="width:29px;height:32px;"></xf:image>
-            					<w2:textbox id="" label="비급여 금액 진료비세부내역서 필수 제출" style="width:325px;height:23px;"></w2:textbox>
+            				<xf:group id="" style="display:flex;align-items:center; gap: 8px;">
+            					<xf:image id="" src="../../images/insure/documents.png" style="width:29px;height:32px; flex-shrink: 0;"></xf:image>
+            					<w2:textbox id="" label="비급여 금액 진료비세부내역서 필수 제출" style="word-break: keep-all;"></w2:textbox>
             				</xf:group>
             			</xf:group>
             		</xf:group>

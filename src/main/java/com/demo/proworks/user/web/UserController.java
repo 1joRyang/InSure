@@ -392,7 +392,7 @@ public class UserController {
 		
         
     /**
-     * 사용자정보을 단건 조회 처리 한다.
+     * 사용자정보를 단건 조회 처리 한다.
      *
      * @param  userVo 사용자정보
      * @return 단건 조회 결과
@@ -496,5 +496,7 @@ public class UserController {
 	    
 	    return userInfo;
 	}
+	
+		
 
 }
