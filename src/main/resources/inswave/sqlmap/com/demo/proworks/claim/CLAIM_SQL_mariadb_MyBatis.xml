@@ -314,17 +314,8 @@
 		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
 		LEFT JOIN CLAIM_RESULT r ON c.claim_no = r.claim_no
 		WHERE 1=1
-		<if test="SC_claim_type != null and SC_claim_type != ''">
-			AND c.claim_type = #{SC_claim_type}
-		</if>
-		<if test="SC_status != null and SC_status != ''">
-			AND c.status = #{SC_status}
-		</if>
-		<if test="SC_emp_name != null and SC_emp_name != ''">
-			AND e.emp_name LIKE CONCAT('%', #{SC_emp_name}, '%')
-		</if>
-		<if test="SC_user_name != null and SC_user_name != ''">
-			AND u.user_name LIKE CONCAT('%', #{SC_user_name}, '%')
+		<if test="claim_no != null and claim_no != ''">
+		    AND c.claim_no LIKE CONCAT('%', #{claim_no}, '%')
 		</if>
 		ORDER BY c.claim_no DESC
 	</select>
