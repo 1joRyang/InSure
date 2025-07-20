@@ -159,17 +159,14 @@
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/ocr-tableStruc.js" scopeVariable="" type="text/javascript"></script>
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/dummy-table.js" scopeVariable="" type="text/javascript"></script>
         <script lazy="false" type="text/javascript"><![CDATA[
-
 scwin.onpageload = function() {
     scwin.emp = JSON.parse(localStorage.getItem("employee"));
     // todo: role에 따라 변경.. empName readonly
     // status 에 따라...
+
+    scwin.claimImg = JSON.parse(localStorage.getItem("claimImg"));
+    // todo: 첫번째 이미지로 세팅
     scwin.imgUrl = "";
-    window.addEventListener("message", function(event) {
-        if (event.data.type === "image_url") {
-            scwin.imgUrl = event.data.url;
-        }
-    });
     
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
     dm_header.set("claimNo", scwin.claim.claimNo);
@@ -316,6 +313,7 @@ scwin.btn_ocr_onclick = function (e) {
     // 이미지 보냈을 때..
     let formData = new FormData();
     formData.append("img_url", scwin.imgUrl);
+    console.log(scwin.imgUrl);
 
     $.ajax({
         url: 'http://localhost:5000/process',
@@ -325,6 +323,7 @@ scwin.btn_ocr_onclick = function (e) {
         processData: false,  // FormData 객체를 문자열로 변환하지 않음
         success: function (response) {
             console.log(response.data.rows);
+            //console.log(scwin.data_rows);
             scwin.createTable(response.data.rows);
         },
         error: function (xhr, status, error) {
@@ -352,6 +351,8 @@ function saveInsure(idx = -1) {
         dm_treatment.set("claim_no", scwin.claim.claimNo);
 
         // todo: 이미지 모달.. setSrc
+        // 메시지 보내는 방법...??
+
         console.log(dm_treatment.getJSON());
         scwin.isEdit ? $c.sbm.execute(sbm_updateTreatment) : $c.sbm.execute(sbm_insertTreatment);
     }

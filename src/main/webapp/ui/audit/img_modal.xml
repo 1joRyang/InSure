@@ -55,7 +55,14 @@ scwin.currentImgIndex = 1;
 scwin.onpageload = function () {
     let claim = JSON.parse(localStorage.getItem("claim"));
     let req = {"elData": {"claim_no": claim.claimNo}};
-    $c.sbm.execute(sbm_getS3Key, req);
+
+    // todo: localstorage에 있으면 순서대로 load...?
+    let claimImg = JSON.parse(localStorage.getItem("claimImg"));
+    if (claimImg.length >= 1) {
+        console.log(claimImg);
+    } else {
+        $c.sbm.execute(sbm_getS3Key, req);
+    }  
 };
 
 scwin.sbm_getS3Key_submitdone = function (e) {
@@ -86,6 +93,9 @@ scwin.sbm_getImg_submitdone = function (e) {
         scwin.renderImageList();
         scwin.renderFullImageViewer();
         scwin.highlightSelectedThumbnail(1);
+
+        // todo: localStorage에 claimImg라는 이름으로 저장
+        console.log(dl_imgList.getAllJSON());
     }
 };
 
@@ -182,7 +192,6 @@ scwin.onThumbnailClick = function (e) {
     images.forEach((img, i) => {
         img.style.display = i === (index - 1) ? "block" : "none";
         img.style.transform = "scale(1)";
-       // window.opener.postMessage({ type: "image_url", url: img.src }, "*");
     });
 
     scwin.highlightSelectedThumbnail(index);
@@ -225,7 +234,6 @@ scwin.btn_minus_onclick = function (e) {
     		<xf:group
     			style="width:90%; height:100%; overflow-y:auto; display:flex; flex-direction:column; align-items:center; padding-top:20px; background-color:gainsboro;"
     			id="imgContainer" class="imgContainer">
-    			<xf:image src="" style="" id="img"></xf:image>
     		</xf:group>
     	</xf:group>
     	<xf:group style="position: relative;float: right;bottom: 70px;right: 50px;" id="">

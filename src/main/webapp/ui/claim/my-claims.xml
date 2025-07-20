@@ -134,6 +134,8 @@ scwin.onpageload = function() {
 
 function moveNsave(rowData) {
     // claimNo, ID, user_name, status, empName
+    localStorage.removeItem("claimImg");
+    
     const claim = {
         claimNo: rowData.claim_no,
         ID: rowData.ID,

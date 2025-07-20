@@ -282,7 +282,7 @@ scwin.btn_del_date_onclick = function (e) {
 };
 
 scwin.ipt_hcode1_onclick = function (e) {
-    openPopup("/InsWebApp/ui/audit/hcode2-popup.xml", "hcode_popup", "병명코드 입력");
+    openPopup("/InsWebApp/ui/audit/hcode1-popup.xml", "hcode_popup", "병명코드 입력");
 };
 
 scwin.ipt_hcode2_onclick = function (e) {
