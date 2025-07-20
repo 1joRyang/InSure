@@ -17,23 +17,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.demo.proworks.claim.service.ClaimService;
 import com.demo.proworks.insimagefile.service.InsimagefileService;
+import com.demo.proworks.insimagefile.vo.ConsentVo;
+import com.demo.proworks.insimagefile.vo.InsimagefileListVo;
 import com.demo.proworks.insimagefile.vo.InsimagefileVo;
 import com.demo.proworks.insimagefile.vo.Step1Vo;
 import com.demo.proworks.insimagefile.vo.Step2Vo;
 import com.demo.proworks.insimagefile.vo.Step3Vo;
 import com.demo.proworks.insimagefile.vo.Step4Vo;
 import com.demo.proworks.insimagefile.vo.Step5Vo;
+import com.demo.proworks.ocr.service.OcrService;
 import com.demo.proworks.s3.service.S3Service;
-import com.demo.proworks.insimagefile.vo.ConsentVo;
-import com.demo.proworks.insimagefile.vo.InsimagefileListVo;
-
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
 import com.inswave.elfw.annotation.ElValidator;
 import com.inswave.elfw.exception.ElException;
-
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
 /**  
  * @subject     : 이미지파일테이블 관련 처리를 담당하는 컨트롤러
@@ -62,7 +59,9 @@ public class InsimagefileController {
     @Resource(name = "claimServiceImpl")
     private ClaimService claimService;
     
-	
+	/** OcrService 주입 */
+	@Resource(name = "ocrService")
+	private OcrService ocrService;
     
     /**
      * 이미지파일테이블 목록을 조회합니다.
@@ -386,65 +385,170 @@ public class InsimagefileController {
     
     }
     
-    /**
-     * (최종제출) 세션에 저장된 모든 데이터를 취합하여 DB에 저장(청구 접수)
-     */
-    @ElService(key = "submitFinalClaim")    
-    @RequestMapping(value = "submitFinalClaim")
-    @ElDescription(sub = "최종 보험금 청구 제출", desc = "세션의 모든 정보를 취합하여 최종 청구를 접수한다.")
-    public void submitFinalClaim(HttpServletRequest request) throws Exception {
-    	System.out.println("================최종 청구 제출 컨트롤러 진입=======================");
-    	HttpSession session = request.getSession();
-    	Map<String, Object> claimData = (Map<String, Object>) session.getAttribute("claim_data");
-    	
-    	// 1. 데이터 유효성 검사
-    	if (claimData == null ||
-    		claimData.get("claimType") == null ||
-    		claimData.get("agreed") == null ||
-    		claimData.get("accidentDate") == null ||
-    		claimData.get("symptom") == null ||
-    		claimData.get("accountNo") == null ||
-    		claimData.get("s3fileKeys") == null ) {
-    		
-    		// 누락된 항목 있으면 에러 메시지 전달 후 다시 진행
-    		throw new ElException("ERROR.BIZ.001", new String[]{"필수 청구 정보가 누락되었습니다. 처음부터 다시 진행해주세요."});   		
-    		}
-    		
-    	System.out.println("========최종 데이터 유효성 검사 통과=====================");
-    	
-    	// 데이터 가공 -> 청구사유 한글변환
-    	String claimTypeEng = (String) claimData.get("claimType");
-    	String claimTypeKor = "기타";
-    	if ("disease".equals(claimTypeEng)) {
-    		claimTypeKor = "질병";
-    	} else if ("injury".equals(claimTypeEng)) {
-    		claimTypeKor = "재해";
-    	}
-    	claimData.put("claimType", claimTypeKor);
-    	
-    	// claim_content 데이터 조합
-    	String symptom = (String) claimData.get("symptom");
-    	String claimContent = String.format("[%s] %s", claimTypeKor, symptom);
-    	claimData.put("claimContent", claimContent);
-    	
-    	//Long loginUserId = (Long) session.getAttribute("loginUserId");
-    	//claimData.put("userId", loginUserId);
-    	// (임시) 세션에서 로그인 사용자 ID를 가져와 claimData에 추가
-    	claimData.put("userId", 1L);
-    	// 로그인 처리 로직 성공 부분
-    	//session.setAttribute("userId", "1111"); // "1111"은 실제 로그인한 사용자의 ID
-    		
-    	// 2. 고유번호 생성
-    	String claimNo = generateClaimNumber();
-    	claimData.put("claimNo", claimNo);
-    	
-    	// 3. Service를 호출하여 DB 저장 (트랜잭션 처리)
-    	claimService.saveFinalClaim(claimData);
-    	
-    	System.out.println("최종 청구 프로세스 완료.");
-    	
-    	
-    }
+  	/**
+	 * (최종제출) 세션에 저장된 모든 데이터를 취합하여 DB에 저장(청구 접수)
+	 */
+	@ElService(key = "submitFinalClaim")
+	@RequestMapping(value = "submitFinalClaim")
+	@ElDescription(sub = "최종 보험금 청구 제출", desc = "세션의 모든 정보를 취합하여 최종 청구를 접수한다.")
+	public void submitFinalClaim(HttpServletRequest request) throws Exception {
+		System.out.println("================최종 청구 제출 컨트롤러 진입=======================");
+		HttpSession session = request.getSession();
+		Map<String, Object> claimData = (Map<String, Object>) session.getAttribute("claim_data");
+	
+		// 1. 데이터 유효성 검사
+		if (claimData == null || 
+				claimData.get("claimType") == null ||
+				claimData.get("agreed") == null ||
+				claimData.get("accidentDate") == null||
+				claimData.get("symptom") == null || 
+				claimData.get("accountNo") == null|| 
+				claimData.get("s3fileKeys") == null) {
+	
+			// 누락된 항목 있으면 에러 메시지 전달 후 다시 진행
+			throw new ElException("ERROR.BIZ.001", new String[] { "필수 청구 정보가 누락되었습니다. 처음부터 다시 진행해주세요." });
+		}
+	
+		System.out.println("========최종 데이터 유효성 검사 통과=====================");
+	
+		// 2. 사용자가 처음 입력한 claimType을 claim_content용으로 보존
+		String originalClaimTypeEng = (String) claimData.get("claimType");
+		String originalClaimTypeKor = convertClaimTypeToKorean(originalClaimTypeEng);
+		
+		// 3. claim_content 먼저 생성 (사용자 입력값 기준)
+		String symptom = (String) claimData.get("symptom");
+		String claimContent = String.format("[%s] %s", originalClaimTypeKor, symptom);
+		claimData.put("claimContent", claimContent);
+		
+		System.out.println("사용자 입력 기준 claim_content 생성: " + claimContent);
+	
+		// 4. OCR 분석을 통한 자동 claim_type 결정
+		String s3KeysAsString = (String) claimData.get("s3fileKeys");
+		String analyzedClaimTypeEng = "disease"; // 기본값 (영문 코드)
+	
+		if (s3KeysAsString != null && !s3KeysAsString.isEmpty()) {
+			try {
+				// S3 키 목록 파싱
+				String[] keysArray = s3KeysAsString.split(",");
+				List<String> s3ObjectKeys = new ArrayList<String>();
+				for (String key : keysArray) {
+					s3ObjectKeys.add(key.trim());
+				}
+	
+				System.out.println("OCR 분석 시작 - 파일 수: " + s3ObjectKeys.size());
+	
+				// OCR 분석 수행 (영문 코드 반환)
+				analyzedClaimTypeEng = ocrService.analyzeDocumentType(s3ObjectKeys);
+				System.out.println("OCR 분석 완료 - 영문 코드: " + analyzedClaimTypeEng);
+	
+				// 유효한 claim_type인지 검증
+				if (!isValidClaimType(analyzedClaimTypeEng)) {
+					System.out.println("유효하지 않은 문서 타입, 기본값 사용: " + analyzedClaimTypeEng);
+					analyzedClaimTypeEng = "disease";
+				}
+	
+			} catch (Exception e) {
+				System.err.println("OCR 분석 실패: " + e.getMessage());
+				System.out.println("OCR 실패로 기본값 사용: " + analyzedClaimTypeEng);
+				e.printStackTrace();
+				// OCR 실패시에도 청구는 계속 진행 (기본값 사용)
+			}
+		}
+	
+		// 5. DB 저장용으로 한글 코드로 변환
+		String analyzedClaimTypeKor = convertEngToKoreanClaimType(analyzedClaimTypeEng);
+		System.out.println("OCR 분석 결과 - DB 저장용 한글 코드: " + analyzedClaimTypeKor);
+	
+		// 6. 기존 claimType 제거 후 OCR 분석 결과로 교체
+		claimData.remove("claimType");
+		claimData.put("claimType", analyzedClaimTypeKor);
+	
+		System.out.println("=== 처리 결과 요약 ===");
+		System.out.println("사용자 입력 claimType (원본): " + originalClaimTypeEng + " -> " + originalClaimTypeKor);
+		System.out.println("OCR 분석 결과: " + analyzedClaimTypeEng + " -> " + analyzedClaimTypeKor);
+		System.out.println("claim_content (사용자 입력 기준): " + claimContent);
+		System.out.println("최종 DB 저장 claimType (OCR 기준): " + analyzedClaimTypeKor);
+		System.out.println("==================");
+	
+		// 7. 사용자 ID 설정 (임시)
+		claimData.put("userId", 1L);
+	
+		// 8. 고유번호 생성
+		String claimNo = generateClaimNumber();
+		claimData.put("claimNo", claimNo);
+	
+		// 9. Service를 호출하여 DB 저장 (트랜잭션 처리)
+		claimService.saveFinalClaim(claimData);
+	
+		System.out.println("최종 청구 프로세스 완료 - claim_type: " + analyzedClaimTypeKor + ", claim_no: " + claimNo);
+		
+		// 10. 세션 무효화
+		session.invalidate();
+
+	}
+
+	/**
+	 * 유효한 claim_type인지 검증
+	 */
+	private boolean isValidClaimType(String claimType) {
+		if (claimType == null)
+			return false;
+
+		switch (claimType) {
+		case "death":
+		case "disability":
+		case "surgery":
+		case "disease":
+		case "injury":
+		case "other":
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/**
+	 * claim_type을 한글로 변환 (화면 표시용)
+	 */
+	private String convertClaimTypeToKorean(String claimType) {
+		switch (claimType) {
+		case "death":
+			return "사망";
+		case "disability":
+			return "장해";
+		case "surgery":
+			return "수술";
+		case "disease":
+			return "질병";
+		case "injury":
+			return "재해";
+		case "other":
+			return "기타";
+		default:
+			return "질병"; // 기본값은 질병
+		}
+	}
+
+	private String convertEngToKoreanClaimType(String engClaimType) {
+		if (engClaimType == null)
+			return "질병";
+		switch (engClaimType) {
+		case "death":
+			return "사망";
+		case "disability":
+			return "장해";
+		case "surgery":
+			return "수술";
+		case "disease":
+			return "질병";
+		case "injury":
+			return "재해";
+		case "other":
+			return "기타";
+		default:
+			return "질병"; // 기본값은 질병
+		}
+	}
     
     
     /**
