@@ -107,7 +107,6 @@
             s.insu_amt,
             '0' as claim_amt,
             '0' as payment_amt,
-            '정상' as status,
             s.start_date,
             s.end_date
         FROM SUB_INSURANCE s 
