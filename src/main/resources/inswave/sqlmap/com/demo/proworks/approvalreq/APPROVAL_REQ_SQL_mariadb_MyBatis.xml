@@ -129,4 +129,14 @@
             CLAIM_NO = #{claim_no}  
     </update>
 
+    <!-- 청구 상태를 결재완료로 변경 -->
+    <update id="updateClaimStatusToApprove" parameterType="com.demo.proworks.approvalreq.vo.ApprovalReqVo">
+        <!-- 청구 상태를 결재완료로 변경한다. -->
+        UPDATE CLAIM    /* QueryID : com.demo.proworks.approvalreq.updateClaimStatusToApprove */      
+        SET  
+            STATUS = '결재완료'
+        WHERE   
+            CLAIM_NO = #{claim_no}  
+    </update>
+
 </mapper>

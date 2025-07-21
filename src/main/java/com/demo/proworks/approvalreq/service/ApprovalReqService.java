@@ -78,4 +78,11 @@ public interface ApprovalReqService {
 	 * @throws Exception
 	 */	
 	public void rejectApprovalReq(ApprovalReqVo approvalReqVo) throws Exception;
+	
+	/**
+	 * 결재요청을 승인 처리한다.
+	 * @param approvalReqVo
+	 * @throws Exception
+	 */	
+	public void approveApprovalReq(ApprovalReqVo approvalReqVo) throws Exception;
 }

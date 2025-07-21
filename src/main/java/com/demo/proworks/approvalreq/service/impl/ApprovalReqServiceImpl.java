@@ -142,4 +142,19 @@ public class ApprovalReqServiceImpl implements ApprovalReqService {
 		approvalReqDAO.updateClaimStatusToReject(approvalReqVo);
 	}
 
+	/**
+	 * 결재요청을 승인 처리한다.
+	 *
+	 * @process
+	 * 1. CLAIM 테이블의 status를 "결재완료"로 변경
+	 * 
+	 * @param  approvalReqVo 결재요청 ApprovalReqVo
+	 * @throws Exception
+	 */
+	@Transactional
+	public void approveApprovalReq(ApprovalReqVo approvalReqVo) throws Exception {
+		// 1. CLAIM 테이블의 status를 "결재완료"로 변경
+		approvalReqDAO.updateClaimStatusToApprove(approvalReqVo);
+	}
+
 }

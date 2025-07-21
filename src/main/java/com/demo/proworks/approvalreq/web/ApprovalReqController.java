@@ -129,4 +129,17 @@ public class ApprovalReqController {
         approvalReqService.rejectApprovalReq(approvalReqVo);                                            
     }
 
+    /**
+     * 결재요청을 승인 처리한다.
+     *
+     * @param  approvalReqVo 결재요청
+     * @throws Exception
+     */
+    @ElService(key="APPROVALREQApprove")    
+    @RequestMapping(value="APPROVALREQApprove")
+    @ElDescription(sub="결재요청 승인처리",desc="결재요청을 승인 처리하고 청구 상태를 변경한다.")    
+    public void approveApprovalReq(ApprovalReqVo approvalReqVo) throws Exception {  
+        approvalReqService.approveApprovalReq(approvalReqVo);                                            
+    }
+
 }

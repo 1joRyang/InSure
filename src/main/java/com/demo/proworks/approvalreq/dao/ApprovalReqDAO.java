@@ -111,4 +111,15 @@ public class ApprovalReqDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAb
         return update("com.demo.proworks.approvalreq.updateClaimStatusToReject", vo);
     }
 
+    /**
+     * 청구 상태를 결재완료로 변경한다.
+     *  
+     * @param  ApprovalReqVo 결재요청
+     * @return 번호
+     * @throws ElException
+     */
+    public int updateClaimStatusToApprove(ApprovalReqVo vo) throws ElException {
+        return update("com.demo.proworks.approvalreq.updateClaimStatusToApprove", vo);
+    }
+
 }
