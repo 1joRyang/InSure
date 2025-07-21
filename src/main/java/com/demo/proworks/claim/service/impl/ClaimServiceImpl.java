@@ -16,6 +16,7 @@ import com.demo.proworks.claim.dao.ClaimDAO;
 import com.demo.proworks.claim.service.ClaimService;
 import com.demo.proworks.claim.vo.ClaimNClaimResultVo;
 import com.demo.proworks.claim.vo.ClaimNoVo;
+import com.demo.proworks.claim.vo.ClaimUserCalcVo;
 import com.demo.proworks.claim.vo.ClaimUserEmpVo;
 import com.demo.proworks.claim.vo.ClaimEmployeeVo;
 import com.demo.proworks.claim.vo.ClaimFullJoinVo;
@@ -50,6 +51,13 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Resource(name = "messageSource")
 	private MessageSource messageSource;
+	
+	/**
+	 * 고객 계산
+	 */
+	public ClaimUserCalcVo selectUserClaimCalc(ClaimVo claimVo) throws Exception {
+		return claimDAO.selectUserClaimCalc(claimVo);
+	}
 	
 	/**
 	 * 관리자 청구 목록 조회

@@ -19,10 +19,10 @@
         		</w2:dataList>
         		<w2:dataMap baseNode="map" id="dm_data">
         			<w2:keyInfo>
-        				<w2:key dataType="text" name="총 청구건수" id="totcnt"></w2:key>
-        				<w2:key dataType="text" name="총지급금액" id="total_amt"></w2:key>
-        				<w2:key dataType="text" name="승인완료" id="done"></w2:key>
-        				<w2:key dataType="text" name="승인율" id="done_perc"></w2:key>
+        				<w2:key dataType="text" name="총 청구건수" id="total_count"></w2:key>
+        				<w2:key dataType="text" name="총지급금액" id="total_payment"></w2:key>
+        				<w2:key dataType="text" name="승인완료" id="completed_count"></w2:key>
+        				<w2:key dataType="text" name="승인율" id="approval_rate"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
         		<w2:dataMap baseNode="map" id="dm_getClaim">
@@ -30,13 +30,28 @@
         				<w2:key dataType="text" name="SC_ID" id="SC_ID"></w2:key>
         				<w2:key dataType="text" name="pageSize" id="pageSize" defaultValue="100"></w2:key>
         				<w2:key dataType="text" name="pageIndex" id="pageIndex" defaultValue="1"></w2:key>
+        				<w2:key dataType="text" name="SC_receipt_date_start" id="SC_receipt_date_start"></w2:key>
+        				<w2:key dataType="text" name="SC_receipt_date_end" id="SC_receipt_date_end"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dm_getCalc">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="ID" id="ID"></w2:key>
+        				<w2:key dataType="text" name="pageSize" id="pageSize" defaultValue="100"></w2:key>
+        				<w2:key dataType="text" name="pageIndex" id="pageIndex" defaultValue="1"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
-        	<xf:submission id="sbm_getMyClaim" action="/InsWebApp/CLAIMList.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_getClaim","key":"elData"}'
-        		target='data:json,{"id":"dl_claimList","key":"elData.claimVoList"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
-        		mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getMyClaim_submitdone" ev:submiterror="" abortTrigger="">
+        	<xf:submission id="sbm_getMyClaim" action="/InsWebApp/CLAIMList.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,{"id":"dm_getClaim","key":"elData"}'
+        		target='data:json,{"id":"dl_claimList","key":"elData.claimVoList"}' encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getMyClaim_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getClaimCalc" action="/InsWebApp/CLAIMUserCalc.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_getCalc","key":"elData"}'
+        		target='data:json,{"id":"dm_data","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -51,14 +66,17 @@ scwin.onpageload = function() {
     let user = JSON.parse(localStorage.getItem("user"));
     dm_getClaim.set("SC_ID", user.id);
     $c.sbm.execute(sbm_getMyClaim);
+
+    // todo: 계산한거 들고오기
+    dm_getCalc.set("ID", user.id);
+    $c.sbm.execute(sbm_getClaimCalc);
 };
 
 scwin.sbm_getMyClaim_submitdone = function (e) {
     // (submitdone) 동적으로 넣기....
     var claimContainer = $p.getComponentById("claimContainer");
-    
+
     var claimListData = dl_claimList.getAllJSON();
-    
     // 각 청구 항목에 대해 카드 생성
     for (var i = 0; i < claimListData.length; i++) {
         var claimData = claimListData[i]; 
@@ -228,56 +246,39 @@ scwin.onClaimCardClick = function(e) {
         
         if (claimData) {
             console.log("선택된 청구서:", claimData);
-            
-            // 여기에 카드 클릭 시 수행할 로직 추가
-            // 예: 상세 페이지로 이동, 팝업 표시 등
-            scwin.showClaimDetail(claimData);
+            // todo: localStorage
+            // location.href = 
         }
     } catch (e) {
         console.error("카드 클릭 이벤트 처리 중 오류:", e);
     }
-};
-]]></script>
+};]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
     		style="display: flex;flex-direction: column;gap: 15px;">
-    		<xf:group style="display: grid;grid-template-columns: 1fr 1fr 1fr ;" id="">
-    			<xf:trigger class="btn_cm" id="" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true" meta_snippetName="8_01 기본버튼"
-    				style="" type="button">
-    				<xf:label><![CDATA[1개월]]></xf:label>
-    			</xf:trigger>
-    			<xf:trigger class="btn_cm" id="" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true" meta_snippetName="8_01 기본버튼"
-    				style="" type="button">
-    				<xf:label><![CDATA[3개월]]></xf:label>
-    			</xf:trigger>
-    			<xf:trigger class="btn_cm" id="" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true" meta_snippetName="8_01 기본버튼"
-    				style="" type="button">
-    				<xf:label><![CDATA[6개월]]></xf:label>
-    			</xf:trigger>
-    		</xf:group>
-    		<xf:group style="border: 1px solid #D9D9D9;border-radius: 10px;display: grid;grid-template-columns: repeat(2, 1fr);padding: 10px;" id="">
-    			<xf:group style="text-align: center;" id="">
-    				<w2:textbox id="" label="" style="font-size: 24px;height: 30px;" ref="data:dm_data.totcnt"></w2:textbox>
+    		<xf:group id=""
+    			style="border: 1px solid #D9D9D9;border-radius: 15px;display: grid;grid-template-columns: repeat(2, 1fr);padding: 10px;">
+    			<xf:group id="" style="text-align: center;">
+    				<w2:textbox id="" label="" ref="data:dm_data.total_count" style="font-size: 24px;height: 30px;"></w2:textbox>
     				<w2:textbox id="" label="총 청구건수" style="width: 100%;height: 23px;"></w2:textbox>
     			</xf:group>
     			<xf:group id="" style="text-align: center;">
-    				<w2:textbox id="" label="" style="font-size: 24px;height: 30px;" ref="data:dm_data.total_amt"></w2:textbox>
+    				<w2:textbox id="" label="" ref="data:dm_data.total_payment" style="font-size: 24px;height: 30px;"></w2:textbox>
     				<w2:textbox id="" label="총 지급금액(원)" style="width: 100%;height: 23px;"></w2:textbox>
     			</xf:group>
     			<xf:group id="" style="text-align: center;">
-    				<w2:textbox id="" label="" style="font-size: 24px;height: 30px;" ref="data:dm_data.done"></w2:textbox>
+    				<w2:textbox id="" label="" ref="data:dm_data.completed_count" style="font-size: 24px;height: 30px;"></w2:textbox>
     				<w2:textbox id="" label="승인완료" style="width: 100%;height: 23px;"></w2:textbox>
     			</xf:group>
     			<xf:group id="" style="text-align: center;">
-    				<w2:textbox id="" label="" style="font-size: 24px;height: 30px;" ref="data:dm_data.done_perc"></w2:textbox>
+    				<w2:textbox id="" label="" ref="data:dm_data.approval_rate" style="font-size: 24px;height: 30px;"></w2:textbox>
     				<w2:textbox id="" label="승인율" style="width: 100%;height: 23px;"></w2:textbox>
     			</xf:group>
     		</xf:group>
-    		<xf:group style="width: 100%;h" id="">
-    			<w2:textbox id="" label="청구내역" style="font-size: 17px;font-weight: 700;"></w2:textbox>
-    			<xf:group style="width: 100%; height: 100%; box-sizing: border-box;" id="claimContainer" class="claimContainer">
-    			</xf:group>
+            <xf:group style="width: 100%;margin-top: 10px" id="">
+    			<w2:textbox style="font-size: 17px;font-weight: 700;" id="" label="청구내역"></w2:textbox>
+    			<xf:group style="width: 100%; height: 100%; box-sizing: border-box;" id="claimContainer" class="claimContainer"></xf:group>
     		</xf:group>
     	</xf:group>
     </body>

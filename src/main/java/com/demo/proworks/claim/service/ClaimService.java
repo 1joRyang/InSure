@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.demo.proworks.claim.vo.ClaimNClaimResultVo;
 import com.demo.proworks.claim.vo.ClaimNoVo;
+import com.demo.proworks.claim.vo.ClaimUserCalcVo;
 import com.demo.proworks.claim.vo.ClaimUserEmpVo;
 import com.demo.proworks.claim.vo.ClaimEmployeeVo;
 import com.demo.proworks.claim.vo.ClaimFullJoinVo;
@@ -24,6 +25,11 @@ import com.demo.proworks.claim.vo.ClaimVo;
  * 
  */
 public interface ClaimService {
+
+	/**
+	 * 고객 계산
+	 */
+	public ClaimUserCalcVo selectUserClaimCalc(ClaimVo claimVo) throws Exception;
 
 	/**
 	 * 관리자 청구 목록 조회

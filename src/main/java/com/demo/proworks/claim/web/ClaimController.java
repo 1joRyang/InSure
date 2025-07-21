@@ -17,6 +17,7 @@ import com.demo.proworks.claim.vo.ClaimListVo;
 import com.demo.proworks.claim.vo.ClaimListwStatusVo;
 import com.demo.proworks.claim.vo.ClaimNClaimResultVo;
 import com.demo.proworks.claim.vo.ClaimNoVo;
+import com.demo.proworks.claim.vo.ClaimUserCalcVo;
 import com.demo.proworks.claim.vo.ClaimUserEmpVo;
 import com.demo.proworks.claim.vo.ClaimEmployeeVo;
 import com.demo.proworks.claim.vo.ClaimFullJoinVo;
@@ -43,6 +44,17 @@ public class ClaimController {
 	/** ClaimService */
 	@Resource(name = "claimServiceImpl")
 	private ClaimService claimService;
+	
+	/**
+	 * 고객 청구 계산
+	 */
+	 @ElService(key = "CLAIMUserCalc")
+	@RequestMapping(value = "CLAIMUserCalc")
+	@ElDescription(sub = "고객 청구 계산", desc = "고객 청구 계산")
+	public ClaimUserCalcVo selectUserClaimCalc(ClaimVo claimVo) throws Exception {
+		ClaimUserCalcVo claimList = claimService.selectUserClaimCalc(claimVo);
+		return claimList;
+	}
 	
 	/**
 	 * 관리자 청구 목록 조회 (status, emp_no를 기준으로)
