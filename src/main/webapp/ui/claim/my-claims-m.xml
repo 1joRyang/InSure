@@ -19,9 +19,9 @@
         		</w2:dataList>
         		<w2:dataMap baseNode="map" id="dm_data">
         			<w2:keyInfo>
-        				<w2:key dataType="text" name="총 청구건수" id="total_count"></w2:key>
-        				<w2:key dataType="text" name="총지급금액" id="total_payment"></w2:key>
-        				<w2:key dataType="text" name="승인완료" id="completed_count"></w2:key>
+        				<w2:key dataType="number" name="총 청구건수" id="total_count"></w2:key>
+        				<w2:key dataType="number" name="총지급금액" id="total_payment"></w2:key>
+        				<w2:key dataType="number" name="승인완료" id="completed_count"></w2:key>
         				<w2:key dataType="text" name="승인율" id="approval_rate"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
@@ -50,13 +50,14 @@
         		ev:submitdone="scwin.sbm_getMyClaim_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getClaimCalc" action="/InsWebApp/CLAIMUserCalc.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_getCalc","key":"elData"}'
-        		target='data:json,{"id":"dm_data","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		target='data:json,{"id":"dm_data","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="로딩 중.." ev:submit=""
         		ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
-        <script lazy="false" type="text/javascript"><![CDATA[let user = {
+        <script lazy="false" type="text/javascript"><![CDATA[// todo: 지우기
+let user = {
     id: "1"
 }
 localStorage.setItem("user", JSON.stringify(user));
@@ -67,8 +68,9 @@ scwin.onpageload = function() {
     dm_getClaim.set("SC_ID", user.id);
     $c.sbm.execute(sbm_getMyClaim);
 
-    // todo: 계산한거 들고오기
+    // 계산한거 들고오기
     dm_getCalc.set("ID", user.id);
+    console.log(dm_getCalc.getJSON())
     $c.sbm.execute(sbm_getClaimCalc);
 };
 
@@ -100,9 +102,20 @@ scwin.createClaimCard = function(container, claimData, index) {
 
     // 카드 그룹
     var cardGroup = $p.dynamicCreate(cardId, "group", {
-        style: "margin-top: 10px; border: 1px solid #D9D9D9; border-radius: 20px; padding: 15px; box-sizing: border-box; box-shadow: 1px 4px 4px rgba(0,0,0,0.05); cursor: pointer;",
-        "ev:onclick": "scwin.onClaimCardClick"
+        style: "margin-top: 10px; border: 1px solid #D9D9D9; border-radius: 20px; padding: 15px; box-sizing: border-box; box-shadow: 1px 4px 4px rgba(0,0,0,0.05); cursor: pointer;"
     }, container);
+
+    cardGroup.setUserData("claimData", claimData);
+    cardGroup.bind("onclick", function() {
+        localStorage.setItem("userClaim", JSON.stringify(claimData));
+        if (claimData.status === "보완") {
+            // todo: 보완 링크
+            // location.href = "";
+        } else {
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claim/claim-detail.xml";
+        }
+        
+    });
 
     // 헤더 그룹
     var headerGroup = $p.dynamicCreate(cardId + "_header", "group", {
@@ -186,9 +199,6 @@ scwin.createClaimCard = function(container, claimData, index) {
         style: "font-size: 14px; color: #888; padding: 0; display: inline-block;"
     }, dateRowGroup);
     dateValue.setValue(claimData?.receipt_date || "");
-
-    // 데이터 바인딩 (카드 클릭 이벤트용)
-    cardGroup.setUserData("claimData", claimData);
 };
 
 scwin.getStatusText = function(status) {
@@ -233,24 +243,6 @@ scwin.getStatusColor = function(status) {
             return "#FF930E"; 
         default:
             return "#333"; // 기본 색상
-    }
-};
-
-/**
- * 청구서 카드 클릭 이벤트 핸들러
- */
-scwin.onClaimCardClick = function(e) {
-    try {
-        var clickedCard = e.target;
-        var claimData = clickedCard.getUserData("claimData");
-        
-        if (claimData) {
-            console.log("선택된 청구서:", claimData);
-            // todo: localStorage
-            // location.href = 
-        }
-    } catch (e) {
-        console.error("카드 클릭 이벤트 처리 중 오류:", e);
     }
 };]]></script>
     </head>
