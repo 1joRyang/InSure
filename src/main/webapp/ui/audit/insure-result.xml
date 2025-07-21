@@ -1513,17 +1513,16 @@ scwin.btn_approval_onclick = function (e) {
             }
         });
     } else {
-        alert("결재 신청");
          openClaimApprovalPopup("/InsWebApp/ui/approval/approval-modal.xml");
     }
 };
 
-function openClaimApprovalPopup(){
+function openClaimApprovalPopup(link){
      requires("uiplugin.popup");
     var winWid = $(window).width();
     var winHei = $(window).height();
     var popWid = 600;
-    var popHei = 250;
+    var popHei = 550;
     var sumLeft = (winWid - popWid) / 2;
     var sumTop = (winHei - popHei) / 2;
 
