@@ -22,8 +22,8 @@ import com.demo.proworks.ocr.vo.OcrAnalysisResult;
 import com.demo.proworks.s3.service.S3Service;
 
 /**
- * @subject : OCR 분석 서비스 구현체 (성능 측정 강화)
- * @description : Python OCR API를 호출하여 이미지 문서 분석 처리 및 성능 모니터링
+ * @subject : OCR 분석 서비스 구현체 (통합 API 사용)
+ * @description : 통합 API 서버를 호출하여 이미지 문서 분석 처리 및 성능 모니터링
  * @author : 시스템 관리자
  * @since : 2025/07/17
  * @modification ===========================================================
@@ -32,13 +32,14 @@ import com.demo.proworks.s3.service.S3Service;
  *               2025/07/17 시스템 관리자 최초 생성 
  *               2025/07/17 시스템 관리자 유니코드 디코딩 및 로직 개선
  *               2025/07/18 시스템 관리자 성능 측정 기능 추가
+ *               2025/07/21 시스템 관리자 통합 API 서버 사용으로 변경
  * 
  */
 @Service("ocrService")
 public class OcrServiceImpl implements OcrService {
 
-	// OCR API URL
-	private String ocrApiUrl = "http://localhost:5000";
+	// 통합 API 서버 URL (기존 OCR API와 FastAPI 통합)
+	private String apiServerUrl = "http://localhost:8000";
 
 	// S3 버킷명
 	private String bucketName = "insure-claim-docs-final-project";
@@ -248,10 +249,9 @@ public class OcrServiceImpl implements OcrService {
 		System.out.println("  🔍 단일 문서 분석 시작: " + s3ObjectKey);
 		System.out.println("  📅 시작 시간: " + docStartTime.format(TIME_FORMATTER));
 
-		// OCR API 서버 상태 확인
 		long healthCheckStart = System.currentTimeMillis();
-		if (!isOcrApiAvailable()) {
-			throw new Exception("OCR API 서버가 실행되지 않음 - " + ocrApiUrl);
+		if (!isApiServerAvailable()) {
+			throw new Exception("통합 API 서버가 실행되지 않음 - " + apiServerUrl);
 		}
 		long healthCheckTime = System.currentTimeMillis() - healthCheckStart;
 		System.out.println("  ✅ API 서버 상태 확인 완료: " + healthCheckTime + "ms");
@@ -264,12 +264,12 @@ public class OcrServiceImpl implements OcrService {
 			long s3Time = System.currentTimeMillis() - s3StartTime;
 			System.out.println("  ✅ Pre-signed URL 생성 완료: " + s3Time + "ms");
 
-			// 2. OCR API 호출
+			// 2. 통합 API 호출 (문서 분류)
 			long ocrApiStart = System.currentTimeMillis();
-			System.out.println("  🤖 OCR API 호출 시작...");
-			String response = callOcrApi(presignedUrl.toString(), s3ObjectKey);
+			System.out.println("  API 호출 시작...");
+			String response = callUnifiedDocumentClassifyApi(presignedUrl.toString(), s3ObjectKey);
 			long ocrApiTime = System.currentTimeMillis() - ocrApiStart;
-			System.out.println("  ✅ OCR API 호출 완료: " + ocrApiTime + "ms");
+			System.out.println("  API 호출 완료: " + ocrApiTime + "ms");
 
 			// 3. 응답 파싱
 			long parseStart = System.currentTimeMillis();
@@ -290,7 +290,7 @@ public class OcrServiceImpl implements OcrService {
 			System.out.println("  📋 세부 시간:");
 			System.out.println("    - 서버 상태 확인: " + healthCheckTime + "ms");
 			System.out.println("    - S3 URL 생성: " + s3Time + "ms");
-			System.out.println("    - OCR API 호출: " + ocrApiTime + "ms");
+			System.out.println("    - 통합 API 호출: " + ocrApiTime + "ms");
 			System.out.println("    - 응답 파싱: " + parseTime + "ms");
 			System.out.println("  🎯 분석 결과: " + result.getDocumentType() + " (신뢰도: " + String.format("%.1f%%", result.getConfidence() * 100) + ")");
 
@@ -305,38 +305,39 @@ public class OcrServiceImpl implements OcrService {
 			System.err.println("    - 처리 시간: " + totalSingleDocTime + "ms");
 			System.err.println("    - 오류: " + e.getMessage());
 			
-			throw new Exception("OCR API 호출 실패: " + e.getMessage(), e);
+			throw new Exception("통합 API 호출 실패: " + e.getMessage(), e);
 		}
 	}
 
 	/**
-	 * OCR API 서버 상태 확인
+	 * 통합 API 서버 상태 확인
 	 */
-	private boolean isOcrApiAvailable() {
+	private boolean isApiServerAvailable() {
 		try {
-			URL url = new URL(ocrApiUrl + "/health");
+			URL url = new URL(apiServerUrl + "/health");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			conn.setConnectTimeout(5000);
 			conn.setReadTimeout(5000);
 
 			int responseCode = conn.getResponseCode();
-			System.out.println("    OCR API 서버 상태: HTTP " + responseCode);
+			System.out.println("    통합 API 서버 상태: HTTP " + responseCode);
 
 			return responseCode == 200;
 
 		} catch (Exception e) {
-			System.err.println("    OCR API 서버 연결 실패: " + e.getMessage());
+			System.err.println("    통합 API 서버 연결 실패: " + e.getMessage());
 			return false;
 		}
 	}
 
 	/**
-	 * OCR API 호출 (성능 측정 강화)
+	 * 통합 API 문서 분류 호출 (성능 측정 강화)
 	 */
-	private String callOcrApi(String imageUrl, String s3ObjectKey) throws Exception {
+	private String callUnifiedDocumentClassifyApi(String imageUrl, String s3ObjectKey) throws Exception {
 		try {
-			URL url = new URL(ocrApiUrl + "/classify-s3");
+			// 통합 API의 문서 분류 엔드포인트 사용
+			URL url = new URL(apiServerUrl + "/api/v1/document/classify-s3");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
 			// 요청 설정 (UTF-8 인코딩 명시)
@@ -347,13 +348,12 @@ public class OcrServiceImpl implements OcrService {
 			conn.setConnectTimeout(30000); // 30초
 			conn.setReadTimeout(60000); // 60초
 
-			// JSON 요청 바디 생성
-			String jsonRequest = String.format("{\"image_url\":\"%s\",\"s3_object_key\":\"%s\"}", imageUrl,
-					s3ObjectKey);
+			// JSON 요청 바디 생성 (통합 API 형식에 맞춤)
+			String jsonRequest = String.format("{\"image_url\":\"%s\",\"s3_object_key\":\"%s\"}", imageUrl, s3ObjectKey);
 
 			// 요청 전송 시간 측정
 			long requestStart = System.currentTimeMillis();
-			System.out.println("    📤 OCR API 요청 전송 중...");
+			System.out.println("    📤 통합 API 요청 전송 중...");
 
 			// 요청 전송
 			OutputStream os = conn.getOutputStream();
@@ -367,7 +367,7 @@ public class OcrServiceImpl implements OcrService {
 
 			// 응답 읽기
 			int responseCode = conn.getResponseCode();
-			System.out.println("    📥 OCR API 응답 코드: " + responseCode + " (요청 전송: " + requestTime + "ms)");
+			System.out.println("    📥 통합 API 응답 코드: " + responseCode + " (요청 전송: " + requestTime + "ms)");
 
 			BufferedReader br;
 
@@ -388,37 +388,43 @@ public class OcrServiceImpl implements OcrService {
 			System.out.println("    📥 응답 읽기 완료: " + responseTime + "ms");
 
 			if (responseCode != 200) {
-				throw new Exception("OCR API 오류 (HTTP " + responseCode + "): " + response.toString());
+				throw new Exception("통합 API 오류 (HTTP " + responseCode + "): " + response.toString());
 			}
 
 			return response.toString();
 
 		} catch (IOException e) {
-			throw new Exception("OCR API 통신 오류: " + e.getMessage(), e);
+			throw new Exception("통합 API 통신 오류: " + e.getMessage(), e);
 		}
 	}
 
 	/**
-	 * OCR API 응답 파싱 (간단한 JSON 파싱)
+	 * 통합 API 응답 파싱 (간단한 JSON 파싱)
+	 * 통합 API 응답 형식:
+	 * {
+	 *   "document_type": "사망진단서",
+	 *   "found_keywords": ["사망진단서", "사망"],
+	 *   "confidence": 0.95,
+	 *   "ocr_text": ["첫번째 줄", "두번째 줄"],
+	 *   "s3_object_key": "key"
+	 * }
 	 */
 	private OcrAnalysisResult parseOcrResponse(String jsonResponse, String s3ObjectKey) {
 		OcrAnalysisResult result = new OcrAnalysisResult();
 		result.setS3ObjectKey(s3ObjectKey);
 
 		try {
-			System.out.println("    🔍 OCR 응답 파싱 중...");
+			System.out.println("    🔍 API 응답 파싱 중...");
 
 			// 간단한 JSON 파싱 (정규식 사용)
 			String documentType = extractJsonValue(jsonResponse, "document_type");
 			String confidenceStr = extractJsonValue(jsonResponse, "confidence");
 
-			// 유니코드 이스케이프 디코딩 적용
-			String decodedDocumentType = decodeUnicodeEscape(documentType);
+			System.out.println("    📄 응답 문서타입: " + documentType);
+			System.out.println("    📊 신뢰도: " + confidenceStr);
 
-			System.out.println("    📄 OCR 원본 문서타입: " + documentType);
-			System.out.println("    📝 디코딩된 문서타입: " + decodedDocumentType);
-
-			result.setDocumentType(decodedDocumentType != null ? decodedDocumentType : "미분류");
+			// 문서 유형 설정 (이미 한글로 반환되므로 디코딩 불필요)
+			result.setDocumentType(documentType != null ? documentType : "미분류");
 
 			if (confidenceStr != null) {
 				try {
@@ -430,69 +436,21 @@ public class OcrServiceImpl implements OcrService {
 				result.setConfidence(0.0);
 			}
 
-			// found_keywords 파싱 (기본적인 배열 파싱)
+			// found_keywords 파싱
 			List<String> keywords = extractJsonArray(jsonResponse, "found_keywords");
-			// 키워드도 유니코드 디코딩
-			List<String> decodedKeywords = new ArrayList<String>();
-			for (String keyword : keywords) {
-				decodedKeywords.add(decodeUnicodeEscape(keyword));
-			}
-			result.setFoundKeywords(decodedKeywords);
+			result.setFoundKeywords(keywords);
 
-			System.out.println("    ✅ OCR 응답 파싱 완료 - 문서유형: " + result.getDocumentType() + 
+			System.out.println("    ✅ 통합 API 응답 파싱 완료 - 문서유형: " + result.getDocumentType() + 
 				", 신뢰도: " + String.format("%.1f%%", result.getConfidence() * 100));
 
 		} catch (Exception e) {
-			System.err.println("    ❌ OCR 응답 파싱 오류: " + e.getMessage());
+			System.err.println("    ❌ 통합 API 응답 파싱 오류: " + e.getMessage());
 			result.setError("응답 파싱 오류: " + e.getMessage());
 			result.setDocumentType("미분류");
 			result.setConfidence(0.0);
 		}
 
 		return result;
-	}
-
-	/**
-	 * 유니코드 이스케이프 문자열을 한글로 디코딩 \\uc7a5\\ud574\\uc9c4\\ub2e8\\uc11c -> 장해진단서
-	 */
-	private String decodeUnicodeEscape(String input) {
-		if (input == null || input.trim().isEmpty()) {
-			return input;
-		}
-
-		try {
-			// Java 8 호환 방식으로 유니코드 이스케이프 패턴 처리
-			java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\\\u([0-9a-fA-F]{4})");
-			java.util.regex.Matcher matcher = pattern.matcher(input);
-
-			StringBuffer result = new StringBuffer();
-
-			while (matcher.find()) {
-				try {
-					String hexCode = matcher.group(1);
-					int codePoint = Integer.parseInt(hexCode, 16);
-					String unicodeChar = String.valueOf((char) codePoint);
-					matcher.appendReplacement(result, unicodeChar);
-				} catch (NumberFormatException e) {
-					System.err.println("    ⚠️  유니코드 변환 실패: " + matcher.group(0));
-					// 변환 실패시 원본 그대로 유지
-					matcher.appendReplacement(result, java.util.regex.Matcher.quoteReplacement(matcher.group(0)));
-				}
-			}
-			matcher.appendTail(result);
-
-			String decoded = result.toString();
-
-			if (!decoded.equals(input)) {
-				System.out.println("    🔤 유니코드 디코딩: " + input + " -> " + decoded);
-			}
-
-			return decoded;
-
-		} catch (Exception e) {
-			System.err.println("    ❌ 유니코드 디코딩 오류: " + e.getMessage());
-			return input; // 실패시 원본 반환
-		}
 	}
 
 	/**
