@@ -49,12 +49,7 @@ scwin.my_claim_onclick = function () {
 scwin.search_claimNum_onclick = function () {
     removeSClass();
     search_claimNum.addClass("selected");
-        let role = JSON.parse(localStorage.getItem("employee")).role;
-    if (role === "실무자") {
-        movePage("/InsWebApp/ui/assignment/claimListSearch.xml");
-    } else {
-        movePage("/InsWebApp/ui/approval/my-approval.xml")
-    }
+        movePage("/InsWebApp/ui/Assignment/claimListSearch.xml");
 };
 
 scwin.search_personNum_onclick = function () {
