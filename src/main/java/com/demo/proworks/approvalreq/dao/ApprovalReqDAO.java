@@ -89,4 +89,26 @@ public class ApprovalReqDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAb
         return delete("com.demo.proworks.approvalreq.deleteApprovalReq", vo);
     }
 
+    /**
+     * 결재요청 메모만 업데이트한다.
+     *  
+     * @param  ApprovalReqVo 결재요청
+     * @return 번호
+     * @throws ElException
+     */
+    public int updateApprovalReqMemo(ApprovalReqVo vo) throws ElException {
+        return update("com.demo.proworks.approvalreq.updateApprovalReqMemo", vo);
+    }
+
+    /**
+     * 청구 상태를 결재반려로 변경한다.
+     *  
+     * @param  ApprovalReqVo 결재요청
+     * @return 번호
+     * @throws ElException
+     */
+    public int updateClaimStatusToReject(ApprovalReqVo vo) throws ElException {
+        return update("com.demo.proworks.approvalreq.updateClaimStatusToReject", vo);
+    }
+
 }

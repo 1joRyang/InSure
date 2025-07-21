@@ -1615,9 +1615,34 @@ scwin.sbm_selectInsuranceProducts_submiterror = function (e) {
 
 
 scwin.btn_reject_onclick = function (e) {
-    alert("결재 반려");
-    console.log("결재 반려");
+    openRejectClaimPopup("/InsWebApp/ui/Assignment/RejectClaimPopup.xml");
 };
+function openRejectClaimPopup(link) {
+    requires("uiplugin.popup");
+    var winWid = $(window).width();
+    var winHei = $(window).height();
+    var popWid = 600;
+    var popHei = 250;
+    var sumLeft = (winWid - popWid) / 2;
+    var sumTop = (winHei - popHei) / 2;
+
+    var opts = {
+        "id": "claim_return_popup",
+        "type": "litewindow",
+        "width": popWid + "px",
+        "height": popHei + "px",
+        "top": sumTop,
+        "left": sumLeft,
+        "popupName": "결재 반려",
+        "modal": true,
+        "useIFrame": false,
+        "title": "결재 반려",
+        "useATagBtn": false,
+        "frameMode": "wframe",
+    };
+
+    $p.openPopup(link, opts);
+}
 ]]></script>
 	</head>
 	<body ev:onpageload="scwin.onpageload">
