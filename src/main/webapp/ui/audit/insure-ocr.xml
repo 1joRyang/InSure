@@ -164,10 +164,16 @@ scwin.onpageload = function() {
     // todo: role에 따라 변경.. empName readonly
     // status 에 따라...
 
-    scwin.claimImg = JSON.parse(localStorage.getItem("claimImg"));
-    // todo: 첫번째 이미지로 세팅
-    scwin.imgUrl = "";
-    
+    var jsnOptions = {
+        id: "img_popup",
+        type: "browserPopup", //필수 고정
+        width: "1000px",
+        height: "800px",
+        popupName: "청구 영수증"
+    };
+
+    $p.openPopup("/InsWebApp/ui/audit/img_modal.xml", jsnOptions);
+
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
     dm_header.set("claimNo", scwin.claim.claimNo);
     console.log(scwin.claim.claimNo)
@@ -185,6 +191,9 @@ scwin.onpageload = function() {
     });
     date_drop.setSelectedIndex(0);
     dm_treatment.set("treatment_date", date_drop.getText());
+
+    scwin.claimImg = JSON.parse(localStorage.getItem("claimImg"));
+    scwin.imgUrl = scwin.claimImg[date_drop.getValue()-1].imgSrc;
     
     scwin.createEmptyTable();
     getInsure();
@@ -308,7 +317,6 @@ scwin.updateExclusionCell = function(rowIndex, colIndex, newValue) {
 
 scwin.btn_ocr_onclick = function (e) {
     // OCR 버튼 클릭 시 OCR 결과를 받아서 테이블을 동적으로 업데이트
-    
     // todo
     // 이미지 보냈을 때..
     let formData = new FormData();
@@ -350,8 +358,9 @@ function saveInsure(idx = -1) {
     if (sel_hospital.getValue() && ipt_department.getValue()&& ipt_hospitalName.getValue() && ipt_patientType.getValue()) {
         dm_treatment.set("claim_no", scwin.claim.claimNo);
 
+        scwin.imgUrl = scwin.claimImg[date_drop.getValue()-1].imgSrc;
+
         // todo: 이미지 모달.. setSrc
-        // 메시지 보내는 방법...??
 
         console.log(dm_treatment.getJSON());
         scwin.isEdit ? $c.sbm.execute(sbm_updateTreatment) : $c.sbm.execute(sbm_insertTreatment);
@@ -520,7 +529,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:select1 submenuSize="auto" ev:onchange="scwin.date_drop_onchange" chooseOption="" allOption="" ref=""
-        							appearance="minimal" disabledClass="w2selectbox_disabled" disabled="false" style="width:150px;" id="date_drop" renderType=""
+        							appearance="minimal" disabledClass="w2selectbox_disabled" disabled="false" style="width:150px;text-align: center;" id="date_drop" renderType=""
         							class="" direction="auto">
         							<xf:choices></xf:choices>
         						</xf:select1>

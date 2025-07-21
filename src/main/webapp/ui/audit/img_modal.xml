@@ -58,8 +58,13 @@ scwin.onpageload = function () {
 
     // todo: localstorage에 있으면 순서대로 load...?
     let claimImg = JSON.parse(localStorage.getItem("claimImg"));
-    if (claimImg.length >= 1) {
-        console.log(claimImg);
+    if (claimImg) {
+        console.log(claimImg, "HAS");
+        
+        dl_imgList.setJSON(claimImg);
+        scwin.renderImageList();
+        scwin.renderFullImageViewer();
+        scwin.highlightSelectedThumbnail(1);
     } else {
         $c.sbm.execute(sbm_getS3Key, req);
     }  
@@ -94,14 +99,13 @@ scwin.sbm_getImg_submitdone = function (e) {
         scwin.renderFullImageViewer();
         scwin.highlightSelectedThumbnail(1);
 
-        // todo: localStorage에 claimImg라는 이름으로 저장
-        console.log(dl_imgList.getAllJSON());
+        // localStorage에 claimImg라는 이름으로 저장
+        localStorage.setItem("claimImg", JSON.stringify(dl_imgList.getAllJSON()));
     }
 };
 
 // 썸네일 목록
 scwin.renderImageList = function () {
-    console.log(dl_imgList.getAllJSON())
     const len = dl_imgList.getRowCount();
     const targetGrp = $p.getComponentById("imgList");
 
@@ -200,7 +204,6 @@ scwin.onThumbnailClick = function (e) {
 
     let len = $p.parent().scwin.genList?.length;
     $p.parent().gen_date?.getChild($p.parent().scwin.genList[len-1], "ipt_idx").setValue(e.target.alt);
-    img.setSrc(e.target.src);
 };
 
 // 줌 조절 함수

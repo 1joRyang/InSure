@@ -291,7 +291,7 @@ scwin.ipt_hcode2_onclick = function (e) {
 
 scwin.sbm_updateClaim_submitdone = function (e) {
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-ocr.xml";
-    //$p.closePopup("img_popup");
+    $p.closePopup("img_popup");
 };
 
 function openPopup(link, popupId, popupName, size = {}) {
