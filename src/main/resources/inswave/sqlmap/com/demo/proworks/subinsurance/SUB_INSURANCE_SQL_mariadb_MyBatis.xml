@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 가입보험정보 관련 처리를 담당하는 Sql Mapper
+	@description : 가입보험정보 관련 처리를 담당하는 Sql Mapper
+	@author      : hyunwoo
+	@since       : 2025/07/21
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/07/21              hyunwoo             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.subinsurance">
+    <insert id="insertSubInsurance" parameterType="com.demo.proworks.subinsurance.vo.SubInsuranceVo">
+    	<!-- 가입보험정보를 등록한다. -->	
+    		
+        INSERT INTO SUB_INSURANCE   /* QueryID : com.demo.proworks.subinsurance.insertSubInsurance */
+        ( 
+            INSU_ID
+            , ID
+            <if test="start_date!= null"> , START_DATE </if>
+            <if test="end_date  != null"> , END_DATE   </if>
+            <if test="insu_amt  != null"> , INSU_AMT   </if>
+        )
+        VALUES  
+        ( 
+            #{insu_id}
+            , #{ID}
+            <if test="start_date!= null"> , #{start_date} </if>
+            <if test="end_date  != null"> , #{end_date}   </if>
+            <if test="insu_amt  != null"> , #{insu_amt}   </if> 
+        )          
+    </insert>	
+	
+    <update id="updateSubInsurance" parameterType="com.demo.proworks.subinsurance.vo.SubInsuranceVo">
+    	<!-- 가입보험정보를 갱신한다. -->
+    	
+        UPDATE SUB_INSURANCE    /* QueryID : com.demo.proworks.subinsurance.updateSubInsurance */      
+      	  SET  
+                INSU_ID    = #{insu_id}   
+         ,  ID         = #{ID}                	                       
+            <if test="start_date!= null"> , START_DATE = #{start_date} </if>
+            <if test="end_date  != null"> , END_DATE   = #{end_date}   </if>
+            <if test="insu_amt  != null"> , INSU_AMT   = #{insu_amt}   </if>                 
+        WHERE   
+                INSU_ID    = #{insu_id}   
+         AND ID         = #{ID}        
+    </update>
+	
+    <delete id="deleteSubInsurance" parameterType="com.demo.proworks.subinsurance.vo.SubInsuranceVo">
+    	<!-- 가입보험정보를 삭제한다. -->
+    	
+        DELETE FROM SUB_INSURANCE   /* QueryID : com.demo.proworks.subinsurance.deleteSubInsurance */ 
+        WHERE   
+                INSU_ID    = #{insu_id}   
+         AND ID         = #{ID}                
+    </delete>
+	
+    <select id="selectSubInsurance" parameterType="com.demo.proworks.subinsurance.vo.SubInsuranceVo" resultType="com.demo.proworks.subinsurance.vo.SubInsuranceVo">
+    	<!-- 가입보험정보를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.subinsurance.selectSubInsurance */
+            INSU_ID, ID, START_DATE, END_DATE, INSU_AMT
+        FROM SUB_INSURANCE 
+        WHERE 
+                INSU_ID    = #{insu_id}   
+         AND ID         = #{ID}        			
+    </select>
+	
+    <select id="selectListSubInsurance" parameterType="com.demo.proworks.subinsurance.vo.SubInsuranceVo" resultType="com.demo.proworks.subinsurance.vo.SubInsuranceVo">
+    	<!-- 가입보험정보 목록을 조회한다. -->
+           SELECT    /* QueryID : com.demo.proworks.subinsurance.selectListSubInsurance */
+               INSU_ID, ID, START_DATE, END_DATE, INSU_AMT		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM SUB_INSURANCE
+                   WHERE  1=1    		
+	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountSubInsurance" parameterType="com.demo.proworks.subinsurance.vo.SubInsuranceVo" resultType="long">
+    <!-- 가입보험정보 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.subinsurance.selectListCountSubInsurance */
+             COUNT(*) totcnt  		                  
+         FROM SUB_INSURANCE
+         WHERE  1=1    		
+
+    </select>
+
+    <select id="selectInsuranceProductsByUserId" parameterType="com.demo.proworks.subinsurance.vo.SubInsuranceProductVo" resultType="com.demo.proworks.subinsurance.vo.SubInsuranceProductVo">
+    <!-- 사용자 ID로 보험상품 목록을 조회한다. -->
+        SELECT    /* QueryID : com.demo.proworks.subinsurance.selectInsuranceProductsByUserId */
+            s.insu_id,
+            i.insu_name,
+            u.user_name,
+            s.ID,
+            s.insu_amt,
+            '0' as claim_amt,
+            '0' as payment_amt,
+            '정상' as status,
+            s.start_date,
+            s.end_date
+        FROM SUB_INSURANCE s 
+        LEFT JOIN USER u ON s.ID = u.id 
+        LEFT JOIN INSURANCE i ON s.insu_id = i.insu_id
+        WHERE u.ID = #{ID}
+    </select>
+
+</mapper>
