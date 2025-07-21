@@ -45,8 +45,7 @@
 		        WHERE 
 		            ar.manager_no = #{emp_no}
 		            AND c.status = #{status}
-		        ORDER BY 
-		            deadline ASC
+		         ORDER BY RECEIPT_DATE DESC
 		    ) S, (SELECT @ROWNUM := 0) TMP
 		) A
 		WHERE PAGE = #{pageIndex};
@@ -81,8 +80,7 @@
 		        WHERE 
 		            c.emp_no = #{emp_no}
 		            AND c.status IN ('대기', '보완', '결재완료', '결재반려')
-		        ORDER BY 
-		            c.receipt_date ASC
+		         ORDER BY RECEIPT_DATE DESC
 		    ) S, (SELECT @ROWNUM := 0) TMP
 		) A
 		WHERE PAGE = #{pageIndex};
@@ -225,6 +223,7 @@
          AND ID like '%${SC_ID}%'
              </if>	     																																																							
         ) S, (SELECT @ROWNUM := 0) TMP
+        ORDER BY RECEIPT_DATE DESC
     ) A
             WHERE PAGE = #{pageIndex}
     </select>

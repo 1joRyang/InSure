@@ -55,7 +55,6 @@ scwin.search_personNum_onclick = function () {
     removeSClass();
     search_personNum.addClass("selected");
 };
-
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">

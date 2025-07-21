@@ -56,12 +56,12 @@ scwin.onpageload = function() {
 scwin.sbm_getMyClaim_submitdone = function (e) {
     // (submitdone) 동적으로 넣기....
     var claimContainer = $p.getComponentById("claimContainer");
-        
+    
     var claimListData = dl_claimList.getAllJSON();
-        
+    
     // 각 청구 항목에 대해 카드 생성
     for (var i = 0; i < claimListData.length; i++) {
-        var claimData = claimListData[i];
+        var claimData = claimListData[i]; 
         scwin.createClaimCard(claimContainer, claimData, i);
     }
 };
@@ -76,7 +76,8 @@ function hexToRgba(hex, alpha) {
 scwin.createClaimCard = function(container, claimData, index) {
     var cardId = "claimCard_" + index;
     let statusColor = scwin.getStatusColor(claimData.status);
-    let statusBackColor = hexToRgba(statusColor, 0.22)
+    let statusBackColor = hexToRgba(statusColor, 0.22);
+
     let statusText = scwin.getStatusText(claimData.status);
 
     // 카드 그룹
@@ -135,7 +136,7 @@ scwin.createClaimCard = function(container, claimData, index) {
     }, headerGroup);
 
     var securitySpan = $p.dynamicCreate(cardId + "_securitySpan", "span", {
-        style: "color: "+ statusColor +"; opacity: 1; font-size: 14px; font-weight: 700;"
+        style: "color: "+ statusColor +"; font-size: 13px; font-weight: 700;"
     }, securityBtn);
     securitySpan.setValue(statusText);
     
@@ -147,7 +148,7 @@ scwin.createClaimCard = function(container, claimData, index) {
 
     // 금액 텍스트 
     var amountText = $p.dynamicCreate(cardId + "_amount", "output", {
-        style: "width: 100%; font-size: 16px; font-weight: bold; color: " + statusColor + "; padding: 0; display: inline-block;"
+        style: "width: 100%; font-size: 16px; font-weight: bold; padding: 0; display: inline-block;"
     }, amountAreaGroup);
     amountText.setValue(claimData?.amount || "");
 
@@ -176,14 +177,14 @@ scwin.getStatusText = function(status) {
     let statusText = "";  // 초기값 설정
 
     // 상태에 따른 텍스트 변경
-    switch (claimData.status) {
+    switch (status) {
         case "대기":
         case "결재반려":
         case "결재중":
         case "결재완료":
             statusText = "심사중";
             break;
-        case "완료료":
+        case "완료":
             statusText = "지급완료";
             break;
         case "반송":
@@ -193,7 +194,7 @@ scwin.getStatusText = function(status) {
             statusText = "보완필요";
             break;
         default:
-            statusText = claimData.status; // 만약 알 수 없는 상태라면 그대로 표시
+            statusText = status; // 만약 알 수 없는 상태라면 그대로 표시
             break;
     }
     return statusText
@@ -241,7 +242,7 @@ scwin.onClaimCardClick = function(e) {
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
     		style="display: flex;flex-direction: column;gap: 15px;">
-    		<xf:group style="display: grid;grid-template-columns: 1fr 1fr 1fr 1fr;" id="">
+    		<xf:group style="display: grid;grid-template-columns: 1fr 1fr 1fr ;" id="">
     			<xf:trigger class="btn_cm" id="" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true" meta_snippetName="8_01 기본버튼"
     				style="" type="button">
     				<xf:label><![CDATA[1개월]]></xf:label>
@@ -253,10 +254,6 @@ scwin.onClaimCardClick = function(e) {
     			<xf:trigger class="btn_cm" id="" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true" meta_snippetName="8_01 기본버튼"
     				style="" type="button">
     				<xf:label><![CDATA[6개월]]></xf:label>
-    			</xf:trigger>
-    			<xf:trigger class="btn_cm" id="" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true" meta_snippetName="8_01 기본버튼"
-    				style="" type="button">
-    				<xf:label><![CDATA[직접설정]]></xf:label>
     			</xf:trigger>
     		</xf:group>
     		<xf:group style="border: 1px solid #D9D9D9;border-radius: 10px;display: grid;grid-template-columns: repeat(2, 1fr);padding: 10px;" id="">
@@ -278,7 +275,7 @@ scwin.onClaimCardClick = function(e) {
     			</xf:group>
     		</xf:group>
     		<xf:group style="width: 100%;h" id="">
-    			<w2:textbox id="" label="청구내역" style="font-size: 18px;"></w2:textbox>
+    			<w2:textbox id="" label="청구내역" style="font-size: 17px;font-weight: 700;"></w2:textbox>
     			<xf:group style="width: 100%; height: 100%; box-sizing: border-box;" id="claimContainer" class="claimContainer">
     			</xf:group>
     		</xf:group>
