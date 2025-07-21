@@ -56,11 +56,6 @@ scwin.search_personNum_onclick = function () {
     search_personNum.addClass("selected");
 };
 
-scwin.vacation_onclick = function () {
-    removeSClass();
-    vacation.addClass("selected");
-};
-
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
@@ -80,9 +75,6 @@ scwin.vacation_onclick = function () {
     		</w2:anchor>
     		<w2:anchor outerDiv="false" id="search_personNum" style="width: 100%;height: 23px;padding: 10px;" class="menu-item" ev:onclick="scwin.search_personNum_onclick">
     			<xf:label><![CDATA[주민번호 조회]]></xf:label>
-    		</w2:anchor>
-    		<w2:anchor outerDiv="false" id="vacation" style="width: 100%;height: 23px;padding: 10px;" class="menu-item" ev:onclick="scwin.vacation_onclick">
-    			<xf:label><![CDATA[휴가신청]]></xf:label>
     		</w2:anchor>
     	</xf:group>
     </body>
