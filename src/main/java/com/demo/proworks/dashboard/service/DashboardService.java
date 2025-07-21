@@ -1,5 +1,7 @@
 package com.demo.proworks.dashboard.service;
 
+import com.demo.proworks.dashboard.vo.ClaimMonitorVo;
+import com.demo.proworks.dashboard.vo.MonthlyPerfVo;
 import com.demo.proworks.dashboard.vo.TodayStatusVo;
 import com.inswave.elfw.exception.ElException;
 
@@ -16,5 +18,9 @@ public interface DashboardService {
 	 * @throws ElException
 	 */
 	 public TodayStatusVo selectTodayStatusCounts() throws ElException;
+	 
+	 public ClaimMonitorVo selectClaimMonitorCounts() throws ElException;
+	 
+	 public MonthlyPerfVo selectMonthlyPerformance() throws ElException;
 
 }

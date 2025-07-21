@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.demo.proworks.dashboard.dao.DashboardDAO;
 import com.demo.proworks.dashboard.service.DashboardService;
+import com.demo.proworks.dashboard.vo.ClaimMonitorVo;
+import com.demo.proworks.dashboard.vo.MonthlyPerfVo;
 import com.demo.proworks.dashboard.vo.TodayStatusVo;
 import com.inswave.elfw.exception.ElException;
 import com.inswave.elfw.log.AppLog;
@@ -38,5 +40,15 @@ public class DashboardServiceImpl implements DashboardService{
 
         return resultVo;
     }
+    
+    @Override
+    public ClaimMonitorVo selectClaimMonitorCounts() throws ElException {
+    	return dashboardDAO.selectClaimMonitorCounts();
+    }
+    
+    @Override
+	public MonthlyPerfVo selectMonthlyPerformance() throws ElException {
+	    return dashboardDAO.selectMonthlyPerformance();
+	}
 
 }

@@ -16,7 +16,7 @@
 -->
 <mapper namespace="com.demo.proworks.dashboard">
 	<select id="selectTodayStatusCounts"
-		resultType="com.demo.proworks.dashboard.vo.TodayStatusVo">
+		resultType="com.demo.proworks.dashboard.vo.TodayStatusVo" useCache="false">
 		<!-- QueryID : com.demo.proworks.dashboard.selectTodayStatusCounts -->
 		SELECT
             COUNT(CASE WHEN status = '대기' THEN 1 END) AS waitingCount,
@@ -27,6 +27,36 @@
             CLAIM  
         WHERE 
             DATE(receipt_date) = CURDATE()
+	</select>
+	
+	<select id="selectClaimMonitorCounts"
+		resultType="com.demo.proworks.dashboard.vo.ClaimMonitorVo" useCache="false">
+		<!-- QueryID : com.demo.proworks.dashboard.selectClaimMonitorCounts -->
+		<![CDATA[
+    SELECT
+        COUNT(CASE WHEN amount <= 1000000 THEN 1 END) AS countUnder1M,
+        COUNT(CASE WHEN amount > 1000000 THEN 1 END) AS countOver1M
+    FROM
+        CLAIM_RESULT
+    ]]>
+	</select>
+	
+	<select id="selectMonthlyPerformance" resultType="com.demo.proworks.dashboard.vo.MonthlyPerfVo" useCache="false">
+	    /* QueryID : com.demo.proworks.dashboard.selectMonthlyPerformance */
+	    <![CDATA[
+	    SELECT
+	        -- 이번 달에 처리된 건수 총합
+	        CONCAT(COUNT(*), '건') AS totalProcessedCount,
+	        -- 처리일(cr.date)과 접수일(c.receipt_date)의 날짜 차이(일)를 계산하여 평균을 구하고, '일'을 붙임
+	        CONCAT(ROUND(AVG(DATEDIFF(cr.date, c.receipt_date)), 1), '일') AS avgProcessingTime
+	    FROM
+	        CLAIM_RESULT cr
+	    JOIN
+	        CLAIM c ON cr.claim_no = c.claim_no
+	    WHERE
+	        -- 처리일(cr.date)이 이번 달에 해당하는 데이터만 필터링
+	        YEAR(cr.date) = YEAR(CURDATE()) AND MONTH(cr.date) = MONTH(CURDATE())
+	    ]]>
 	</select>
 	
 	

@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 import com.inswave.elfw.exception.ElException;
 import com.demo.proworks.claim.vo.ClaimFullJoinVo;
+import com.demo.proworks.dashboard.vo.ClaimMonitorVo;
+import com.demo.proworks.dashboard.vo.MonthlyPerfVo;
 import com.demo.proworks.dashboard.vo.TodayStatusVo;
 
 /**
@@ -31,18 +33,19 @@ public class DashboardDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbst
 		 return (List<TodayStatusVo>) list("com.demo.proworks.dashboard.selectTodayStatusCounts");
 	 }
 	
-	
-		
 	/**
-	 * 사용자 주민번호로 청구목록 조회 (사용자, 직원, 결과 정보 조인)
-	 *
-	 * @param claimFullJoinVo 청구-전체조인 VO (주민번호 포함)
-	 * @return 사용자의 청구목록
-	 * @throws Exception
-	 
-	public List<ClaimFullJoinVo> selectUserClaimsByRrn(ClaimFullJoinVo vo) throws ElException {
-		return (List<ClaimFullJoinVo>) list("com.demo.proworks.claim.selectUserClaimsByRrn", vo);
+	 * 고객 청구 모니터링을 조회한다.
+	 */
+	public ClaimMonitorVo selectClaimMonitorCounts() throws ElException {
+		return (ClaimMonitorVo) selectByPk("com.demo.proworks.dashboard.selectClaimMonitorCounts");
 	}
-*/
+
+	/**
+	 * 이번달 성과를 조회한다.
+	 */
+	public MonthlyPerfVo selectMonthlyPerformance() throws ElException {
+	    return (MonthlyPerfVo) selectByPk("com.demo.proworks.dashboard.selectMonthlyPerformance");
+	}
+	
 
 }

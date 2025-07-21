@@ -16,11 +16,35 @@
         				<w2:key dataType="number" name="반송 건수" id="returnedCount"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_claimMonitor">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="100만원 이하 건수" id="countUnder1M"></w2:key>
+        				<w2:key dataType="text" name="100만원 이상 건수" id="countOver1M"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_monthlyPerf">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="총처리건수" id="totalProcessedCount"></w2:key>
+        				<w2:key dataType="text" name="평균처리시간" id="avgProcessingTime"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
-        	<xf:submission id="sbm_getTodayStatus" action="/InsWebApp/selectTodayStatusCounts.pwkjson" method="post" mediatype="application/json" ref="data:json,dma_todayStatus"
-        		target="data:json,dma_todayStatus" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
-        		processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getTodayStatus_submitdone" ev:submiterror="" abortTrigger="">
+        	<xf:submission id="sbm_getTodayStatus" action="/InsWebApp/selectTodayStatusCounts.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_todayStatus","key":"todayStatusVo"}'
+        		target='data:json,{"id":"dma_todayStatus","key":"todayStatusVo"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getTodayStatus_submitdone"
+        		ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getClaimMonitor" action="/InsWebApp/selectClaimMonitorCounts.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_claimMonitor","key":"claimMonitorVo"}'
+        		target='data:json,{"id":"dma_claimMonitor","key":"claimMonitorVo"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getMonthlyPerf" action="/InsWebApp/selectMonthlyPerformance.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_monthlyPerf","key":"monthlyPerfVo"}'
+        		target='data:json,{"id":"dma_monthlyPerf","key":"monthlyPerfVo"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -28,10 +52,12 @@
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
     $p.executeSubmission("sbm_getTodayStatus");
+    $p.executeSubmission("sbm_getClaimMonitor");
+    $p.executeSubmission("sbm_getMonthlyPerf");
 };
         
 scwin.sbm_getTodayStatus_submitdone = function (e) {
-    
+    console.log("서버로부터 받은 원본 응답: ", e.responseJSON);
 };
 ]]></script>
         <style type="text/css"><![CDATA[
@@ -110,17 +136,29 @@ scwin.sbm_getTodayStatus_submitdone = function (e) {
 
                 <xf:group class="flex_row" id="grp_top_panels">
                     <xf:group class="panel">
-                        <xf:group class="panel_header_with_icon">
-                            <w2:textbox class="panel_title" label="오늘의 처리 현황" tagname="h3"></w2:textbox>
-                            <xf:group class="header_icon icon_pink"></xf:group>
-                        </xf:group>
-                        <xf:group class="panel_content">
-                            <xf:group class="status_item"><w2:textbox class="status_label" label="처리 대기" tagname="span"></w2:textbox><w2:textbox class="status_value red" label="23건" tagname="span"></w2:textbox></xf:group>
-                            <xf:group class="status_item"><w2:textbox class="status_label" label="결재 중" tagname="span"></w2:textbox><w2:textbox class="status_value orange" label="15건" tagname="span"></w2:textbox></xf:group>
-                            <xf:group class="status_item"><w2:textbox class="status_label" label="완료" tagname="span"></w2:textbox><w2:textbox class="status_value green" label="47건" tagname="span"></w2:textbox></xf:group>
-                            <xf:group class="status_item"><w2:textbox class="status_label" label="반송" tagname="span"></w2:textbox><w2:textbox class="status_value" label="1건" tagname="span"></w2:textbox></xf:group>
-                        </xf:group>
-                    </xf:group>
+    <xf:group class="panel_header_with_icon">
+        <w2:textbox class="panel_title" label="오늘의 처리 현황" tagname="h3"></w2:textbox>
+        <xf:group class="header_icon icon_pink"></xf:group>
+    </xf:group>
+    <xf:group class="panel_content">
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="처리 대기" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value red" ref="data:dma_todayStatus.waitingCount" dataType="number" displayFormat="#,##0건" tagname="span" label=""></w2:textbox>
+        </xf:group>
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="결재 중" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value orange" ref="data:dma_todayStatus.processingCount" dataType="number" displayFormat="#,##0건" tagname="span" label=""></w2:textbox>
+        </xf:group>
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="완료" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value green" ref="data:dma_todayStatus.completedCount" dataType="number" displayFormat="#,##0건" tagname="span" label=""></w2:textbox>
+        </xf:group>
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="반송" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value" ref="data:dma_todayStatus.returnedCount" dataType="number" displayFormat="#,##0건" tagname="span" label=""></w2:textbox>
+        </xf:group>
+    </xf:group>
+</xf:group>
                     
                     <xf:group class="panel">
                         <xf:group class="panel_header_with_icon">
@@ -138,24 +176,36 @@ scwin.sbm_getTodayStatus_submitdone = function (e) {
                     <xf:group class="panel">
                         <xf:group class="panel_header_with_icon">
                             <w2:textbox class="panel_title" label="고객 청구 모니터링" tagname="h3"></w2:textbox>
-                             <xf:group class="header_icon icon_blue"></xf:group>
+                            <xf:group class="header_icon icon_blue"></xf:group>
                         </xf:group>
                         <xf:group class="panel_content">
-                            <xf:group class="status_item"><w2:textbox class="status_label" label="100만원 이하" tagname="span"></w2:textbox><w2:textbox class="status_value red" label="7건" tagname="span"></w2:textbox></xf:group>
-                            <xf:group class="status_item"><w2:textbox class="status_label" label="100만원 이상" tagname="span"></w2:textbox><w2:textbox class="status_value red" label="2건" tagname="span"></w2:textbox></xf:group>
+                            <xf:group class="status_item">
+                                <w2:textbox class="status_label" label="100만원 이하" tagname="span"></w2:textbox>
+                                <w2:textbox class="status_value red" ref="data:dma_claimMonitor.countUnder1M" dataType="number" displayFormat="#,##0건" tagname="span" label=""></w2:textbox>
+                            </xf:group>
+                            <xf:group class="status_item">
+                                <w2:textbox class="status_label" label="100만원 이상" tagname="span"></w2:textbox>
+                                <w2:textbox class="status_value red" ref="data:dma_claimMonitor.countOver1M" dataType="number" displayFormat="#,##0건" tagname="span" label=""></w2:textbox>
+                            </xf:group>
                         </xf:group>
                     </xf:group>
                     
                     <xf:group class="panel">
-                        <xf:group class="panel_header_with_icon">
-                             <w2:textbox class="panel_title" label="이번 달 성과" tagname="h3"></w2:textbox>
-                             <xf:group class="header_icon icon_green"></xf:group>
-                        </xf:group>
-                        <xf:group class="panel_content">
-                            <xf:group class="status_item"><w2:textbox class="status_label" label="총 처리 건수" tagname="span"></w2:textbox><w2:textbox class="status_value" label="1,247건" tagname="span"></w2:textbox></xf:group>
-                            <xf:group class="status_item"><w2:textbox class="status_label" label="평균 처리 시간" tagname="span"></w2:textbox><w2:textbox class="status_value" label="1.8일" tagname="span"></w2:textbox></xf:group>
-                        </xf:group>
-                    </xf:group>
+    <xf:group class="panel_header_with_icon">
+         <w2:textbox class="panel_title" label="이번 달 성과" tagname="h3"></w2:textbox>
+         <xf:group class="header_icon icon_green"></xf:group>
+    </xf:group>
+    <xf:group class="panel_content">
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="총 처리 건수" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value" ref="data:dma_monthlyPerf.totalProcessedCount" tagname="span" label=""></w2:textbox>
+        </xf:group>
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="평균 처리 시간" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value" ref="data:dma_monthlyPerf.avgProcessingTime" tagname="span" label=""></w2:textbox>
+        </xf:group>
+        </xf:group>
+</xf:group>
                 </xf:group>
                 
                 <xf:group class="flex_row" id="grp_mid_charts">
