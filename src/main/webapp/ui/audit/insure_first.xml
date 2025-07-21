@@ -27,21 +27,11 @@ scwin.onpageload = function () {
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
     dm_header.set("patient", scwin.claim.userName);
     dm_header.set("claimNo", scwin.claim.claimNo);
-
-    // todo: img 리스트 조회
 };
 
 scwin.btn_next_onclick = function (e) {
     // 페이지 이동
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_second.xml";
-};
-
-scwin.btn_img_next_onclick = function (e) {
-    // todo: img 옮기기
-};
-
-scwin.btn_img_def_onclick = function (e) {
-    // todo: img 옮기기
 };
 
 scwin.btn_change_onclick = function (e) {

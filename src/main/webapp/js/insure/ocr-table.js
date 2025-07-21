@@ -1,3 +1,25 @@
+// 숫자 정리 함수 추가
+function cleanNumber(value) {
+    if (value === null || value === undefined || value === '') {
+        return 0;
+    }
+    
+    // 문자열로 변환
+    let str = String(value);
+    
+    // 쉼표와 점 제거
+    str = str.replace(/[,.]/g, '');
+    
+    // 숫자만 추출 (음수 부호는 유지)
+    let match = str.match(/^-?\d+/);
+    
+    if (match) {
+        return parseInt(match[0]) || 0;
+    }
+    
+    // 숫자가 없으면 0 반환
+    return 0;
+}
 
 // 페이지 로드 시 빈 테이블 생성 함수
 scwin.createEmptyTable = function() {
@@ -49,17 +71,17 @@ scwin.createTable = function (result) {
         });
     });
     
-    // 2단계: 정확히 일치하는 항목들 처리
+    // 2단계: 정확히 일치하는 항목들 처리 (숫자 정리 적용)
     let unmatchedRows = [];
     dataRows.forEach(function(row) {
         if (rowNameDataMap.has(row.col1)) {
             // 정확히 일치하는 경우
             let targetRow = rowNameDataMap.get(row.col1);
-            targetRow.col2 = row.col2 || 0;
-            targetRow.col3 = row.col3 || 0;
-            targetRow.col4 = row.col4 || 0;
-            targetRow.col6 = row.col5 || 0;  // 원래 col5를 col6으로
-            targetRow.col7 = row.col6 || 0;  // 원래 col6을 col7로
+            targetRow.col2 = cleanNumber(row.col2);  // 숫자 정리 적용
+            targetRow.col3 = cleanNumber(row.col3);  // 숫자 정리 적용
+            targetRow.col4 = cleanNumber(row.col4);  // 숫자 정리 적용
+            targetRow.col6 = cleanNumber(row.col5);  // 원래 col5를 col6으로, 숫자 정리 적용
+            targetRow.col7 = cleanNumber(row.col6);  // 원래 col6을 col7로, 숫자 정리 적용
             // col8도 제외항목이므로 0 유지
         } else {
             // 일치하지 않는 경우 나중에 처리
@@ -67,7 +89,7 @@ scwin.createTable = function (result) {
         }
     });
     
-    // 3단계: 일치하지 않는 항목들을 가장 유사한 rowName에 병합
+    // 3단계: 일치하지 않는 항목들을 가장 유사한 rowName에 병합 (숫자 정리 적용)
     unmatchedRows.forEach(function(row) {
         let result = findMostSimilarRowName(row.col1, rowName);
         
@@ -75,12 +97,19 @@ scwin.createTable = function (result) {
         if (result.similarity >= 0.3) {
             let targetRow = rowNameDataMap.get(result.name);
             
+            // 숫자 정리를 적용한 값들
+            let cleanCol2 = cleanNumber(row.col2);
+            let cleanCol3 = cleanNumber(row.col3);
+            let cleanCol4 = cleanNumber(row.col4);
+            let cleanCol5 = cleanNumber(row.col5);
+            let cleanCol6 = cleanNumber(row.col6);
+            
             // 0이 아닌 값들만 병합 (기존 값이 0인 경우에만)
-            if (targetRow.col2 === 0 && (row.col2 || 0) !== 0) targetRow.col2 = row.col2;
-            if (targetRow.col3 === 0 && (row.col3 || 0) !== 0) targetRow.col3 = row.col3;
-            if (targetRow.col4 === 0 && (row.col4 || 0) !== 0) targetRow.col4 = row.col4;
-            if (targetRow.col6 === 0 && (row.col5 || 0) !== 0) targetRow.col6 = row.col5;
-            if (targetRow.col7 === 0 && (row.col6 || 0) !== 0) targetRow.col7 = row.col6;
+            if (targetRow.col2 === 0 && cleanCol2 !== 0) targetRow.col2 = cleanCol2;
+            if (targetRow.col3 === 0 && cleanCol3 !== 0) targetRow.col3 = cleanCol3;
+            if (targetRow.col4 === 0 && cleanCol4 !== 0) targetRow.col4 = cleanCol4;
+            if (targetRow.col6 === 0 && cleanCol5 !== 0) targetRow.col6 = cleanCol5;
+            if (targetRow.col7 === 0 && cleanCol6 !== 0) targetRow.col7 = cleanCol6;
             
             console.log(`"${row.col1}"을 "${result.name}"에 병합 (유사도: ${result.similarity.toFixed(2)})`);
         } else {
@@ -113,7 +142,7 @@ scwin.createTable = function (result) {
     
 }
 
-// 플랫 리스트 생성 (기존 코드와의 호환성을 위해)
+// 플랫 리스트 생성 (기존 코드와의 호합성을 위해)
 function createFlatRowNameList() {
     let flatList = [];
     tableStructure.forEach(category => {
@@ -393,38 +422,37 @@ function createCellClickHandler(td, rowIndex, colIndex, cellValue) {
 
 // 문자열 유사도 계산 (Levenshtein Distance 기반)
 function calculateSimilarity(str1, str2) {
-    const matrix = [];
-    
-    // 빈 문자열 처리
-    if (str1.length === 0) return str2.length;
-    if (str2.length === 0) return str1.length;
-    
-    // 행렬 초기화
-    for (let i = 0; i <= str2.length; i++) {
-        matrix[i] = [i];
-    }
-    for (let j = 0; j <= str1.length; j++) {
-        matrix[0][j] = j;
-    }
-    
-    // 거리 계산
-    for (let i = 1; i <= str2.length; i++) {
-        for (let j = 1; j <= str1.length; j++) {
-            if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-                matrix[i][j] = matrix[i - 1][j - 1];
-            } else {
-                matrix[i][j] = Math.min(
-                    matrix[i - 1][j - 1] + 1, // 교체
-                    matrix[i][j - 1] + 1,     // 삽입
-                    matrix[i - 1][j] + 1      // 삭제
-                );
-            }
-        }
-    }
-    
-    // 유사도를 0~1 사이의 값으로 변환
-    const maxLength = Math.max(str1.length, str2.length);
-    return (maxLength - matrix[str2.length][str1.length]) / maxLength;
+	const matrix = [];
+
+	   // ✅ 빈 문자열인 경우 매칭으로 간주
+	   if (!str1 || !str2) return 1.0;
+
+	   // 행렬 초기화
+	   for (let i = 0; i <= str2.length; i++) {
+	       matrix[i] = [i];
+	   }
+	   for (let j = 0; j <= str1.length; j++) {
+	       matrix[0][j] = j;
+	   }
+
+	   // 거리 계산
+	   for (let i = 1; i <= str2.length; i++) {
+	       for (let j = 1; j <= str1.length; j++) {
+	           if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+	               matrix[i][j] = matrix[i - 1][j - 1];
+	           } else {
+	               matrix[i][j] = Math.min(
+	                   matrix[i - 1][j - 1] + 1, // 교체
+	                   matrix[i][j - 1] + 1,     // 삽입
+	                   matrix[i - 1][j] + 1      // 삭제
+	               );
+	           }
+	       }
+	   }
+
+	   // 유사도 계산
+	   const maxLength = Math.max(str1.length, str2.length);
+	   return (maxLength - matrix[str2.length][str1.length]) / maxLength;
 }
 
 // 가장 유사한 rowName 항목을 찾는 함수
@@ -480,8 +508,9 @@ function calculateMainTableTotal() {
 	ipt_tableTotalminus.setValue(patientTotal);
 }
 
+// 셀 값 저장 함수도 숫자 정리 적용
 function saveCellValue(td, input, rowIndex, colIndex) {
-    const newValue = parseFloat(input.value) || 0;
+    const newValue = cleanNumber(input.value);  // 숫자 정리 적용
     td.textContent = newValue;
     
     console.log(`Row ${rowIndex}, Col ${colIndex} 값 변경: ${newValue}`);
@@ -563,7 +592,6 @@ scwin.updateColumnTotal = function (colIndex) {
     }
 }
 
-
 // 셀 값 수정 함수
 function editCell(td, rowIndex, colIndex, currentValue) {
     // 이미 수정 중인 셀이 있으면 취소
@@ -609,7 +637,4 @@ function editCell(td, rowIndex, colIndex, currentValue) {
     input.addEventListener('blur', function() {
         saveCellValue(td, input, rowIndex, colIndex);
     });
-
 }
-
-
