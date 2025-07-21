@@ -1513,16 +1513,38 @@ scwin.btn_approval_onclick = function (e) {
             }
         });
     } else {
-        // Swal.fire({
-        //     title: '결재 신청',
-        //     text: '결재 신청이 완료되었습니다.',
-        //     icon: 'info',
-        //     confirmButtonText: '확인',
-        //     backdrop: false,  
-        //     allowOutsideClick: true
-        // });
+        alert("결재 신청");
+         openClaimApprovalPopup("/InsWebApp/ui/approval/approval-modal.xml");
     }
 };
+
+function openClaimApprovalPopup(){
+     requires("uiplugin.popup");
+    var winWid = $(window).width();
+    var winHei = $(window).height();
+    var popWid = 600;
+    var popHei = 250;
+    var sumLeft = (winWid - popWid) / 2;
+    var sumTop = (winHei - popHei) / 2;
+
+    var opts = {
+        "id": "claim_Approval_popup",
+        "type": "litewindow",
+        "width": popWid + "px",
+        "height": popHei + "px",
+        "top": sumTop,
+        "left": sumLeft,
+        "popupName": "결재 신청",
+        "modal": true,
+        "useIFrame": false,
+        "title": "결재 신청",
+        "useATagBtn": false,
+        "frameMode": "wframe",
+    };
+
+    $p.openPopup(link, opts);
+
+}
 // 결재승인 성공 콜백
 scwin.sbm_approveApprovalReq_submitdone = function (e) {
     alert("결재승인이 완료되었습니다.");
