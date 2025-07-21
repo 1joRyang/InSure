@@ -109,4 +109,34 @@
             </if>
     </select>
 
+    <!-- 결재요청 메모만 업데이트 -->
+    <update id="updateApprovalReqMemo" parameterType="com.demo.proworks.approvalreq.vo.ApprovalReqVo">
+        <!-- 결재요청 메모를 업데이트한다. -->
+        UPDATE APPROVAL_REQ    /* QueryID : com.demo.proworks.approvalreq.updateApprovalReqMemo */      
+        SET  
+            APPROVAL_MEMO = #{approval_memo}
+        WHERE   
+            CLAIM_NO = #{claim_no}  
+    </update>
+
+    <!-- 청구 상태를 결재반려로 변경 -->
+    <update id="updateClaimStatusToReject" parameterType="com.demo.proworks.approvalreq.vo.ApprovalReqVo">
+        <!-- 청구 상태를 결재반려로 변경한다. -->
+        UPDATE CLAIM    /* QueryID : com.demo.proworks.approvalreq.updateClaimStatusToReject */      
+        SET  
+            STATUS = '결재반려'
+        WHERE   
+            CLAIM_NO = #{claim_no}  
+    </update>
+
+    <!-- 청구 상태를 결재완료로 변경 -->
+    <update id="updateClaimStatusToApprove" parameterType="com.demo.proworks.approvalreq.vo.ApprovalReqVo">
+        <!-- 청구 상태를 결재완료로 변경한다. -->
+        UPDATE CLAIM    /* QueryID : com.demo.proworks.approvalreq.updateClaimStatusToApprove */      
+        SET  
+            STATUS = '결재완료'
+        WHERE   
+            CLAIM_NO = #{claim_no}  
+    </update>
+
 </mapper>

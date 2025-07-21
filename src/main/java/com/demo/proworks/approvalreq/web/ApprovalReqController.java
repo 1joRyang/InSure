@@ -115,5 +115,31 @@ public class ApprovalReqController {
     public void deleteApprovalReq(ApprovalReqVo approvalReqVo) throws Exception {
         approvalReqService.deleteApprovalReq(approvalReqVo);
     }
-   
+
+    /**
+     * 결재요청을 반려 처리한다.
+     *
+     * @param  approvalReqVo 결재요청
+     * @throws Exception
+     */
+    @ElService(key="APPROVALREQReject")    
+    @RequestMapping(value="APPROVALREQReject")
+    @ElDescription(sub="결재요청 반려처리",desc="결재요청을 반려 처리하고 청구 상태를 변경한다.")    
+    public void rejectApprovalReq(ApprovalReqVo approvalReqVo) throws Exception {  
+        approvalReqService.rejectApprovalReq(approvalReqVo);                                            
+    }
+
+    /**
+     * 결재요청을 승인 처리한다.
+     *
+     * @param  approvalReqVo 결재요청
+     * @throws Exception
+     */
+    @ElService(key="APPROVALREQApprove")    
+    @RequestMapping(value="APPROVALREQApprove")
+    @ElDescription(sub="결재요청 승인처리",desc="결재요청을 승인 처리하고 청구 상태를 변경한다.")    
+    public void approveApprovalReq(ApprovalReqVo approvalReqVo) throws Exception {  
+        approvalReqService.approveApprovalReq(approvalReqVo);                                            
+    }
+
 }

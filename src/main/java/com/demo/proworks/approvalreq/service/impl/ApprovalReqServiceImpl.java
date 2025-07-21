@@ -6,6 +6,7 @@ import javax.annotation.Resource;
 
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.demo.proworks.approvalreq.service.ApprovalReqService;
 import com.demo.proworks.approvalreq.vo.ApprovalReqVo;
@@ -122,4 +123,38 @@ public class ApprovalReqServiceImpl implements ApprovalReqService {
 		return approvalReqDAO.deleteApprovalReq(approvalReqVo);
 	}
 	
+	/**
+	 * 결재요청을 반려 처리한다.
+	 *
+	 * @process
+	 * 1. APPROVAL_REQ 테이블의 approval_memo 업데이트
+	 * 2. CLAIM 테이블의 status를 "결재반려"로 변경
+	 * 
+	 * @param  approvalReqVo 결재요청 ApprovalReqVo
+	 * @throws Exception
+	 */
+	@Transactional
+	public void rejectApprovalReq(ApprovalReqVo approvalReqVo) throws Exception {
+		// 1. APPROVAL_REQ 테이블의 approval_memo 업데이트
+		approvalReqDAO.updateApprovalReqMemo(approvalReqVo);
+		
+		// 2. CLAIM 테이블의 status를 "결재반려"로 변경
+		approvalReqDAO.updateClaimStatusToReject(approvalReqVo);
+	}
+
+	/**
+	 * 결재요청을 승인 처리한다.
+	 *
+	 * @process
+	 * 1. CLAIM 테이블의 status를 "결재완료"로 변경
+	 * 
+	 * @param  approvalReqVo 결재요청 ApprovalReqVo
+	 * @throws Exception
+	 */
+	@Transactional
+	public void approveApprovalReq(ApprovalReqVo approvalReqVo) throws Exception {
+		// 1. CLAIM 테이블의 status를 "결재완료"로 변경
+		approvalReqDAO.updateClaimStatusToApprove(approvalReqVo);
+	}
+
 }
