@@ -7,8 +7,25 @@
     	<w2:buildDate />
     	<w2:MSA />
     	<xf:model>
-    		<w2:dataCollection baseNode="map" />
+    		<w2:dataCollection baseNode="map">
+    			<w2:dataMap baseNode="map" id="dma_logout_request">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="실무자아이디" id="empNo"></w2:key>
+    					<w2:key dataType="text" name="비밀번호" id="empPw"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    			<w2:dataMap baseNode="map" id="dma_logout_response">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="실무자아이디" id="empNo"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    		</w2:dataCollection>
     		<w2:workflowCollection />
+    		<xf:submission id="sbm_EmployeeLogout" action="/InsWebApp/EmployeeLogout.pwkjson" method="post" mediatype="application/json"
+    			ref='data:json,[{"id":"dma_logout_request","key":"elData"},{"id":"dma_logout_response","key":"elData"}]' target="" encoding="UTF-8"
+    			instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+    			ev:submitdone="scwin.sbm_EmployeeLogout_submitdone" ev:submiterror="scwin.sbm_EmployeeLogout_submiterror" abortTrigger="">
+    		</xf:submission>
     	</xf:model>
     	<w2:layoutInfo />
     	<w2:publicInfo method="" />
@@ -17,31 +34,53 @@ scwin.onpageload = function() {
 	
 };
 
-scwin.logout_onclick = function (e) {
-
-};
-
 scwin.img_logo_onclick = function (e) {
     location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
+};
+
+scwin.logout_btn_onclick = function (e) {
+      if (confirm("로그아웃 하시겠습니까?")) {
+          $c.sbm.execute(sbm_EmployeeLogout);
+    }
+    
+};
+
+// 로그아웃 실패 시 처리
+scwin.sbm_EmployeeLogout_submiterror = function(e) {
+    console.error("로그아웃 실패:", e);
+    alert("로그아웃 처리 중 오류가 발생했습니다.");
+};
+
+scwin.sbm_EmployeeLogout_submitdone = function (e) {
+    console.log("로그아웃 완료");
+    
+    // 로컬스토리지 정리
+    localStorage.removeItem("user");
+    localStorage.removeItem("simple");
+    localStorage.removeItem("employee");
+    
+    // 로그인 페이지로 이동
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/login_pc_ver.xml";
+
 };
 ]]></script>
     	<w2:require as="udc_notification" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/notification.xml"></w2:require>
     </head>
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
-    		style="background-color: white;border-bottom: 1px solid #bfbfbf;">
+    		style="background-color: white;border-bottom: 1px solid #bfbfbf;       font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
     		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
     			style="margin: 0">
-    			<xf:image src="/InsWebApp/images/insure/insureLogo.png" style="width:165px;height:60px;" id="img_logo" ev:onclick="scwin.img_logo_onclick"></xf:image>
+    			<xf:image src="/InsWebApp/images/insure/insureLogo.png" style="width:165px;height:60px;" id="img_logo"
+    				ev:onclick="scwin.img_logo_onclick">
+    			</xf:image>
     			<xf:group class="breadcrumb" id="" style="">
     				<xf:group id="" style="" tagname="ul">
     					<xf:group id="" style="" tagname="li"></xf:group>
     				</xf:group>
     			</xf:group>
     			<w2:udc_notification style="width: 30px;height: 30px;" title="" message=""></w2:udc_notification>
-    			<w2:span id="logout" label="로그아웃" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    				meta_snippetName="10_16 출력텍스트" style="" ev:onclick="scwin.logout_onclick">
-    			</w2:span>
+    			<w2:button style="width: 80px;height: 23px;background-color:#FFFFFF;       font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;" id="logout_btn" label="로그아웃" ev:onclick="scwin.logout_btn_onclick"></w2:button>
     		</xf:group>
     	</xf:group>
     </body>

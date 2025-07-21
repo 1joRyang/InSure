@@ -155,13 +155,15 @@ public class ProworksAuthProcess {
         }
         
         // EMPLOYEE 역할 체크 (ADMIN, MANAGER 등 포함)
-        if ("ADMIN".equals(userRole) || "MANAGER".equals(userRole) || "EMPLOYEE".equals(userRole)) {
+        if ("ADMIN".equals(userRole) || "MANAGER".equals(userRole) || "EMPLOYEE".equals(userRole)||
+        "실무자".equals(userRole) || "관리자".equals(userRole)) {
             // EMPLOYEE는 USER 전용 서비스 제외하고 모든 서비스 접근 가능
             if (USER_ONLY_SERVICES.contains(svcId)) {
                 return false;
             }
             return true;
         }
+        
         
         // 정의되지 않은 역할은 접근 불가
         AppLog.warn("[ProworksAuthProcess] 정의되지 않은 사용자 역할: " + userRole);

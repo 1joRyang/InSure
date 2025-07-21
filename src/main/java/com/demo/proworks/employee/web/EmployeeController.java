@@ -293,100 +293,64 @@ public class EmployeeController {
         response.getWriter().write(jsonErrorResponse);
     }
 	
-    /*public void login(LoginVo loginVo, HttpServletRequest request, HttpServletResponse response) throws Exception {
-    	//int id = loginVo.getEmpNo();
-    	String id = loginVo.getUserId();
-    	String pw = loginVo.getPw();
-    	
-    	//LoginInfo info = loginProcess.processLogin(request, id, pw);
-    	
-    	Object[] params = {"EMPLOYEE", pw};
-    	
-    	System.out.println(">>>>> 1. 화면에서 입력받은 id: " + id);
-	    System.out.println(">>>>> 1. 화면에서 입력받은 pw: " + pw);
-    	
-    	// processLogin(request, id, pw, params[0], params[1], ...);
-        LoginInfo info = loginProcess.processLogin(request, id, "EMPLOYEE", pw);
-        AppLog.debug("- Login 정보 : " + info.toString()); 
-    	
-    	 if (info.isSuc()) {
-    	 
-    	 
-    		 	// loginProcess가 세션을 만들지 않는 것에 대비하여, 여기서 직접 세션을 생성합니다.
-		        HttpSession session = request.getSession(true);
-		        
-		        session.setAttribute("loginInfo", info); // info 객체나 user_id 등을 저장
-		        session.setMaxInactiveInterval(30 * 60); // 예: 세션 유효 시간 30분 설정
-		        
-		        System.out.println(">>>>> [DEBUG] 세션 강제 생성 완료! Session ID: " + session.getId());
-		        
-		   try {
-		     
-		        ProworksUserHeader userHeader = (ProworksUserHeader) request.getSession().getAttribute("userHeader");
-		        
-		        
-		         // DB에서 사용자 정보 조회
-		        EmployeeVo searchEmpVo = new EmployeeVo();
-		        searchEmpVo.setEmpNo(id);
-	            EmployeeVo empInfo = employeeService.selectEmployee(searchEmpVo);
-	            
-	            
-	             //if (empInfo != null) {
-	             
-	             if (userHeader != null) {
-	                String employeeId = empInfo.getEmpNo(); // DB에서 가져온 실제 id 값
-	                
-	                
-	                System.out.println(">>>>> DB에서 조회한 실무자 ID: " + employeeId);
-	                
-	                // 로그인 성공 및 세션 정보 조회 성공
-                    Map<String, Object> elData = new HashMap<>();
-                    Map<String, Object> responseMap = new HashMap<>();	              			            
-		            
-		            responseMap.put("status", "SUCCESS");
-                    //responseMap.put("empName", empInfo.getEmpName());
-                    //responseMap.put("role", empInfo.getRole());
-                    responseMap.put("empName", userHeader.getTestUserName());
-                    responseMap.put("role", userHeader.getUserRole());
-                    
-		            elData.put("dma_login_response", responseMap);
-		            
-            
-		            ObjectMapper mapper = new ObjectMapper();
-		            String jsonResponse = mapper.writeValueAsString(elData);
-		
-		            response.setContentType("application/json");
-		            response.setCharacterEncoding("UTF-8");
-		            response.getWriter().write(jsonResponse);
+	
+	
 
-			        } else {
-			            //response.getWriter().write(jsonErrorResponse);
-			             throw new Exception("로그인 후 세션 정보를 가져오는 데 실패했습니다.");
-			        }
-			        
-			    } catch (Exception e) {
-                // 세션 처리 중 발생한 에러에 대한 응답
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                AppLog.error("로그인 성공 후 세션 처리 중 에러", e);
-                // (필요 시 에러 응답 JSON 생성)
-            }
+	/**
+	 * 로그아웃을 처리한다.
+	 * @param request 요청 정보 HttpServletRequest
+	 * @param response 응답 정보 HttpServletResponse
+	 * @throws Exception
+	 */
+	@ElService(key = "EmployeeLogout")
+	@RequestMapping(value = "EmployeeLogout")
+	@ElDescription(sub = "실무자로그아웃", desc = "실무자로그아웃을 처리한다.")
+	public void logout(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	
+	    try {
+	        // 현재 세션에서 사용자 ID 가져오기
+	        HttpSession session = request.getSession(false);
+	        String empNo = null;
+	
+	        if (session != null) {
+	            // userHeader에서 가져오기 (SessionDataAdapter에서 설정한 것)
+	            ProworksUserHeader userHeader = (ProworksUserHeader) session.getAttribute("userHeader");
+	            if (userHeader != null) {
+	                empNo = userHeader.getUserId(); // Employee의 경우 empNo가 userId로 저장됨
+	            }
+	        }
+	
+	        // LoginAdapter를 통한 로그아웃 처리
+	        if (empNo != null) {
+	            LoginInfo logoutInfo = loginProcess.processLogout(request, empNo);
+	        } else {
+	            // 세션이 없어도 강제로 무효화
+	            if (session != null) {
+	                session.invalidate();
+	            }
+	        }
+	
+	        // 성공 응답
+	        Map<String, Object> elData = new HashMap<>();
+	        Map<String, Object> responseMap = new HashMap<>();
+	        responseMap.put("success", true);
+	        responseMap.put("message", "로그아웃이 완료되었습니다.");
+	        elData.put("dma_logout_response", responseMap);
+	
+	        ObjectMapper mapper = new ObjectMapper();
+	        String jsonResponse = mapper.writeValueAsString(elData);
+	
+	        response.setContentType("application/json");
+	        response.setCharacterEncoding("UTF-8");
+	        response.getWriter().write(jsonResponse);
+	
+	    } catch (Exception e) {
+	        AppLog.error("로그아웃 처리 중 오류 발생", e);
+	        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	        response.getWriter().write("{\"success\":false,\"error\":\"로그아웃 처리 중 오류가 발생했습니다.\"}");
+	    }
+	}
 
-        } else {
-            // 로그인 실패 시 처리
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            Map<String, Object> errorData = new HashMap<>();
-            Map<String, String> errorMap = new HashMap<>();
-            errorMap.put("errorMsg", "로그인 실패: 아이디 또는 비밀번호가 올바르지 않습니다.");
-            errorData.put("error", errorMap);
-
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonErrorResponse = mapper.writeValueAsString(errorData);
-            
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(jsonErrorResponse);
-        }
-    }*/
 
     /**
      * 실무자,관리자정보 목록을 조회합니다.
