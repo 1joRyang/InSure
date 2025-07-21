@@ -497,11 +497,35 @@
                 100% { transform: rotate(360deg); }
             }
 
+            /* 비활성화된 버튼 스타일 */
+            .disabled-button {
+                opacity: 0.5 !important;
+                cursor: not-allowed !important;
+                pointer-events: none !important;
+                background-color: #cccccc !important;
+                color: #666666 !important;
+                border-color: #cccccc !important;
+            }
+
+            /* 읽기 전용 텍스트 영역 스타일 */
+            .readonly-textarea {
+                background-color: #f5f5f5 !important;
+                color: #666666 !important;
+                cursor: not-allowed !important;
+            }
+
+            /* 권한 없음 안내 메시지 */
+            .permission-notice {
+                color: #ff6b6b;
+                font-size: 12px;
+                margin-top: 5px;
+                font-style: italic;
+            }
+
 
         ]]></style>
 
-		<script lazy="false" type="text/javascript"><![CDATA[
-// 로딩 표시 함수
+		<script lazy="false" type="text/javascript"><![CDATA[// 로딩 표시 함수
 scwin.showLoading = function (show) {
     try {
         if (typeof $p.showLoading === 'function') {
@@ -522,27 +546,23 @@ scwin.showLoading = function (show) {
 
 scwin.onpageload = function () {
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
+    scwin.employee = JSON.parse(localStorage.getItem("employee"));
+    
     // 로컬스토리지에서 가져오기
     console.log("청구번호:", scwin.claim.claimNo);
+    console.log("청구 담당자 empNo:", scwin.claim.empNo);
+    console.log("현재 로그인 사용자 empNo:", scwin.employee.empNo);
+    
     // 검색 조건에 설정
     dma_search.set("claim_no", scwin.claim.claimNo);
     dma_ID.set("ID", scwin.claim.ID);
     dma_excludedItemsSearch.set("SC_claim_no", scwin.claim.claimNo);
     // 페이징 정보 설정
     dmp_settlementVo.set("SC_claim_no", scwin.claim.claimNo);
-    scwin.employee = JSON.parse(localStorage.getItem("employee"));
-    btn_reject.hide();
-    if (scwin.employee.role !== "실무자") {
-        btn_return.hide();
-        btn_supplement.hide();
-        txt_examMemo.setReadOnly(true);
-
-        btn_approval.setValue("결재 승인");
-        btn_complete.hide();
-        btn_reject.show();
-        btn_generateMemo.hide();
-
-    }
+    
+    // 권한 제어 로직
+    scwin.setUIPermissions();
+    
     // 데이터 조회
     scwin.loadClaimUserEmpInfo();
     scwin.searchSettlementData();
@@ -550,7 +570,82 @@ scwin.onpageload = function () {
     scwin.sbm_selectSettlementSummary();
     scwin.searchExcludedItems();
     scwin.loadExistingMemo();
+};
 
+// 권한에 따른 UI 제어 함수
+scwin.setUIPermissions = function() {
+    var userRole = scwin.employee.role;
+    var isOwnClaim = scwin.claim.empNo === scwin.employee.empNo;
+    
+    console.log("권한 제어 - 역할:", userRole, "본인 청구건:", isOwnClaim);
+    
+    // 기본적으로 모든 버튼 숨기기
+    btn_reject.hide();
+    
+    if (userRole === "실무자") {
+        if (isOwnClaim) {
+            // 본인 청구건 - 모든 권한 허용
+            console.log("본인 청구건 - 모든 권한 허용");
+            btn_return.show();
+            btn_supplement.show();
+            btn_approval.show();
+            btn_complete.show();
+            btn_generateMemo.show();
+            
+            txt_examMemo.setReadOnly(false);
+            btn_approval.setValue("결재 신청");
+            
+        } else {
+            // 다른 실무자의 청구건 - 조회만 가능
+            console.log("다른 실무자의 청구건 - 조회만 가능");
+            btn_return.show();
+            btn_supplement.show();
+            btn_approval.show();
+            btn_complete.show();
+            btn_generateMemo.show();
+            
+            // 모든 버튼 비활성화
+            btn_return.setDisabled(true);
+            btn_supplement.setDisabled(true);
+            btn_approval.setDisabled(true);
+            btn_complete.setDisabled(true);
+            btn_generateMemo.setDisabled(true);
+            
+            // 입력 필드 읽기 전용
+            txt_examMemo.setReadOnly(true);
+            
+            // 추가적으로 스타일로 시각적 표시
+            btn_return.addClass("disabled-button");
+            btn_supplement.addClass("disabled-button");
+            btn_approval.addClass("disabled-button");
+            btn_complete.addClass("disabled-button");
+            btn_generateMemo.addClass("disabled-button");
+        }
+        
+    } else {
+        // 관리자/승인자 (실무자가 아닌 경우)
+        console.log("관리자/승인자 권한");
+        btn_return.hide();
+        btn_supplement.hide();
+        btn_generateMemo.hide();
+        btn_complete.hide();
+        btn_reject.show();
+        
+        txt_examMemo.setReadOnly(true);
+        btn_approval.setValue("결재 승인");
+    }
+};
+
+// 권한 체크 공통 함수
+scwin.checkPermission = function(actionName) {
+    var userRole = scwin.employee.role;
+    var isOwnClaim = scwin.claim.empNo === scwin.employee.empNo;
+    
+    if (userRole === "실무자" && !isOwnClaim) {
+        alert("본인이 담당한 청구건만 " + actionName + "할 수 있습니다.");
+        return false;
+    }
+    return true;
 };
 
 scwin.loadExistingMemo = function () {
@@ -858,6 +953,8 @@ scwin.sbm_selectInsuranceProducts_submitdone = function (e) {
 
 // FastAPI 심사메모 생성 - claim_no 기준으로 수정
 scwin.generateMemoFromAPI = function () {
+    if (!scwin.checkPermission("메모 생성")) return;
+    
     if (!scwin.claim.claimNo) {
         alert("청구번호를 확인해주세요.");
         return;
@@ -1210,6 +1307,8 @@ scwin.prepareClaimResultData = function () {
 
 // 최종 심사 완료 (수정된 함수)
 scwin.btn_complete_onclick = function () {
+    if (!scwin.checkPermission("심사 완료")) return;
+    
     var memo = txt_examMemo.getValue();
 
     if (!memo || memo.trim() === "") {
@@ -1477,9 +1576,13 @@ scwin.sbm_selectSettlementSummary_submiterror = function (e) {
 
     console.log(errorMsg);
 };
+
 scwin.btn_approval_onclick = function (e) {
+    // 실무자의 경우에만 권한 체크 (관리자는 모든 청구건 승인 가능)
+    if (scwin.employee.role === "실무자" && !scwin.checkPermission("결재 신청")) return;
+    
     if (scwin.employee.role !== "실무자") {
-        // 배경 오버레이 제거 옵션들
+        // 관리자/승인자의 결재 승인
         Swal.fire({
             title: '결재 승인',
             text: '결재를 승인하시겠습니까?',
@@ -1489,11 +1592,8 @@ scwin.btn_approval_onclick = function (e) {
             cancelButtonColor: '#d33',
             confirmButtonText: '승인',
             cancelButtonText: '취소',
-            // // 배경 오버레이 관련 설정
-            // backdrop: false,  // 배경 오버레이 완전 제거
-            // 또는
-            backdrop: 'rgba(0,0,0,0.1)',  // 투명도 조절 (0~1)
-            allowOutsideClick: true  // 바깥 클릭시 닫기 허용
+            backdrop: 'rgba(0,0,0,0.1)',
+            allowOutsideClick: true
         }).then((result) => {
             if (result.isConfirmed) {
                 if (!scwin.claim.claimNo) {
@@ -1502,7 +1602,7 @@ scwin.btn_approval_onclick = function (e) {
                         text: '청구번호가 없습니다.',
                         icon: 'error',
                         confirmButtonText: '확인',
-                        backdrop: false,  // 에러 알림도 배경 제거
+                        backdrop: false,
                         allowOutsideClick: true
                     });
                     return;
@@ -1513,7 +1613,8 @@ scwin.btn_approval_onclick = function (e) {
             }
         });
     } else {
-         openClaimApprovalPopup("/InsWebApp/ui/approval/approval-modal.xml");
+        // 실무자의 결재 신청
+        openClaimApprovalPopup("/InsWebApp/ui/approval/approval-modal.xml");
     }
 };
 
@@ -1584,6 +1685,7 @@ scwin.sbm_approveApprovalReq_submiterror = function (e) {
 };
 
 scwin.btn_return_onclick = function (e) {
+    if (!scwin.checkPermission("반송")) return;
     openClaimReturnPopup("/InsWebApp/ui/Assignment/claimReturnPopup.xml");
 };
 
@@ -1617,9 +1719,8 @@ function openClaimReturnPopup(link) {
 
 //Request for supple
 scwin.btn_supplement_onclick = function (e) {
-
+    if (!scwin.checkPermission("보완 요청")) return;
     openReqSupplePopup("/InsWebApp/ui/Assignment/reqSupplePopup.xml");
-
 };
 
 function openReqSupplePopup(link) {
@@ -1746,8 +1847,7 @@ function openRejectClaimPopup(link) {
     };
 
     $p.openPopup(link, opts);
-}
-]]></script>
+}]]></script>
 	</head>
 	<body ev:onpageload="scwin.onpageload">
 		<w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/header.xml"></w2:wframe>

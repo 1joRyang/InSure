@@ -32,7 +32,8 @@
             , #{ID}
             <if test="start_date!= null"> , #{start_date} </if>
             <if test="end_date  != null"> , #{end_date}   </if>
-            <if test="insu_amt  != null"> , #{insu_amt}   </if> 
+            <if test="insu_amt  != null"> , #{insu_amt}   </if>
+ 
         )          
     </insert>	
 	
@@ -42,10 +43,12 @@
         UPDATE SUB_INSURANCE    /* QueryID : com.demo.proworks.subinsurance.updateSubInsurance */      
       	  SET  
                 INSU_ID    = #{insu_id}   
-         ,  ID         = #{ID}                	                       
+         ,  ID         = #{ID}        
+        	                       
             <if test="start_date!= null"> , START_DATE = #{start_date} </if>
             <if test="end_date  != null"> , END_DATE   = #{end_date}   </if>
-            <if test="insu_amt  != null"> , INSU_AMT   = #{insu_amt}   </if>                 
+            <if test="insu_amt  != null"> , INSU_AMT   = #{insu_amt}   </if>
+                 
         WHERE   
                 INSU_ID    = #{insu_id}   
          AND ID         = #{ID}        
@@ -57,7 +60,8 @@
         DELETE FROM SUB_INSURANCE   /* QueryID : com.demo.proworks.subinsurance.deleteSubInsurance */ 
         WHERE   
                 INSU_ID    = #{insu_id}   
-         AND ID         = #{ID}                
+         AND ID         = #{ID}        
+        
     </delete>
 	
     <select id="selectSubInsurance" parameterType="com.demo.proworks.subinsurance.vo.SubInsuranceVo" resultType="com.demo.proworks.subinsurance.vo.SubInsuranceVo">
@@ -67,7 +71,8 @@
         FROM SUB_INSURANCE 
         WHERE 
                 INSU_ID    = #{insu_id}   
-         AND ID         = #{ID}        			
+         AND ID         = #{ID}        
+			
     </select>
 	
     <select id="selectListSubInsurance" parameterType="com.demo.proworks.subinsurance.vo.SubInsuranceVo" resultType="com.demo.proworks.subinsurance.vo.SubInsuranceVo">
@@ -113,6 +118,22 @@
         LEFT JOIN USER u ON s.ID = u.id 
         LEFT JOIN INSURANCE i ON s.insu_id = i.insu_id
         WHERE u.ID = #{ID}
+    </select>
+
+    <select id="selectUserInsuranceListByUserName" parameterType="com.demo.proworks.subinsurance.vo.UserInsuranceVo" resultType="com.demo.proworks.subinsurance.vo.UserInsuranceVo">
+    <!-- 사용자명으로 보험 목록을 조회한다 (JOIN 쿼리 사용). -->
+        SELECT    /* QueryID : com.demo.proworks.subinsurance.selectUserInsuranceListByUserName */
+            s.insu_id,
+            u.ID,
+            u.user_name,
+            s.start_date,
+            s.end_date,
+            s.insu_amt
+        FROM SUB_INSURANCE s 
+        LEFT JOIN USER u ON s.ID = u.ID 
+        LEFT JOIN INSURANCE i ON s.insu_id = i.insu_id
+        WHERE u.ID = #{ID}
+        order by s.start_date DESC
     </select>
 
 </mapper>

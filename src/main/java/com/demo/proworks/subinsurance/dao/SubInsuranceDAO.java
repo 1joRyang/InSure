@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import com.inswave.elfw.exception.ElException;
 import com.demo.proworks.subinsurance.vo.SubInsuranceVo;
 import com.demo.proworks.subinsurance.vo.SubInsuranceProductVo;
+import com.demo.proworks.subinsurance.vo.UserInsuranceVo;
 import com.demo.proworks.subinsurance.dao.SubInsuranceDAO;
 
 /**  
@@ -99,6 +100,17 @@ public class SubInsuranceDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultA
      */
     public List<SubInsuranceProductVo> selectInsuranceProductsByUserId(SubInsuranceProductVo vo) throws ElException {
         return (List<SubInsuranceProductVo>)list("com.demo.proworks.subinsurance.selectInsuranceProductsByUserId", vo);
+    }
+
+    /**
+     * 사용자명으로 보험 목록을 조회한다 (JOIN 쿼리 사용).
+     *  
+     * @param  UserInsuranceVo 사용자보험정보
+     * @return List<UserInsuranceVo> 사용자보험목록
+     * @throws ElException
+     */
+    public List<UserInsuranceVo> selectUserInsuranceListByUserName(UserInsuranceVo vo) throws ElException {
+        return (List<UserInsuranceVo>)list("com.demo.proworks.subinsurance.selectUserInsuranceListByUserName", vo);
     }
 
 }

@@ -11,6 +11,7 @@ import com.demo.proworks.subinsurance.service.SubInsuranceService;
 import com.demo.proworks.subinsurance.vo.SubInsuranceVo;
 import com.demo.proworks.subinsurance.vo.SubInsuranceListVo;
 import com.demo.proworks.subinsurance.vo.SubInsuranceProductVo;
+import com.demo.proworks.subinsurance.vo.UserInsuranceVo;
 
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
@@ -204,6 +205,31 @@ public class SubInsuranceController {
         
         // 직접 List<SubInsuranceProductVo> 반환 - 이렇게 하면 elData에 직접 배열이 들어감
         return productList != null ? productList : new java.util.ArrayList<>();
+    }
+
+    /**
+     * 사용자명으로 보험 목록을 조회한다 (JOIN 쿼리 사용).
+     *
+     * @param  userInsuranceVo 사용자보험정보
+     * @return 사용자보험 목록
+     * @throws Exception
+     */
+    @ElService(key="USERINSURANCEList")
+    @RequestMapping(value="USERINSURANCEList")
+    @ElDescription(sub="사용자보험 목록조회",desc="사용자명으로 보험 목록을 JOIN 쿼리로 조회한다.")
+    public List<UserInsuranceVo> selectUserInsuranceListByUserName(UserInsuranceVo userInsuranceVo) throws Exception {
+        System.out.println("=== USERINSURANCEList 컨트롤러 호출 ===");
+        System.out.println("요청 데이터: " + userInsuranceVo.toString());
+        System.out.println("사용자명: " + userInsuranceVo.getUser_name());
+        
+        List<UserInsuranceVo> userInsuranceList = subInsuranceService.selectUserInsuranceListByUserName(userInsuranceVo);
+        
+        System.out.println("사용자보험 조회 결과: " + (userInsuranceList != null ? userInsuranceList.size() : 0) + "건");
+        if (userInsuranceList != null && !userInsuranceList.isEmpty()) {
+            System.out.println("첫 번째 데이터: " + userInsuranceList.get(0).toString());
+        }
+        
+        return userInsuranceList != null ? userInsuranceList : new java.util.ArrayList<>();
     }
    
 }
