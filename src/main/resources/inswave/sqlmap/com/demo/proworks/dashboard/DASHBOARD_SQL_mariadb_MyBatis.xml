@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject : 대시보드 처리를 담당하는 Sql Mapper
+	@description : 대시보드 처리를 담당하는 Sql Mapper
+	@author : Inswave
+	@since : 2025/07/01
+	@modification
+	===========================================================
+	DATE AUTHOR DESC
+	===========================================================
+	2025/07/01 Inswave 최초 생성
+-->
+<mapper namespace="com.demo.proworks.dashboard">
+	<select id="selectTodayStatusCounts"
+		resultType="com.demo.proworks.dashboard.vo.TodayStatusVo">
+		<!-- QueryID : com.demo.proworks.dashboard.selectTodayStatusCounts -->
+		SELECT
+            COUNT(CASE WHEN status = '대기' THEN 1 END) AS waitingCount,
+            COUNT(CASE WHEN status = '결재중' THEN 1 END) AS processingCount,
+            COUNT(CASE WHEN status = '완료' THEN 1 END) AS completedCount,
+            COUNT(CASE WHEN status = '반송' THEN 1 END) AS returnedCount
+        FROM
+            CLAIM  
+        WHERE 
+            DATE(receipt_date) = CURDATE()
+	</select>
+	
+	
+
+</mapper>

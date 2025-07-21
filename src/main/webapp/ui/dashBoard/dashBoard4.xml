@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+            <w2:dataCollection baseNode="map"/>
+            <w2:workflowCollection/>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        <script lazy="false" type="text/javascript"><![CDATA[
+            scwin.onpageload = function() {
+
+            };
+        ]]></script>
+        <style type="text/css"><![CDATA[
+            /* ----- Global & Wrapper ----- */
+            .dashboard_wrap { background-color: #f4f6f9; padding: 20px; }
+            .flex_row { display: flex; flex-direction: row; gap: 20px; margin-bottom: 20px; }
+            .flex_row:last-child { margin-bottom: 0; }
+
+            /* ----- Notification Bar ----- */
+            .notification_bar { background-color: #fff3cd; color: #856404; padding: 12px 20px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; }
+            .notification_bar::before { content: "▲"; margin-right: 10px; }
+
+            /* ----- Common Panel Style ----- */
+            .panel { flex: 1; background-color: #ffffff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column;}
+            .panel_title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; }
+            .panel_content { flex-grow: 1; display: flex; flex-direction: column; }
+
+            /* ----- Top Panel Content Style ----- */
+            .status_item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 14px; }
+            .status_label { color: #555; }
+            .status_value { color: #111; font-weight: bold; }
+            .status_value.red { color: #dc3545; }
+            
+            /* ----- Chart Placeholder ----- */
+            .chart_placeholder { flex-grow: 1; width: 100%; min-height: 200px; background-color: #f7f7f7; border: 1px dashed #e0e0e0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #aaa; }
+
+            /* ----- KPI Card Style ----- */
+            .kpi_card { flex: 1; background-color: #fff; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+            .kpi_title_box { border: 1px dotted #ccc; padding: 8px; margin-bottom: 10px; font-size: 14px; color: #555; }
+            .kpi_value_box { border: 1px dotted #ccc; padding: 8px; font-size: 24px; font-weight: bold; color: #333; }
+
+            /* ===== (신규) 우선 처리 업무 목록 스타일 ===== */
+            .task_panel .panel_header { display: flex; justify-content: space-between; align-items: center; }
+            .task_list { padding: 0; margin: 0; list-style: none; }
+            .task_item { display: flex; align-items: center; padding: 15px 5px; border-bottom: 1px solid #f0f0f0; }
+            .task_item:last-child { border-bottom: none; }
+            
+            .task_item .priority_line { width: 4px; height: 40px; border-radius: 2px; margin-right: 15px; }
+            .priority_high { background-color: #eb4e4e; }
+            .priority_medium { background-color: #f0a03c; }
+            .priority_low { background-color: #57b96e; }
+            .priority_default { background-color: #adb5bd; }
+            
+            .task_item .task_content { flex-grow: 1; }
+            .task_content .title { font-size: 15px; font-weight: 500; color: #333; margin-bottom: 4px;}
+            .task_content .details { font-size: 13px; color: #666; }
+
+            .task_item .task_actions { display: flex; align-items: center; gap: 8px; }
+            .status_badge { font-size: 12px; padding: 4px 8px; border-radius: 4px; font-weight: 500;}
+            .status_yellow { background-color: #fff8e1; color: #f59f0b; }
+            .status_blue { background-color: #e7f5ff; color: #339af0; }
+            .status_green { background-color: #e6fcf5; color: #20c997; }
+            .status_gray { background-color: #f1f3f5; color: #868e96; }
+            
+            .btn { text-decoration: none; padding: 6px 14px; border-radius: 5px; font-size: 13px; font-weight: 500; text-align: center;}
+            .btn_primary { background-color: #4c6ef5; color: white; }
+            .btn_secondary { background-color: #f1f3f5; color: #495057; }
+            .btn_view_all { background-color: #e9ecef; color: #495057; }
+            /* ======================================= */
+
+        ]]>
+        </style>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+        <xf:group class="sub_contents" id="">
+            <xf:group class="dashboard_wrap" id="grp_dashboard">
+
+                <xf:group class="notification_bar" id="grp_noti"><w2:textbox label="긴급 심사 요청 - 고객 청구건 3건이 승인 대기 중입니다." tagname="span"></w2:textbox></xf:group>
+
+                <xf:group class="flex_row" id="grp_top_panels">
+                    <xf:group class="panel"><w2:textbox class="panel_title" label="오늘의 처리 현황" tagname="h3"></w2:textbox><xf:group class="panel_content"><w2:div class="status_item"><w2:textbox class="status_label" label="처리 대기" tagname="span"></w2:textbox><w2:textbox class="status_value" label="23건" tagname="span"></w2:textbox></w2:div><w2:div class="status_item"><w2:textbox class="status_label" label="심사 중" tagname="span"></w2:textbox><w2:textbox class="status_value red" label="15건" tagname="span"></w2:textbox></w2:div><w2:div class="status_item"><w2:textbox class="status_label" label="완료" tagname="span"></w2:textbox><w2:textbox class="status_value" label="47건" tagname="span"></w2:textbox></w2:div><w2:progress id="progress1" value="67.1" style="height: 10px; margin-top: auto;"></w2:progress></xf:group></xf:group>
+                    <xf:group class="panel"><w2:textbox class="panel_title" label="보완 요청 현황" tagname="h3"></w2:textbox><xf:group class="panel_content"><w2:div class="status_item"><w2:textbox class="status_label" label="보완 요청" tagname="span"></w2:textbox><w2:textbox class="status_value" label="12건" tagname="span"></w2:textbox></w2:div><w2:div class="status_item"><w2:textbox class="status_label" label="보완 접수" tagname="span"></w2:textbox><w2:textbox class="status_value" label="9건" tagname="span"></w2:textbox></w2:div><w2:div class="status_item"><w2:textbox class="status_label" label="기한 임박" tagname="span"></w2:textbox><w2:textbox class="status_value red" label="3건" tagname="span"></w2:textbox></w2:div><w2:div class="status_item" style="margin-top:auto; border-top:1px solid #eee; padding-top:10px;"><w2:textbox class="status_label" label="평균 보완 시간" tagname="span"></w2:textbox><w2:textbox class="status_value" label="2.3일" tagname="span"></w2:textbox></w2:div></xf:group></xf:group>
+                    <xf:group class="panel"><w2:textbox class="panel_title" label="고객 청구 모니터링" tagname="h3"></w2:textbox><xf:group class="panel_content"><w2:div class="status_item"><w2:textbox class="status_label" label="500만원 이상" tagname="span"></w2:textbox><w2:textbox class="status_value" label="7건" tagname="span"></w2:textbox></w2:div><w2:div class="status_item"><w2:textbox class="status_label" label="1000만원 이상" tagname="span"></w2:textbox><w2:textbox class="status_value" label="2건" tagname="span"></w2:textbox></w2:div><w2:div class="status_item"><w2:textbox class="status_label" label="이상 청구 의심" tagname="span"></w2:textbox><w2:textbox class="status_value red" label="5건" tagname="span"></w2:textbox></w2:div><w2:div class="status_item"><w2:textbox class="status_label" label="전문가 검토 대기" tagname="span"></w2:textbox><w2:textbox class="status_value" label="3건" tagname="span"></w2:textbox></w2:div></xf:group></xf:group>
+                    <xf:group class="panel"><w2:textbox class="panel_title" label="이번 달 성과" tagname="h3"></w2:textbox><xf:group class="panel_content"><w2:div class="status_item"><w2:textbox class="status_label" label="총 처리 건수" tagname="span"></w2:textbox><w2:textbox class="status_value" label="1,247건" tagname="span"></w2:textbox></w2:div><w2:div class="status_item"><w2:textbox class="status_label" label="평균 처리 시간" tagname="span"></w2:textbox><w2:textbox class="status_value" label="1.8일" tagname="span"></w2:textbox></w2:div><w2:div class="status_item"><w2:textbox class="status_label" label="고객 만족도" tagname="span"></w2:textbox><w2:textbox class="status_value" label="94.2%" tagname="span"></w2:textbox></w2:div><w2:textbox class="status_label" label="목표 달성률" style="margin-top:auto;"></w2:textbox><w2:progress id="progress2" value="102" style="height: 10px;" valueLabel="102%"></w2:progress></xf:group></xf:group>
+                </xf:group>
+                
+                <xf:group class="flex_row" id="grp_mid_charts">
+                    <xf:group class="panel"><w2:textbox class="panel_title" label="주간 처리 현황 추이" tagname="h3"></w2:textbox><xf:group class="chart_placeholder"><w2:textbox label="FusionChart Area2D 영역"></w2:textbox></xf:group></xf:group>
+                    <xf:group class="panel"><w2:textbox class="panel_title" label="청구 유형별 분포" tagname="h3"></w2:textbox><xf:group class="chart_placeholder"><w2:textbox label="FusionChart Doughnut2D 영역"></w2:textbox></xf:group></xf:group>
+                </xf:group>
+                
+                <xf:group class="flex_row" id="grp_bot_charts">
+                    <xf:group class="panel"><w2:textbox class="panel_title" label="월별 승인률 추이" tagname="h3"></w2:textbox><xf:group class="chart_placeholder" style="min-height:150px;"><w2:textbox label="FusionChart Column2D 영역"></w2:textbox></xf:group></xf:group>
+                    <xf:group class="panel"><w2:textbox class="panel_title" label="처리 시간 분포" tagname="h3"></w2:textbox><xf:group class="chart_placeholder" style="min-height:150px;"><w2:textbox label="FusionChart Column2D 영역"></w2:textbox></xf:group></xf:group>
+                </xf:group>
+                
+                <xf:group class="flex_row" id="grp_kpi_row">
+                    <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="평균 처리 시간"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox label="1.8일"></w2:textbox></xf:group></xf:group>
+                    <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="승인률"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox label="94.2%"></w2:textbox></xf:group></xf:group>
+                    <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="오늘 처리"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox label="85건"></w2:textbox></xf:group></xf:group>
+                </xf:group>
+                
+                <xf:group class="flex_row" id="grp_task_list">
+                    <xf:group class="panel task_panel">
+                        <xf:group class="panel_header" id="" style="">
+                            <w2:textbox class="panel_title" label="우선 처리 업무" tagname="h3"></w2:textbox>
+                            <w2:anchor class="btn btn_view_all" id="" outerDiv="false">
+                                <xf:label><![CDATA[전체 보기]]></xf:label>
+                            </w2:anchor>
+                        </xf:group>
+                        <xf:group class="task_list" id="">
+                            <xf:group class="task_item" id="">
+                                <xf:group class="priority_line priority_high"></xf:group>
+                                <xf:group class="task_content">
+                                    <w2:textbox class="title" label="고객 청구 심사 - 1,250만원" tagname="p"></w2:textbox>
+                                    <w2:textbox class="details" label="청구번호: CL-2024-071501 | 김OO | 심장수술 | 마감: 오늘 17:00" tagname="p"></w2:textbox>
+                                </xf:group>
+                                <xf:group class="task_actions">
+                                    <w2:textbox class="status_badge status_yellow" label="심사대기"></w2:textbox>
+                                    <w2:anchor class="btn btn_primary" outerDiv="false"><xf:label><![CDATA[처리]]></xf:label></w2:anchor>
+                                </xf:group>
+                            </xf:group>
+                             <xf:group class="task_item" id="">
+                                <xf:group class="priority_line priority_medium"></xf:group>
+                                <xf:group class="task_content">
+                                    <w2:textbox class="title" label="보완 기한 임박 - 내일 마감" tagname="p"></w2:textbox>
+                                    <w2:textbox class="details" label="청구번호: CL-2024-071302 | 박OO | 추가 진단서 요청 | 마감: 내일 09:00" tagname="p"></w2:textbox>
+                                </xf:group>
+                                <xf:group class="task_actions">
+                                    <w2:textbox class="status_badge status_blue" label="보완대기"></w2:textbox>
+                                    <w2:anchor class="btn btn_secondary" outerDiv="false"><xf:label><![CDATA[확인]]></xf:label></w2:anchor>
+                                </xf:group>
+                            </xf:group>
+                             <xf:group class="task_item" id="">
+                                <xf:group class="priority_line priority_default"></xf:group>
+                                <xf:group class="task_content">
+                                    <w2:textbox class="title" label="이상 청구 검토" tagname="p"></w2:textbox>
+                                    <w2:textbox class="details" label="청구번호: CL-2024-071403 | 최OO | 동일 치료 중복 청구 의심" tagname="p"></w2:textbox>
+                                </xf:group>
+                                <xf:group class="task_actions">
+                                    <w2:textbox class="status_badge status_gray" label="검토중"></w2:textbox>
+                                    <w2:anchor class="btn btn_secondary" outerDiv="false"><xf:label><![CDATA[상세]]></xf:label></w2:anchor>
+                                </xf:group>
+                            </xf:group>
+                            <xf:group class="task_item" id="">
+                                <xf:group class="priority_line priority_low"></xf:group>
+                                <xf:group class="task_content">
+                                    <w2:textbox class="title" label="장기 청구 승인" tagname="p"></w2:textbox>
+                                    <w2:textbox class="details" label="청구번호: CL-2024-071404 | 정OO | 물리치료 | 승인예정액: 45만원" tagname="p"></w2:textbox>
+                                </xf:group>
+                                <xf:group class="task_actions">
+                                    <w2:textbox class="status_badge status_green" label="승인완료"></w2:textbox>
+                                    <w2:anchor class="btn btn_secondary" outerDiv="false"><xf:label><![CDATA[확인]]></xf:label></w2:anchor>
+                                </xf:group>
+                            </xf:group>
+                            <xf:group class="task_item" id="">
+                                <xf:group class="priority_line priority_low"></xf:group>
+                                <xf:group class="task_content">
+                                    <w2:textbox class="title" label="단순 외래 청구" tagname="p"></w2:textbox>
+                                    <w2:textbox class="details" label="청구번호: CL-2024-071405 | 한OO | 감기 치료 | 청구액: 12만원" tagname="p"></w2:textbox>
+                                </xf:group>
+                                <xf:group class="task_actions">
+                                    <w2:textbox class="status_badge status_yellow" label="대기"></w2:textbox>
+                                    <w2:anchor class="btn btn_primary" outerDiv="false"><xf:label><![CDATA[처리]]></xf:label></w2:anchor>
+                                </xf:group>
+                            </xf:group>
+                        </xf:group>
+                    </xf:group>
+                </xf:group>
+
+            </xf:group>
+        </xf:group>
+    </body>
+</html>
