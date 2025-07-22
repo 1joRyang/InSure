@@ -92,6 +92,24 @@
         				<w2:key dataType="text" name="페이지_건수" id="pageSize" defaultValue="100"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dm_getTreatOnlyCno">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="SC_claim_no" id="SC_claim_no"></w2:key>
+        				<w2:key dataType="text" name="pageSize" id="pageSize" defaultValue="100"></w2:key>
+        				<w2:key dataType="text" name="pageIndex" id="pageIndex" defaultValue="1"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_treatmentList" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+        				<w2:column dataType="text" name="department" id="department"></w2:column>
+        				<w2:column dataType="text" name="treatment_date" id="treatment_date"></w2:column>
+        				<w2:column dataType="text" name="patient_type" id="patient_type"></w2:column>
+        				<w2:column dataType="text" name="hospital_name" id="hospital_name"></w2:column>
+        				<w2:column dataType="text" name="hospital_grade" id="hospital_grade"></w2:column>
+        				<w2:column dataType="text" name="treatment_id" id="treatment_id"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
         	</w2:dataCollection>
         	<w2:workflowCollection />
         	<xf:submission id="sbm_getExcList" action="/InsWebApp/EXCITEMListR.pwkjson" method="post" mediatype="application/json"
@@ -132,25 +150,30 @@
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getTreatment" action="/InsWebApp/TREATMENTUpdView.pwkjson" method="post" mediatype="application/json"
-        		ref='data:json,{"id":"dm_getTreatReq","key":"elData"}' target='data:json,{"id":"dm_treatment","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler=""
-        		customHandler="" mode="asynchronous" processMsg="로딩 중..." ev:submit="" ev:submitdone="scwin.sbm_getTreatment_submitdone"
+        		ref='data:json,{"id":"dm_getTreatReq","key":"elData"}' target='data:json,{"id":"dm_treatment","key":"elData"}' encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="로딩 중..." ev:submit=""
+        		ev:submitdone="scwin.sbm_getTreatment_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_updateTreatment" action="/InsWebApp/TREATMENTUpd.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,{"id":"dm_treatment","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="저장 중..." ev:submit="" ev:submitdone="scwin.sbm_insertTreatment_submitdone"
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_updateTreatment" action="/InsWebApp/TREATMENTUpd.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_treatment","key":"elData"}' target="" encoding="UTF-8"
-        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="저장 중..." ev:submit="" ev:submitdone="scwin.sbm_insertTreatment_submitdone"
-        		ev:submiterror="" abortTrigger="">
+        	<xf:submission id="sbm_updatePaymentInfo" action="/InsWebApp/PAYMENTINFOUpd.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,{"id":"dm_sub","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+        		mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_updatePaymentInfo" action="/InsWebApp/PAYMENTINFOUpd.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_sub","key":"elData"}' target="" encoding="UTF-8"
-        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
-        		ev:submiterror="" abortTrigger="">
+        	<xf:submission id="sbm_updateClaimItems" action="/InsWebApp/CLAIMITEMUpd.pwkjson" method="post" mediatype="application/json"
+        		ref="" target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg=""
+        		ev:submit="" ev:submitdone="scwin.sbm_updateClaimItems_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_updateClaimItems" action="/InsWebApp/CLAIMITEMUpd.pwkjson" method="post" mediatype="application/json" ref="" target="" encoding="UTF-8"
-        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_updateClaimItems_submitdone"
-        		ev:submiterror="" abortTrigger="">
+        	<xf:submission id="sbm_updateSettlement" action="/InsWebApp/SETTLEMENTUpd.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,{"id":"dm_result","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_updateSettlement" action="/InsWebApp/SETTLEMENTUpd.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_result","key":"elData"}' target="" encoding="UTF-8"
-        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
-        		ev:submiterror="" abortTrigger="">
+        	<xf:submission id="sbm_getTreatmentOnlyCNo" action="/InsWebApp/TREATMENTList.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_getTreatOnlyCno","key":"elData"}' target='data:json,{"id":"dl_treatmentList","key":"elData.treatmentVoList"}'
+        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getTreatmentOnlyCNo_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -161,8 +184,23 @@
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
     scwin.emp = JSON.parse(localStorage.getItem("employee"));
-    // todo: role에 따라 변경.. empName readonly
-    // status 에 따라...
+    scwin.claim = JSON.parse(localStorage.getItem("claim"));
+    scwin.isEmp = true;
+
+    // 담당자 아니면 readonly
+    if (scwin.emp.empNo != scwin.claim.empNo) {
+        scwin.isEmp = false;
+
+        btn_ocr.hide();
+        ipt_department.setReadOnly(true);
+        ipt_hospitalName.setReadOnly(true);
+        sel_hospital.setReadOnly(true);
+        ipt_patientType.setReadOnly(true);
+
+        ipt_paid.setReadOnly(true);
+        ipt_willpay.setReadOnly(true);
+        ipt_pay.setReadOnly(true);
+    }
 
     var jsnOptions = {
         id: "img_popup",
@@ -174,9 +212,7 @@ scwin.onpageload = function() {
 
     $p.openPopup("/InsWebApp/ui/audit/img_modal.xml", jsnOptions);
 
-    scwin.claim = JSON.parse(localStorage.getItem("claim"));
     dm_header.set("claimNo", scwin.claim.claimNo);
-    console.log(scwin.claim.claimNo)
     dm_header.set("patient", scwin.claim.userName);
 
     scwin.exclusionData = {};
@@ -185,18 +221,51 @@ scwin.onpageload = function() {
     scwin.nextClick = false;
     scwin.isGetTreatId = false; // insert 끝내고 treatmentId 가져오기.......
 
-    let savedData = JSON.parse(localStorage.getItem('dateList') || '[]');
-    savedData.forEach(item => {
-        date_drop.addItem(item.imgIdx, item.dateRange);
-    });
-    date_drop.setSelectedIndex(0);
+
+    if (scwin.isEmp) {
+        let savedData = JSON.parse(localStorage.getItem('dateList') || '[]');
+        savedData.forEach(item => {
+            date_drop.addItem(item.imgIdx, item.dateRange);
+        });
+        date_drop.setSelectedIndex(0);
+
+        getTreatmentWithDate();
+
+    } else { // 담당자 아니면
+        dm_getTreatOnlyCno.set("SC_claim_no", scwin.claim.claimNo);
+        $c.sbm.execute(sbm_getTreatmentOnlyCNo);
+    }
+    
+};
+
+function getTreatmentWithDate() {
     dm_treatment.set("treatment_date", date_drop.getText());
 
-    scwin.claimImg = JSON.parse(localStorage.getItem("claimImg"));
-    scwin.imgUrl = scwin.claimImg[date_drop.getValue()-1].imgSrc;
-    
+    if (scwin.isEmp) { // 담당자
+        scwin.claimImg = JSON.parse(localStorage.getItem("claimImg"));
+        scwin.imgUrl = scwin.claimImg[date_drop.getValue()-1].imgSrc;
+    }
+        
     scwin.createEmptyTable();
     getInsure();
+}
+
+scwin.sbm_getTreatmentOnlyCNo_submitdone = function (e) {
+
+    if (dl_treatmentList.getTotalRow() != 0) {
+        var rowCount = dl_treatmentList.getRowCount();
+        for (var i = 0; i < rowCount; i++) {
+            var treatmentDate = dl_treatmentList.getCellData(i, "treatment_date");
+            date_drop.addItem(i, treatmentDate); 
+        }
+        date_drop.setSelectedIndex(0);
+
+        getTreatmentWithDate();
+
+    } else { // db에도 없으면 그냥 빈테이블
+        scwin.createEmptyTable();
+    }
+    
 };
 
 function getInsure() {
@@ -306,7 +375,7 @@ scwin.updateExclusionCell = function(rowIndex, colIndex, newValue) {
     if (!targetCell) return;
 
     // 값 반영
-    targetCell.textContent = newValue;
+    targetCell.textContent = Number(newValue).toLocaleString();
 
     // 스타일 및 기타 표시 유지
     targetCell.style.backgroundColor = '#fff3cd';
@@ -317,8 +386,6 @@ scwin.updateExclusionCell = function(rowIndex, colIndex, newValue) {
 
 scwin.btn_ocr_onclick = function (e) {
     // OCR 버튼 클릭 시 OCR 결과를 받아서 테이블을 동적으로 업데이트
-    // todo
-    // 이미지 보냈을 때..
     let formData = new FormData();
     formData.append("img_url", scwin.imgUrl);
     console.log(scwin.imgUrl);
@@ -331,15 +398,12 @@ scwin.btn_ocr_onclick = function (e) {
         processData: false,  // FormData 객체를 문자열로 변환하지 않음
         success: function (response) {
             console.log(response.data.rows);
-            //console.log(scwin.data_rows);
             scwin.createTable(response.data.rows);
         },
         error: function (xhr, status, error) {
             console.log(error);
         }
     }); 
-     
-    //scwin.createTable(scwin.data_rows);
 };
 
 scwin.btn_before_onclick = function (e) {
@@ -355,6 +419,11 @@ scwin.date_drop_onchange = function (info) {
 };
 
 function saveInsure(idx = -1) {
+    if (!scwin.isEmp) {
+        getInsure();
+        return;
+    }
+
     if (sel_hospital.getValue() && ipt_department.getValue()&& ipt_hospitalName.getValue() && ipt_patientType.getValue()) {
         dm_treatment.set("claim_no", scwin.claim.claimNo);
 
@@ -362,7 +431,6 @@ function saveInsure(idx = -1) {
 
         // todo: 이미지 모달.. setSrc
 
-        console.log(dm_treatment.getJSON());
         scwin.isEdit ? $c.sbm.execute(sbm_updateTreatment) : $c.sbm.execute(sbm_insertTreatment);
     }
     else {
@@ -425,9 +493,12 @@ function resetExclusionCells() {
 
 scwin.btn_next_onclick = function (e) {
     scwin.nextClick = true;
-    saveInsure();
+    if (scwin.isEmp) {
+        saveInsure();
+    } else {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-result.xml";
+    }
     $p.closePopup("img_popup");
-    
 };
 
 scwin.ipt_paid_onchange = function (info) {
@@ -578,7 +649,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         		<xf:group style="" id="" class="btn_schbox">
         			<xf:trigger ev:onclick="scwin.btn_ocr_onclick" disabled="" style="" id="btn_ocr" type="button" class="btn_cm sch"
         				escape="false">
-        				<xf:label><![CDATA[조회]]></xf:label>
+        				<xf:label><![CDATA[OCR]]></xf:label>
         			</xf:trigger>
         		</xf:group>
         	</xf:group>
@@ -617,7 +688,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">진료비총액</xf:group>
         					<xf:group tagname="td" style="" id="cell_total" class="w2tb_td">
         						<xf:input readOnlyClass="readonly" ref="data:dm_sub.total_medical_fee" style="width: 144px;height: 21px;"
-        							readOnly="true" id="ipt_tableTotal" initValue="0">
+        							readOnly="true" id="ipt_tableTotal" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -625,7 +696,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">환자부담총액</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:input readOnlyClass="readonly" ref="data:dm_sub.total_patient_payment"
-        							style="width: 144px;height: 21px;" readOnly="true" id="ipt_tableTotalminus" initValue="0">
+        							style="width: 144px;height: 21px;" readOnly="true" id="ipt_tableTotalminus" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -633,7 +704,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">이미납부한금액</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:input ref="data:dm_sub.amount_paid" ev:onchange="scwin.ipt_paid_onchange" maxByteLength=""
-        							dataType="text" style="width: 144px;height: 21px;" id="ipt_paid" initValue="0">
+        							dataType="text" style="width: 144px;height: 21px;" id="ipt_paid" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -641,7 +712,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">납부할금액</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:input ref="data:dm_sub.due_amt" maxByteLength="" dataType="text" style="width: 144px;height: 21px;"
-        							id="" initValue="0">
+        							id="ipt_willpay" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -649,7 +720,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">납부한금액</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:input ref="data:dm_sub.due_pay" ev:onchange="scwin.ipt_pay_onchange" maxByteLength="" dataType="text"
-        							style="width: 144px;height: 21px;" id="ipt_pay" initValue="0">
+        							style="width: 144px;height: 21px;" id="ipt_pay" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -683,7 +754,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">최종수납액</xf:group>
         					<xf:group tagname="td" style="" id="" class="w2tb_td">
         						<xf:input ref="data:dm_result.final_due" readOnlyClass="readonly" style="width: 144px;height: 21px;"
-        							readOnly="true" id="ipt_fianlpay" class="" initValue="0">
+        							readOnly="true" id="ipt_fianlpay" class="" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -691,7 +762,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">병원공제금</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:input ref="data:dm_result.hospital_prepaid" readOnlyClass="readonly" style="width: 144px;height: 21px;"
-        							readOnly="true" id="ipt_hosp" class="readonly" initValue="0">
+        							readOnly="true" id="ipt_hosp" class="readonly" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -700,7 +771,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:input ref="data:dm_result.deducation_amt" readOnlyClass="readonly"
         							ev:onchange="scwin.ipt_excTotal_onchange" style="width: 144px;height: 21px;" readOnly="true" id="ipt_excTotal"
-        							class="readonly" initValue="0">
+        							class="readonly" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -708,7 +779,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">산출금</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:input ref="data:dm_result.refund_amt" readOnlyClass="readonly" style="width: 144px;height: 21px;"
-        							readOnly="true" id="ipt_result" class="readonly" initValue="0">
+        							readOnly="true" id="ipt_result" class="readonly" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>

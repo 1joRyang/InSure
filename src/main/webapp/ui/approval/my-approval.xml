@@ -16,7 +16,7 @@
         				<w2:column dataType="text" name="마감일" id="deadline"></w2:column>
         				<w2:column dataType="text" name="담당자" id="emp_name"></w2:column>
         				<w2:column dataType="text" name="상태" id="status"></w2:column>
-        				<w2:column dataType="text" name="id" id="id"></w2:column>
+        				<w2:column dataType="text" name="ID" id="ID"></w2:column>
         				<w2:column dataType="text" name="emp_no" id="emp_no"></w2:column>
         			</w2:columnInfo>
         		</w2:dataList>
@@ -28,7 +28,7 @@
         				<w2:column dataType="text" name="마감일" id="deadline"></w2:column>
         				<w2:column dataType="text" name="담당자" id="emp_name"></w2:column>
         				<w2:column dataType="text" name="상태" id="status"></w2:column>
-        				<w2:column dataType="text" name="id" id="id"></w2:column>
+        				<w2:column dataType="text" name="ID" id="ID"></w2:column>
         				<w2:column dataType="text" name="emp_no" id="emp_no"></w2:column>
         			</w2:columnInfo>
         		</w2:dataList>
@@ -167,11 +167,11 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     									<w2:column hidden="false" removeBorderStyle="false" width="70" inputType="text" id="column7"
     										value="상태" blockSelect="false" displayMode="label">
     									</w2:column>
-    									<w2:column hidden="true" width="70" inputType="text" style="" id="column6" value="id"
-    										displayMode="label">
-    									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="column11" value="emp_no" displayMode="label"
+    									<w2:column width="70" inputType="text" style="" id="column6" value="ID" displayMode="label"
     										hidden="true">
+    									</w2:column>
+    									<w2:column hidden="true" width="70" inputType="text" style="" id="column5" value="emp_no"
+    										displayMode="label">
     									</w2:column>
     								</w2:row>
     							</w2:header>
@@ -195,7 +195,7 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
     										displayMode="label">
     									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="id" value="" displayMode="label"></w2:column>
+    									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
     									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
     								</w2:row>
     							</w2:gBody>
@@ -229,11 +229,11 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column7" value="상태"
     										blockSelect="false" displayMode="label">
     									</w2:column>
-    									<w2:column hidden="true" width="70" inputType="text" style="" id="column8" value="id"
-    										displayMode="label">
-    									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="column11" value="emp_no" displayMode="label"
+    									<w2:column width="70" inputType="text" style="" id="column6" value="ID" displayMode="label"
     										hidden="true">
+    									</w2:column>
+    									<w2:column hidden="true" width="70" inputType="text" style="" id="column5" value="emp_no"
+    										displayMode="label">
     									</w2:column>
     								</w2:row>
     							</w2:header>
@@ -257,7 +257,7 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
     										displayMode="label">
     									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="id" value="" displayMode="label"></w2:column>
+    									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
     									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
     								</w2:row>
     							</w2:gBody>

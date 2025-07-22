@@ -21,6 +21,14 @@ function cleanNumber(value) {
     return 0;
 }
 
+// 숫자 포맷팅 함수 추가 (천 단위 콤마)
+function formatNumber(value) {
+    if (value === null || value === undefined || value === '' || value === 0) {
+        return '0';
+    }
+    return Number(value).toLocaleString('ko-KR');
+}
+
 // 페이지 로드 시 빈 테이블 생성 함수
 scwin.createEmptyTable = function() {
     // 빈 데이터 생성 - 계층 구조 기반
@@ -122,21 +130,21 @@ scwin.createTable = function (result) {
         processedData.push(rowNameDataMap.get(name));
     });
     
-	// 🔹 열 별 합계를 계산하여 "합계" 행에 반영
-	let totalRow = processedData.find(row => row.col1 === '합계');
+   // 🔹 열 별 합계를 계산하여 "합계" 행에 반영
+   let totalRow = processedData.find(row => row.col1 === '합계');
 
-	if (totalRow) {
-	    for (let colIndex = 2; colIndex <= 8; colIndex++) {
-	        let sum = 0;
-	        processedData.forEach(row => {
-	            if (row.col1 !== '합계') {
-	                sum += parseFloat(row['col' + colIndex]) || 0;
-	            }
-	        });
-	        totalRow['col' + colIndex] = sum;
-	    }
-	}
-	
+   if (totalRow) {
+       for (let colIndex = 2; colIndex <= 8; colIndex++) {
+           let sum = 0;
+           processedData.forEach(row => {
+               if (row.col1 !== '합계') {
+                   sum += parseFloat(row['col' + colIndex]) || 0;
+               }
+           });
+           totalRow['col' + colIndex] = sum;
+       }
+   }
+   
     // 계층 구조 테이블 생성 함수 호출
     createHierarchicalTable(processedData);
     
@@ -282,12 +290,12 @@ createHierarchicalTable = function (processedData) {
             
             item.details.forEach(detail => {
                 var rowElement = document.createElement('tr');
-				
-				// 합계 하이라이팅
-				if (detail === '합계') {
-				    rowElement.style.backgroundColor = '#f2f2f2';
-				    rowElement.style.fontWeight = 'bold';
-				}
+            
+            // 합계 하이라이팅
+            if (detail === '합계') {
+                rowElement.style.backgroundColor = '#f2f2f2';
+                rowElement.style.fontWeight = 'bold';
+            }
 
                 
                 // 대분류 컬럼 (첫 번째 행에만 표시, rowspan 적용)
@@ -342,47 +350,50 @@ createHierarchicalTable = function (processedData) {
                     td.style.padding = '8px';
                     td.style.textAlign = 'right';
                     
+                    // 탭 네비게이션을 위한 데이터 속성 추가
+                    td.setAttribute('data-row', dataIndex);
+                    td.setAttribute('data-col', colIndex - 2);
+                    
                     // 헤더 인덱스 계산 (항목명 제외하고 0부터 시작)
                     let headerIndex = colIndex - 2;
                     
                     // 제외항목 컬럼인지 확인 (colIndex 5, 8이 제외항목 = headerIndex 3, 6)
                     if (headerIndex === 3 || headerIndex === 6) {
-						// 제외항목 컬럼 - 모달 열기
-						const key = `${dataIndex}_${headerIndex}`;
-						    
-						let displayValue = cellValue; 
-						    
-						// exclusionData에 해당 키의 데이터가 있으면 우선 사용
-						if (scwin.exclusionData && scwin.exclusionData[key] && scwin.exclusionData[key].trim()) {
-						    displayValue = scwin.exclusionData[key];
-						}
-						    
-						td.textContent = displayValue;
-						    
-						td.style.backgroundColor = '#fff3cd';
-						td.style.cursor = 'pointer';
-						    
-						// 제외항목 클릭 이벤트
-						td.addEventListener('click', createExclusionClickHandler(dataIndex, headerIndex, td));
-						    
+                        // 제외항목 컬럼 - 모달 열기
+                        const key = `${dataIndex}_${headerIndex}`;
+                          
+                        let displayValue = cellValue; 
+                          
+                        // exclusionData에 해당 키의 데이터가 있으면 우선 사용
+                        if (scwin.exclusionData && scwin.exclusionData[key] && scwin.exclusionData[key].trim()) {
+                            displayValue = scwin.exclusionData[key];
+                        }
+                          
+                        td.textContent = displayValue;
+                          
+                        td.style.backgroundColor = '#fff3cd';
+                        td.style.cursor = 'pointer';
+                          
+                        // 제외항목 클릭 이벤트
+                        td.addEventListener('click', createExclusionClickHandler(dataIndex, headerIndex, td));
+                          
                     } else {
-                        // 수정 가능한 컬럼
-                        td.textContent = cellValue;
+                        // 수정 가능한 컬럼 - 포맷된 숫자로 표시
+                        td.textContent = formatNumber(cellValue);
                         td.style.cursor = 'pointer';
                         
                         // 일반 셀 클릭 이벤트
                         td.addEventListener('click', createCellClickHandler(td, dataIndex, headerIndex, cellValue));
                         
-						if (currentRowData.col1 !== '합계') {
-							// 호버 효과
-							td.addEventListener('mouseenter', function() {
-								this.style.backgroundColor = '#f0f0f0';
-							});
-							td.addEventListener('mouseleave', function() {
-								this.style.backgroundColor = 'white';
-							});
-						}
-                        
+                        if (currentRowData.col1 !== '합계') {
+                            // 호버 효과
+                            td.addEventListener('mouseenter', function() {
+                                this.style.backgroundColor = '#f0f0f0';
+                            });
+                            td.addEventListener('mouseleave', function() {
+                                this.style.backgroundColor = 'white';
+                            });
+                        }
                     }
                     
                     rowElement.appendChild(td);
@@ -396,15 +407,53 @@ createHierarchicalTable = function (processedData) {
 
     // 테이블을 컨테이너에 추가
     tableContainer.appendChild(table);
-	
-	for (let i=0; i<8; i++){
-		scwin.updateColumnTotal(i);
-	}
-	
-		
-	calculateMainTableTotal();
+   
+    for (let i=0; i<8; i++){
+        scwin.updateColumnTotal(i);
+    }
+   
+    calculateMainTableTotal();
 }
 
+// 탭 네비게이션을 위한 헬퍼 함수들
+function getNextCell(currentRow, currentCol) {
+    const table = document.querySelector('#tableContainer table');
+    const editableCols = [0, 1, 2, 4, 5]; // 제외항목(3, 6) 제외
+    
+    // 현재 행에서 다음 편집 가능한 열 찾기
+    let nextColIndex = editableCols.indexOf(currentCol) + 1;
+    
+    if (nextColIndex < editableCols.length) {
+        // 같은 행의 다음 열
+        return findCellByPosition(currentRow, editableCols[nextColIndex]);
+    } else {
+        // 다음 행의 첫 번째 열
+        return findCellByPosition(currentRow + 1, editableCols[0]);
+    }
+}
+
+function getPrevCell(currentRow, currentCol) {
+    const editableCols = [0, 1, 2, 4, 5]; // 제외항목(3, 6) 제외
+    
+    // 현재 행에서 이전 편집 가능한 열 찾기
+    let prevColIndex = editableCols.indexOf(currentCol) - 1;
+    
+    if (prevColIndex >= 0) {
+        // 같은 행의 이전 열
+        return findCellByPosition(currentRow, editableCols[prevColIndex]);
+    } else {
+        // 이전 행의 마지막 열
+        return findCellByPosition(currentRow - 1, editableCols[editableCols.length - 1]);
+    }
+}
+
+function findCellByPosition(row, col) {
+    const table = document.querySelector('#tableContainer table');
+    if (!table) return null;
+    
+    const cell = table.querySelector(`td[data-row="${row}"][data-col="${col}"]`);
+    return cell;
+}
 
 // 제외항목 클릭 핸들러 생성 함수 
 function createExclusionClickHandler(rowIndex, colIndex, td) {
@@ -416,43 +465,46 @@ function createExclusionClickHandler(rowIndex, colIndex, td) {
 // 일반 셀 클릭 핸들러 생성 함수 
 function createCellClickHandler(td, rowIndex, colIndex, cellValue) {
     return function() {
-        editCell(td, rowIndex, colIndex, td.textContent);
+		if (scwin.isEmp === false) {
+		    return; 
+		}
+        editCell(td, rowIndex, colIndex, cellValue);
     };
 }
 
 // 문자열 유사도 계산 (Levenshtein Distance 기반)
 function calculateSimilarity(str1, str2) {
-	const matrix = [];
+    const matrix = [];
 
-	   // ✅ 빈 문자열인 경우 매칭으로 간주
-	   if (!str1 || !str2) return 1.0;
+    // ✅ 빈 문자열인 경우 매칭으로 간주
+    if (!str1 || !str2) return 1.0;
 
-	   // 행렬 초기화
-	   for (let i = 0; i <= str2.length; i++) {
-	       matrix[i] = [i];
-	   }
-	   for (let j = 0; j <= str1.length; j++) {
-	       matrix[0][j] = j;
-	   }
+    // 행렬 초기화
+    for (let i = 0; i <= str2.length; i++) {
+        matrix[i] = [i];
+    }
+    for (let j = 0; j <= str1.length; j++) {
+        matrix[0][j] = j;
+    }
 
-	   // 거리 계산
-	   for (let i = 1; i <= str2.length; i++) {
-	       for (let j = 1; j <= str1.length; j++) {
-	           if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-	               matrix[i][j] = matrix[i - 1][j - 1];
-	           } else {
-	               matrix[i][j] = Math.min(
-	                   matrix[i - 1][j - 1] + 1, // 교체
-	                   matrix[i][j - 1] + 1,     // 삽입
-	                   matrix[i - 1][j] + 1      // 삭제
-	               );
-	           }
-	       }
-	   }
+    // 거리 계산
+    for (let i = 1; i <= str2.length; i++) {
+        for (let j = 1; j <= str1.length; j++) {
+            if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1, // 교체
+                    matrix[i][j - 1] + 1,     // 삽입
+                    matrix[i - 1][j] + 1      // 삭제
+                );
+            }
+        }
+    }
 
-	   // 유사도 계산
-	   const maxLength = Math.max(str1.length, str2.length);
-	   return (maxLength - matrix[str2.length][str1.length]) / maxLength;
+    // 유사도 계산
+    const maxLength = Math.max(str1.length, str2.length);
+    return (maxLength - matrix[str2.length][str1.length]) / maxLength;
 }
 
 // 가장 유사한 rowName 항목을 찾는 함수
@@ -474,90 +526,89 @@ function findMostSimilarRowName(col1Value, rowName) {
 // 서브테이블계산 
 function calculateMainTableTotal() {
     let total = 0;
-	let patientTotal = 0
+    let patientTotal = 0
     const mainTable = document.querySelector('#tableContainer table');
     
     if (mainTable) {
         // "합계" 행 찾기
         const rows = mainTable.rows;
-		for (let i = 3; i < rows.length; i++) { // 헤더 3개 행 제외
-			const firstCell = rows[i].cells[rows[i].cells.length - 8]; 
-		    if (firstCell && firstCell.textContent.includes('합계')) {
-				for (let j = 0; j < 7; j++) { // col2~col8
-					if (j !== 3 && j !== 6) { // 제외항목 컬럼(col5, col8) 제외
-						const cellIndex = rows[i].cells.length - 7 + j;
-		                if (cellIndex < rows[i].cells.length - 1) {
-							const cellValue = parseFloat(rows[i].cells[cellIndex].textContent) || 0;
-		                    total += cellValue;
-							if (j !== 1) {
-								patientTotal += cellValue;
-							}
-		                }
-		            }
-		        }
-		    }
-			if (firstCell && firstCell.textContent.includes("상한액초과금")) {
-				const overLimitValueText = rows[i].cells[rows[i].cells.length - 7].textContent.trim();
-				const overLimitValue = parseFloat(overLimitValueText.replace(/,/g, '')) || 0;
-				patientTotal -= overLimitValue;
-			}
+        for (let i = 3; i < rows.length; i++) { // 헤더 3개 행 제외
+            const firstCell = rows[i].cells[rows[i].cells.length - 8]; 
+            if (firstCell && firstCell.textContent.includes('합계')) {
+                for (let j = 0; j < 7; j++) { // col2~col8
+                    if (j !== 3 && j !== 6) { // 제외항목 컬럼(col5, col8) 제외
+                        const cellIndex = rows[i].cells.length - 7 + j;
+                        if (cellIndex < rows[i].cells.length - 1) {
+                            const cellValue = parseFloat(rows[i].cells[cellIndex].textContent.replace(/,/g, '')) || 0;
+                            total += cellValue;
+                            if (j !== 1) {
+                                patientTotal += cellValue;
+                            }
+                        }
+                    }
+                }
+            }
+            if (firstCell && firstCell.textContent.includes("상한액초과금")) {
+                const overLimitValueText = rows[i].cells[rows[i].cells.length - 7].textContent.trim();
+                const overLimitValue = parseFloat(overLimitValueText.replace(/,/g, '')) || 0;
+                patientTotal -= overLimitValue;
+            }
         }
     }
-	
+   
     ipt_tableTotal.setValue(total);
-	ipt_tableTotalminus.setValue(patientTotal);
+    ipt_tableTotalminus.setValue(patientTotal);
 }
 
-// 셀 값 저장 함수도 숫자 정리 적용
+// 셀 값 저장 함수 - 숫자 정리 적용 및 포맷팅
 function saveCellValue(td, input, rowIndex, colIndex) {
     const newValue = cleanNumber(input.value);  // 숫자 정리 적용
-    td.textContent = newValue;
+    td.textContent = formatNumber(newValue);    // 포맷된 숫자로 표시
     
     console.log(`Row ${rowIndex}, Col ${colIndex} 값 변경: ${newValue}`);
     
-	scwin.updateColumnTotal(colIndex);
-	
-	calculateMainTableTotal();
+    scwin.updateColumnTotal(colIndex);
+    calculateMainTableTotal();
 }
 
 // 제외항목 모달 열기 함수
 function openExclusionModal(rowIndex, colIndex, td) {
-	const key = `${rowIndex}_${colIndex}`;
-	
-	localStorage.setItem('itemId', rowIndex);
-	localStorage.setItem('excId', colIndex);
-	
-	requires("uiplugin.popup"); 
-	var winWid = $(window).width();
-	var winHei = $(window).height();
-	var popWid = 1000;
-	var popHei = 600;
-	var sumLeft = (winWid - popWid) / 2;
-	var sumTop = (winHei - popHei) / 2;
-	
-	var opts = {
-					id : "exc_popup",
-					width : popWid + "px",
-					height : popHei + "px",
-					top : sumTop, 
-					left : sumLeft,
-					popupName : `제외항목 ${key}`,
-					modal : true, 
-					type : "wframePopup", 
-					closeAction: function() {
-						let newValue = localStorage.getItem("exc");
-						scwin.updateExclusionCell(rowIndex, colIndex, newValue);
-						scwin.exclusionData[key] = newValue;
-						localStorage.removeItem("exc");
-						return true;
-					}
-				};
-				
-	$p.openPopup("/InsWebApp/ui/audit/exc-popup.xml", opts);
+    const key = `${rowIndex}_${colIndex}`;
+   
+    localStorage.setItem('itemId', rowIndex);
+    localStorage.setItem('excId', colIndex);
+   
+    requires("uiplugin.popup"); 
+    var winWid = $(window).width();
+    var winHei = $(window).height();
+    var popWid = 1000;
+    var popHei = 600;
+    var sumLeft = (winWid - popWid) / 2;
+    var sumTop = (winHei - popHei) / 2;
+   
+    var opts = {
+        id : "exc_popup",
+        width : popWid + "px",
+        height : popHei + "px",
+        top : sumTop, 
+        left : sumLeft,
+        popupName : `제외항목 ${key}`,
+        modal : true, 
+        type : "wframePopup", 
+        closeAction: function() {
+            let newValue = localStorage.getItem("exc");
+            scwin.updateExclusionCell(rowIndex, colIndex, newValue);
+            scwin.exclusionData[key] = newValue;
+            localStorage.removeItem("exc");
+            return true;
+        }
+    };
+            
+    $p.openPopup("/InsWebApp/ui/audit/exc-popup.xml", opts);
 }
 
 scwin.updateColumnTotal = function (colIndex) {
-	colIndex += 1;
+    colIndex += 1;
     const mainTable = document.querySelector('#tableContainer table');
     if (!mainTable) return;
 
@@ -583,30 +634,41 @@ scwin.updateColumnTotal = function (colIndex) {
         }
     }
 
-    // 계산된 합계를 합계행에 반영
+    // 계산된 합계를 합계행에 반영 (포맷팅 적용)
     if (totalRow) {
         const totalCell = totalRow.cells[totalRow.cells.length - 8 + colIndex];
         if (totalCell) {
-            totalCell.textContent = sum;
+            totalCell.textContent = formatNumber(sum);
         }
     }
 }
 
-// 셀 값 수정 함수
+// 셀 값 수정 함수 - 탭 네비게이션 기능 추가
 function editCell(td, rowIndex, colIndex, currentValue) {
     // 이미 수정 중인 셀이 있으면 취소
     const existingInput = document.querySelector('.editing-input');
     if (existingInput) {
-        existingInput.parentNode.textContent = existingInput.getAttribute('data-original');
+        const originalValue = existingInput.getAttribute('data-original');
+        existingInput.parentNode.textContent = formatNumber(originalValue);
         existingInput.remove();
+    }
+    
+    // 합계 행은 편집 불가
+    const table = document.querySelector('#tableContainer table');
+    const currentRow = td.parentNode;
+    const labelCell = currentRow.cells[currentRow.cells.length - 8];
+    if (labelCell && labelCell.textContent.trim() === '합계') {
+        return;
     }
     
     // 입력 필드 생성
     const input = document.createElement('input');
     input.type = 'number';
-    input.value = currentValue;
+    input.value = cleanNumber(currentValue); // 콤마 제거된 순수 숫자값
     input.className = 'editing-input';
-    input.setAttribute('data-original', currentValue);
+    input.setAttribute('data-original', cleanNumber(currentValue));
+    input.setAttribute('data-row', rowIndex);
+    input.setAttribute('data-col', colIndex);
     input.style.width = '100%';
     input.style.border = '1px solid #007bff';
     input.style.padding = '2px';
@@ -619,22 +681,63 @@ function editCell(td, rowIndex, colIndex, currentValue) {
     input.focus();
     input.select();
     
-    // Enter 키로 저장
-    input.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            saveCellValue(td, input, rowIndex, colIndex);
-        }
-    });
-    
-    // ESC 키로 취소
+    // 키보드 이벤트 처리
     input.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            td.textContent = currentValue;
+        const currentRowNum = parseInt(this.getAttribute('data-row'));
+        const currentColNum = parseInt(this.getAttribute('data-col'));
+        
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveCellValue(td, input, rowIndex, colIndex);
+            
+            // Enter 시 다음 행의 같은 열로 이동
+            const nextCell = findCellByPosition(currentRowNum + 1, currentColNum);
+            if (nextCell && !isExclusionColumn(currentColNum)) {
+                const nextCellValue = cleanNumber(nextCell.textContent);
+                editCell(nextCell, currentRowNum + 1, currentColNum, nextCellValue);
+            }
+        } else if (e.key === 'Tab') {
+            e.preventDefault();
+            saveCellValue(td, input, rowIndex, colIndex);
+            
+            if (e.shiftKey) {
+                // Shift+Tab: 이전 셀로 이동
+                const prevCell = getPrevCell(currentRowNum, currentColNum);
+                if (prevCell) {
+                    const prevCellValue = cleanNumber(prevCell.textContent);
+                    const prevRow = parseInt(prevCell.getAttribute('data-row'));
+                    const prevCol = parseInt(prevCell.getAttribute('data-col'));
+                    editCell(prevCell, prevRow, prevCol, prevCellValue);
+                }
+            } else {
+                // Tab: 다음 셀로 이동
+                const nextCell = getNextCell(currentRowNum, currentColNum);
+                if (nextCell) {
+                    const nextCellValue = cleanNumber(nextCell.textContent);
+                    const nextRow = parseInt(nextCell.getAttribute('data-row'));
+                    const nextCol = parseInt(nextCell.getAttribute('data-col'));
+                    editCell(nextCell, nextRow, nextCol, nextCellValue);
+                }
+            }
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            const originalValue = this.getAttribute('data-original');
+            td.textContent = formatNumber(originalValue);
         }
     });
     
     // 포커스 잃으면 저장
     input.addEventListener('blur', function() {
-        saveCellValue(td, input, rowIndex, colIndex);
+        // 다른 셀로 이동하는 경우가 아닐 때만 저장
+        setTimeout(() => {
+            if (!document.querySelector('.editing-input')) {
+                saveCellValue(td, input, rowIndex, colIndex);
+            }
+        }, 100);
     });
+}
+
+// 제외항목 컬럼인지 확인하는 함수
+function isExclusionColumn(colIndex) {
+    return colIndex === 3 || colIndex === 6; // 제외항목 컬럼들
 }
