@@ -57,11 +57,11 @@
 
 scwin.onpageload = function() {
     scwin.emp = JSON.parse(localStorage.getItem("employee"));
-	ipt_claimNo.setValue(localStorage.getItem("claimNo"));
-    
+    scwin.claim = JSON.parse(localStorage.getItem("claim"));
+	ipt_claimNo.setValue(scwin.claim.claimNo);
     ipt_emp.setValue(scwin.emp.empName);
 
-    dm_claim.set("claim_no", localStorage.getItem("claimNo"));
+    dm_claim.set("claim_no", scwin.claim.claimNo);
 
     $c.sbm.execute(sbm_getDeptName, {"elData": {"dept_id": scwin.emp.deptId}});
 

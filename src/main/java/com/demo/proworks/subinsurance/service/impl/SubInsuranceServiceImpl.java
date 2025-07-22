@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.demo.proworks.subinsurance.service.SubInsuranceService;
 import com.demo.proworks.subinsurance.vo.SubInsuranceVo;
 import com.demo.proworks.subinsurance.vo.SubInsuranceProductVo;
+import com.demo.proworks.subinsurance.vo.UserInsuranceVo;
 import com.demo.proworks.subinsurance.dao.SubInsuranceDAO;
 
 /**  
@@ -124,18 +125,34 @@ public class SubInsuranceServiceImpl implements SubInsuranceService {
 	}
 
     /**
-     * 사용자 ID로 보험상품 목록을 조회한다.
-     *
-     * @process
-     * 1. 사용자 ID로 보험상품 목록을 조회한다.
-     * 2. 결과 List<SubInsuranceProductVo>를 리턴한다.
-     * 
-     * @param  subInsuranceProductVo 보험상품조회정보 SubInsuranceProductVo
-     * @return 보험상품 목록 List<SubInsuranceProductVo>
-     * @throws Exception
-     */
-	public List<SubInsuranceProductVo> selectInsuranceProductsByUserId(SubInsuranceProductVo subInsuranceProductVo) throws Exception {
-		List<SubInsuranceProductVo> list = subInsuranceDAO.selectInsuranceProductsByUserId(subInsuranceProductVo);
+    * 사용자 ID로 보험상품 목록을 조회한다.
+    *
+    * @process
+    * 1. 사용자 ID로 보험상품 목록을 조회한다.
+    * 2. 결과 List<SubInsuranceProductVo>를 리턴한다.
+    * 
+    * @param  subInsuranceProductVo 보험상품조회정보 SubInsuranceProductVo
+    * @return 보험상품 목록 List<SubInsuranceProductVo>
+    * @throws Exception
+    */
+    public List<SubInsuranceProductVo> selectInsuranceProductsByUserId(SubInsuranceProductVo subInsuranceProductVo) throws Exception {
+    List<SubInsuranceProductVo> list = subInsuranceDAO.selectInsuranceProductsByUserId(subInsuranceProductVo);
+    return list;
+    }
+
+	/**
+	 * 사용자명으로 보험 목록을 조회한다 (JOIN 쿼리 사용).
+	 *
+	 * @process
+	 * 1. 사용자명으로 SUB_INSURANCE와 USER 테이블을 JOIN하여 조회한다.
+	 * 2. 결과 List<UserInsuranceVo>를 리턴한다.
+	 * 
+	 * @param  userInsuranceVo 사용자보험정보 UserInsuranceVo
+	 * @return 사용자보험 목록 List<UserInsuranceVo>
+	 * @throws Exception
+	 */
+	public List<UserInsuranceVo> selectUserInsuranceListByUserName(UserInsuranceVo userInsuranceVo) throws Exception {
+		List<UserInsuranceVo> list = subInsuranceDAO.selectUserInsuranceListByUserName(userInsuranceVo);
 		return list;
 	}
 	

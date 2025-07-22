@@ -34,6 +34,9 @@ public class ClaimListwStatusVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "ID", physicalName = "ID", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String ID;
 
+    @ElDtoField(logicalName = "emp_no", physicalName = "emp_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String emp_no;
+
     @ElVoField(physicalName = "claim_no")
     public String getClaim_no(){
         String ret = this.claim_no;
@@ -111,6 +114,17 @@ public class ClaimListwStatusVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.ID = ID;
     }
 
+    @ElVoField(physicalName = "emp_no")
+    public String getEmp_no(){
+        String ret = this.emp_no;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "emp_no")
+    public void setEmp_no(String emp_no){
+        this.emp_no = emp_no;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -121,7 +135,8 @@ public class ClaimListwStatusVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("deadline").append("=").append(deadline).append(",");
         sb.append("emp_name").append("=").append(emp_name).append(",");
         sb.append("status").append("=").append(status).append(",");
-        sb.append("ID").append("=").append(ID);
+        sb.append("ID").append("=").append(ID).append(",");
+        sb.append("emp_no").append("=").append(emp_no);
         sb.append("]");
         return sb.toString();
 

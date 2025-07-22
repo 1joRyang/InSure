@@ -48,6 +48,7 @@
 		    deadline,
 		    emp_name,
 		    status,
+		    emp_no,
 		    ID
 		FROM (
 		    SELECT S.*, CEIL((@ROWNUM := @ROWNUM + 1) / #{pageSize}) AS PAGE
@@ -59,6 +60,7 @@
 		            DATE_ADD(c.receipt_date, INTERVAL 3 DAY) AS deadline, 
 		            reg.emp_name, 
 		            c.status,
+		            c.emp_no,
 		            c.ID
 		        FROM 
 		            CLAIM c
@@ -84,6 +86,7 @@
 		    deadline,
 		    emp_name,
 		    status,
+		    emp_no,
 		    ID
 		FROM (
 		    SELECT S.*, CEIL((@ROWNUM := @ROWNUM + 1) / #{pageSize}) AS PAGE
@@ -95,6 +98,7 @@
 		            DATE_ADD(c.receipt_date, INTERVAL 3 DAY) AS deadline, 
 		            e.emp_name, 
 		            c.status,
+		            c.emp_no,
 		            c.ID
 		        FROM 
 		            CLAIM c
@@ -119,6 +123,7 @@
 		    deadline,
 		    emp_name,
 		    status,
+		    emp_no,
 		    ID
 		FROM (
 		    SELECT S.*, CEIL((@ROWNUM := @ROWNUM + 1) / #{pageSize}) AS PAGE
@@ -130,6 +135,7 @@
 		            DATE_ADD(c.receipt_date, INTERVAL 3 DAY) AS deadline, 
 		            e.emp_name, 
 		            c.status,
+		            c.emp_no,
 		            c.ID
 		        FROM 
 		            CLAIM c

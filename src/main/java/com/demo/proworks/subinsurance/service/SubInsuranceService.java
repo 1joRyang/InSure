@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.demo.proworks.subinsurance.vo.SubInsuranceVo;
 import com.demo.proworks.subinsurance.vo.SubInsuranceProductVo;
+import com.demo.proworks.subinsurance.vo.UserInsuranceVo;
 
 /**  
  * @subject     : 가입보험정보 관련 처리를 담당하는 인터페이스
@@ -81,5 +82,14 @@ public interface SubInsuranceService {
      * @throws Exception
      */
 	public List<SubInsuranceProductVo> selectInsuranceProductsByUserId(SubInsuranceProductVo subInsuranceProductVo) throws Exception;
+
+    /**
+     * 사용자명으로 보험 목록을 조회한다 (JOIN 쿼리 사용).
+     *
+     * @param  userInsuranceVo 사용자보험정보 UserInsuranceVo
+     * @return 사용자보험 목록 List<UserInsuranceVo>
+     * @throws Exception
+     */
+	public List<UserInsuranceVo> selectUserInsuranceListByUserName(UserInsuranceVo userInsuranceVo) throws Exception;
 	
 }
