@@ -83,12 +83,12 @@ scwin.onpageload = function() {
 	let itemId = localStorage.getItem('itemId');
     let excId = localStorage.getItem('excId');
     let treatmentId = localStorage.getItem("treatmentId");
-    let claimNo = localStorage.getItem("claimNo");
+    let claim = JSON.parse(localStorage.getItem("claim"));
 
     dm_excitems.set("exc_id", excId);
     dm_excitems.set("item_id", itemId);
     dm_excitems.set("treatment_id", treatmentId);
-    dm_excitems.set("claim_no", claimNo);
+    dm_excitems.set("claim_no", claim.claimNo);
 
     $c.sbm.execute(sbm_getExc, {"elData": dm_excitems.getJSON()});
 };

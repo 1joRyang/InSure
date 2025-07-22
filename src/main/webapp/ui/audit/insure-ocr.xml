@@ -306,7 +306,7 @@ scwin.updateExclusionCell = function(rowIndex, colIndex, newValue) {
     if (!targetCell) return;
 
     // 값 반영
-    targetCell.textContent =  Number(newValue).toLocaleString();
+    targetCell.textContent = Number(newValue).toLocaleString();
 
     // 스타일 및 기타 표시 유지
     targetCell.style.backgroundColor = '#fff3cd';
@@ -317,8 +317,6 @@ scwin.updateExclusionCell = function(rowIndex, colIndex, newValue) {
 
 scwin.btn_ocr_onclick = function (e) {
     // OCR 버튼 클릭 시 OCR 결과를 받아서 테이블을 동적으로 업데이트
-    // todo
-    // 이미지 보냈을 때..
     let formData = new FormData();
     formData.append("img_url", scwin.imgUrl);
     console.log(scwin.imgUrl);
@@ -331,15 +329,12 @@ scwin.btn_ocr_onclick = function (e) {
         processData: false,  // FormData 객체를 문자열로 변환하지 않음
         success: function (response) {
             console.log(response.data.rows);
-            //console.log(scwin.data_rows);
             scwin.createTable(response.data.rows);
         },
         error: function (xhr, status, error) {
             console.log(error);
         }
     }); 
-     
-    //scwin.createTable(scwin.data_rows);
 };
 
 scwin.btn_before_onclick = function (e) {
@@ -427,7 +422,6 @@ scwin.btn_next_onclick = function (e) {
     scwin.nextClick = true;
     saveInsure();
     $p.closePopup("img_popup");
-    
 };
 
 scwin.ipt_paid_onchange = function (info) {
