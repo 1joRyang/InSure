@@ -32,7 +32,7 @@
 		    FROM CLAIM c
 		    LEFT JOIN CLAIM_RESULT cr ON c.claim_no = cr.claim_no
 		    WHERE c.ID = 1
-		) AS S
+		) AS S 
 		WHERE 
 		   PAGE = #{pageIndex};
 
@@ -67,11 +67,16 @@
 		        JOIN APPROVAL_REQ ar ON c.claim_no = ar.claim_no
 		        WHERE 
 		            ar.manager_no = #{emp_no}
-		            AND c.status = #{status}
-		         ORDER BY RECEIPT_DATE DESC
+		            <if test="status == '결재중'">
+		            	AND c.status = #{status}
+		            </if>
+		            <if test="status != '결재중'">
+		            	AND c.status != '결재중'
+		            </if>
 		    ) S, (SELECT @ROWNUM := 0) TMP
-		) A
-		WHERE PAGE = #{pageIndex};
+		) A 
+		WHERE PAGE = #{pageIndex}
+		ORDER BY receipt_date DESC;
 	</select>
 	
 	<select id="selectClaimWithStatusWait" parameterType="com.demo.proworks.claim.vo.ClaimVo"
@@ -103,10 +108,10 @@
 		        WHERE 
 		            c.emp_no = #{emp_no}
 		            AND c.status IN ('대기', '보완', '결재완료', '결재반려', '보완완료')
-		         ORDER BY RECEIPT_DATE DESC
 		    ) S, (SELECT @ROWNUM := 0) TMP
-		) A
-		WHERE PAGE = #{pageIndex};
+		) A 
+		WHERE PAGE = #{pageIndex}
+		ORDER BY receipt_date DESC;
 	</select>
 
 	<select id="selectClaimWithStatus" parameterType="com.demo.proworks.claim.vo.ClaimVo"
@@ -138,11 +143,10 @@
 		        WHERE 
 		            c.emp_no = #{emp_no}
 		            AND c.status = #{status}
-		        ORDER BY 
-		            c.receipt_date ASC
 		    ) S, (SELECT @ROWNUM := 0) TMP
-		) A
-		WHERE PAGE = #{pageIndex};
+		) A 
+		WHERE PAGE = #{pageIndex}
+		ORDER BY receipt_date DESC;
 	</select>
 	
 	<select id="selectClaimJoinClaimResult" parameterType="com.demo.proworks.claim.vo.ClaimUserVo"
