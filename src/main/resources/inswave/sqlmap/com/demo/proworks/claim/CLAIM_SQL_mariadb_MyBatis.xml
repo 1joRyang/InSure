@@ -102,7 +102,7 @@
 		        JOIN EMPLOYEE e ON c.emp_no = e.emp_no
 		        WHERE 
 		            c.emp_no = #{emp_no}
-		            AND c.status IN ('대기', '보완', '결재완료', '결재반려')
+		            AND c.status IN ('대기', '보완', '결재완료', '결재반려', '보완완료')
 		         ORDER BY RECEIPT_DATE DESC
 		    ) S, (SELECT @ROWNUM := 0) TMP
 		) A
