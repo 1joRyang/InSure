@@ -73,14 +73,18 @@
     			abortTrigger="">
     		</xf:submission>
     		<xf:submission id="sbm_getS3Url" action="/InsWebApp/getS3UploadUrl.pwkjson" method="post" mediatype="application/json"
-    			ref='data:json,{"id":"dma_getS3Url","key":"elData"}' target="" encoding="UTF-8" instance="" replace=""
-    			errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getS3Url_submitdone"
-    			ev:submiterror="" abortTrigger="">
+    			ref='data:json,{"id":"dma_getS3Url","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
+    			customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getS3Url_submitdone" ev:submiterror=""
+    			abortTrigger="">
     		</xf:submission>
     		<xf:submission id="sbm_addSupplementDocs" action="/InsWebApp/addSupplementDocs.pwkjson" method="post"
     			mediatype="application/json" ref='data:json,{"id":"dma_final_docs","key":"elData"}' target="" encoding="UTF-8" instance="" replace=""
     			errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
     			ev:submitdone="scwin.sbm_addSupplementDocs_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
+    		<xf:submission id="sbm_updateComplete" action="/InsWebApp/updateSupplementComplete.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dma_final_docs","key":"suppVo"}' target='data:json,{"id":"dma_final_docs","key":"suppVo"}' encoding="UTF-8"
+    			instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_updateComplete_submitdone"
+    			ev:submiterror="" abortTrigger="">
     		</xf:submission>
     	</xf:model>
     	<w2:leaf>true</w2:leaf>
@@ -303,8 +307,8 @@ scwin.sbm_getS3Url_submitdone = function (e) {
 };
 
 scwin.sbm_addSupplementDocs_submitdone = function (e) {
-    alert("보완 서류가 정상적으로 제출되었습니다.");
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
+    console.log("1. 파일 키 저장 성공. 이어서 보완 완료 처리를 시작합니다.");
+    $p.executeSubmission("sbm_updateComplete");
 };
 
 scwin.saveFileKeysToServer = function() {
@@ -318,6 +322,11 @@ scwin.saveFileKeysToServer = function() {
 
     $p.executeSubmission("sbm_addSupplementDocs");
 }
+
+scwin.sbm_updateComplete_submitdone = function (e) {
+    alert("보완 서류가 정상적으로 제출되었습니다.");
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
+};
 ]]></script>
     	<style type="text/css"><![CDATA[/* custom.css */
 

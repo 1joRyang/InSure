@@ -60,5 +60,10 @@ public class SupplementServiceImpl implements SupplementService {
 		 }
 	 }
 	 
+	@Override
+    public int updateSupplementCompleted(SuppVo vo) throws Exception {
+        return supplementDAO.updateSupplementCompleted(vo);
+    }
+	 
 	 
 }

@@ -28,6 +28,48 @@
         				<w2:key dataType="text" name="평균처리시간" id="avgProcessingTime"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_supplementStatus">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="보완요청 건수" id="requestCount"></w2:key>
+        				<w2:key dataType="text" name="보완완료 건수" id="completedCount"></w2:key>
+        				<w2:key dataType="text" name="평균보완 시간" id="avgProcessingTime"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_dailyCount">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="전일처리건수" id="yesterdayProcessedCount"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_approvalRate">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="승인률" id="approvalRate"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dlt_urgentClaims" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="청구번호" id="claimNo"></w2:column>
+        				<w2:column dataType="text" name="고객명" id="userName"></w2:column>
+        				<w2:column dataType="text" name="청구내용" id="claimContent"></w2:column>
+        				<w2:column dataType="text" name="배정유형" id="claimType"></w2:column>
+        				<w2:column dataType="text" name="마감시간" id="deadline"></w2:column>
+        				<w2:column dataType="text" name="담당자명" id="empName"></w2:column>
+        				<w2:column dataType="text" name='상태' id="status"></w2:column>
+        				<w2:column dataType="text" name="남은시간" id="timeRemaining"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_weeklyTrend" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="요일" id="reportDate"></w2:column>
+        				<w2:column dataType="number" name="결재 건" id="approvalCount"></w2:column>
+        				<w2:column dataType="number" name="단순 지급" id="simplePayCount"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dlt_claimTypeChart" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="라벨" id="label"></w2:column>
+        				<w2:column dataType="number" name="값" id="value"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
         	</w2:dataCollection>
         	<w2:workflowCollection />
         	<xf:submission id="sbm_getTodayStatus" action="/InsWebApp/selectTodayStatusCounts.pwkjson" method="post"
@@ -46,20 +88,273 @@
         		target='data:json,{"id":"dma_monthlyPerf","key":"monthlyPerfVo"}' encoding="UTF-8" instance="" replace="" errorHandler=""
         		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
+        	<xf:submission id="sbm_getSupplementStatus" action="/InsWebApp/selectSupplementStatus.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_supplementStatus","key":"supplementStatusVo"}'
+        		target='data:json,{"id":"dma_supplementStatus","key":"supplementStatusVo"}' encoding="UTF-8" instance="" replace=""
+        		errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror=""
+        		abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getYesterdayCount" action="/InsWebApp/selectYesterdayCount.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_dailyCount","key":"dailyCountVo"}'
+        		target='data:json,{"id":"dma_dailyCount","key":"dailyCountVo"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getApprovalRate" action="/InsWebApp/selectApprovalRate.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_approvalRate","key":"approvalRateVo"}'
+        		target='data:json,{"id":"dma_approvalRate","key":"approvalRateVo"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getUrgentClaims" action="/InsWebApp/selectUrgentClaims.pwkjson" method="post"
+        		mediatype="application/json" ref="" target='data:json,{"id":"dlt_urgentClaims","key":"dlt_urgentClaims"}' encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getUrgentClaims_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getWeeklyTrend" action="/InsWebApp/selectWeeklyTrend.pwkjson" method="post" mediatype="application/json"
+        		ref="" target='data:json,{"id":"dl_weeklyTrend","key":"weeklyTrendList"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getWeeklyTrend_submitdone"
+        		ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getClaimType" action="/InsWebApp/selectClaimTypeDistribution.pwkjson" method="post"
+        		mediatype="application/json" ref="" target='' encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getClaimType_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
     $p.executeSubmission("sbm_getTodayStatus");
+    $p.executeSubmission("sbm_getSupplementStatus");
     $p.executeSubmission("sbm_getClaimMonitor");
     $p.executeSubmission("sbm_getMonthlyPerf");
+    $p.executeSubmission("sbm_getYesterdayCount");
+    $p.executeSubmission("sbm_getApprovalRate");
+    $p.executeSubmission("sbm_getUrgentClaims");
+    $p.executeSubmission("sbm_getWeeklyTrend");
+    $p.executeSubmission("sbm_getClaimType");
 };
         
 scwin.sbm_getTodayStatus_submitdone = function (e) {
     console.log("서버로부터 받은 원본 응답: ", e.responseJSON);
 };
-]]></script>
+
+scwin.sbm_getUrgentClaims_submitdone = function (e) {
+    console.log("====== [클라이언트] 우선 처리 업무 데이터 수신 ======");
+    console.log("서버로부터 받은 원본 응답(JSON):", e.responseJSON);
+
+    let urgentTaskList = e.responseJSON.dlt_urgentClaims;
+
+    if (urgentTaskList && urgentTaskList.length > 0) {
+        console.log("유효한 우선 처리 업무 리스트 발견:", urgentTaskList.length + "건");
+        // 동적으로 업무 아이템 UI를 생성하는 함수 호출
+        scwin.createUrgentTaskItems(urgentTaskList);
+    } else {
+        console.log("조회된 우선 처리 업무가 없습니다.");
+    }
+    console.log("==============================================");
+};
+
+scwin.createUrgentTaskItems = function(taskList){
+    // UI를 생성할 부모 컨테이너
+    let parentGroup = $p.getComponentById("grp_urgentTaskContainer");
+    
+    // --- 아래 부분을 수정 ---
+    // 기존에 생성된 아이템이 있다면 모두 삭제
+    let children = parentGroup.getChildren();
+    for (let i = children.length - 1; i >= 0; i--) {
+        parentGroup.removeChild(children[i]);
+    }
+    // --- 여기까지 수정 ---
+
+    // 각 데이터에 대해 아이템 생성
+    for (let i = 0; i < taskList.length; i++) {
+        let taskData = taskList[i];
+        scwin.createUrgentTaskItem(parentGroup, taskData, i);
+    }
+};
+
+scwin.createUrgentTaskItem = function(container, taskData, index){
+let itemId = "task_item_" + index;
+
+    // 1. task_item group 생성
+    let taskItemGroup = $p.dynamicCreate(itemId, "group", {
+        "tagname": "div",
+        "style": "display: flex; align-items: center; padding: 15px 5px; border-bottom: 1px solid #f0f0f0;"
+    }, container);
+
+    // 2. priority_line group 생성
+    $p.dynamicCreate(itemId + "_line", "group", {
+        "tagname": "div",
+        "style": "width: 4px; height: 40px; border-radius: 2px; margin-right: 15px; background-color: #eb4e4e;"
+    }, taskItemGroup);
+
+    // 3. task_content group 생성
+    let contentGroup = $p.dynamicCreate(itemId + "_content", "group", {
+        "tagname": "div",
+        "style": "flex-grow: 1; min-width: 0;"
+    }, taskItemGroup); // !!!!! 부모를 taskItemGroup으로 수정 !!!!!
+
+    // 3-1. 제목(title) textbox 생성
+    let titleBox = $p.dynamicCreate(itemId + "_title", "textbox", {
+        "tagname": "p",
+        "style": "font-size: 15px; font-weight: 500; color: #333; margin-bottom: 4px;"
+    }, contentGroup);
+    let titleText = "청구번호: " + taskData.claimNo + " | " + taskData.userName + " | " + taskData.claimContent;
+    titleBox.setValue(titleText);
+
+    // 3-2. 상세(details) textbox 생성
+    let detailsBox = $p.dynamicCreate(itemId + "_details", "textbox", {
+        "tagname": "p",
+        "style": "font-size: 13px; color: #666;"
+    }, contentGroup);
+    detailsBox.setValue("담당자: " + taskData.empName);
+
+    // 4. task_actions group 생성
+    let actionsGroup = $p.dynamicCreate(itemId + "_actions", "group", {
+        "tagname": "div",
+        "style": "display: flex; align-items: center; gap: 8px;"
+    }, taskItemGroup);
+
+    // 4-1. 상태 배지 (배경색/글자색 동적 변경)
+    let statusColors = {
+        "대기": { "bg": "#fff8e1", "color": "#f59f0b" },
+        "결재중": { "bg": "#e7f5ff", "color": "#339af0" },
+        "결재반려": { "bg": "#fff5f5", "color": "#fa5252" },
+        "결재완료": { "bg": "#e6fcf5", "color": "#20c997" },
+        "보완": { "bg": "#f1f3f5", "color": "#868e96" },
+        "보완완료": { "bg": "#e6fcf5", "color": "#087f5b" }
+    };
+    let currentStatusColor = statusColors[taskData.status] || statusColors["보완"];
+    
+    let statusBadge = $p.dynamicCreate(itemId + "_status", "textbox", {
+        "style": "font-size: 12px; padding: 4px 8px; border-radius: 4px; font-weight: 500; background-color: " + currentStatusColor.bg + "; color: " + currentStatusColor.color + ";",
+    }, actionsGroup);
+    statusBadge.setValue(taskData.status);
+
+    // 4-2. 남은 시간
+    let deadlineBox = $p.dynamicCreate(itemId + "_deadline", "textbox", {
+        "style": "color: #c92a2a; font-weight: 500; font-size:13px;",
+        "tagname": "span"
+    }, actionsGroup);
+    deadlineBox.setValue(taskData.deadline);
+};
+
+scwin.sbm_getWeeklyTrend_submitdone = function (e) {
+   scwin.renderChartWithEngine();
+};
+
+scwin.renderChartWithEngine = function() {
+    try {
+        // 1. 데이터 변환 (이전과 동일)
+        var wqData = dl_weeklyTrend.getAllJSON();
+        var categories = [];
+        var approvalData = [];
+        var simplePayData = [];
+
+        for (var i = 0; i < wqData.length; i++) {
+            categories.push({ "label": wqData[i].reportDate });
+            approvalData.push({ "value": wqData[i].approvalCount });
+            simplePayData.push({ "value": wqData[i].simplePayCount });
+        }
+
+        // 2. FusionCharts에 전달할 최종 데이터 소스 조립 (이전과 동일)
+        var dataSource = {
+            "chart": {
+                "theme": "fusion",
+                "palettecolors": "#5D68E5,#57B96E",
+                "plotFillAlpha": "10",
+                "lineThickness": "2",
+                "drawAnchors": "1",
+                "anchorRadius": "4",
+                "showLegend": "1",
+                "legendPosition": "top-right",
+                "plottooltext": "$seriesName: $value건",
+                "baseFont": "Noto Sans KR, sans-serif"
+            },
+            "categories": [{ "category": categories }],
+            "dataset": [
+                { "seriesname": "결재 건", "data": approvalData },
+                { "seriesname": "단순 지급", "data": simplePayData }
+            ]
+        };
+
+        // 3. ✨✨✨ 핵심 변경 사항 ✨✨✨
+        // WebSquare 컴포넌트에서 .fc()를 호출하여 FusionCharts 엔진 객체를 얻습니다.
+        var fusionChartEngine = chart_weeklyTrend.fc();
+
+        // 4. 엔진의 네이티브 함수인 setJSONData()를 사용해 데이터를 주입합니다.
+        //    이렇게 하면 차트가 데이터를 받고 스스로를 다시 그립니다.
+        fusionChartEngine.setJSONData(dataSource);
+
+    } catch (error) {
+        console.error("차트 엔진 제어 중 오류 발생:", error);
+    }
+};
+/*
+scwin.initWeeklyChart = function() {
+    var chartAttrs = {
+        "caption": "",
+        "subCaption": "",
+        "baseFont": "Noto Sans KR, sans-serif",
+        "showValues": "0",
+        "theme": "fusion",
+        "palettecolors": "#5D68E5,#57B96E",
+        "plotFillAlpha": "10",
+        "lineThickness": "2",
+        "drawAnchors": "1",
+        "anchorRadius": "4",
+        "showLegend": "1",
+        "legendPosition": "top-right",
+        "plottooltext": "$seriesName: $value건"
+    };
+
+    chart_weeklyTrend.setChartAttribute(chartAttrs);
+};
+ */
+
+scwin.sbm_getClaimType_submitdone = function (e) {
+    // 1. 서버 응답에서 실제 데이터 배열을 추출합니다.
+    var chartDataFromServer = e.responseJSON.claimTypeData;
+
+    // 2. 추출한 데이터를 dataList에 수동으로 설정합니다.
+    dlt_claimTypeChart.setJSON(chartDataFromServer);
+
+    // 3. 차트 스타일 속성 (라벨 제거 & 범례 정리)
+    var chartAttrs = {
+        "theme": "fusion",
+        "caption": "",
+        "baseFont": "Noto Sans KR, sans-serif",
+        "palettecolors": "#5D68E5,#57B96E,#F3B63A,#FC5C65,#20C997,#868e96",
+        
+        // 범례 (Legend) 설정
+        "showLegend": "1",
+        "legendPosition": "bottom",
+        "legendItemFontSize": "13",
+
+        // 도넛 차트 모양 설정
+        "doughnutRadius": "50",
+        "startingAngle": "300",
+
+        // ✨✨✨ [핵심] 값 & 라벨 표시 설정 ✨✨✨
+        "showPercentValues": "0", // 차트의 모든 퍼센트 값 표시 기능을 끕니다.
+        "showValues": "0",        // 차트의 모든 숫자 값 표시 기능을 끕니다.
+
+        // 툴팁 (마우스 올렸을 때) 설정
+        "plottooltext": "<b>$label:</b> $dataValue건 ($percentValue)",
+
+        // 크기 및 여백 설정
+        "pieRadius": "80",
+        "chartTopMargin": "10",
+        "chartBottomMargin": "10",
+        "showBorder": "0",
+        "bgAlpha": "0"
+    };
+    chart_claimType.setChartAttribute(chartAttrs);
+
+    // 4. 차트를 그립니다.
+    chart_claimType.draw();
+};]]></script>
         <style type="text/css"><![CDATA[
             /* ----- Global & Wrapper ----- */
             .dashboard_wrap { background-color: #f4f6f9; padding: 20px; }
@@ -112,9 +407,9 @@ scwin.sbm_getTodayStatus_submitdone = function (e) {
             .priority_medium { background-color: #f0a03c; }
             .priority_low { background-color: #57b96e; }
             .priority_default { background-color: #adb5bd; }
-            .task_item .task_content { flex-grow: 1; }
+            .task_item .task_content { flex-grow: 1; min-width: 0; }
             .task_content .title { font-size: 15px; font-weight: 500; color: #333; margin-bottom: 4px;}
-            .task_content .details { font-size: 13px; color: #666; }
+            .task_content .details { font-size: 13px; color: #666; white-space: normal; word-break: break-all;}
             .task_item .task_actions { display: flex; align-items: center; gap: 8px; }
             .status_badge { font-size: 12px; padding: 4px 8px; border-radius: 4px; font-weight: 500;}
             .status_badge_yellow { background-color: #fff8e1; color: #f59f0b; }
@@ -161,17 +456,25 @@ scwin.sbm_getTodayStatus_submitdone = function (e) {
 </xf:group>
                     
                     <xf:group class="panel">
-                        <xf:group class="panel_header_with_icon">
-                            <w2:textbox class="panel_title" label="보완 요청 현황" tagname="h3"></w2:textbox>
-                            <xf:group class="header_icon icon_yellow"></xf:group>
-                        </xf:group>
-                        <xf:group class="panel_content">
-                            <xf:group class="status_item"><w2:textbox class="status_label" label="보완 요청" tagname="span"></w2:textbox><w2:textbox class="status_value orange" label="12건" tagname="span"></w2:textbox></xf:group>
-                            <xf:group class="status_item"><w2:textbox class="status_label" label="보완 접수" tagname="span"></w2:textbox><w2:textbox class="status_value blue" label="8건" tagname="span"></w2:textbox></xf:group>
-                            <xf:group class="status_item"><w2:textbox class="status_label" label="기한 임박" tagname="span"></w2:textbox><w2:textbox class="status_value red" label="3건" tagname="span"></w2:textbox></xf:group>
-                            <xf:group class="status_item" style="margin-top: auto; border-top: 1px solid #f0f0f0; border-bottom: none;"><w2:textbox class="status_label" label="평균 보완 시간" tagname="span"></w2:textbox><w2:textbox class="status_value" label="2.3일" tagname="span"></w2:textbox></xf:group>
-                        </xf:group>
-                    </xf:group>
+    <xf:group class="panel_header_with_icon">
+        <w2:textbox class="panel_title" label="보완 요청 현황" tagname="h3"></w2:textbox>
+        <xf:group class="header_icon icon_yellow"></xf:group>
+    </xf:group>
+    <xf:group class="panel_content">
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="보완 요청" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value orange" ref="data:dma_supplementStatus.requestCount" displayFormat="#,##0건" dataType="number" tagname="span" label=""></w2:textbox>
+        </xf:group>
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="보완 완료" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value blue" ref="data:dma_supplementStatus.completedCount" displayFormat="#,##0건" dataType="number" tagname="span" label=""></w2:textbox>
+        </xf:group>
+        <xf:group class="status_item" style="border-bottom: none;">
+            <w2:textbox class="status_label" label="평균 보완 시간" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value" ref="data:dma_supplementStatus.avgProcessingTime" tagname="span" label=""></w2:textbox>
+        </xf:group>
+    </xf:group>
+</xf:group>
                     
                     <xf:group class="panel">
                         <xf:group class="panel_header_with_icon">
@@ -209,8 +512,15 @@ scwin.sbm_getTodayStatus_submitdone = function (e) {
                 </xf:group>
                 
                 <xf:group class="flex_row" id="grp_mid_charts">
-                    <xf:group class="panel"><w2:textbox class="panel_title" label="주간 처리 현황 추이" tagname="h3"></w2:textbox><xf:group class="chart_placeholder"><w2:textbox label="FusionChart Area2D 영역"></w2:textbox></xf:group></xf:group>
-                    <xf:group class="panel"><w2:textbox class="panel_title" label="청구 유형별 분포" tagname="h3"></w2:textbox><xf:group class="chart_placeholder"><w2:textbox label="FusionChart Doughnut2D 영역"></w2:textbox></xf:group></xf:group>
+                    <xf:group class="panel">
+                    	<w2:textbox class="panel_title" label="주간 처리 현황 추이" tagname="h3"></w2:textbox>
+                    	<w2:fwSparkChart id="chart_weeklyTrend" seriesType="simple" chartType="sparkline" style="width: 100%; height: 250px;"></w2:fwSparkChart>
+                    </xf:group>
+                    <xf:group class="panel"><w2:textbox class="panel_title" label="청구 유형별 분포" tagname="h3"></w2:textbox>
+                        <w2:fusionchart id="chart_claimType" chartType="Doughnut2D" ref="data:dlt_claimTypeChart"
+                            style="width: 100%; height: 250px;" drawType="javascript">
+                        </w2:fusionchart>
+                    </xf:group>
                 </xf:group>
                 
                 <xf:group class="flex_row" id="grp_bot_charts">
@@ -219,21 +529,21 @@ scwin.sbm_getTodayStatus_submitdone = function (e) {
                 </xf:group>
                 
                 <xf:group class="flex_row" id="grp_kpi_row">
-                    <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="평균 처리 시간"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox label="1.8일"></w2:textbox></xf:group></xf:group>
-                    <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="승인률"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox label="94.2%"></w2:textbox></xf:group></xf:group>
-                    <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="오늘 처리"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox label="85건"></w2:textbox></xf:group></xf:group>
+                    <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="평균 처리 시간"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox ref="data:dma_monthlyPerf.avgProcessingTime" label=""></w2:textbox></xf:group></xf:group>
+                    <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="승인률"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox ref="data:dma_approvalRate.approvalRate" label=""></w2:textbox></xf:group></xf:group>
+                    <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="전일 처리"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox ref="data:dma_dailyCount.yesterdayProcessedCount" label=""></w2:textbox></xf:group></xf:group>
                 </xf:group>
                 
                 <xf:group class="flex_row" id="grp_task_list">
                     <xf:group class="panel task_panel">
-                        <xf:group class="panel_header" id="" style=""><w2:textbox class="panel_title" label="우선 처리 업무" tagname="h3"></w2:textbox><w2:anchor class="btn btn_view_all" id="" outerDiv="false"><xf:label><![CDATA[전체 보기]]></xf:label></w2:anchor></xf:group>
-                        <xf:group class="task_list" id="">
-                            <xf:group class="task_item" id=""><xf:group class="priority_line priority_high"></xf:group><xf:group class="task_content"><w2:textbox class="title" label="고객 청구 심사 - 1,250만원" tagname="p"></w2:textbox><w2:textbox class="details" label="청구번호: CL-2024-071501 | 김OO | 심장수술 | 마감: 오늘 17:00" tagname="p"></w2:textbox></xf:group><xf:group class="task_actions"><w2:textbox class="status_badge status_badge_yellow" label="심사대기"></w2:textbox><w2:anchor class="btn btn_primary" outerDiv="false"><xf:label><![CDATA[처리]]></xf:label></w2:anchor></xf:group></xf:group>
-                            <xf:group class="task_item" id=""><xf:group class="priority_line priority_medium"></xf:group><xf:group class="task_content"><w2:textbox class="title" label="보완 기한 임박 - 내일 마감" tagname="p"></w2:textbox><w2:textbox class="details" label="청구번호: CL-2024-071302 | 박OO | 추가 진단서 요청 | 마감: 내일 09:00" tagname="p"></w2:textbox></xf:group><xf:group class="task_actions"><w2:textbox class="status_badge status_badge_blue" label="보완대기"></w2:textbox><w2:anchor class="btn btn_secondary" outerDiv="false"><xf:label><![CDATA[확인]]></xf:label></w2:anchor></xf:group></xf:group>
-                            <xf:group class="task_item" id=""><xf:group class="priority_line priority_default"></xf:group><xf:group class="task_content"><w2:textbox class="title" label="이상 청구 검토" tagname="p"></w2:textbox><w2:textbox class="details" label="청구번호: CL-2024-071403 | 최OO | 동일 치료 중복 청구 의심" tagname="p"></w2:textbox></xf:group><xf:group class="task_actions"><w2:textbox class="status_badge status_badge_gray" label="검토중"></w2:textbox><w2:anchor class="btn btn_secondary" outerDiv="false"><xf:label><![CDATA[상세]]></xf:label></w2:anchor></xf:group></xf:group>
-                            <xf:group class="task_item" id=""><xf:group class="priority_line priority_low"></xf:group><xf:group class="task_content"><w2:textbox class="title" label="장기 청구 승인" tagname="p"></w2:textbox><w2:textbox class="details" label="청구번호: CL-2024-071404 | 정OO | 물리치료 | 승인예정액: 45만원" tagname="p"></w2:textbox></xf:group><xf:group class="task_actions"><w2:textbox class="status_badge status_badge_green" label="승인완료"></w2:textbox><w2:anchor class="btn btn_secondary" outerDiv="false"><xf:label><![CDATA[확인]]></xf:label></w2:anchor></xf:group></xf:group>
-                            <xf:group class="task_item" id=""><xf:group class="priority_line priority_low"></xf:group><xf:group class="task_content"><w2:textbox class="title" label="단순 외래 청구" tagname="p"></w2:textbox><w2:textbox class="details" label="청구번호: CL-2024-071405 | 한OO | 감기 치료 | 청구액: 12만원" tagname="p"></w2:textbox></xf:group><xf:group class="task_actions"><w2:textbox class="status_badge status_badge_yellow" label="대기"></w2:textbox><w2:anchor class="btn btn_primary" outerDiv="false"><xf:label><![CDATA[처리]]></xf:label></w2:anchor></xf:group></xf:group>
+                        <xf:group class="panel_header" id="" style="">
+                            <w2:textbox class="panel_title" label="우선 처리 업무" tagname="h3"></w2:textbox>
                         </xf:group>
+
+                        <xf:group class="task_list" id="grp_urgentTaskContainer" style="height:400px; overflow-y: auto;">
+                            
+                        </xf:group>
+
                     </xf:group>
                 </xf:group>
                 

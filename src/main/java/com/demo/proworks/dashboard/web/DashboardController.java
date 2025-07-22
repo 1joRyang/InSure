@@ -1,6 +1,7 @@
 package com.demo.proworks.dashboard.web;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -9,9 +10,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.demo.proworks.dashboard.service.DashboardService;
+import com.demo.proworks.dashboard.vo.ApprovalRateVo;
+import com.demo.proworks.dashboard.vo.ChartVo;
 import com.demo.proworks.dashboard.vo.ClaimMonitorVo;
+import com.demo.proworks.dashboard.vo.DailyCountVo;
 import com.demo.proworks.dashboard.vo.MonthlyPerfVo;
+import com.demo.proworks.dashboard.vo.SupplementStatusVo;
 import com.demo.proworks.dashboard.vo.TodayStatusVo;
+import com.demo.proworks.dashboard.vo.UrgentClaimVo;
+import com.demo.proworks.dashboard.vo.WeeklyTrendVo;
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -83,6 +90,119 @@ public class DashboardController {
     responseWrapper.put("monthlyPerfVo", resultVo);
     return responseWrapper;
 
+	}
+	
+	/**
+	 * 보완 요청 현황을 조회한다.
+	 * @return MonthlyPerfVo
+	 * @throws Exception
+     */
+	@ElService(key = "selectSupplementStatus")
+	@RequestMapping(value = "selectSupplementStatus")
+	@ElDescription(sub = "보완 요청 현황 조회", desc = "대시보드의 보완 요청 현황 데이터를 조회한다.")
+	public Map<String, Object> selectSupplementStatus() throws Exception {
+		SupplementStatusVo resultVo = dashboardService.selectSupplementStatus();
+	    Map<String, Object> responseWrapper = new HashMap<>();
+	    responseWrapper.put("supplementStatusVo", resultVo);
+	    return responseWrapper;
+
+	}
+	
+	/**
+	 * 전일 처리 건수를 조회한다.
+	 * @return DailyCountVo
+	 * @throws Exception
+     */
+	@ElService(key = "selectYesterdayCount")
+	@RequestMapping(value = "selectYesterdayCount")
+	@ElDescription(sub = "전일 처리 건수 조회", desc = "대시보드의 전일 처리 건수를 조회한다.")
+	public Map<String, Object> selectYesterdayCount() throws Exception {
+		DailyCountVo resultVo = dashboardService.selectYesterdayProcessedCount();
+	    Map<String, Object> responseWrapper = new HashMap<>();
+	    responseWrapper.put("dailyCountVo", resultVo);
+	    return responseWrapper;
+
+	}
+	
+	/**
+	 * 이번 달 승인률을 조회한다.
+	 * @return ApprovalRateVo
+	 * @throws Exception
+     */
+	@ElService(key = "selectApprovalRate")
+	@RequestMapping(value = "selectApprovalRate")
+	@ElDescription(sub = "이번 달 승인률 조회", desc = "대시보드의 이번 달 승인률 데이터를 조회한다.")
+	public Map<String, Object> selectApprovalRate() throws Exception {
+		ApprovalRateVo resultVo = dashboardService.selectMonthlyApprovalRate();
+	    Map<String, Object> responseWrapper = new HashMap<>();
+	    responseWrapper.put("approvalRateVo", resultVo);
+	    return responseWrapper;
+
+	}
+	
+	
+	/**
+	 * 이번 달 승인률을 조회한다.
+	 * @return ApprovalRateVo
+	 * @throws Exception
+     */
+	@ElService(key = "selectUrgentClaims")
+	@RequestMapping(value = "selectUrgentClaims")
+	@ElDescription(sub = "우선 처리 업무 조회", desc = "마감 기한이 임박한 청구 목록을 조회한다.")
+	public Map<String, Object> selectUrgentClaims() throws Exception {
+		System.out.println("====== [서버] 우선 처리 업무 조회 시작 ======");
+        List<UrgentClaimVo> resultList = dashboardService.selectUrgentClaims();
+        
+        if (resultList != null) {
+            System.out.println("DB 조회 결과 건수: " + resultList.size());
+            if (!resultList.isEmpty()) {
+                System.out.println("첫 번째 데이터: " + resultList.get(0).toString());
+            }
+        } else {
+            System.out.println("DB 조회 결과가 null입니다.");
+        }
+        
+        // 2. 클라이언트의 DataList ID("dlt_urgentClaims")를 key로 하여 Map에 담아 반환
+        Map<String, Object> responseWrapper = new HashMap<>();
+        responseWrapper.put("dlt_urgentClaims", resultList);
+
+        return responseWrapper;
+
+	}
+	
+	
+	/**
+	 * 주간 처리 현황 추이 데이터를 조회한다.
+	 * @return List<WeeklyTrendVo>
+	 * @throws Exception
+     */
+	@ElService(key = "selectWeeklyTrend")
+	@RequestMapping(value = "selectWeeklyTrend")
+	@ElDescription(sub = "주간 처리 현황 추이 조회", desc = "대시보드의 주간 처리 현황 추이 데이터를 조회한다.")
+	public Map<String, Object> selectWeeklyTrend() throws Exception {
+	    System.out.println("====== [서버] 주간 처리 현황 추이 데이터를 조회 시작 ======");
+	    
+	    // 반환 타입을 List<WeeklyTrendVo>로 변경 ✅
+	    List<WeeklyTrendVo> resultList = dashboardService.selectWeeklyTrend();
+	
+	    Map<String, Object> responseWrapper = new HashMap<>();
+	    responseWrapper.put("weeklyTrendList", resultList);
+	    return responseWrapper;
+	}
+	
+	/**
+	 * 청구 유형 데이터를 조회한다.
+     */
+	@ElService(key = "selectClaimTypeDistribution")
+	@RequestMapping(value = "selectClaimTypeDistribution")
+	@ElDescription(sub = "청구 유형 데이터 조회", desc = "청구 유형 데이터 조회한다.")
+	public Map<String, Object> selectClaimTypeDistribution() throws Exception {
+	    System.out.println("====== [서버] 청구 유형 데이터를 조회 시작 ======");
+	    
+	    List<ChartVo> resultList = dashboardService.selectClaimTypeDistribution();
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("claimTypeData", resultList);
+	    return response;
 	}
 	
 	
