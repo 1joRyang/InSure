@@ -13,18 +13,19 @@
         				<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
-        		<w2:dataMap baseNode="map" id="dma_additionalReq">
+        		<w2:dataMap baseNode="map" id="dma_returnReq">
         			<w2:keyInfo>
         				<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
-        				<w2:key dataType="text" name="additional_memo" id="additional_memo"></w2:key>
-        				<w2:key dataType="text" name="request_type" id="request_type"></w2:key>
+        				<w2:key dataType="text" name="return_memo" id="return_memo"></w2:key>
+        				<w2:key dataType="text" name="request_date" id="request_date"></w2:key>
+        				<w2:key dataType="text" name="completed_date" id="completed_date"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
-        	<xf:submission id="sbm_insertAdditionalReq" action="/InsWebApp/ADDITIONALREQInsUp.pwkjson" method="post"
-        		mediatype="application/json" ref='data:json,{"id":"dma_additionalReq","key":"additionalReqCusVo"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
-        		mode="asynchronous" processMsg="처리중입니다..." ev:submit="" ev:submitdone="scwin.sbm_insertAdditionalReq_submitdone" ev:submiterror="scwin.sbm_insertAdditionalReq_submiterror" abortTrigger="">
+        	<xf:submission id="sbm_insertReturnReq" action="/InsWebApp/RETURNREQInsUp.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_returnReq","key":"returnReqVo"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+        		mode="asynchronous" processMsg="처리중입니다..." ev:submit="" ev:submitdone="scwin.sbm_insertReturnReq_submitdone" ev:submiterror="scwin.sbm_insertReturnReq_submiterror" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -35,53 +36,45 @@ scwin.onpageload = function () {
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
 
     txt_claim_no.setValue(scwin.claim.claimNo);
-    dma_additionalReq.set("claim_no", scwin.claim.claimNo);
+    dma_returnReq.set("claim_no", scwin.claim.claimNo);
 };
 
 // 추가요청 등록 및 상태 업데이트
 scwin.btn_submit_onclick = function (e) {
     // textarea 값 검증
-    var additionalMemo = txa_additional_memo.getValue();
-    if (!additionalMemo || additionalMemo.trim() === "") {
+    var returnMemo = txa_additional_memo.getValue();
+    if (!returnMemo || returnMemo.trim() === "") {
         console.log("반송 사유를 입력해주세요.");
         txa_additional_memo.focus();
         return false;
     }
 
     // dataMap에 값 설정
-    dma_additionalReq.set("additional_memo", additionalMemo.trim());
-     dma_additionalReq.set("request_type", "RETURN");
-    console.log(dma_additionalReq.get("additional_memo"));
-    console.log(dma_additionalReq.get("claim_no"));
+    dma_returnReq.set("return_memo", returnMemo.trim());
+    console.log(dma_returnReq.get("return_memo"));
+    console.log(dma_returnReq.get("claim_no"));
 
-    
+
     // 서버로 데이터 전송
-    $p.executeSubmission("sbm_insertAdditionalReq");
+    $p.executeSubmission("sbm_insertReturnReq");
 };
 
-// 추가요청 등록 성공 처리
-scwin.sbm_insertAdditionalReq_submitdone = function (e) {
-
-    console.log(e);
-    
-    $p.closePopup();
-    alert("반려 처리 되었습니다.");
-    return true;
-};
-
-// 추가요청 등록 실패 처리
-scwin.sbm_insertAdditionalReq_submiterror = function (e) {
-    var errorMsg = "추가요청 등록 중 오류가 발생했습니다.";
-    if (e.responseJSON && e.responseJSON.message) {
-        errorMsg = e.responseJSON.message;
-    }
-    console.log(errorMsg);
-    console.log(e);
-};
 
 scwin.btn_close_onclick = function (e) {
     $p.closePopup();
     return true;
+};
+
+
+scwin.sbm_insertReturnReq_submitdone = function (e) {
+    console.log("반송 요청 등록 완료:", e);
+    $p.closePopup();
+    return true;
+};
+
+scwin.sbm_insertReturnReq_submiterror = function (e) {
+    console.log("에러 확인용 : ", e);
+    return false;
 };
 ]]></script>
     </head>
