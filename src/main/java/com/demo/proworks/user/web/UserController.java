@@ -172,6 +172,61 @@ public class UserController {
 	       
     
     
+	  /**
+	 * 로그아웃을 처리한다.
+	 * @param request 요청 정보 HttpServletRequest
+	 * @param response 응답 정보 HttpServletResponse
+	 * @throws Exception
+	 */
+	@ElService(key = "UserLogout")
+	@RequestMapping(value = "UserLogout")
+	@ElDescription(sub = "사용자로그아웃", desc = "사용자로그아웃을 처리한다.")
+	public void logout(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	    
+	    try {
+	        // 현재 세션에서 사용자 ID 가져오기
+	        HttpSession session = request.getSession(false);
+	        String userId = null;
+	        
+	        if (session != null) {
+	            ProworksUserHeader userHeader = (ProworksUserHeader) session.getAttribute("userHeader");
+	            if (userHeader != null) {
+	                userId = userHeader.getUserId();
+	            }
+	        }
+	        
+	        // LoginAdapter를 통한 로그아웃 처리
+	        if (userId != null) {
+	            LoginInfo logoutInfo = loginProcess.processLogout(request, userId);
+	        } else {
+	            // 세션이 없어도 강제로 무효화
+	            if (session != null) {
+	                session.invalidate();
+	            }
+	        }
+	        
+	        // 성공 응답
+	        Map<String, Object> elData = new HashMap<>();
+	        Map<String, Object> responseMap = new HashMap<>();
+	        responseMap.put("success", true);
+	        responseMap.put("message", "로그아웃이 완료되었습니다.");
+	        elData.put("dma_logout_response", responseMap);
+	        
+	        ObjectMapper mapper = new ObjectMapper();
+	        String jsonResponse = mapper.writeValueAsString(elData);
+	        
+	        response.setContentType("application/json");
+	        response.setCharacterEncoding("UTF-8");
+	        response.getWriter().write(jsonResponse);
+	        
+	    } catch (Exception e) {
+	        AppLog.error("로그아웃 처리 중 오류 발생", e);
+	        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	        response.getWriter().write("{\"success\":false,\"error\":\"로그아웃 처리 중 오류가 발생했습니다.\"}");
+	    }
+	}
+	    
+    
     
      /**
      * 사용자정보 목록을 조회합니다.

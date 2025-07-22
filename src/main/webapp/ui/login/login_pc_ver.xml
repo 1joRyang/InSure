@@ -23,12 +23,18 @@
         				<w2:key dataType="text" name="실무자아이디" id="empNo"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_logout_response">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="실무자아이디" id="empNo"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
         	</w2:dataCollection>
 
         	<w2:workflowCollection />
 
-        	<xf:submission id="sbm_EmployeeLogin" action="/InsWebApp/EmployeeLogin.pwkjson" method="post" mediatype="application/json" ref='data:json,[{"id":"dma_login_request","key":"elData"},{"id":"dma_login_response","key":"elData"}]' target=""
-        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        	<xf:submission id="sbm_EmployeeLogin" action="/InsWebApp/EmployeeLogin.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,[{"id":"dma_login_request","key":"elData"},{"id":"dma_login_response","key":"elData"}]' target="" encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
         		ev:submitdone="scwin.sbm_EmployeeLogin_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
@@ -205,28 +211,6 @@ function checkLoginPermission(requiredType) {
     }
 }
 
-/**
- * 통합 로그아웃 함수
- */
-function logout() {
-    const currentLogin = getCurrentLoginType();
-    
-    // 모든 로그인 정보 삭제
-    localStorage.removeItem("user");
-    localStorage.removeItem("simple");
-    localStorage.removeItem("employee");
-    
-    console.log("모든 로그인 정보 삭제됨");
-    
-    // 로그인 타입별 로그아웃 처리
-    if (currentLogin.type === "EMPLOYEE") {
-        // Employee 로그아웃 후 Employee 로그인 페이지로
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/login_pc_ver.xml";
-    } else {
-        // USER/SIMPLE 로그아웃 후 user 로그인 페이지로
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/insure_login_mobile.xml";
-    }
-}
 
 /**
  * Employee 권한 체크 (Employee 전용 페이지에서 사용)
@@ -288,7 +272,82 @@ scwin.ibx_empPw_onkeydown = function (e) {
         e.preventDefault();
         scwin.trigger1_login_onclick(); // 로그인 함수 실행
     }
-};]]></script>
+};
+
+
+
+scwin.sbm_EmployeeLogout_submitdone = function (e) {
+     console.log("서버 로그아웃 완료:", e);
+    
+    try {
+        // 서버 로그아웃 성공 후 로컬스토리지 정리
+        const currentLogin = getCurrentLoginType();
+        
+        // 모든 로그인 정보 삭제
+        localStorage.removeItem("user");
+        localStorage.removeItem("simple");
+        localStorage.removeItem("employee");
+        
+        console.log("로그아웃 완료: 서버 세션 및 로컬스토리지 삭제");
+        
+        // 로그인 타입별 페이지 이동
+        if (currentLogin.type === "EMPLOYEE") {
+            // Employee 로그아웃 후 Employee 로그인 페이지로
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/login_pc_ver.xml";
+        } else {
+            // USER/SIMPLE 로그아웃 후 user 로그인 페이지로
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/insure_login_mobile.xml";
+        }
+        
+    } catch (error) {
+        console.error("로그아웃 처리 중 오류:", error);
+        // 오류가 있어도 강제로 로그인 페이지로 이동
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/login_pc_ver.xml";
+    }
+};
+
+
+/**
+ * 수정된 통합 로그아웃 함수 - 서버 로그아웃 포함
+ */
+function logout() {
+    const currentLogin = getCurrentLoginType();
+    
+    if (currentLogin.type === "NONE") {
+        console.log("이미 로그아웃 상태입니다.");
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/login_pc_ver.xml";
+        return;
+    }
+    
+    // 확인 대화상자
+    if (confirm("로그아웃 하시겠습니까?")) {
+        // 서버 로그아웃 서브미션 실행
+        sbm_EmployeeLogout.submit();       
+    }
+}
+
+/**
+ * 통합 로그아웃 함수
+ */
+function logout() {
+    const currentLogin = getCurrentLoginType();
+    
+    // 모든 로그인 정보 삭제
+    localStorage.removeItem("user");
+    localStorage.removeItem("simple");
+    localStorage.removeItem("employee");
+    
+    console.log("모든 로그인 정보 삭제됨");
+    
+    // 로그인 타입별 로그아웃 처리
+    if (currentLogin.type === "EMPLOYEE") {
+        // Employee 로그아웃 후 Employee 로그인 페이지로
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/login_pc_ver.xml";
+    } else {
+        // USER/SIMPLE 로그아웃 후 user 로그인 페이지로
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/insure_login_mobile.xml";
+    }
+}]]></script>
             
     </head>
         

@@ -372,4 +372,28 @@
 		</if>
 	</select>
 
+
+	<!-- 주민번호로 사용자의 청구내역 조회 -->
+	<select id="selectUserClaimsByRrn" parameterType="com.demo.proworks.claim.vo.ClaimFullJoinVo"
+        resultType="com.demo.proworks.claim.vo.ClaimFullJoinVo">
+    SELECT /* QueryID : com.demo.proworks.claim.selectUserClaimsByRrn */
+        c.claim_no,
+        c.claim_type,
+        u.user_name,
+        r.amount,
+        e.emp_name,
+        c.status
+    FROM CLAIM c
+    LEFT JOIN USER u ON c.ID = u.ID
+    LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+    LEFT JOIN CLAIM_RESULT r ON c.claim_no = r.claim_no
+    WHERE 1=1
+    <if test="id != null and id != ''">
+        AND c.ID = #{id}
+    </if>
+    <if test="SC_claim_type != null and SC_claim_type != ''">
+        AND c.claim_type = #{SC_claim_type}
+    </if>
+    ORDER BY c.claim_no DESC
+</select>
 </mapper>

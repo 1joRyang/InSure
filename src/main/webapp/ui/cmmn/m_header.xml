@@ -7,31 +7,78 @@
     	<w2:buildDate />
     	<w2:MSA />
     	<xf:model>
-    		<w2:dataCollection baseNode="map" />
+    		<w2:dataCollection baseNode="map">
+    			<w2:dataMap baseNode="map" id="dma_logout_request">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="사용자아이디" id="userId"></w2:key>
+    					<w2:key dataType="text" name="비밀번호" id="pw"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    		</w2:dataCollection>
     		<w2:workflowCollection />
+    		<xf:submission id="sbm_UserLogout" action="/InsWebApp/UserLogout.pwkjson" method="post" mediatype="application/json"
+    			ref='data:json,{"id":"dma_logout_request","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
+    			customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_UserLogout_submitdone"
+    			ev:submiterror="scwin.sbm_UserLogout_submiterror" abortTrigger="">
+    		</xf:submission>
     	</xf:model>
     	<w2:layoutInfo />
     	<w2:publicInfo method="" />
     	<script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
 	
-};]]></script>
+};
+
+scwin.img_logo_onclick = function (e) {
+    location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobileWrapper.xml"
+};
+
+scwin.logout_btn_onclick = function (e) {
+      if (confirm("로그아웃 하시겠습니까?")) {
+          $c.sbm.execute(sbm_UserLogout);
+    }
+    
+};
+
+scwin.sbm_UserLogout_submitdone = function (e) {
+     console.log("로그아웃 완료");
+    
+    // 로컬스토리지 정리
+    localStorage.removeItem("user");
+    localStorage.removeItem("simple");
+    localStorage.removeItem("employee");
+    
+    // 로그인 페이지로 이동
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/insure_login_mobile.xml";
+
+};
+
+scwin.sbm_UserLogout_submiterror = function (e) {
+    console.error("로그아웃 실패:", e);
+    alert("로그아웃 처리 중 오류가 발생했습니다.");
+};
+]]></script>
     	<w2:require as="udc_notification" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/notification.xml"></w2:require>
     </head>
     <body ev:onpageload="scwin.onpageload">
-    	<xf:group class="m_header" id="" style=";background-color:#FFFFFF;">
-    		<xf:group class="fl" id="" style="">
-    			<w2:anchor class="btn_back" id="" outerDiv="false" style="">
-    				<xf:label><![CDATA[뒤로]]></xf:label>
-    			</w2:anchor>
-    			<xf:image src="/InsWebApp/images/ws5/logo/insureLogo.png" style="width:100px;height:32px;" id=""></xf:image>
 
-    		</xf:group>
-    		<xf:group class="fr" id="" style="">
-    			<w2:udc_notification style="width: 30px;height: 30px;" title="" message=""></w2:udc_notification>
+    	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
+    		style="background-color: white;border-bottom: 1px solid #bfbfbf;       font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+    		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
+    			style="margin: 0">
+    			<xf:image ev:onclick="scwin.img_logo_onclick" id="img_logo" src="/InsWebApp/images/insure/insureLogo.png"
+    				style="width:165px;height:60px;">
+    			</xf:image>
+    			<xf:group class="breadcrumb" id="" style="">
+    				<xf:group id="" style="" tagname="ul">
+    					<xf:group id="" style="" tagname="li"></xf:group>
+    				</xf:group>
+    			</xf:group>
+    			<w2:udc_notification message="" style="width: 30px;height: 30px;" title=""></w2:udc_notification>
+    			<w2:button ev:onclick="scwin.logout_btn_onclick" id="logout_btn" label="로그아웃"
+    				style="width: 80px;height: 23px;background-color:#FFFFFF;       font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+    			</w2:button>
     		</xf:group>
     	</xf:group>
-    	<w2:textbox id="resultBox" label="" style="width:283px;height:23px;"></w2:textbox>
-    	
     </body>
 </html>
