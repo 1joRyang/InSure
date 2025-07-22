@@ -16,7 +16,7 @@
         		</w2:dataMap>
         		<w2:dataMap baseNode="map" id="dm_addi">
         			<w2:keyInfo>
-        				<w2:key dataType="text" name="additional_memo" id="additional_memo"></w2:key>
+        				<w2:key dataType="text" name="return_memo" id="return_memo"></w2:key>
         				<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
@@ -38,7 +38,7 @@
         		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getCResult_submitdone"
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_getReturn" action="/InsWebApp/ADDITIONALREQUpdView.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_addi","key":"elData"}' target='data:json,{"id":"dm_addi","key":"elData"}' encoding="UTF-8"
+        	<xf:submission id="sbm_getReturn" action="/InsWebApp/RETURNREQUpdView.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_addi","key":"elData"}' target='data:json,{"id":"dm_addi","key":"elData"}' encoding="UTF-8"
         		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getReturn_submitdone"
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
@@ -101,7 +101,7 @@ scwin.sbm_getCResult_submitdone = function (e) {
 };
 
 scwin.sbm_getReturn_submitdone = function (e) {
-    memo.setValue(dm_addi.get("additional_memo"));
+    memo.setValue(dm_addi.get("return_memo"));
 };
 ]]></script>
     </head>

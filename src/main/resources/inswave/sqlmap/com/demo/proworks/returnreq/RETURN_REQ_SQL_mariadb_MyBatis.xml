@@ -63,7 +63,7 @@
         SELECT     /* QueryID : com.demo.proworks.returnreq.selectReturnReq */
             CLAIM_NO, RETURN_MEMO, REQUEST_DATE, COMPLETED_DATE
         FROM RETURN_REQ 
-        WHERE 
+        WHERE CLAIM_NO = #{claim_no}
 			
     </select>
 	
