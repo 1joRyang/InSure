@@ -62,7 +62,7 @@ scwin.onpageload = function() {
             txt_title.setValue("반송된 청구");
             st_gre.hide();
             status = scwin.userClaim.status;
-        } else {
+        } else { 
             txt_title.setValue("진행 중인 청구");
             st_re.hide();
             status = "심사 중";
@@ -178,7 +178,7 @@ scwin.sbm_getReturn_submitdone = function (e) {
     			</xf:group>
     			<xf:group id="grp_result" style="display: flex;justify-content: space-between;font-weight: 700;">
     				<w2:textbox id="" label="지급금액" style="width: 150px;height: 23px;"></w2:textbox>
-    				<w2:textbox id="" label="0" style="text-align: end;" ref="data:dm_result.amount" dataType="number"></w2:textbox>
+    				<w2:textbox id="" label="0" style="text-align: end;" ref="data:dm_result.amount" dataType="number" displayFormat="##,###,###,###"></w2:textbox>
     			</xf:group>
     			<xf:group id="" style="display: flex;justify-content: space-between;font-weight: 700;">
     				<w2:textbox id="" label="담당자" style="width: 150px;height: 23px;"></w2:textbox>
