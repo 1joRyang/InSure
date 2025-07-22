@@ -433,7 +433,57 @@ public class EmployeeController {
         employeeService.deleteEmployee(employeeVo);
     }
     
-    
+/**
+     * 부서별 직원 목록을 조회합니다.
+     *
+     * @param  employeeVo 직원정보 (deptId, status 등 포함)
+     * @return 부서별 직원 목록 조회 결과
+     * @throws Exception
+     */
+    @ElService(key="EmployeeListByDept")
+    @RequestMapping(value="EmployeeListByDept")    
+    @ElDescription(sub="부서별 직원 목록조회",desc="특정 부서의 직원 목록을 조회한다.")               
+    public EmployeeListVo selectListEmployeeByDept(EmployeeVo employeeVo) throws Exception {    	   	
+        
+        // 로그 추가 (디버깅용)
+        System.out.println(">>>>> 부서별 직원 조회 요청");
+        System.out.println(">>>>> deptId: " + employeeVo.getDeptId());
+        System.out.println(">>>>> status: " + employeeVo.getStatus());
+        System.out.println(">>>>> pageSize: " + employeeVo.getPageSize());
+        System.out.println(">>>>> pageIndex: " + employeeVo.getPageIndex());
+        
+        // 부서 ID가 없으면 빈 결과 반환
+        if (employeeVo.getDeptId() == null || employeeVo.getDeptId().trim().isEmpty()) {
+            System.out.println(">>>>> 부서 ID가 없어서 빈 결과 반환");
+            EmployeeListVo emptyResult = new EmployeeListVo();
+            emptyResult.setEmployeeVoList(new java.util.ArrayList<>());
+            emptyResult.setTotalCount(0);
+            emptyResult.setPageSize(employeeVo.getPageSize());
+            emptyResult.setPageIndex(employeeVo.getPageIndex());
+            return emptyResult;
+        }
+        
+        // 기본값 설정
+        if (employeeVo.getStatus() == null || employeeVo.getStatus().trim().isEmpty()) {
+            employeeVo.setStatus("재직중");  // 기본적으로 재직중인 직원만 조회
+        }
+        
+        // 부서별 직원 목록 조회
+        List<EmployeeVo> employeeList = employeeService.selectListEmployeeByDept(employeeVo);                  
+        long totCnt = employeeService.selectListCountEmployeeByDept(employeeVo);
+        
+        System.out.println(">>>>> 조회된 직원 수: " + employeeList.size());
+        System.out.println(">>>>> 전체 건수: " + totCnt);
+        
+        // 결과 객체 생성
+        EmployeeListVo retEmployeeList = new EmployeeListVo();
+        retEmployeeList.setEmployeeVoList(employeeList); 
+        retEmployeeList.setTotalCount(totCnt);
+        retEmployeeList.setPageSize(employeeVo.getPageSize());
+        retEmployeeList.setPageIndex(employeeVo.getPageIndex());
+
+        return retEmployeeList;            
+    }    
     
 	   
 }

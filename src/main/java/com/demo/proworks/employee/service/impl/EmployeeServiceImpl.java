@@ -135,5 +135,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 	public String getEmpNameByNo(String empNo) throws Exception {
 		return employeeDAO.selectEmpNameByNo(empNo);
 	}
-	
+	@Override
+	public List<EmployeeVo> selectListEmployeeByDept(EmployeeVo employeeVo) throws Exception {
+	    return employeeDAO.selectListEmployeeByDept(employeeVo);
+	}
+
+	@Override
+	public long selectListCountEmployeeByDept(EmployeeVo employeeVo) throws Exception {
+	    return employeeDAO.selectListCountEmployeeByDept(employeeVo);
+	}	
 }
