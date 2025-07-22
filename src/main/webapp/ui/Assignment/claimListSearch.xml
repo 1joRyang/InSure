@@ -287,7 +287,7 @@ scwin.checkSearchCondition = function() {
     		style="">
     		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
     			style="">
-    			<w2:textbox class="pgt_tit" id="" label="청구번호 조회" style="" tagname="h2"></w2:textbox>
+    			<w2:textbox class="pgt_tit" id="" label="청구번호 조회" style="padding-bottom: 20px;width: 100%;border-bottom: .2px solid #3674B5;padding-bottom: 20px;" tagname="h2"></w2:textbox>
     		</xf:group>
 
     		<!-- 검색 조건 영역 (수정됨) -->
@@ -301,7 +301,7 @@ scwin.checkSearchCondition = function() {
     					ev:onclick="scwin.btn_search_onclick">
     					<xf:label><![CDATA[검색]]></xf:label>
     				</xf:trigger>
-    				<xf:trigger class="btn_cm" id="btn_reset" style="background-color: #f44336;" type="button"
+    				<xf:trigger class="btn_cm" id="btn_reset" style="" type="button"
     					ev:onclick="scwin.btn_reset_onclick">
     					<xf:label><![CDATA[전체조회]]></xf:label>
     				</xf:trigger>
@@ -313,7 +313,6 @@ scwin.checkSearchCondition = function() {
 
     		<!-- 조회 결과 표시 영역 -->
     		<xf:group id="" style="margin-bottom:10px;">
-    			<w2:textbox id="" label="청구 목록" style="font-weight:bold; display:inline-block; margin-right:10px; color:#1976D2;"></w2:textbox>
     		</xf:group>
 
     		<!-- 전체 조인 그리드 -->
