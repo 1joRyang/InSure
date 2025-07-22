@@ -62,7 +62,7 @@ scwin.onpageload = function() {
             txt_title.setValue("반송된 청구");
             st_gre.hide();
             status = scwin.userClaim.status;
-        } else {
+        } else { 
             txt_title.setValue("진행 중인 청구");
             st_re.hide();
             status = "심사 중";

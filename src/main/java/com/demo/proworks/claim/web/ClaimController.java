@@ -63,7 +63,7 @@ public class ClaimController {
 	@RequestMapping(value = "CLAIMManagerwStatusList")
 	@ElDescription(sub = "관리자 청구 목록 조회", desc = "관리자 청구 목록 조회")
 	public List<ClaimListwStatusVo> selectClaimWithStatusManager(ClaimVo claimVo) throws Exception {
-		List<ClaimListwStatusVo> claimList = claimService.selectClaimWithStatus(claimVo);
+		List<ClaimListwStatusVo> claimList = claimService.selectClaimWithStatusManager(claimVo);
 		System.out.println("controller " + claimList);
 		return claimList;
 	}

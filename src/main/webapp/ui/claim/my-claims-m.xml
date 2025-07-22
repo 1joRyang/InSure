@@ -236,6 +236,7 @@ scwin.getStatusColor = function(status) {
         case "결재완료":
         case "결재중":
         case "결재반려":
+        case "보완완료":
             return "#578FCA"; 
         case "반송":
             return "#FF7E7E"; 
