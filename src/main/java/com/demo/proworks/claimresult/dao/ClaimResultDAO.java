@@ -64,6 +64,8 @@ public class ClaimResultDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAb
      * @throws ElException
      */
     public int insertClaimResult(ClaimResultVo vo) throws ElException {    	
+    
+    	update("com.demo.proworks.claimresult.updateClaimStatus",vo);
         return insert("com.demo.proworks.claimresult.insertClaimResult", vo);
     }
 
@@ -74,9 +76,12 @@ public class ClaimResultDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAb
      * @return 번호
      * @throws ElException
      */
-    public int updateClaimResult(ClaimResultVo vo) throws ElException {
-        return update("com.demo.proworks.claimresult.updateClaimResult", vo);
-    }
+
+	public int updateClaimResult(ClaimResultVo vo) throws ElException {
+	    // CLAIM_RESULT 업데이트 전에 CLAIM 상태도 업데이트
+	    update("com.demo.proworks.claimresult.updateClaimStatus", vo);
+	    return update("com.demo.proworks.claimresult.updateClaimResult", vo);
+	}
 
     /**
      * 심사결과를 삭제한다.
@@ -88,5 +93,7 @@ public class ClaimResultDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAb
     public int deleteClaimResult(ClaimResultVo vo) throws ElException {
         return delete("com.demo.proworks.claimresult.deleteClaimResult", vo);
     }
+
+
 
 }
