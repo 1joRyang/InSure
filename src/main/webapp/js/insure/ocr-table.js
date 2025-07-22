@@ -465,6 +465,9 @@ function createExclusionClickHandler(rowIndex, colIndex, td) {
 // 일반 셀 클릭 핸들러 생성 함수 
 function createCellClickHandler(td, rowIndex, colIndex, cellValue) {
     return function() {
+		if (scwin.isEmp === false) {
+		    return; 
+		}
         editCell(td, rowIndex, colIndex, cellValue);
     };
 }

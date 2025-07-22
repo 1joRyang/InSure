@@ -139,15 +139,16 @@
 scwin.onpageload = function() {
     scwin.index = 0;
     scwin.genList = [];
+    scwin.isEmp = true;
 
     scwin.emp = JSON.parse(localStorage.getItem("employee"));
-    // todo: role에 따라 변경.. empName
     
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
     dm_header.set("claimNo", scwin.claim.claimNo);
     dm_header.set("patient", scwin.claim.userName);
 
     dm_claim.set("claim_no", scwin.claim.claimNo);
+
     let reqData = {"elData":{"ID": scwin.claim.ID }};
     $c.sbm.execute(sbm_befClaim, reqData);
     $c.sbm.execute(sbm_getSubInsu, reqData);
@@ -168,6 +169,18 @@ scwin.onpageload = function() {
     scwin.genList.push(scwin.index);
 	gen_date.insertChild(scwin.index++);   
 
+    // 담당자 아니면 readonly
+    if (scwin.emp.empNo != scwin.claim.empNo) {
+        gen_date.hide();
+        ipt_claimNo.setReadOnly(true);
+        ipt_reason.setReadOnly(true);
+        ipt_charge.setReadOnly(true);
+        txt_content.setReadOnly(true);
+        ipt_hcode1.setReadOnly(true);
+        ipt_hcode2.setReadOnly(true);
+        ipt_hcodeDate.setReadOnly(true);
+        scwin.isEmp = false;
+    }
 };
 
 let isDateDrop = false;
@@ -247,14 +260,18 @@ scwin.btn_next_onclick = function (e) {
         dm_claim.set("disaster_code", hcode2);  
     } 
 
-    if (isClaimOffset && isDateDrop && isHcode) {
+    if (!scwin.isEmp) {
+        // 담당자 아님
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-ocr.xml";
+        $p.closePopup("img_popup");
+
+    } else if (isClaimOffset && isDateDrop && isHcode) {
         // 서브미션 호출
         if (isSaveOffset) {
             $c.sbm.execute(sbm_insertOffset); 
         }
         $c.sbm.execute(sbm_updateClaim);
-    }
-    else {
+    } else {
         alert("다음 항목의 입력을 확인하세요\n" + missingFields.join(", "));
     }
 };
@@ -479,7 +496,7 @@ scwin.grd_insure_oncellclick = function (rowIndex, columnIndex, columnId) {
     						meta_snippetName="1_04 가변 4단 분할_width값 고정 25per" style="padding: 10px;">
     						<xf:group class="" id="" style="">
     							<w2:textbox id="" label="청구 내용" style="width: 150px;height: 23px;"></w2:textbox>
-    							<xf:textarea class="" id="" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
+    							<xf:textarea class="" id="txt_content" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
     								meta_snippetName="10_09 Textarea_100per" placeholder="" style="width:100%;height: 82px;" ref="data:dm_claim.claim_content">
     							</xf:textarea>
     						</xf:group>

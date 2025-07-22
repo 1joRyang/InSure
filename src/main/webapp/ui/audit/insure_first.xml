@@ -22,11 +22,16 @@
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function () {
     scwin.emp = JSON.parse(localStorage.getItem("employee"));
-    // todo: role에 따라 변경.. empName
 
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
     dm_header.set("patient", scwin.claim.userName);
     dm_header.set("claimNo", scwin.claim.claimNo);
+
+    // 담당자 아니면 readonly
+    if (scwin.emp.empNo != scwin.claim.empNo) {
+        btn_reject.hide();
+        btn_change.hide();
+    }
 };
 
 scwin.btn_next_onclick = function (e) {
