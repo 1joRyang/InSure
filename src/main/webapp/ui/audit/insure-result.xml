@@ -1686,7 +1686,7 @@ scwin.sbm_approveApprovalReq_submiterror = function (e) {
 
 scwin.btn_return_onclick = function (e) {
     if (!scwin.checkPermission("반송")) return;
-    openClaimReturnPopup("/InsWebApp/ui/Assignment/claimReturnPopup.xml");
+    openClaimReturnPopup("/InsWebApp/ui/assignment/claimReturnPopup.xml");
 };
 
 function openClaimReturnPopup(link) {
@@ -1720,7 +1720,7 @@ function openClaimReturnPopup(link) {
 //Request for supple
 scwin.btn_supplement_onclick = function (e) {
     if (!scwin.checkPermission("보완 요청")) return;
-    openReqSupplePopup("/InsWebApp/ui/Assignment/reqSupplePopup.xml");
+    openReqSupplePopup("/InsWebApp/ui/assignment/reqSupplePopup.xml");
 };
 
 function openReqSupplePopup(link) {
@@ -1820,7 +1820,7 @@ scwin.sbm_selectInsuranceProducts_submiterror = function (e) {
 
 
 scwin.btn_reject_onclick = function (e) {
-    openRejectClaimPopup("/InsWebApp/ui/Assignment/RejectClaimPopup.xml");
+    openRejectClaimPopup("/InsWebApp/ui/assignment/RejectClaimPopup.xml");
 };
 function openRejectClaimPopup(link) {
     requires("uiplugin.popup");

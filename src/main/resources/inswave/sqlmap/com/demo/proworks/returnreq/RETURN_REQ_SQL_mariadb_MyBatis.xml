@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 반송요청정보 관련 처리를 담당하는 Sql Mapper
+	@description : 반송요청정보 관련 처리를 담당하는 Sql Mapper
+	@author      : hyunwoo
+	@since       : 2025/07/22
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/07/22              hyunwoo             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.returnreq">
+    <insert id="insertReturnReq" parameterType="com.demo.proworks.returnreq.vo.ReturnReqVo">
+    	<!-- 반송요청정보를 등록한다. -->	
+    		
+        INSERT INTO RETURN_REQ   /* QueryID : com.demo.proworks.returnreq.insertReturnReq */
+        ( 
+
+            <if test="claim_no      != null"> , CLAIM_NO       </if>
+            <if test="return_memo   != null"> , RETURN_MEMO    </if>
+            <if test="request_date  != null"> , REQUEST_DATE   </if>
+            <if test="completed_date!= null"> , COMPLETED_DATE </if>
+        )
+        VALUES  
+        ( 
+
+            <if test="claim_no      != null"> , #{claim_no}       </if>
+            <if test="return_memo   != null"> , #{return_memo}    </if>
+            <if test="request_date  != null"> , #{request_date}   </if>
+            <if test="completed_date!= null"> , #{completed_date} </if> 
+        )          
+    </insert>	
+	
+    <update id="updateReturnReq" parameterType="com.demo.proworks.returnreq.vo.ReturnReqVo">
+    	<!-- 반송요청정보를 갱신한다. -->
+    	
+        UPDATE RETURN_REQ    /* QueryID : com.demo.proworks.returnreq.updateReturnReq */      
+      	  SET  
+        	                       
+            <if test="claim_no      != null"> , CLAIM_NO       = #{claim_no}       </if>
+            <if test="return_memo   != null"> , RETURN_MEMO    = #{return_memo}    </if>
+            <if test="request_date  != null"> , REQUEST_DATE   = #{request_date}   </if>
+            <if test="completed_date!= null"> , COMPLETED_DATE = #{completed_date} </if>                 
+        WHERE   
+
+    </update>
+	
+    <delete id="deleteReturnReq" parameterType="com.demo.proworks.returnreq.vo.ReturnReqVo">
+    	<!-- 반송요청정보를 삭제한다. -->
+    	
+        DELETE FROM RETURN_REQ   /* QueryID : com.demo.proworks.returnreq.deleteReturnReq */ 
+        WHERE   
+        
+    </delete>
+	
+    <select id="selectReturnReq" parameterType="com.demo.proworks.returnreq.vo.ReturnReqVo" resultType="com.demo.proworks.returnreq.vo.ReturnReqVo">
+    	<!-- 반송요청정보를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.returnreq.selectReturnReq */
+            CLAIM_NO, RETURN_MEMO, REQUEST_DATE, COMPLETED_DATE
+        FROM RETURN_REQ 
+        WHERE 
+			
+    </select>
+	
+    <select id="selectListReturnReq" parameterType="com.demo.proworks.returnreq.vo.ReturnReqVo" resultType="com.demo.proworks.returnreq.vo.ReturnReqVo">
+    	<!-- 반송요청정보 목록을 조회한다. -->
+           SELECT    /* QueryID : com.demo.proworks.returnreq.selectListReturnReq */
+               CLAIM_NO, RETURN_MEMO, REQUEST_DATE, COMPLETED_DATE		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM RETURN_REQ
+                   WHERE  1=1    		
+	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountReturnReq" parameterType="com.demo.proworks.returnreq.vo.ReturnReqVo" resultType="long">
+    <!-- 반송요청정보 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.returnreq.selectListCountReturnReq */
+             COUNT(*) totcnt  		                  
+         FROM RETURN_REQ
+         WHERE  1=1    		
+
+    </select>
+	<insert id="upsertReturnReqAndClaimStatus" parameterType="com.demo.proworks.returnreq.vo.ReturnReqVo">
+		<!-- MySQL/MariaDB UPSERT 구문 -->
+		INSERT INTO RETURN_REQ
+		(CLAIM_NO, RETURN_MEMO,REQUEST_DATE)
+		VALUES
+		(#{claim_no}, #{return_memo},CURDATE())
+		ON DUPLICATE KEY UPDATE
+		RETURN_MEMO = VALUES(RETURN_MEMO)
+	</insert>
+	
+		<update id="updateClaimStatusReturn" parameterType="com.demo.proworks.returnreq.vo.ReturnReqVo">
+	<!-- 청구 상태를 업데이트한다. -->
+	
+	UPDATE CLAIM 
+	SET STATUS = '반송'
+        WHERE CLAIM_NO = #{claim_no}
+    </update>
+	
+		<insert id="insertReturnReqAndClaimStatus" parameterType="com.demo.proworks.returnreq.vo.ReturnReqVo">
+		<!-- 추가요청 정보만 등록한다. -->
+
+		INSERT INTO RETURN_REQ 
+		( CLAIM_NO,RETURN_MEMO,REQUEST_DATE)
+		VALUES
+		(#{claim_no},#{return_memo},CURDATE())
+	</insert>
+</mapper>
