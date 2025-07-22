@@ -428,7 +428,7 @@ scwin.grd_insure_oncellclick = function (rowIndex, columnIndex, columnId) {
     										blockSelect="false" displayMode="label">
     									</w2:column>
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="amount" blockSelect="false"
-    										displayMode="label">
+    										displayMode="label" displayFormat="##,###,###,###">
     									</w2:column>
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
     										displayMode="label">

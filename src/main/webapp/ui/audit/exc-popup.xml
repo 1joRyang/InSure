@@ -176,7 +176,7 @@ scwin.btn_close_onclick = function (e) {
     			<xf:group class="" id="" style="">
     				<w2:textbox style="width: 150px;height: 23px;" id="" label="금액"></w2:textbox>
     				<xf:input class="" id="ipt_cost" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    					meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_excitems.exc_cost">
+    					meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_excitems.exc_cost" displayFormat="##,###,###,###">
     				</xf:input>
     			</xf:group>
     		</xf:group>

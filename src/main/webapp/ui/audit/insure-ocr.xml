@@ -306,7 +306,7 @@ scwin.updateExclusionCell = function(rowIndex, colIndex, newValue) {
     if (!targetCell) return;
 
     // 값 반영
-    targetCell.textContent = newValue;
+    targetCell.textContent =  Number(newValue).toLocaleString();
 
     // 스타일 및 기타 표시 유지
     targetCell.style.backgroundColor = '#fff3cd';
@@ -617,7 +617,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">진료비총액</xf:group>
         					<xf:group tagname="td" style="" id="cell_total" class="w2tb_td">
         						<xf:input readOnlyClass="readonly" ref="data:dm_sub.total_medical_fee" style="width: 144px;height: 21px;"
-        							readOnly="true" id="ipt_tableTotal" initValue="0">
+        							readOnly="true" id="ipt_tableTotal" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -625,7 +625,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">환자부담총액</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:input readOnlyClass="readonly" ref="data:dm_sub.total_patient_payment"
-        							style="width: 144px;height: 21px;" readOnly="true" id="ipt_tableTotalminus" initValue="0">
+        							style="width: 144px;height: 21px;" readOnly="true" id="ipt_tableTotalminus" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -633,7 +633,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">이미납부한금액</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:input ref="data:dm_sub.amount_paid" ev:onchange="scwin.ipt_paid_onchange" maxByteLength=""
-        							dataType="text" style="width: 144px;height: 21px;" id="ipt_paid" initValue="0">
+        							dataType="text" style="width: 144px;height: 21px;" id="ipt_paid" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -641,7 +641,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">납부할금액</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:input ref="data:dm_sub.due_amt" maxByteLength="" dataType="text" style="width: 144px;height: 21px;"
-        							id="" initValue="0">
+        							id="" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -649,7 +649,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">납부한금액</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:input ref="data:dm_sub.due_pay" ev:onchange="scwin.ipt_pay_onchange" maxByteLength="" dataType="text"
-        							style="width: 144px;height: 21px;" id="ipt_pay" initValue="0">
+        							style="width: 144px;height: 21px;" id="ipt_pay" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -683,7 +683,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">최종수납액</xf:group>
         					<xf:group tagname="td" style="" id="" class="w2tb_td">
         						<xf:input ref="data:dm_result.final_due" readOnlyClass="readonly" style="width: 144px;height: 21px;"
-        							readOnly="true" id="ipt_fianlpay" class="" initValue="0">
+        							readOnly="true" id="ipt_fianlpay" class="" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -691,7 +691,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">병원공제금</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:input ref="data:dm_result.hospital_prepaid" readOnlyClass="readonly" style="width: 144px;height: 21px;"
-        							readOnly="true" id="ipt_hosp" class="readonly" initValue="0">
+        							readOnly="true" id="ipt_hosp" class="readonly" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -700,7 +700,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:input ref="data:dm_result.deducation_amt" readOnlyClass="readonly"
         							ev:onchange="scwin.ipt_excTotal_onchange" style="width: 144px;height: 21px;" readOnly="true" id="ipt_excTotal"
-        							class="readonly" initValue="0">
+        							class="readonly" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
@@ -708,7 +708,7 @@ function extractClaimItemData(treatmentId, claimNo) {
         					<xf:group tagname="td" style="" class="w2tb_td">산출금</xf:group>
         					<xf:group tagname="td" style="" class="w2tb_td">
         						<xf:input ref="data:dm_result.refund_amt" readOnlyClass="readonly" style="width: 144px;height: 21px;"
-        							readOnly="true" id="ipt_result" class="readonly" initValue="0">
+        							readOnly="true" id="ipt_result" class="readonly" initValue="0" displayFormat="##,###,###,###">
         						</xf:input>
         					</xf:group>
         				</xf:group>
