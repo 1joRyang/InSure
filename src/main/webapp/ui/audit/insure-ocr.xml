@@ -4,6 +4,8 @@
     xmlns:ev="http://www.w3.org/2001/xml-events"
     xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
     <head>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
         <w2:type>COMPONENT</w2:type>
         <w2:buildDate/>
         <w2:MSA/>
@@ -181,6 +183,7 @@
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/ocr-table.js" scopeVariable="" type="text/javascript"></script>
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/ocr-tableStruc.js" scopeVariable="" type="text/javascript"></script>
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/dummy-table.js" scopeVariable="" type="text/javascript"></script>
+        <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
     scwin.emp = JSON.parse(localStorage.getItem("employee"));
@@ -418,6 +421,16 @@ scwin.date_drop_onchange = function (info) {
     }
 };
 
+const Toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  iconColor: 'white',
+  showConfirmButton: false,
+  timer: 1500,
+  timerProgressBar: false,
+
+})
+
 function saveInsure(idx = -1) {
     if (!scwin.isEmp) {
         getInsure();
@@ -435,7 +448,11 @@ function saveInsure(idx = -1) {
     }
     else {
         date_drop.setEventPause("onchange", true);
-        alert("진료 정보 입력을 확인하세요.");
+        scwin.noBtnAlertWithTimer({
+            title: '진료 정보 입력을 확인하세요', 
+            text: '병원명/진료과, 병원등급, 환자등급', 
+            icon: 'warning'
+        });
         date_drop.setSelectedIndex(idx - 1);
         date_drop.setEventPause("onchange", false);
     }
