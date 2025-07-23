@@ -23,42 +23,62 @@
         		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
-        	<xf:submission id="sbm_insertReturnReq" action="/InsWebApp/RETURNREQInsUp.pwkjson" method="post"
-        		mediatype="application/json" ref='data:json,{"id":"dma_returnReq","key":"returnReqVo"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
-        		mode="asynchronous" processMsg="처리중입니다..." ev:submit="" ev:submitdone="scwin.sbm_insertReturnReq_submitdone" ev:submiterror="scwin.sbm_insertReturnReq_submiterror" abortTrigger="">
+        	
+        	<!-- 존재 여부 확인 submission -->
+        	<xf:submission id="sbm_checkReturnReq" action="/InsWebApp/RETURNREQCheck.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_claimNo","key":"returnReqVo"}' 
+        		target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+        		mode="asynchronous" processMsg="확인중입니다..." 
+        		ev:submit="" ev:submitdone="scwin.sbm_checkReturnReq_submitdone" 
+        		ev:submiterror="scwin.sbm_checkReturnReq_submiterror" abortTrigger="">
+        	</xf:submission>
+        	
+        	<!-- INSERT 전용 submission -->
+        	<xf:submission id="sbm_insertReturnReq" action="/InsWebApp/RETURNREQInsertOnly.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_returnReq","key":"returnReqVo"}' 
+        		target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+        		mode="asynchronous" processMsg="등록중입니다..." 
+        		ev:submit="" ev:submitdone="scwin.sbm_insertReturnReq_submitdone" 
+        		ev:submiterror="scwin.sbm_insertReturnReq_submiterror" abortTrigger="">
+        	</xf:submission>
+        	
+        	<!-- UPDATE 전용 submission -->
+        	<xf:submission id="sbm_updateReturnReq" action="/InsWebApp/RETURNREQUpdateOnly.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_returnReq","key":"returnReqVo"}' 
+        		target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+        		mode="asynchronous" processMsg="수정중입니다..." 
+        		ev:submit="" ev:submitdone="scwin.sbm_updateReturnReq_submitdone" 
+        		ev:submiterror="scwin.sbm_updateReturnReq_submiterror" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
         <script lazy="false" type="text/javascript"><![CDATA[
-scwin.onpageload = function () {
 
+scwin.onpageload = function () {
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
 
     txt_claim_no.setValue(scwin.claim.claimNo);
     dma_returnReq.set("claim_no", scwin.claim.claimNo);
+    dma_claimNo.set("claim_no", scwin.claim.claimNo);
 };
 
-// 추가요청 등록 및 상태 업데이트
 scwin.btn_submit_onclick = function (e) {
     // textarea 값 검증
     var returnMemo = txa_additional_memo.getValue();
     if (!returnMemo || returnMemo.trim() === "") {
-        console.log("반송 사유를 입력해주세요.");
+        alert("반송 사유를 입력해주세요.");
         txa_additional_memo.focus();
         return false;
     }
 
-    // dataMap에 값 설정
     dma_returnReq.set("return_memo", returnMemo.trim());
-    console.log(dma_returnReq.get("return_memo"));
-    console.log(dma_returnReq.get("claim_no"));
-
-
-    // 서버로 데이터 전송
-    $p.executeSubmission("sbm_insertReturnReq");
+    
+    console.log("존재 여부 확인 중...");
+    console.log("CLAIM_NO:", dma_claimNo.get("claim_no"));
+    
+    $p.executeSubmission("sbm_checkReturnReq");
 };
-
 
 scwin.btn_close_onclick = function (e) {
     $p.closePopup();
@@ -66,17 +86,80 @@ scwin.btn_close_onclick = function (e) {
 };
 
 
+scwin.sbm_checkReturnReq_submitdone = function (e) {
+    var result = e.responseJSON;
+    
+    console.log("확인 결과:", result);
+    
+    if (result && result.success) {
+        if (result.exists) {
+            // 기존 데이터가 있으면 UPDATE
+            console.log("기존 데이터 존재 - UPDATE 실행");
+            $p.executeSubmission("sbm_updateReturnReq");
+        } else {
+            // 기존 데이터가 없으면 INSERT
+            console.log("신규 데이터 - INSERT 실행");
+            $p.executeSubmission("sbm_insertReturnReq");
+        }
+    } else {
+        alert("데이터 확인 중 오류가 발생했습니다.");
+    }
+};
+
+scwin.sbm_checkReturnReq_submiterror = function (e) {
+    console.log("확인 중 에러:", e);
+    alert("데이터 확인 중 오류가 발생했습니다.");
+    return false;
+};
+
+
 scwin.sbm_insertReturnReq_submitdone = function (e) {
-    console.log("반송 요청 등록 완료:", e);
-    $p.closePopup();
+    var result = e.responseJSON;
+    console.log("INSERT 결과:", result);
+    
+    if (result && result.success) {
+        alert(result.message);
+        scwin.closeAndRedirect();
+    } else {
+        alert(result.message || "등록 중 오류가 발생했습니다.");
+    }
     return true;
 };
 
 scwin.sbm_insertReturnReq_submiterror = function (e) {
-    console.log("에러 확인용 : ", e);
+    console.log("등록 중 에러:", e);
+    alert("등록 중 오류가 발생했습니다.");
     return false;
 };
-]]></script>
+
+
+scwin.sbm_updateReturnReq_submitdone = function (e) {
+    var result = e.responseJSON;
+    console.log("UPDATE 결과:", result);
+    
+    if (result && result.success) {
+        alert(result.message);
+        scwin.closeAndRedirect();
+    } else {
+        alert(result.message || "수정 중 오류가 발생했습니다.");
+    }
+    return true;
+};
+
+scwin.sbm_updateReturnReq_submiterror = function (e) {
+    console.log("수정 중 에러:", e);
+    alert("수정 중 오류가 발생했습니다.");
+    return false;
+};
+
+
+// 팝업 닫기 및 페이지 이동
+scwin.closeAndRedirect = function() {
+    $p.closePopup();
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+};
+
+        ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
@@ -89,13 +172,14 @@ scwin.sbm_insertReturnReq_submiterror = function (e) {
     				id="txt_claim_no" label="출력텍스트입니다. ">
     			</w2:span>
     		</xf:group>
+    		
     		<xf:textarea class="" id="txa_additional_memo" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
     			meta_snippetName="10_09 Textarea_100per" placeholder="반송 사유를 입력해주세요" style="width:100%;height: 82px;">
     		</xf:textarea>
     		<xf:group class="btnbox" id="" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true" meta_snippetName="8_05 팝업전체제어버튼"
     			style="">
     			<xf:group class="rt" id="" style="">
-    				<xf:trigger class="btn_cm " id="btn_close" style=""   ev:onclick="scwin.btn_close_onclick" type="button">
+    				<xf:trigger class="btn_cm " id="btn_close" style="" ev:onclick="scwin.btn_close_onclick" type="button">
     					<xf:label><![CDATA[닫기]]></xf:label>
     				</xf:trigger>
     				<xf:trigger class="btn_cm pt" id="btn_submit" style="" type="button" ev:onclick="scwin.btn_submit_onclick">

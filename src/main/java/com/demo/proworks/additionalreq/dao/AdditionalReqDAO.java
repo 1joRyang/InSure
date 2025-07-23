@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import com.inswave.elfw.exception.ElException;
 import com.demo.proworks.additionalreq.vo.AdditionalReqCusVo;
 import com.demo.proworks.additionalreq.vo.AdditionalReqVo;
-import com.demo.proworks.additionalreq.dao.AdditionalReqDAO;
 
 /**  
  * @subject     : 추가요청 정보 관련 처리를 담당하는 DAO
@@ -58,18 +57,18 @@ public class AdditionalReqDAO extends com.demo.proworks.cmmn.dao.ProworksDefault
     }
         
     /**
-     * 추가요청 정보를 등록한다.
+     * 추가요청 정보를 등록한다. (INSERT만)
      *  
      * @param  AdditionalReqVo 추가요청 정보
      * @return 번호
      * @throws ElException
      */
     public int insertAdditionalReq(AdditionalReqVo vo) throws ElException {    	
-        return insert("com.demo.proworks.additionalreq.insertAdditionalReq", vo);
+        return insert("com.demo.proworks.additionalreq.insertAdditionalReqOnly", vo);
     }
 
     /**
-     * 추가요청 정보를 갱신한다.
+     * 추가요청 정보를 갱신한다. (UPDATE만)
      *  
      * @param  AdditionalReqVo 추가요청 정보
      * @return 번호
@@ -87,35 +86,66 @@ public class AdditionalReqDAO extends com.demo.proworks.cmmn.dao.ProworksDefault
      * @throws ElException
      */
     public int deleteAdditionalReq(AdditionalReqVo vo) throws ElException {
-    return delete("com.demo.proworks.additionalreq.deleteAdditionalReq", vo);
+        return delete("com.demo.proworks.additionalreq.deleteAdditionalReq", vo);
     }
 
     /**
-     * 추가요청 정보를 등록하고 청구 상태를 업데이트한다.
+     * 추가요청 존재 여부 확인
+     *  
+     * @param  AdditionalReqVo 추가요청 정보
+     * @return boolean 존재 여부
+     */
+    public boolean existsAdditionalReq(AdditionalReqVo vo) {
+        try {
+            Integer count = (Integer) selectByPk("com.demo.proworks.additionalreq.countAdditionalReq", vo);
+            return count != null && count > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 청구 상태를 업데이트한다.
+     *  
+     * @param  AdditionalReqVo 추가요청 정보
+     * @return 번호
+     * @throws ElException
+     */
+    public int updateClaimStatus(AdditionalReqVo vo) throws ElException {
+        return update("com.demo.proworks.additionalreq.updateClaimStatus", vo);
+    }
+
+    /**
+     * 추가요청 정보를 등록하고 청구 상태를 업데이트한다. (기존 호환성 유지)
      *  
      * @param  AdditionalReqVo 추가요청 정보
      * @return 번호
      * @throws ElException
      */
     public int insertAdditionalReqAndUpdateClaimStatus(AdditionalReqVo vo) throws ElException {
-        // 1. 추가요청 정보 등록
         int result1 = insert("com.demo.proworks.additionalreq.insertAdditionalReqOnly", vo);
         
-        // 2. 청구 상태 업데이트
         int result2 = update("com.demo.proworks.additionalreq.updateClaimStatus", vo);
         
-        // 두 작업 모두 성공하면 첫 번째 insert 결과 반환
+        if (result2 == 0) {
+            throw new ElException("청구 상태 업데이트에 실패했습니다. CLAIM_NO: " + vo.getClaim_no());
+        }
+        
         return result1;
     }
     
+    /**
+     * 추가요청 정보를 Upsert하고 청구 상태를 업데이트한다. (기존 호환성 유지)
+     *  
+     * @param  AdditionalReqCusVo 추가요청 정보
+     * @return 번호
+     * @throws ElException
+     */
     public int upsertAdditionalReqAndUpdateClaimStatus(AdditionalReqCusVo vo) throws ElException {
-    // 1. UPSERT 실행 (MySQL ON DUPLICATE KEY UPDATE 사용)
-    int result = insert("com.demo.proworks.additionalreq.upsertAdditionalReqOnly", vo);
-    
-    // 2. 청구 상태 업데이트
-    update("com.demo.proworks.additionalreq.updateClaimStatus", vo);
-    
-    return result;
-}
-
+        int result = insert("com.demo.proworks.additionalreq.upsertAdditionalReqOnly", vo);
+        
+        update("com.demo.proworks.additionalreq.updateClaimStatus", vo);
+        
+        return result;
+    }
 }

@@ -1095,7 +1095,7 @@ scwin.generateMemoFromAPI = function () {
 
                         Swal.fire({
                             title: '메모 생성 완료',
-                            text: '심사 메모가 성공적으로 생성되었습니다.\n처리된 진료 건수: ' + result.treatment_count + '건',
+                            text: '심사 메모가 성공적으로 생성되었습니다.처리된 진료 건수:'  + result.treatment_count + '건',
                             icon: 'success',
                             confirmButtonText: '확인',
                             confirmButtonColor: '#3085d6'
@@ -1892,7 +1892,7 @@ scwin.btn_return_onclick = function (e) {
     // 상태별 세부 권한 체크
     if (!scwin.checkReturnPermission()) return;
 
-    openClaimReturnPopup("/InsWebApp/ui/assignment/claimReturnPopup.xml");
+    openClaimReturnPopup("/InsWebApp/ui/Assignment/claimReturnPopup.xml");
 };
 
 function openClaimReturnPopup(link) {
@@ -1931,7 +1931,7 @@ scwin.btn_supplement_onclick = function (e) {
     // 상태별 세부 권한 체크
     if (!scwin.checkSupplementPermission()) return;
 
-    openReqSupplePopup("/InsWebApp/ui/assignment/reqSupplePopup.xml");
+    openReqSupplePopup("/InsWebApp/ui/Assignment/reqSupplePopup.xml");
 };
 
 function openReqSupplePopup(link) {
@@ -2031,7 +2031,7 @@ scwin.sbm_selectInsuranceProducts_submiterror = function (e) {
 
 
 scwin.btn_reject_onclick = function (e) {
-    openRejectClaimPopup("/InsWebApp/ui/assignment/RejectClaimPopup.xml");
+    openRejectClaimPopup("/InsWebApp/ui/Assignment/RejectClaimPopup.xml");
 };
 function openRejectClaimPopup(link) {
     requires("uiplugin.popup");
@@ -2598,6 +2598,7 @@ scwin.btn_approve_complete_onclick = function () {
             
             // 결재 승인 submission 실행
             $p.executeSubmission("sbm_approveApprovalReq");
+              location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
         }
     });
 };]]></script>
