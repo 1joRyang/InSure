@@ -40,7 +40,16 @@ scwin.noBtnAlertWithTimer = (param) => {
 	});
 }
 
-scwin.twoBtnAlert = (param) => {
+/** 부르는 형태 예시
+scwin.twoBtnAlert({
+     title: "로그아웃 하시겠습니까?",
+ }, (result) => {
+     if (result.isConfirmed) {
+         $c.sbm.execute(sbm_EmployeeLogout);
+     }
+ });
+ */
+scwin.twoBtnAlert = (param, func) => {
 	Swal.fire({
 		...param,
 		showCancelButton: true,
@@ -49,5 +58,5 @@ scwin.twoBtnAlert = (param) => {
 		confirmButtonText: '완료',
 		cancelButtonText: '취소',
 		reverseButtons: true
-	});
+	}).then(func);
 }

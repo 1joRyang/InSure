@@ -3,6 +3,7 @@
     xmlns:ev="http://www.w3.org/2001/xml-events"
     xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
     <head>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     	<w2:type>COMPONENT</w2:type>
     	<w2:buildDate />
     	<w2:MSA />
@@ -29,6 +30,7 @@
     	</xf:model>
     	<w2:layoutInfo />
     	<w2:publicInfo method="" />
+    	<script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
     	<script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
 	
@@ -40,9 +42,19 @@ scwin.img_logo_onclick = function (e) {
 };
 
 scwin.logout_btn_onclick = function (e) {
-    if (confirm("로그아웃 하시겠습니까?")) {
-        $c.sbm.execute(sbm_EmployeeLogout);
-    }
+	Swal.fire({
+        title: "로그아웃 하시겠습니까?",
+        showCancelButton: true,
+        confirmButtonColor: '#4FACFE',
+        cancelButtonColor: '#d1d1d1',
+        confirmButtonText: '확인',
+        cancelButtonText: '취소',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $c.sbm.execute(sbm_EmployeeLogout);
+        }
+    });
 };
 
 // 로그아웃 실패 시 처리
