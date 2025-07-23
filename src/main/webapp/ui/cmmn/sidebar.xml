@@ -68,6 +68,7 @@ scwin.search_claimNum_onclick = function () {
     removeSClass();
     search_claimNum.addClass("selected");
     movePage("/InsWebApp/ui/Assignment/claimListSearch.xml", "searchClaim");
+
 };
 
 scwin.search_personNum_onclick = function () {

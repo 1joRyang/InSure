@@ -67,7 +67,9 @@ public class ProworksAuthProcess {
     private static final List<String> PUBLIC_SERVICES = Arrays.asList(
         "UserLogin",
         "SimpleLogin", 
-        "EmployeeLogin"
+        "EmployeeLogin",
+        "websocket0004SendTestNotification"
+
 
         // 필요에 따라 추가...
     );
@@ -80,6 +82,7 @@ public class ProworksAuthProcess {
         AppLog.debug("[ProworksAuthProcess] 권한 체크 시작 - svcId: " + svcId);
         
         try {
+        
             // 1. 로그인 불필요 서비스인지 체크
             if (isPublicService(svcId)) {
                 AppLog.debug("[ProworksAuthProcess] 공개 서비스 - 권한 체크 생략: " + svcId);

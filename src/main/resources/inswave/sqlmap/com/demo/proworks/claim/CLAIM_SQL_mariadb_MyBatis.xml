@@ -401,4 +401,33 @@
     </if>
     ORDER BY c.claim_no DESC
 </select>
+
+
+	<!-- 청구번호로 관리자 번호조회 -->
+	 <select id="selectManagerNo" parameterType="String" resultType="String">
+      SELECT
+          ar.manager_no
+      FROM
+          APPROVAL_REQ ar
+      JOIN
+          CLAIM c ON c.claim_no = ar.claim_no
+      WHERE
+          c.claim_no = #{claimNo}
+    </select>
+    
+    
+    <!-- 고객명 조회 -->
+	<select id="selectCustomerNameById" parameterType="String" resultType="String">
+	    SELECT user_name 
+	    FROM USER 
+	    WHERE ID = #{customerId}
+	</select>
+	
+	<!-- 직원명 조회 -->
+	<select id="selectEmployeeNameById" parameterType="String" resultType="String">
+	    SELECT emp_name 
+	    FROM EMPLOYEE 
+	    WHERE emp_no = #{empNo}
+	</select>
+	
 </mapper>

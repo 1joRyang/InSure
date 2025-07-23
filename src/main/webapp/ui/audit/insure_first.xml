@@ -41,7 +41,7 @@ scwin.btn_next_onclick = function (e) {
 
 scwin.btn_change_onclick = function (e) {
     // 담당자 변경 팝업 호출
-    openChangeAssigneePopup("/InsWebApp/ui/assignment/change-assignee-popup.xml");
+    openChangeAssigneePopup("/InsWebApp/ui/Assignment/change-assignee-popup.xml");
 };
 
 // 담당자 변경 팝업 함수
@@ -73,7 +73,7 @@ function openChangeAssigneePopup(link) {
 }
 
 scwin.btn_reject_onclick = function (e) {
-    openClaimReturnPopup("/InsWebApp/ui/assignment/claimReturnPopup.xml");
+    openClaimReturnPopup("/InsWebApp/ui/Assignment/claimReturnPopup.xml");
 };
 function openClaimReturnPopup(link) {
     requires("uiplugin.popup");

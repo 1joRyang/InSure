@@ -20,12 +20,37 @@
     					<w2:key dataType="text" name="실무자아이디" id="empNo"></w2:key>
     				</w2:keyInfo>
     			</w2:dataMap>
+    			<w2:dataMap baseNode="map" id="dma_notificationData">
+    				<w2:keyInfo>
+    					<w2:key dataType="number" name="읽지 않은 알람" id="unreadCount"></w2:key>
+    					<w2:key dataType="number" name="총 알람" id="totalCount"></w2:key>
+    				</w2:keyInfo>
+    				<w2:data xmlns="">
+    					<unreadCount>0</unreadCount>
+    					<totalCount>0</totalCount>
+    				</w2:data>
+    			</w2:dataMap>
+    			<w2:dataList baseNode="list" repeatNode="map" id="dlt_notification" saveRemovedData="true">
+    				<w2:columnInfo>
+    					<w2:column dataType="text" name="알림ID" id="noti_id"></w2:column>
+    					<w2:column dataType="text" name="알림내용" id="noti_content"></w2:column>
+    					<w2:column dataType="text" name="알림타입" id="noti_type"></w2:column>
+    					<w2:column dataType="text" name="수신자ID" id="emp_no"></w2:column>
+    					<w2:column dataType="text" name="읽음여부" id="is_read"></w2:column>
+    					<w2:column dataType="text" name="생성일시" id="created_date"></w2:column>
+    				</w2:columnInfo>
+    			</w2:dataList>
     		</w2:dataCollection>
     		<w2:workflowCollection />
     		<xf:submission id="sbm_EmployeeLogout" action="/InsWebApp/EmployeeLogout.pwkjson" method="post" mediatype="application/json"
     			ref='data:json,[{"id":"dma_logout_request","key":"elData"},{"id":"dma_logout_response","key":"elData"}]' target="" encoding="UTF-8"
     			instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
     			ev:submitdone="scwin.sbm_EmployeeLogout_submitdone" ev:submiterror="scwin.sbm_EmployeeLogout_submiterror" abortTrigger="">
+    		</xf:submission>
+    		<xf:submission id="sbm_getNotifications" action="/InsWebApp/notification0001GetNotificationList.pwkjson" method="post"
+    			mediatype="application/json" ref='data:json,{"id":"dma_notificationData","key":"elData"}' target="" encoding="UTF-8" instance=""
+    			replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+    			ev:submitdone="scwin.sbm_getNotifications_submitdone" ev:submiterror="" abortTrigger="">
     		</xf:submission>
     	</xf:model>
     	<w2:layoutInfo />
@@ -34,7 +59,119 @@
     	<script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
 	
+    // [수정] window 객체에 초기화 여부를 저장하는 플래그를 확인합니다.
+    if (!window.isWebSocketInitialized) {
+        if (typeof WebSocketService !== "undefined") {
+            WebSocketService.init();
+            window.isWebSocketInitialized = true; // ✨ 초기화 완료 플래그 설정
+            console.log("최초 웹소켓 연결을 초기화합니다.");
+        }
+    } else {
+        console.log("기존 웹소켓 연결을 재사용합니다.");
+    }
+
+    // 초기 알림 로딩은 페이지마다 실행해도 괜찮습니다.
+    scwin.loadInitialNotifications();
+
 };
+/**
+ * WebSocket에서 호출하는 알림 목록 추가 함수
+ */
+scwin.addNotificationToList = function(notificationData) {
+    try {
+        // 데이터리스트에 새로운 알림 추가
+        dlt_notification.insertRow(0, {
+            noti_id: 'NOTI_' + Date.now(),
+            noti_type: notificationData.noti_type,
+            noti_content: notificationData.noti_content,
+            emp_no: getCurrentUserId(),
+            is_read: notificationData.is_read,
+            created_date: notificationData.created_date
+        });
+        
+        console.log('✅ 새 알림이 목록에 추가되었습니다:', notificationData);
+        
+    } catch (e) {
+        console.error('❌ 알림 목록 추가 실패:', e);
+    }
+};
+
+/**
+ * 알림 배지 업데이트
+ */
+scwin.updateNotificationBadge = function() {
+    try {
+        const currentUnread = parseInt(dma_notificationData.get("unreadCount")) || 0;
+        const newUnreadCount = currentUnread + 1;
+
+        dma_notificationData.set("unreadCount", newUnreadCount);
+        
+        const badge = $p.getComponentById("noti_badge");
+        if (badge) {
+            badge.setValue(newUnreadCount);
+            badge.setStyle("display", "block");
+        }
+    } catch (e) {
+        console.error("알림 배지 업데이트 실패:", e);
+    }
+};
+
+
+/**
+ * [서버 통신] 페이지 최초 로드 시, 서버에서 알림 목록과 미읽음 개수를 가져옵니다.
+ */
+scwin.loadInitialNotifications = function() {
+    // dma_notificationData에 현재 로그인한 사용자 ID를 설정해야 합니다.
+    // **중요**: submission을 실행하기 전에 로그인한 사용자 정보를 DataMap에 넣어주세요.
+    const empNo = JSON.parse(localStorage.getItem("employee"))?.empNo;
+    if (empNo) {
+        dma_notificationData.set("empNo", empNo);
+        $c.sbm.execute(sbm_getNotifications); // Submission 실행
+    }
+};
+
+/**
+ * sbm_getNotifications 서브미션의 성공 콜백 함수
+ */
+scwin.sbm_getNotifications_submitdone = function(e) {
+    try {
+        const responseData = e.responseJSON.elData;
+        if (!responseData) return;
+        
+        // DataList(dlt_notification)에 알림 목록을 설정합니다.
+        dlt_notification.setJSON(responseData.notificationVoList || []);
+
+        // DataMap(dma_notificationData)에 통계 정보를 설정합니다.
+        const unreadCount = responseData.unreadCount || 0;
+        dma_notificationData.set("unreadCount", unreadCount);
+        dma_notificationData.set("totalCount", responseData.totalCount || 0);
+
+        // 미읽음 개수로 배지 UI를 설정합니다.
+        const badge = $p.getComponentById("noti_badge");
+        badge.setValue(unreadCount);
+
+        if (unreadCount > 0) {
+            badge.setStyle("display", "block");
+        } else {
+            badge.setStyle("display", "none");
+        }
+    } catch(err) {
+        console.error("초기 알림 데이터 처리 중 오류:", err);
+    }
+};
+
+/**
+ * [UI 이벤트] 종 아이콘 클릭 시 알림 패널을 토글합니다.
+ */
+scwin.noti_btn_onclick = function(e) {
+    const panel = $p.getComponentById("notification_panel");
+    if (panel.getStyle("display") === "none") {
+        panel.setStyle("display", "block");
+    } else {
+        panel.setStyle("display", "none");
+    }
+};
+
 
 scwin.img_logo_onclick = function (e) {
     localStorage.setItem("nowSelect", "dash");
@@ -70,13 +207,39 @@ scwin.sbm_EmployeeLogout_submitdone = function (e) {
     localStorage.removeItem("user");
     localStorage.removeItem("simple");
     localStorage.removeItem("employee");
+    localStorage.removeItem("notifications"); // 알림도 정리
     
     // 로그인 페이지로 이동
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/login_pc_ver.xml";
 
 };
+
+
+
+
+scwin.trigger1_onclick = function (e) {
+    var managerEmpNo = "102021"; // 실제 관리자 번호로 수정
+
+    if (WebSocketService && WebSocketService.isConnected) {
+        var testTaskData = {
+            targetEmpNo: managerEmpNo,
+            claimNo: "TEST-00123",
+            claimContent: "클릭 테스트 알림입니다.",
+            claimType: "테스트 상해",
+            priority: "HIGH"
+        };
+
+        WebSocketService.assignTaskManually(testTaskData);
+        alert(managerEmpNo + " 계정으로 테스트 알림을 보냈습니다.");
+
+    } else {
+        alert("웹소켓이 연결되어 있지 않습니다.");
+    }
+
+    // --- ▼ [핵심 수정] 버튼의 기본 동작(새로고침 등)을 막습니다. ▼ ---
+    return false; 
+};
 ]]></script>
-    	<w2:require as="udc_notification" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/notification.xml"></w2:require>
     </head>
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
@@ -86,14 +249,62 @@ scwin.sbm_EmployeeLogout_submitdone = function (e) {
     			<xf:image src="/InsWebApp/images/insure/insureLogo.png" style="width:165px;height:60px;pointer: cursor;" id="img_logo"
     				ev:onclick="scwin.img_logo_onclick">
     			</xf:image>
+    			<xf:group
+    				style="position:absolute; right:50px; top:60px; width:350px; background-color:white; border:1px solid #ccc; display:none; z-index:1000; padding:10px;"
+    				id="notification_panel">
+    				<w2:gridView checkAllType="false" dataList="data:dlt_notification" style="height:200px;" readOnly="true"
+    					id="grd_notification" defaultCellHeight="20">
+    					<w2:caption style="" id="caption1" value="this is a grid caption."></w2:caption>
+    					<w2:header style="" id="header1">
+    						<w2:row style="" id="row1">
+    							<w2:column width="70" inputType="text" style="" id="column6" value="알림ID" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column5" value="알림내용" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column4" value="알림타입" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column3" value="수신자ID" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column2" value="읽음여부" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column1" value="생성일시" displayMode="label"></w2:column>
+    						</w2:row>
+    					</w2:header>
+    					<w2:gBody style="" id="gBody1">
+    						<w2:row style="" id="row2">
+    							<w2:column width="70" inputType="text" style="" id="noti_id" value="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="noti_content" value="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="noti_type" value="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="is_read" value="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="created_date" value="" displayMode="label"></w2:column>
+    						</w2:row>
+    					</w2:gBody>
+    				</w2:gridView>
+    			</xf:group>
     			<xf:group class="breadcrumb" id="" style="">
     				<xf:group id="" style="" tagname="ul">
     					<xf:group id="" style="" tagname="li"></xf:group>
     				</xf:group>
     			</xf:group>
-    			<w2:udc_notification style="width: 30px;height: 30px;" title="" message=""></w2:udc_notification>
-    			<w2:button style="width: 80px;height: 23px;background-color:#FFFFFF;       font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;" id="logout_btn" label="로그아웃" ev:onclick="scwin.logout_btn_onclick"></w2:button>
+    			<w2:button style="background: transparent; border: none; cursor: pointer; position: relative;" id="noti_btn"
+    				ev:onclick="scwin.noti_btn_onclick">
+    				<xf:output label=""
+    					style="position: absolute; top: -5px; right: -5px; background: #ff4757; color: white; border-radius: 50%; min-width: 16px; height: 16px; font-size: 10px; text-align: center; display: none; z-index: 10;"
+    					id="noti_badge">
+    					<xf:label></xf:label>
+    				</xf:output>
+    				<xf:image src="/InsWebApp/images/insure/noti.png" style="width:20px; height:20px; vertical-align: middle;"
+    					id="noti_icon">
+    				</xf:image>
+    			</w2:button>
+    			<w2:button ev:onclick="scwin.logout_btn_onclick"
+    				style="width: 80px;height: 23px;background-color:#FFFFFF;       font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"
+    				id="logout_btn" label="로그아웃">
+    			</w2:button>
+    			<xf:trigger class="btn_cm" id="trigger1" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true" meta_snippetName="8_01 기본버튼"
+    				style="" type="button" ev:onclick="scwin.trigger1_onclick">
+    				<xf:label><![CDATA[인라인버튼]]></xf:label>
+    			</xf:trigger>
     		</xf:group>
     	</xf:group>
+    	<xf:group style="" id="noti-list-items"></xf:group>
+      
+      <script lazy="false" type="text/javascript" src="/InsWebApp/js/insure/websocket.js"></script>
     </body>
 </html>

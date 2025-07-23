@@ -2,13 +2,19 @@ package com.demo.proworks.assignrule.service.impl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.annotation.Resource;
 
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import com.demo.proworks.assignrule.service.AssignRuleService;
 import com.demo.proworks.assignrule.vo.AssignRuleVo;
@@ -325,12 +331,23 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 			int updateResult = assignRuleDAO.updateClaimAssignment(updateParams);
 			System.out.println("[DEBUG] 업데이트 결과: " + updateResult);
 
-			if (updateResult > 0) {
+			/*if (updateResult > 0) {
 				String result = String.format("🔥 자동 배정 완료 - 청구번호: %s, 청구유형: %s, 담당부서: %s, 담당자: %s(%s)", claimNo,
 						claimType, assignDeptName, assignedEmployee.getEmpName(), empNo);
 				System.out.println("[DEBUG] " + result);
 				System.out.println("========== [DEBUG] 자동 배정 성공 완료 ==========");
-				return result;
+				return result;*/
+				
+			if (updateResult > 0) {
+            String resultMessage = String.format("🔥 자동 배정 완료 - 청구번호: %s, 청구유형: %s, 담당부서: %s, 담당자: %s(%s)", claimNo,
+                    claimType, assignDeptName, assignedEmployee.getEmpName(), empNo);
+            System.out.println("[DEBUG] " + resultMessage);
+
+            // 🔔 웹소켓 알림 전송 로직 호출!
+            sendWebSocketAutoAssignNotification(claimNo, empNo, resultMessage, claimType, assignDeptName);
+
+            System.out.println("========== [DEBUG] 자동 배정 성공 완료 ==========");
+            return resultMessage;
 			} else {
 				System.err.println("[ERROR] 청구 업데이트 실패 - updateResult: " + updateResult);
 				throw new Exception("청구 업데이트에 실패했습니다.");
@@ -343,6 +360,7 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 			e.printStackTrace();
 			throw new Exception("청구 배정 중 오류 발생: " + e.getMessage(), e);
 		}
+		return null; // 컴파일 에러 방지
 	}
 
 	/**
@@ -656,5 +674,139 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 			result.put("message", "배정 미리보기 중 오류 발생: " + e.getMessage());
 			return result;
 		}
+	}
+	
+	/**
+	 * 🔔 웹소켓 자동 배정 알림 전송 (기존 배정 로직에 추가)
+	 */
+	/*private void sendWebSocketAutoAssignNotification(String claimNo, String assignedEmpNo, String assignResult, String claimType, String assignDeptName) {
+	    // 비동기로 실행 - 배정 로직에 영향 없음
+	    CompletableFuture.runAsync(() -> {
+	        try {
+	            System.out.println("[WEBSOCKET] 자동 배정 알림 전송 시작: " + claimNo + " -> " + assignedEmpNo);
+	            
+	            RestTemplate restTemplate = new RestTemplate();
+	            HttpHeaders headers = new HttpHeaders();
+	            headers.setContentType(MediaType.APPLICATION_JSON);
+	            
+	            // 알림 데이터 구성
+	            Map<String, Object> notificationData = new HashMap<>();
+	            notificationData.put("claimNo", claimNo);
+	            notificationData.put("claimType", claimType);
+	            notificationData.put("claimContent", "실손보험 청구 심사");
+	            notificationData.put("assignedEmpNo", assignedEmpNo);
+	            notificationData.put("assignResult", assignResult);
+	            notificationData.put("assignDept", assignDeptName);
+	            notificationData.put("keyword", claimType);
+	            notificationData.put("priority", "AUTO");
+	            
+	            // 기본 환자/병원 정보 (실제 데이터가 있다면 ClaimVo에서 가져오기)
+	            notificationData.put("patientName", "환자-" + claimNo);
+	            notificationData.put("hospitalName", "병원정보");
+	            notificationData.put("receiptAmount", "심사대상");
+	            notificationData.put("receiptDate", new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()));
+	            
+	            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(notificationData, headers);
+	            
+	            // 웹소켓 서버로 알림 전송 (localhost:3000)
+	            Map<String, Object> response = restTemplate.postForObject(
+	                "http://localhost:3000/api/notify-auto-assign", 
+	                entity, 
+	                Map.class
+	            );
+	            
+	            if (response != null && Boolean.TRUE.equals(response.get("success"))) {
+	                System.out.println("[WEBSOCKET] ✅ 자동 배정 알림 전송 성공: " + claimNo + " -> " + assignedEmpNo);
+	            } else {
+	                System.out.println("[WEBSOCKET] ⚠️ 자동 배정 알림 전송 실패: " + (response != null ? response.get("message") : "응답 없음"));
+	            }
+	            
+	        } catch (Exception e) {
+	            System.out.println("[WEBSOCKET] ⚠️ 자동 배정 알림 전송 중 오류 (배정은 정상 완료): " + e.getMessage());
+	            // 웹소켓 알림 실패해도 배정 로직에는 영향 없음
+	        }
+	    });
+	}*/
+	
+	
+	
+	/**
+	 * 🔔 자동 배정 웹소켓 알림을 비동기로 전송합니다.
+	 * 배정 로직의 성능에 영향을 주지 않기 위해 비동기로 처리합니다.
+	 * @param claimNo 청구 번호
+	 * @param assignedEmpNo 배정된 직원 번호
+	 * @param assignResult 배정 결과 메시지
+	 * @param claimType 청구 유형
+	 * @param assignDeptName 배정 부서명
+	 */
+	private void sendWebSocketAutoAssignNotification(String claimNo, String assignedEmpNo, String assignResult, String claimType, String assignDeptName) {
+	    CompletableFuture.runAsync(() -> {
+	        try {
+	            System.out.println("[WEBSOCKET] 자동 배정 알림 전송 시작: " + claimNo + " -> " + assignedEmpNo);
+	
+	            RestTemplate restTemplate = new RestTemplate();
+	            HttpHeaders headers = new HttpHeaders();
+	            headers.setContentType(MediaType.APPLICATION_JSON);
+	
+	            // Node.js 서버로 보낼 데이터 구성 (server.js의 /api/notify-auto-assign API와 일치)
+	            Map<String, Object> notificationData = new HashMap<>();
+	            notificationData.put("claimNo", claimNo);
+	            notificationData.put("claimType", claimType);
+	            notificationData.put("assignedEmpNo", assignedEmpNo);
+	            notificationData.put("assignDept", assignDeptName);
+	            // 필요에 따라 추가 정보 전송
+	            notificationData.put("claimContent", "새로운 실손보험 청구가 배정되었습니다.");
+	            notificationData.put("priority", "NORMAL");
+	
+	            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(notificationData, headers);
+	
+	            // 웹소켓 서버 API 호출 (server.js가 실행 중인 포트)
+	            String webSocketApiUrl = "http://localhost:3000/api/notify-auto-assign";
+	            Map<String, Object> response = restTemplate.postForObject(webSocketApiUrl, entity, Map.class);
+	
+	            if (response != null && Boolean.TRUE.equals(response.get("success"))) {
+	                System.out.println("[WEBSOCKET] ✅ 자동 배정 알림 전송 성공: " + claimNo + " -> " + assignedEmpNo);
+	            } else {
+	                System.err.println("[WEBSOCKET] ⚠️ 자동 배정 알림 전송 실패: " + (response != null ? response.get("message") : "응답 없음"));
+	            }
+	
+	        } catch (Exception e) {
+	            System.err.println("[WEBSOCKET] ⚠️ 자동 배정 알림 전송 중 오류 (배정은 정상 완료됨): " + e.getMessage());
+	        }
+	    });
+	}
+
+	/**
+	 * 🔔 웹소켓 일괄 배정 완료 알림 전송
+	 */
+	private void sendWebSocketBatchCompleteNotification(int totalProcessed, int successCount, int failCount) {
+	    CompletableFuture.runAsync(() -> {
+	        try {
+	            System.out.println("[WEBSOCKET] 일괄 배정 완료 알림 전송 시작: 총 " + totalProcessed + "건");
+	            
+	            RestTemplate restTemplate = new RestTemplate();
+	            HttpHeaders headers = new HttpHeaders();
+	            headers.setContentType(MediaType.APPLICATION_JSON);
+	            
+	            Map<String, Object> batchData = new HashMap<>();
+	            batchData.put("totalProcessed", totalProcessed);
+	            batchData.put("successCount", successCount);
+	            batchData.put("failCount", failCount);
+	            batchData.put("processedClaims", new ArrayList<>()); // 필요시 실제 처리 목록 추가
+	            
+	            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(batchData, headers);
+	            
+	            Map<String, Object> response = restTemplate.postForObject(
+	                "http://localhost:3000/api/notify-batch-complete", 
+	                entity, 
+	                Map.class
+	            );
+	            
+	            System.out.println("[WEBSOCKET] ✅ 일괄 배정 완료 알림 전송: " + totalProcessed + "건 처리 완료");
+	            
+	        } catch (Exception e) {
+	            System.out.println("[WEBSOCKET] ⚠️ 일괄 배정 알림 전송 실패: " + e.getMessage());
+	        }
+	    });
 	}
 }
