@@ -3,6 +3,7 @@
     xmlns:ev="http://www.w3.org/2001/xml-events"
     xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
     <head>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <w2:type>COMPONENT</w2:type>
         <w2:buildDate/>
         <w2:MSA/>
@@ -61,8 +62,9 @@
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
+        <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
         <script lazy="false" type="text/javascript"><![CDATA[
-scwin.onpageload = function() {
+scwin.onpageload = function () {
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
 
     txt_req_supple.setValue(scwin.claim.claimNo);
@@ -75,7 +77,11 @@ scwin.btn_submit_onclick = function (e) {
     // textarea 값 검증
     var additionalMemo = txa_supplement_memo.getValue();
     if (!additionalMemo || additionalMemo.trim() === "") {
-        alert("보완 요청 사유를 입력해주세요.");
+        $p.closePopup();
+        scwin.toastAlert({
+            icon: 'warning',
+            title: '보완 요청 사유를 입력해주세요.'
+        });
         txa_supplement_memo.focus();
         return false;
     }
@@ -83,16 +89,16 @@ scwin.btn_submit_onclick = function (e) {
     // dataMap에 값 설정
     dma_additionalReq.set("additional_memo", additionalMemo.trim());
     dma_additionalReq.set("request_type", "SUPPLEMENT"); // 보완요청 타입 설정
-    
+
     console.log("존재 여부 확인 중...");
     console.log("CLAIM_NO:", dma_claimNo.get("claim_no"));
-    
+
     // 1단계: 존재 여부 확인
     $p.executeSubmission("sbm_checkAdditionalReq");
 };
 
 // 닫기 버튼 클릭
-scwin.btn_close_onclick = function(e) {
+scwin.btn_close_onclick = function (e) {
     $p.closePopup();
     return true;
 };
@@ -100,9 +106,9 @@ scwin.btn_close_onclick = function(e) {
 
 scwin.sbm_checkAdditionalReq_submitdone = function (e) {
     var result = e.responseJSON;
-    
+
     console.log("확인 결과:", result);
-    
+
     if (result && result.success) {
         if (result.exists) {
             // 기존 데이터가 있으면 UPDATE
@@ -114,13 +120,19 @@ scwin.sbm_checkAdditionalReq_submitdone = function (e) {
             $p.executeSubmission("sbm_insertAdditionalReq");
         }
     } else {
-        alert("데이터 확인 중 오류가 발생했습니다.");
+        scwin.toastAlert({
+            icon: 'error',
+            title: '데이터 확인 중 오류가 발생했습니다.'
+        });
     }
 };
 
 scwin.sbm_checkAdditionalReq_submiterror = function (e) {
     console.log("확인 중 에러:", e);
-    alert("데이터 확인 중 오류가 발생했습니다.");
+    scwin.toastAlert({
+        icon: 'error',
+        title: '데이터 확인 중 오류가 발생했습니다.'
+    });
     return false;
 };
 
@@ -128,19 +140,31 @@ scwin.sbm_checkAdditionalReq_submiterror = function (e) {
 scwin.sbm_insertAdditionalReq_submitdone = function (e) {
     var result = e.responseJSON;
     console.log("INSERT 결과:", result);
-    
+
     if (result && result.success) {
-        alert(result.message || "보완 요청이 등록되었습니다.");
-        scwin.closeAndRedirect();
+        $p.closePopup();
+        scwin.noBtnAlertWithTimer({
+            icon: 'success',
+            title: result.message || '보완 요청이 등록되었습니다.'
+        });
+        setTimeout(function () {
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+        }, 2000);
     } else {
-        alert(result.message || "등록 중 오류가 발생했습니다.");
+        scwin.toastAlert({
+            icon: 'error',
+            title: result.message || '등록 중 오류가 발생했습니다.'
+        });
     }
     return true;
 };
 
 scwin.sbm_insertAdditionalReq_submiterror = function (e) {
     console.log("등록 중 에러:", e);
-    alert("등록 중 오류가 발생했습니다.");
+    scwin.toastAlert({
+        icon: 'error',
+        title: '등록 중 오류가 발생했습니다.'
+    });
     return false;
 };
 
@@ -148,19 +172,32 @@ scwin.sbm_insertAdditionalReq_submiterror = function (e) {
 scwin.sbm_updateAdditionalReq_submitdone = function (e) {
     var result = e.responseJSON;
     console.log("UPDATE 결과:", result);
-    
+
     if (result && result.success) {
-        alert(result.message || "보완 요청이 수정되었습니다.");
-        scwin.closeAndRedirect();
+        $p.closePopup();
+        scwin.noBtnAlertWithTimer({
+            icon: 'success',
+            title: result.message || '보완 요청이 수정되었습니다.'
+        });
+
+        setTimeout(function () {
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+        }, 2000);
     } else {
-        alert(result.message || "수정 중 오류가 발생했습니다.");
+        scwin.toastAlert({
+            icon: 'error',
+            title: result.message || '수정 중 오류가 발생했습니다.'
+        });
     }
     return true;
 };
 
 scwin.sbm_updateAdditionalReq_submiterror = function (e) {
     console.log("수정 중 에러:", e);
-    alert("수정 중 오류가 발생했습니다.");
+    scwin.toastAlert({
+        icon: 'error',
+        title: '수정 중 오류가 발생했습니다.'
+    });
     return false;
 };
 
@@ -168,14 +205,19 @@ scwin.sbm_updateAdditionalReq_submiterror = function (e) {
 scwin.sbm_insertAdditionalReqOld_submitdone = function (e) {
     console.log("보완요청 처리 성공:", e);
     $p.closePopup();
-    alert("보완 요청 완료");
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
+    scwin.noBtnAlertWithTimer({
+        icon: 'success',
+        title: '보완 요청 완료'
+    });
+    setTimeout(function () {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+    }, 2000);
     return true;
 };
 
 scwin.sbm_insertAdditionalReqOld_submiterror = function (e) {
     console.log("보완요청 처리 실패:", e);
-    
+
     var errorMsg = "보완요청 전송 중 오류가 발생했습니다.";
     if (e.responseJSON && e.responseJSON.elHeader && e.responseJSON.elHeader.resMsg) {
         errorMsg = e.responseJSON.elHeader.resMsg;
@@ -185,10 +227,72 @@ scwin.sbm_insertAdditionalReqOld_submiterror = function (e) {
 
 
 // 팝업 닫기 및 페이지 이동
-scwin.closeAndRedirect = function() {
+scwin.closeAndRedirect = function () {
     $p.closePopup();
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
 };
+const Toast = Swal.mixin({
+    toast: true,
+    showConfirmButton: false,
+})
+
+scwin.toastAlertMobile = (param) => {
+    Toast.fire({
+        ...param,
+        timer: 2000,
+        position: 'center',
+        timerProgressBar: false,
+    });
+}
+
+scwin.toastAlert = (param) => {
+    Toast.fire({
+        ...param,
+        timer: 3000,
+        position: 'top-end',
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+}
+
+scwin.noBtnAlert = (param) => {
+    Swal.fire({
+        ...param,
+        showConfirmButton: false,
+    });
+}
+
+scwin.noBtnAlertWithTimer = (param) => {
+    Swal.fire({
+        ...param,
+        timer: 2000,
+        showConfirmButton: false,
+    });
+}
+
+/** 부르는 형태 예시
+scwin.twoBtnAlert({
+     title: "로그아웃 하시겠습니까?",
+ }, (result) => {
+     if (result.isConfirmed) {
+         $c.sbm.execute(sbm_EmployeeLogout);
+     }
+ });
+ */
+scwin.twoBtnAlert = (param, func) => {
+    Swal.fire({
+        ...param,
+        showCancelButton: true,
+        confirmButtonColor: '#4FACFE',
+        cancelButtonColor: '#d1d1d1',
+        confirmButtonText: '완료',
+        cancelButtonText: '취소',
+        reverseButtons: true
+    }).then(func);
+}
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
