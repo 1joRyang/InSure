@@ -69,6 +69,7 @@ scwin.btn_close_onclick = function (e) {
 scwin.sbm_insertReturnReq_submitdone = function (e) {
     console.log("반송 요청 등록 완료:", e);
     $p.closePopup();
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
     return true;
 };
 
