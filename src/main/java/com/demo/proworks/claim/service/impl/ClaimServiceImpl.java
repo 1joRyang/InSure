@@ -138,40 +138,72 @@ public class ClaimServiceImpl implements ClaimService {
 	 */
 	@Transactional
 	public int insertClaim(ClaimVo claimVo) throws Exception {
-		// 1. 청구 데이터 등록
-		int result = claimDAO.insertClaim(claimVo);
+    int result = claimDAO.insertClaim(claimVo);
 
-		System.out.println("[청구 등록 완료] 청구번호: " + claimVo.getClaim_no() + ", claim_type: " + claimVo.getClaim_type());
+    System.out.println("[청구 등록 완료] 청구번호: " + claimVo.getClaim_no() + ", claim_type: " + claimVo.getClaim_type());
 
-		// 2. 등록이 성공한 경우 자동 배정 실행 
-	    if (result > 0 && claimVo.getClaim_no() != null) {
-	        try {
-	           
-	            String originalClaimType = claimVo.getClaim_type();
-	            if ("other".equals(originalClaimType)) {
-	                System.out.println("[자동 배정] claim_type 'other'를 'disease'로 변경하여 배정 진행");
-	                claimVo.setClaim_type("disease");
-	            }
-	            
-	            String assignResult = assignRuleService.assignEmployeeToClaim(claimVo.getClaim_no());
-	            System.out.println("[자동 배정 완료] " + assignResult);
-	            
-	            // 원래 claim_type으로 복구 (DB에는 이미 저장되었으므로 VO만 복구)
-	            claimVo.setClaim_type(originalClaimType);
-	            
-	        } catch (Exception e) {
-	            // 자동 배정 실패 시에도 청구 등록은 유지하고 로그만 남김 (트랜잭션 롤백 방지)
-	            System.err.println("[자동 배정 실패] 청구번호: " + claimVo.getClaim_no() + ", 오류: " + e.getMessage());
-	            System.err.println("[알림] 청구 등록은 완료되었으나 자동 배정만 실패함. 수동 배정 필요.");
-	            e.printStackTrace();
+    if (result > 0 && claimVo.getClaim_no() != null) {
+        try {
+            String originalClaimType = claimVo.getClaim_type();
+            System.out.println("[자동 배정 준비] 원본 claim_type: " + originalClaimType);
+            
+            String koreanClaimType = convertEngToKoreanForAssignment(originalClaimType);
+            System.out.println("[자동 배정] 영문 '" + originalClaimType + "' -> 한글 '" + koreanClaimType + "'로 변환");
+            
+            ClaimVo tempUpdateVo = new ClaimVo();
+            tempUpdateVo.setClaim_no(claimVo.getClaim_no());
+            tempUpdateVo.setClaim_type(koreanClaimType);
+            claimDAO.updateClaim(tempUpdateVo);
+            System.out.println("[자동 배정] DB의 claim_type을 '" + koreanClaimType + "'로 임시 업데이트");
+            
+            String assignResult = assignRuleService.assignEmployeeToClaim(claimVo.getClaim_no());
+            System.out.println("[자동 배정 완료] " + assignResult);
+            
+            ClaimVo restoreVo = new ClaimVo();
+            restoreVo.setClaim_no(claimVo.getClaim_no());
+            restoreVo.setClaim_type(originalClaimType);
+            claimDAO.updateClaim(restoreVo);
+            System.out.println("[자동 배정] DB의 claim_type을 원본 '" + originalClaimType + "'로 복구");
+            
+        } catch (Exception e) {
+            System.err.println("[자동 배정 실패] 청구번호: " + claimVo.getClaim_no() + ", 오류: " + e.getMessage());
+            System.err.println("[알림] 청구 등록은 완료되었으나 자동 배정만 실패함. 수동 배정 필요.");
+            
+            try {
+                ClaimVo restoreVo = new ClaimVo();
+                restoreVo.setClaim_no(claimVo.getClaim_no());
+                restoreVo.setClaim_type(claimVo.getClaim_type());
+                claimDAO.updateClaim(restoreVo);
+                System.out.println("[자동 배정 실패] DB를 원본 타입으로 복구 완료");
+            } catch (Exception restoreEx) {
+                System.err.println("[자동 배정 실패] DB 복구 실패: " + restoreEx.getMessage());
+            }
+            
+        }
+    }
 
-	        }
-	    }
-	    
-
-	    return result;
+    return result;
 	}
-
+	private String convertEngToKoreanForAssignment(String engClaimType) {
+	    if (engClaimType == null) return "질병";
+	    
+	    switch (engClaimType) {
+	        case "death":
+	            return "사망";
+	        case "disability":
+	            return "장해";
+	        case "surgery":
+	            return "수술";
+	        case "disease":
+	            return "질병";
+	        case "injury":
+	            return "재해";  // 이제 "재해"로 변환되어 배정 규칙과 매칭됨
+	        case "other":
+	            return "질병";  // 기타는 질병으로 처리
+	        default:
+	            return "질병";  // 기본값
+	    }
+	}
 	/**
 	 * 청구를 갱신 처리 한다.
 	 *
@@ -350,6 +382,40 @@ public class ClaimServiceImpl implements ClaimService {
 	    List<ClaimFullJoinVo> list = claimDAO.selectUserClaimsByRrn(claimFullJoinVo);
 	    return list;
 	}
-
-
+	/**
+	 * OCR 분석 결과로 기존 청구건 업데이트
+	 * OCR 서비스가 이미 분석을 완료했으므로, 단순히 DB 업데이트만 수행
+	 * 
+	 * @param claimNo 청구번호
+	 * @param analyzedClaimTypeKor OCR 분석된 청구타입 (한글)
+	 * @param claimContent 청구내용
+	 * @throws Exception 
+	 */
+	@Override
+	@Transactional
+	public void updateClaimWithOcrResult(String claimNo, String analyzedClaimTypeKor, String claimContent) throws Exception {
+    try {
+        System.out.println("[OCR 결과 DB 업데이트] 청구번호: " + claimNo + ", 분석된 타입: " + analyzedClaimTypeKor);
+        
+        // 업데이트용 ClaimVo 생성
+        ClaimVo updateVo = new ClaimVo();
+        updateVo.setClaim_no(claimNo);
+        updateVo.setClaim_type(analyzedClaimTypeKor);
+        updateVo.setClaim_content(claimContent);
+        
+        // DB 업데이트 수행 (기존 updateClaim 메서드 활용)
+        int updateResult = claimDAO.updateClaim(updateVo);
+        
+        if (updateResult <= 0) {
+            throw new Exception("OCR 결과 DB 업데이트에 실패했습니다. 청구번호: " + claimNo);
+        }
+        
+        System.out.println("[OCR 결과 DB 업데이트 완료] 청구번호: " + claimNo + ", 최종 타입: " + analyzedClaimTypeKor);
+        
+    } catch (Exception e) {
+        System.err.println("[OCR 결과 DB 업데이트 실패] 청구번호: " + claimNo + ", 오류: " + e.getMessage());
+        e.printStackTrace();
+        throw e; // RuntimeException 대신 원본 Exception 전달
+    	}
+	}
 }

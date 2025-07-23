@@ -169,5 +169,14 @@ public interface ClaimService {
 	 */
 	public List<ClaimFullJoinVo> selectUserClaimsByRrn(ClaimFullJoinVo claimFullJoinVo) throws Exception;
 
+	/**
+	 * OCR 분석 결과로 기존 청구건 업데이트
+	 * 
+	 * @param claimNo 청구번호
+	 * @param analyzedClaimTypeKor OCR 분석된 청구타입 (한글)
+	 * @param claimContent 청구내용
+	 * @throws Exception
+	 */
+	public void updateClaimWithOcrResult(String claimNo, String analyzedClaimTypeKor, String claimContent) throws Exception;
 
 }
