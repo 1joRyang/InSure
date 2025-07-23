@@ -157,6 +157,7 @@ scwin.btn_edit_docs_onclick = function (e) {
 scwin.sbm_submitFinalClaim_submitdone = function (e) {
     alert("보험금 청구가 정상적으로 접수되었습니다.");
     $p.executeSubmission("sbm_ClaimSaveDone");
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
 };
 
 scwin.sbm_submitFinalClaim_submiterror = function (e) {
@@ -166,7 +167,6 @@ scwin.sbm_submitFinalClaim_submiterror = function (e) {
 
 scwin.sbm_ClaimSaveDone_submitdone = function (e) {
     console.log("후속처리",e);
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
     
     
 };
