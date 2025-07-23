@@ -26,7 +26,7 @@
     		</w2:dataCollection>
     		<w2:workflowCollection />
     		<xf:submission id="sbm_UserLogin" action="/InsWebApp/UserLogin.pwkjson" method="post" mediatype="application/json" ref='data:json,[{"id":"dma_login_request","key":"elData"},{"id":"dma_login_response","key":"elData"}]' target='' encoding="UTF-8"
-    			instance="" replace="" errorHandler="scwin.sbm_UserLogin_submiterror" customHandler="" mode="asynchronous" processMsg="false" ev:submit="" ev:submitdone="scwin.sbm_UserLogin_submitdone"
+    			instance="" replace="" errorHandler="scwin.sbm_UserLogin_submiterror" customHandler="" mode="asynchronous" processMsg="로그인 중.." ev:submit="" ev:submitdone="scwin.sbm_UserLogin_submitdone"
     			ev:submiterror="" abortTrigger="">
     		</xf:submission>
     	</xf:model>
@@ -123,29 +123,34 @@ scwin.ibx_userid_onkeydown = function (e) {
     	<w2:require as="udc_notification" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/notification.xml"></w2:require>
     </head>
     <body ev:onpageload="scwin.onpageload" class="body">
-    	<xf:group style="width: 100%;height: 100%;display: flex;justify-content: center;align-items:center;" id="" class="container">
-    		<xf:image src="/InsWebApp/images/ws5/logo/insureLogo.png" style="width:131px;height:50px;" id="" class="logo"></xf:image>
-    		<xf:group style="height: 200px;" id="" class="pin-wrapper">
-    			<w2:textbox style="" id="" label="간편하게 청구하고 더 빠르게 돌려받으세요." class="pin-wrapper textTitle"></w2:textbox>
-    			<w2:textbox style="" id="" label="최초 1회 등록 후 간편 비밀번호로 로그인하세요." class="pin-wrapper text"></w2:textbox>
+    	<xf:group
+    		style="width: 100%;height: 100%;display: flex;flex-direction: column;  align-items: center;            box-sizing: border-box;            overflow-y: auto;            background-color: white;"
+    		id="" class="sub_content">
+    		<xf:group
+    			style="width: 100%;  align-items: center;justify-content:center;display: flex;flex-direction: column;margin-top: 65px;" id="">
+    			<xf:image src="/InsWebApp/images/ws5/logo/insureLogo.png" style="width:131px;height:50px;" id="" class="logo"></xf:image>
+    			<xf:group style="height: 120px;" id="" class="pin-wrapper">
+    				<w2:textbox style="" id="" label="간편하게 청구하고 더 빠르게 돌려받으세요." class="pin-wrapper textTitle"></w2:textbox>
+    				<w2:textbox style="" id="" label="최초 1회 등록 후 간편 비밀번호로 로그인하세요." class="pin-wrapper text"></w2:textbox>
+    			</xf:group>
     		</xf:group>
-    		<xf:group meta_snippetCategory="00_화면시작" meta_snippetName="0_01 페이지시작" meta_snippetKeyComponent="true" style="" id=""
-    			class="input-group">
-    			<w2:textbox style="" id="" label="아이디" class="input-group input-label"></w2:textbox>
-    			<xf:input ref="data:dma_login_request.userId" style="" id="ibx_userid" class="input-group input-field" placeholder="아이디를 입력하세요" ev:onkeydown="scwin.ibx_userid_onkeydown"></xf:input>
+    		<xf:group style="width: 100%;align-items: center;justify-content:center;display: flex;flex-direction: column;" id="">
+    			<xf:group meta_snippetCategory="00_화면시작" meta_snippetName="0_01 페이지시작" meta_snippetKeyComponent="true" style="margin-bottom: 20px;" id=""
+    				class="input-group">
+    				<w2:textbox style="" id="" label="아이디" class="input-group input-label"></w2:textbox>
+    				<xf:input ref="data:dma_login_request.userId" ev:onkeydown="scwin.ibx_userid_onkeydown" style="" id="ibx_userid"
+    					placeholder="아이디를 입력하세요" class="input-group input-field">
+    				</xf:input>
+    			</xf:group>
+    			<xf:group meta_snippetCategory="00_화면시작" meta_snippetName="0_01 페이지시작" meta_snippetKeyComponent="true" style="" id=""
+    				class="input-group">
+    				<w2:textbox style="" id="" label="비밀번호" class="input-group input-label"></w2:textbox>
+    				<xf:secret ref="data:dma_login_request.pw" ev:onkeydown="scwin.ibx_userpw_onkeydown" style="" id="ibx_userpw"
+    					placeholder="비밀번호를 입력하세요" class="input-group input-field">
+    				</xf:secret>
+    			</xf:group>
+    			<w2:button ev:onclick="scwin.login_btn_onclick" style="" id="login_btn" label="로그인" class="sign-in-btn"></w2:button>
     		</xf:group>
-    		<xf:group class="input-group" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
-    			style="">
-    			<w2:textbox class="input-group input-label" id="" label="비밀번호" style=""></w2:textbox>
-    			<xf:secret class="input-group input-field" id="ibx_userpw" ref="data:dma_login_request.pw" style="" placeholder="비밀번호를 입력하세요" ev:onkeydown="scwin.ibx_userpw_onkeydown"></xf:secret>
-    		</xf:group>
-    		<xf:group style="" id="" class="checkbox-group">
-    			<xf:select selectedindex="-1" id="" appearance="full" style="" class="checkbox-group checkbox"></xf:select>
-    			<w2:textbox style="" id="" label="Remember me" class="checkbox-group checkbox-label"></w2:textbox>
-    		</xf:group>
-    		<w2:button ev:onclick="scwin.login_btn_onclick" style="" id="login_btn" label="로그인"
-    			class="sign-in-btn">
-    		</w2:button>
     	</xf:group>
     </body>
 </html>

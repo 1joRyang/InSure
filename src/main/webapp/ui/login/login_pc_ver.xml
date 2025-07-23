@@ -1,7 +1,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
         
     <head>
-                
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <w2:type>COMPONENT</w2:type>
                 
         <w2:buildDate/>
@@ -43,6 +43,7 @@
                 
         <w2:publicInfo method=""/>
                 
+        <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
         <script lazy="false" type="text/javascript"><![CDATA[scwin.onpageload = function() {
 	// 1. dma_login_request 데이터맵 초기화
     dma_login_request.set("empNo", "");
@@ -83,14 +84,20 @@ scwin.trigger1_login_onclick = function(e) {
 
     // 1. 아이디 입력값 검증
     if (actualEmpNo === "" || actualEmpNo === null) {
-        alert("아이디를 입력해주세요.");
+        scwin.toastAlert({
+            icon: 'warning',
+            title: '아이디를 입력해주세요.'
+        });
         ibx_empNo.focus();
         return;
     }
 
     // 2. 비밀번호 입력값 검증
     if (actualEmpPw === "" || actualEmpPw === null) {
-        alert("비밀번호를 입력해주세요.");
+        scwin.toastAlert({
+            icon: 'warning',
+            title: '비밀번호를 입력해주세요.'
+        });
         ibx_empPw.focus(); 
         return;
     }
@@ -136,13 +143,19 @@ scwin.sbm_EmployeeLogin_submitdone = function (e) {
             
         } else {
             // 로그인 실패 시 처리 - alert 추가
-            alert("아이디 또는 비밀번호를 확인해주세요.");
+            scwin.toastAlert({
+                icon: 'warning',
+                title: '아이디 또는 비밀번호를 확인해주세요.'
+            });
             dma_login_request.set("empPw", "");
             ibx_empPw.focus();
         }
     } catch (error) {
         console.error("로그인 결과 처리 중 오류가 발생했습니다:", error);
-        alert("로그인 결과를 처리하는 중 오류가 발생했습니다.");
+        scwin.toastAlert({
+            icon: 'error',
+            title: '로그인 결과를 처리하는 중 오류가 발생했습니다.'
+        });
     }
 };
 
@@ -151,7 +164,10 @@ scwin.sbm_EmployeeLogin_submitdone = function (e) {
  */
 scwin.sbm_EmployeeLogin_submiterror = function(e) {
     console.error("Employee 로그인 서브미션 에러:", e);
-    alert("아이디 또는 비밀번호를 확인해주세요.");
+    scwin.toastAlert({
+        icon: 'warning',
+        title: '아이디 또는 비밀번호를 확인해주세요.'
+    });
     dma_login_request.set("empPw", "");
     ibx_empPw.focus();
 };
@@ -218,7 +234,10 @@ function checkLoginPermission(requiredType) {
 function checkEmployeeAuth() {
     const currentLogin = getCurrentLoginType();
     if (currentLogin.type !== "EMPLOYEE") {
-        alert("Employee 권한이 필요합니다.");
+        scwin.noBtnAlertWithTimer({
+            title:'Employee 권한이 필요합니다.', 
+            icon:'warning'
+        })
         location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/login_pc_ver.xml";
         return false;
     }
@@ -348,7 +367,7 @@ function logout() {
         location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/insure_login_mobile.xml";
     }
 }]]></script>
-            
+
     </head>
         
     <body class="" ev:onpageload="scwin.onpageload">
@@ -396,29 +415,6 @@ function logout() {
     							</w2:anchor>
 
     						</xf:group>
-
-    						<xf:group class="grp_password" id="">
-    							<xf:select appearance="full" cols="" id="" ref="" rows="" selectedindex="-1" style="">
-
-    								<xf:choices>
-
-    									<xf:item>
-
-    										<xf:label><![CDATA[Remember me]]></xf:label>
-
-    										<xf:value />
-
-    									</xf:item>
-
-    								</xf:choices>
-
-    							</xf:select>
-    							<w2:anchor class="link_password" id="" outerDiv="false" style="">
-
-    								<xf:label><![CDATA[Forgot password?]]></xf:label>
-
-    							</w2:anchor>
-    						</xf:group>
     					</xf:group>
 
     				</xf:group>
@@ -430,18 +426,6 @@ function logout() {
     						<xf:label><![CDATA[Login]]></xf:label>
 
     					</xf:trigger>
-
-    				</xf:group>
-
-    				<xf:group class="login_account" id="" style="">
-
-    					<w2:textbox class="" id="" label="New user?" style="" />
-    					<w2:anchor class="link_account" id="" outerDiv="false" style="">
-
-    						<xf:label><![CDATA[Create an account]]></xf:label>
-
-    					</w2:anchor>
-
 
     				</xf:group>
 

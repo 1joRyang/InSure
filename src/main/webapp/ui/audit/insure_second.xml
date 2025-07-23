@@ -3,6 +3,7 @@
     xmlns:ev="http://www.w3.org/2001/xml-events"
     xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
     <head meta_templateCategory="02_Multi" meta_templateName="2_05 search_multigrid">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <w2:type>COMPONENT</w2:type>
         <w2:buildDate/>
         <w2:MSA/>
@@ -135,6 +136,7 @@
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
+        <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
     scwin.index = 0;
@@ -253,7 +255,7 @@ scwin.btn_next_onclick = function (e) {
         dm_claim.set("disease_code", hcode1);
         dm_claim.set("date_of_accident", hcode2Date);
     } else {
-        missingFields.push("청구내역 및 처리정보 (병명코드, 재해 일자는 필수 입력입니다.)");
+        missingFields.push("청구내역 및 처리정보 (병명코드, 재해 일자 필수)");
     }
     
     if (hcode2 !== "" ) {
@@ -272,13 +274,16 @@ scwin.btn_next_onclick = function (e) {
         }
         $c.sbm.execute(sbm_updateClaim);
     } else {
-        alert("다음 항목의 입력을 확인하세요\n" + missingFields.join(", "));
+        scwin.noBtnAlertWithTimer({
+            title:'다음 항목의 입력을 확인하세요', 
+            text: missingFields.join("<br>"), 
+            icon:'warning'
+        })
     }
 };
 
 scwin.btn_befo_onclick = function (e) {
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
-    //parent.WebSquare.util.getComponentById("web_container").setSrc("/InsWebApp/ui/audit/insure_first.xml");
 };
 
 scwin.btn_add_date_onclick = function (e) {
