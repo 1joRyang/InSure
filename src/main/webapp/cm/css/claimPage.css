@@ -155,9 +155,10 @@ html, body {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 50px);
     position:relative;
-    margin:0;
+	margin-top: 50px;
+
 }
 
 /* 헤더 - 청구유형 */
@@ -173,7 +174,7 @@ html, body {
 }
 
 .step_tit {
-    font-size: 18px; /* 청구유형 텍스트 크기 */
+    font-size: 15px; /* 청구유형 텍스트 크기 */
     font-weight: bold;
     color: #333;
 }
@@ -191,13 +192,13 @@ html, body {
 }
 
 .step li {
-    width: 28px; /* 단계 원의 너비 */
-    height: 28px; /* 단계 원의 높이 */
+    width: 25px; /* 단계 원의 너비 */
+    height: 25px; /* 단계 원의 높이 */
     border-radius: 50%; /* 완전한 원 */
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: bold;
     margin-left: 8px; /* 단계 원 사이 간격 */
     transition: all 0.2s ease-in-out; /* 부드러운 전환 효과 */

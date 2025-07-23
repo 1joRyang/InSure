@@ -274,6 +274,7 @@ scwin.btn_next_onclick = function (e) {
         }
         $c.sbm.execute(sbm_updateClaim);
     } else {
+        console.log(scwin)
         scwin.noBtnAlertWithTimer({
             title:'다음 항목의 입력을 확인하세요', 
             text: missingFields.join("<br>"), 
