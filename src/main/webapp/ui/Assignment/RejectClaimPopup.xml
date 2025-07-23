@@ -37,24 +37,45 @@ scwin.btn_submit_onclick = function (e) {
     // textarea 값 검증
     var approvalMemo = txa_supplement_memo.getValue();
     if (!approvalMemo || approvalMemo.trim() === "") {
+        scwin.toastAlert({
+            icon: 'warning',
+            title: '반려 사유를 입력해주세요.'
+        });
         txa_supplement_memo.focus();
         return false;
     }
-    
-    dma_approvalReq.set("approval_memo", approvalMemo);
-    $c.sbm.execute(sbm_rejectApprovalReq); // 변경된 submission 사용
+    scwin.twoBtnAlert({
+        title: '결재를 반려하시겠습니까?',
+        text: '반려 처리 후에는 취소할 수 없습니다.',
+        icon: 'question'
+    }, (result) => {
+        if (result.isConfirmed) {
+            dma_approvalReq.set("approval_memo", approvalMemo);
+            $c.sbm.execute(sbm_rejectApprovalReq); // 변경된 submission 사용
+        }
+    });
+
 };
 
 // 성공 콜백
 scwin.sbm_rejectApprovalReq_submitdone = function(e) {
-    alert("결재반려 처리가 완료되었습니다.");
     $p.closePopup();
-   location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
+    scwin.noBtnAlertWithTimer({
+        icon: 'success',
+        title: '결재반려 처리가 완료되었습니다.'
+    });
+    setTimeout(function() {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+    }, 2000);
 };
 
 // 에러 콜백
 scwin.sbm_rejectApprovalReq_submiterror = function(e) {
-    alert("결재반려 처리 중 오류가 발생했습니다.");
+    $p.closePopup();
+    scwin.toastAlert({
+        icon: 'error',
+        title: '결재반려 처리 중 오류가 발생했습니다.'
+    });
     console.log(e);
 };
 
@@ -63,6 +84,68 @@ scwin.btn_close_onclick = function(e) {
     $p.closePopup();
     return true;
 };
+const Toast = Swal.mixin({
+	    toast: true,
+	    showConfirmButton: false,
+	})
+
+scwin.toastAlertMobile = (param) => {
+	Toast.fire({
+		...param, 
+		timer: 2000,
+		position: 'center',
+		timerProgressBar: false,
+	});
+}
+	
+scwin.toastAlert = (param) => {
+	Toast.fire({
+		...param, 
+		timer: 3000,
+		position: 'top-end',
+		timerProgressBar: true,
+		didOpen: (toast) => {
+			        toast.addEventListener('mouseenter', Swal.stopTimer)
+			        toast.addEventListener('mouseleave', Swal.resumeTimer)
+			    }
+	});
+} 
+
+scwin.noBtnAlert = (param) => {
+	Swal.fire({
+		...param,
+		showConfirmButton: false,
+	});
+}
+
+scwin.noBtnAlertWithTimer = (param) => {
+	Swal.fire({
+		...param,
+		timer: 2000,
+		showConfirmButton: false,
+	});
+}
+
+/** 부르는 형태 예시
+scwin.twoBtnAlert({
+     title: "로그아웃 하시겠습니까?",
+ }, (result) => {
+     if (result.isConfirmed) {
+         $c.sbm.execute(sbm_EmployeeLogout);
+     }
+ });
+ */
+scwin.twoBtnAlert = (param, func) => {
+	Swal.fire({
+		...param,
+		showCancelButton: true,
+		confirmButtonColor: '#4FACFE',
+		cancelButtonColor: '#d1d1d1',
+		confirmButtonText: '완료',
+		cancelButtonText: '취소',
+		reverseButtons: true
+	}).then(func);
+}
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
