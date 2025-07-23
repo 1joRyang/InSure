@@ -2759,28 +2759,32 @@ scwin.btn_approve_complete_onclick = function () {
 					style="width: 500px; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);border: 1px solid #d9d9d9;">
 
 					<!-- 보험상품 그리드 - SQL 구조에 맞게 수정 -->
-					<w2:textbox class="section_title" id="" label="보험 상품별 지급 내역" style=""></w2:textbox>
-					<w2:gridView id="grd_insuranceProducts" style="height:180px;border: 1px solid #d9d9d9;" dataList="data:dlt_insuranceProducts" autoFit="allColumn"
-						readOnly="true" class="gvw" scrollByColumn="false" scrollByColumnAdaptive="false">
-						<w2:caption style="" id="caption2" value="보험 상품 목록"></w2:caption>
-						<w2:header style="" id="header2">
-							<w2:row style="" id="row3">
-								<w2:column width="100" inputType="text" id="column4" value="보험ID" displayMode="label"></w2:column>
-								<w2:column width="150" inputType="text" id="column5" value="보험상품명" displayMode="label"></w2:column>
-								<w2:column width="100" inputType="text" id="column6" value="가입자명" displayMode="label"></w2:column>
-								<w2:column width="100" inputType="text" id="column7" value="보험금액" displayMode="label"></w2:column>
-							</w2:row>
-						</w2:header>
-						<w2:gBody style="" id="gBody2">
-							<w2:row style="" id="row4">
-								<w2:column width="100" inputType="text" id="insu_id" displayMode="label"></w2:column>
-								<w2:column width="150" inputType="text" id="insu_name" displayMode="label"></w2:column>
-								<w2:column width="100" inputType="text" id="user_name" displayMode="label"></w2:column>
-								<w2:column width="100" inputType="text" id="insu_amt" displayMode="label" dataType="number" displayFormat="#,###">
-								</w2:column>
-							</w2:row>
-						</w2:gBody>
-					</w2:gridView>
+					<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
+						meta_snippetName="6_01 그리드" style="">
+						<w2:gridView id="grd_insuranceProducts" style="height:180px;border: 1px solid #d9d9d9;"
+							dataList="data:dlt_insuranceProducts" autoFit="allColumn" readOnly="true" class="gvw" scrollByColumn="false"
+							scrollByColumnAdaptive="false">
+							<w2:caption style="" id="caption2" value="보험 상품 목록"></w2:caption>
+							<w2:header style="" id="header2">
+								<w2:row style="" id="row3">
+									<w2:column width="100" inputType="text" id="column4" value="보험ID" displayMode="label"></w2:column>
+									<w2:column width="150" inputType="text" id="column5" value="보험상품명" displayMode="label"></w2:column>
+									<w2:column width="100" inputType="text" id="column6" value="가입자명" displayMode="label"></w2:column>
+									<w2:column width="100" inputType="text" id="column7" value="보험금액" displayMode="label"></w2:column>
+								</w2:row>
+							</w2:header>
+							<w2:gBody style="" id="gBody2">
+								<w2:row style="" id="row4">
+									<w2:column width="100" inputType="text" id="insu_id" displayMode="label"></w2:column>
+									<w2:column width="150" inputType="text" id="insu_name" displayMode="label"></w2:column>
+									<w2:column width="100" inputType="text" id="user_name" displayMode="label"></w2:column>
+									<w2:column width="100" inputType="text" id="insu_amt" displayMode="label" dataType="number" displayFormat="#,###">
+									</w2:column>
+								</w2:row>
+							</w2:gBody>
+						</w2:gridView>
+					</xf:group>
+
 
 
 					<w2:textbox class="section_title" id="" label="심사 메모"></w2:textbox>
@@ -2814,21 +2818,21 @@ scwin.btn_approve_complete_onclick = function () {
 						</xf:group>
 
 						<xf:group class="button_group" id="">
-							<xf:trigger style="width:100%;padding:16px;font-size:16px;" id="btn_reject" type="button"
-								class="btn_secondary" ev:onclick="scwin.btn_reject_onclick">
+							<xf:trigger style="width:100%;padding:16px;font-size:16px;" id="btn_reject" type="button" class="btn_secondary"
+								ev:onclick="scwin.btn_reject_onclick">
 								<xf:label>결재 반려</xf:label>
 							</xf:trigger>
 							<xf:trigger class="btn_secondary" id="btn_approval" type="button" style="" ev:onclick="scwin.btn_approval_onclick">
 								<xf:label>결재신청</xf:label>
 							</xf:trigger>
 							<xf:trigger ev:onclick="scwin.btn_complete_onclick" style="width:100%;padding:16px;font-size:16px;" id="btn_complete"
-							type="button" class="btn_primary">
-							<xf:label>최종 심사 완료</xf:label>
+								type="button" class="btn_primary">
+								<xf:label>최종 심사 완료</xf:label>
 							</xf:trigger>
-						<xf:trigger ev:onclick="scwin.btn_approve_complete_onclick" style="width:100%;padding:16px;font-size:16px;background-color:#28a745;" id="btn_approve_complete"
-							type="button" class="btn_primary">
-							<xf:label>결재 완료</xf:label>
-						</xf:trigger>
+							<xf:trigger ev:onclick="scwin.btn_approve_complete_onclick"
+								style="width:100%;padding:16px;font-size:16px;background-color:#28a745;" id="btn_approve_complete" type="button" class="btn_primary">
+								<xf:label>결재 완료</xf:label>
+							</xf:trigger>
 
 						</xf:group>
 					</xf:group>
