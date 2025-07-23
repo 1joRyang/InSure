@@ -110,10 +110,10 @@ scwin.createClaimCard = function(container, claimData, index) {
     cardGroup.bind("onclick", function() {
         localStorage.setItem("userClaim", JSON.stringify(claimData));
         if (claimData.status === "보완") {
-            // todo: 보완 링크
-            // location.href = "";
-        } else {
+            // todo: 링크 바꾸기
             location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claim/claim-detail.xml";
+        } else {
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/suppDocs.xml";
         }
         
     });

@@ -5,6 +5,7 @@
     xmlns:w2="http://www.inswave.com/websquare"
     xmlns:xf="http://www.w3.org/2002/xforms">
     <head>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     	<w2:type>DEFAULT</w2:type>
     	<w2:buildDate />
     	<xf:model>
@@ -88,12 +89,13 @@
     	<w2:css src="/css/custom.css"></w2:css>
     	<w2:js src="/js/final_check.js"></w2:js>
     	<w2:engine-version>5.0.0</w2:engine-version>
+        <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
         <script lazy="false" type="text/javascript"><![CDATA[scwin.uploadQueue = [];
 scwin.uploadedFileKeys = [];
 scwin.currentFileForUpload = null;
 
 scwin.onpageload = function() {
-    const claimJson = localStorage.getItem("claim");
+    const claimJson = localStorage.getItem("userClaim");
     console.log("1. 로컬 스토리지에서 가져온 claim 데이터: ", claimJson);
 
     if(claimJson) {
@@ -238,7 +240,10 @@ scwin.btnNext_onclick = function () {
     const previewBox = document.querySelector('[id$="previewBox"]');
     const images = previewBox.querySelectorAll('img');
     if (images.length === 0) {
-        alert("보완 서류를 등록해주세요.");
+        scwin.toastAlertMobile({
+            icon: 'warning',
+            title: '보완 서류를 등록해주세요.'
+        });
         return;
     }
     scwin.uploadQueue = [];
@@ -273,7 +278,10 @@ scwin.sbm_getS3Url_submitdone = function (e) {
     console.log("서버로부터 받은 objectKey:", presignedUrl);
 
     if (!presignedUrl) {
-        alert("파일 업로드 URL을 받아오지 못했습니다.");
+        scwin.toastAlertMobile({
+            icon: 'error',
+            title: '파일 업로드 URL을 받아오지 못했습니다.'
+        });
         return;
     }
 
@@ -298,12 +306,18 @@ scwin.sbm_getS3Url_submitdone = function (e) {
         })
         .catch(error => {
             console.error(error);
-            alert("파일 업로드 중 오류가 발생했습니다.");
+            scwin.toastAlertMobile({
+                icon: 'error',
+                title: '파일 업로드 중 오류가 발생했습니다.'
+            });
         });
 };
 
 scwin.sbm_addSupplementDocs_submitdone = function (e) {
-    alert("보완 서류가 정상적으로 제출되었습니다.");
+    scwin.toastAlertMobile({
+        icon: 'success',
+        title: '보완 서류가 정상적으로 제출되었습니다.'
+    });
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
 };
 
@@ -319,7 +333,7 @@ scwin.saveFileKeysToServer = function() {
     $p.executeSubmission("sbm_addSupplementDocs");
 }
 ]]></script>
-    	<style type="text/css"><![CDATA[/* custom.css */
+        <style type="text/css"><![CDATA[/* custom.css */
 
 /*
   ======================================
