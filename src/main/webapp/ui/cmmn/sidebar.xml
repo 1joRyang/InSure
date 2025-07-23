@@ -15,8 +15,20 @@
         <w2:publicInfo method=""/>
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
-	dashboard.addClass("selected");
+    let now = localStorage.getItem("nowSelect");
     scwin.role = JSON.parse(localStorage.getItem("employee")).role;
+
+    if (now == "myClaim") {
+        scwin.my_claim_onclick();
+    } else if (now == "searchClaim") {
+        scwin.search_claimNum_onclick();
+    } else if (now == "searchPerson") {
+        scwin.search_personNum_onclick();
+    } else if (now == "goAssign" && scwin.role === "관리자") {
+        scwin.go_assignRule_onclick();
+    } else { 
+        scwin.dashboard_onclick();
+    }
 
     if (scwin.role === "실무자") {
         go_assignRule.hide();
@@ -30,14 +42,15 @@ function removeSClass() {
     }
 }
 
-function movePage(link) {
+function movePage(link, now) {
     parent.WebSquare.util.getComponentById("web_container").setSrc(link);
+    localStorage.setItem("nowSelect", now);
 }
 
 scwin.dashboard_onclick = function () {
     removeSClass();
     dashboard.addClass("selected");
-    movePage("/InsWebApp/ui/dashBoard/dashBoard7.xml");
+    movePage("/InsWebApp/ui/dashBoard/dashBoard7.xml", "dash");
 };
 
 scwin.my_claim_onclick = function () {
@@ -45,28 +58,28 @@ scwin.my_claim_onclick = function () {
     my_claim.addClass("selected");
     
     if (scwin.role === "실무자") {
-        movePage("/InsWebApp/ui/claim/my-claims.xml");
+        movePage("/InsWebApp/ui/claim/my-claims.xml", "myClaim");
     } else {
-        movePage("/InsWebApp/ui/approval/my-approval.xml")
+        movePage("/InsWebApp/ui/approval/my-approval.xml", "myClaim");
     }
 };
 
 scwin.search_claimNum_onclick = function () {
     removeSClass();
     search_claimNum.addClass("selected");
-        movePage("/InsWebApp/ui/Assignment/claimListSearch.xml");
+    movePage("/InsWebApp/ui/Assignment/claimListSearch.xml", "searchClaim");
 };
 
 scwin.search_personNum_onclick = function () {
     removeSClass();
     search_personNum.addClass("selected");
-    movePage("/InsWebApp/ui/employee/SearchRrn.xml");
+    movePage("/InsWebApp/ui/employee/SearchRrn.xml", "searchPerson");
 };
 
 scwin.go_assignRule_onclick = function () {
     removeSClass();
     go_assignRule.addClass("selected");
-    movePage("/InsWebApp/ui/Assignment/assignment.xml");
+    movePage("/InsWebApp/ui/Assignment/assignment.xml", "goAssign");
 };
 ]]></script>
     </head>
