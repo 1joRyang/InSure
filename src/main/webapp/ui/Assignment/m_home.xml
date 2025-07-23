@@ -293,7 +293,6 @@ scwin.suppDocs_onclick = function (e) {
 ]]></style>
     </head>
     <body ev:onpageload="scwin.onpageload">
-        <w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/m_header.xml"></w2:wframe>
         <xf:group class="pageWrapper" id="pageWrapper">
             <!-- 헤더 -->
 
@@ -355,8 +354,6 @@ scwin.suppDocs_onclick = function (e) {
                 </xf:group>
             </xf:group>
             
-            <!-- 하단 네비게이션 -->
-            <w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/m_footer.xml"></w2:wframe>
         </xf:group>
     </body>
 </html>
