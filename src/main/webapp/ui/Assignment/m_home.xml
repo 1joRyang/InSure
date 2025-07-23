@@ -293,12 +293,12 @@ scwin.suppDocs_onclick = function (e) {
 ]]></style>
     </head>
     <body ev:onpageload="scwin.onpageload">
-        <xf:group class="pageWrapper" id="pageWrapper">
+        <xf:group class="sub_content pageWrapper" id="pageWrapper" style="height: 100%;">
             <!-- 헤더 -->
 
             
             <!-- 메인 콘텐츠 래퍼 -->
-            <xf:group id="mainContentWrapper" style="background-color: white;">
+            <xf:group id="mainContentWrapper" style="background-color: white;height: 100%;">
                 <!-- 내선번호 현황 섹션 -->
                 <xf:group class="internal_num_section" style="margin-left: 20px;margin-right: 20px;margin-bottom: 20px;margin-top: 10px">
                     <xf:group class="section_title">
