@@ -396,29 +396,6 @@ function logout() {
     							</w2:anchor>
 
     						</xf:group>
-
-    						<xf:group class="grp_password" id="">
-    							<xf:select appearance="full" cols="" id="" ref="" rows="" selectedindex="-1" style="">
-
-    								<xf:choices>
-
-    									<xf:item>
-
-    										<xf:label><![CDATA[Remember me]]></xf:label>
-
-    										<xf:value />
-
-    									</xf:item>
-
-    								</xf:choices>
-
-    							</xf:select>
-    							<w2:anchor class="link_password" id="" outerDiv="false" style="">
-
-    								<xf:label><![CDATA[Forgot password?]]></xf:label>
-
-    							</w2:anchor>
-    						</xf:group>
     					</xf:group>
 
     				</xf:group>
@@ -430,18 +407,6 @@ function logout() {
     						<xf:label><![CDATA[Login]]></xf:label>
 
     					</xf:trigger>
-
-    				</xf:group>
-
-    				<xf:group class="login_account" id="" style="">
-
-    					<w2:textbox class="" id="" label="New user?" style="" />
-    					<w2:anchor class="link_account" id="" outerDiv="false" style="">
-
-    						<xf:label><![CDATA[Create an account]]></xf:label>
-
-    					</w2:anchor>
-
 
     				</xf:group>
 
