@@ -52,6 +52,9 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "id", physicalName = "id", type = "int", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private int id;
 
+    @ElDtoField(logicalName = "emp_no", physicalName = "emp_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String emp_no;
+
     @ElVoField(physicalName = "claim_no")
     public String getClaim_no(){
         String ret = this.claim_no;
@@ -194,6 +197,17 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.id = id;
     }
 
+    @ElVoField(physicalName = "emp_no")
+    public String getEmp_no(){
+        String ret = this.emp_no;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "emp_no")
+    public void setEmp_no(String emp_no){
+        this.emp_no = emp_no;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -210,7 +224,8 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("SC_user_name").append("=").append(SC_user_name).append(",");
         sb.append("SC_search_text").append("=").append(SC_search_text).append(",");
         sb.append("rrn").append("=").append(rrn).append(",");
-        sb.append("id").append("=").append(id);
+        sb.append("id").append("=").append(id).append(",");
+        sb.append("emp_no").append("=").append(emp_no);
         sb.append("]");
         return sb.toString();
 
