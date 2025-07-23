@@ -21,8 +21,14 @@ import com.inswave.elfw.exception.ElException;
 @Repository("batchDAO")
 public class BatchDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstractDAO {
 	
+	/*월별 승인율 추이*/
 	public int updateMonthlyApprovalRate() throws ElException {
         return update("com.demo.proworks.batch.updateMonthlyApprovalRate", null);
+    }
+    
+    /*평균 처리 시간*/
+    public int updateDailyProcessingTime() throws ElException {
+        return update("com.demo.proworks.batch.updateDailyProcessingTime", null);
     }
 	
 

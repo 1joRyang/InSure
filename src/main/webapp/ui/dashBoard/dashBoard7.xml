@@ -60,8 +60,8 @@
         		<w2:dataList baseNode="list" repeatNode="map" id="dl_weeklyTrend" saveRemovedData="true">
         			<w2:columnInfo>
         				<w2:column dataType="text" name="요일" id="reportDate"></w2:column>
-        				<w2:column dataType="number" name="결재 건" id="approvalCount"></w2:column>
-        				<w2:column dataType="number" name="단순 지급" id="simplePayCount"></w2:column>
+        				<w2:column dataType="text" name="결재 건" id="approvalCount"></w2:column>
+        				<w2:column dataType="text" name="단순 지급" id="simplePayCount"></w2:column>
         			</w2:columnInfo>
         		</w2:dataList>
         		<w2:dataList baseNode="list" repeatNode="map" id="dlt_claimTypeChart" saveRemovedData="true">
@@ -87,6 +87,18 @@
         				<w2:key dataType="number" name="장기처리건수" id="outlierCount"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dlt_weekly_approval" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="요일" id="label"></w2:column>
+        				<w2:column dataType="text" name="건수" id="value"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dlt_weekly_simplePay" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="요일" id="label"></w2:column>
+        				<w2:column dataType="text" name="건수" id="value"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
         	</w2:dataCollection>
         	<w2:workflowCollection />
         	<xf:submission id="sbm_getTodayStatus" action="/InsWebApp/selectTodayStatusCounts.pwkjson" method="post"
@@ -276,56 +288,33 @@ let itemId = "task_item_" + index;
 };
 
 scwin.sbm_getWeeklyTrend_submitdone = function (e) {
-   scwin.renderChartWithEngine();
+   // 1. 서버 응답에서 데이터 배열 추출
+    var chartDataFromServer = e.responseJSON.weeklyTrendList;
+
+    // 2. dataList에 수동으로 데이터 설정
+    dl_weeklyTrend.setJSON(chartDataFromServer);
+
+    // 3. 차트 스타일 속성 설정
+    var chartAttrs = {
+        "theme": "fusion",
+        "baseFont": "Noto Sans KR, sans-serif",
+        "palettecolors": "#5D68E5,#57B96E",
+        "lineThickness": "2",
+        "drawAnchors": "1",
+        "anchorRadius": "4",
+        "showLegend": "1",
+        "legendPosition": "top-right",
+        "plottooltext": "$seriesName: $value건",
+        "showBorder": "0",
+        "bgAlpha": "0"
+    };
+    chart_weeklyTrend.setChartAttribute(chartAttrs);
+
+    // 4. 차트 그리기
+    chart_weeklyTrend.draw();
 };
 
-scwin.renderChartWithEngine = function() {
-    try {
-        // 1. 데이터 변환 (이전과 동일)
-        var wqData = dl_weeklyTrend.getAllJSON();
-        var categories = [];
-        var approvalData = [];
-        var simplePayData = [];
 
-        for (var i = 0; i < wqData.length; i++) {
-            categories.push({ "label": wqData[i].reportDate });
-            approvalData.push({ "value": wqData[i].approvalCount });
-            simplePayData.push({ "value": wqData[i].simplePayCount });
-        }
-
-        // 2. FusionCharts에 전달할 최종 데이터 소스 조립 (이전과 동일)
-        var dataSource = {
-            "chart": {
-                "theme": "fusion",
-                "palettecolors": "#5D68E5,#57B96E",
-                "plotFillAlpha": "10",
-                "lineThickness": "2",
-                "drawAnchors": "1",
-                "anchorRadius": "4",
-                "showLegend": "1",
-                "legendPosition": "top-right",
-                "plottooltext": "$seriesName: $value건",
-                "baseFont": "Noto Sans KR, sans-serif"
-            },
-            "categories": [{ "category": categories }],
-            "dataset": [
-                { "seriesname": "결재 건", "data": approvalData },
-                { "seriesname": "단순 지급", "data": simplePayData }
-            ]
-        };
-
-        // 3. ✨✨✨ 핵심 변경 사항 ✨✨✨
-        // WebSquare 컴포넌트에서 .fc()를 호출하여 FusionCharts 엔진 객체를 얻습니다.
-        var fusionChartEngine = chart_weeklyTrend.fc();
-
-        // 4. 엔진의 네이티브 함수인 setJSONData()를 사용해 데이터를 주입합니다.
-        //    이렇게 하면 차트가 데이터를 받고 스스로를 다시 그립니다.
-        fusionChartEngine.setJSONData(dataSource);
-
-    } catch (error) {
-        console.error("차트 엔진 제어 중 오류 발생:", error);
-    }
-};
 /*
 scwin.initWeeklyChart = function() {
     var chartAttrs = {
@@ -404,7 +393,7 @@ scwin.sbm_getMonthlyApprovalRate_submitdone = function (e) {
     var chartAttrs = {
         "theme": "fusion",
         "baseFont": "Noto Sans KR, sans-serif",
-        "plotFillColor": "#578FCA", // 막대 색상
+        "palettecolors": "#578FCA",
 
         // Y축(세로축) 설정
         "yAxisMinValue": "0",     // Y축 최소값
@@ -429,6 +418,7 @@ scwin.sbm_getMonthlyApprovalRate_submitdone = function (e) {
     chartAttrs.chartRightMargin = "20";
 
     chart_monthlyRate.setChartAttribute(chartAttrs);
+    chart_monthlyRate.setPlotColor(["#578FCA"]);
 
     // 차트 그리기
     chart_monthlyRate.draw();
@@ -646,7 +636,16 @@ scwin.sbm_getOutlierCount_submitdone = function (e) {
                 <xf:group class="flex_row" id="grp_mid_charts">
                     <xf:group class="panel">
                     	<w2:textbox class="panel_title" label="주간 처리 현황 추이" tagname="h3"></w2:textbox>
-                    	<w2:fwSparkChart id="chart_weeklyTrend" seriesType="simple" chartType="sparkline" style="width: 100%; height: 250px;"></w2:fwSparkChart>
+                    	<w2:fusionchart
+                            id="chart_weeklyTrend"
+                            chartType="msline"
+                            ref="data:dl_weeklyTrend"
+                            labelNode="reportDate"
+                            seriesColumns="[['approvalCount','simplePayCount']]"
+                            style="width: 100%; height: 250px;"
+                            drawType="javascript">
+                        </w2:fusionchart>
+                        
                     </xf:group>
                     <xf:group class="panel"><w2:textbox class="panel_title" label="청구 유형별 분포" tagname="h3"></w2:textbox>
                         <w2:fusionchart id="chart_claimType" chartType="Doughnut2D" ref="data:dlt_claimTypeChart"

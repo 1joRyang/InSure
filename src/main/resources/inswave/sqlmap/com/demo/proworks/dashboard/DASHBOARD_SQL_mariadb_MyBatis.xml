@@ -258,7 +258,7 @@
 	
 	
 	<select id="selectProcessingTimeTrend" resultType="com.demo.proworks.dashboard.vo.ProcessingTimeVo">
-	    /* QueryID : com.demo.proworks.dashboard.selectProcessingTimeTrend (최종 수정) */
+	    /* QueryID : com.demo.proworks.dashboard.selectProcessingTimeTrend (배치 통계 테이블 조회) */
 	    <![CDATA[
 	    WITH RECURSIVE DateRange AS (
 	        SELECT CURDATE() - INTERVAL 1 DAY AS `Date`
@@ -273,17 +273,11 @@
 	    )
 	    SELECT
 	        DATE_FORMAT(b.Date, '%m/%d') AS label,
-	        IFNULL(AVG(DATEDIFF(cr.date, c.receipt_date)), 0) AS value
+	        IFNULL(d.AVG_PROCESSING_TIME, 0) AS value
 	    FROM
 	        BusinessDays b
 	    LEFT JOIN
-	        CLAIM_RESULT cr ON cr.date = b.Date
-	    LEFT JOIN
-	        CLAIM c ON cr.claim_no = c.claim_no
-	        -- JOIN 조건에 이상치 필터링을 직접 포함
-	        AND DATEDIFF(cr.date, c.receipt_date) BETWEEN 0 AND 15
-	    GROUP BY
-	        b.Date
+	        DASHBOARD_DAILY_TIME d ON b.Date = d.STAT_DATE
 	    ORDER BY
 	        b.Date ASC
 	    ]]>
@@ -291,7 +285,7 @@
 	
 	
 	<select id="selectProcessingTimeOutlierCount" resultType="int">
-	    /* QueryID : com.demo.proworks.dashboard.selectProcessingTimeOutlierCount (최종 수정) */
+	    /* QueryID : com.demo.proworks.dashboard.selectProcessingTimeOutlierCount (배치 통계 테이블 조회) */
 	    <![CDATA[
 	    WITH RECURSIVE DateRange AS (
 	        SELECT CURDATE() - INTERVAL 1 DAY AS `Date`
@@ -305,15 +299,11 @@
 	        LIMIT 7
 	    )
 	    SELECT
-	        COUNT(cr.claim_no)
+	        IFNULL(SUM(d.OUTLIER_COUNT), 0)
 	    FROM
-	        CLAIM_RESULT cr
-	    JOIN
-	        CLAIM c ON cr.claim_no = c.claim_no
-	    WHERE
-	        cr.date IN (SELECT `Date` FROM BusinessDays)
-	        -- DATEDIFF의 기준을 3일 초과로 명확히 수정
-	        AND DATEDIFF(cr.date, c.receipt_date) > 3
+	        BusinessDays b
+	    LEFT JOIN
+	        DASHBOARD_DAILY_TIME d ON b.Date = d.STAT_DATE
 	    ]]>
 	</select>
 	

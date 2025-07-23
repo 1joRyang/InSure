@@ -16,11 +16,11 @@ public class WeeklyTrendVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "reportDate", physicalName = "reportDate", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String reportDate;
 
-    @ElDtoField(logicalName = "approvalCount", physicalName = "approvalCount", type = "int", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
-    private int approvalCount;
+    @ElDtoField(logicalName = "approvalCount", physicalName = "approvalCount", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String approvalCount;
 
-    @ElDtoField(logicalName = "simplePayCount", physicalName = "simplePayCount", type = "int", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
-    private int simplePayCount;
+    @ElDtoField(logicalName = "simplePayCount", physicalName = "simplePayCount", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String simplePayCount;
 
     @ElVoField(physicalName = "reportDate")
     public String getReportDate(){
@@ -34,22 +34,24 @@ public class WeeklyTrendVo extends com.demo.proworks.cmmn.ProworksCommVO {
     }
 
     @ElVoField(physicalName = "approvalCount")
-    public int getApprovalCount(){
-        return approvalCount;
+    public String getApprovalCount(){
+        String ret = this.approvalCount;
+        return ret;
     }
 
     @ElVoField(physicalName = "approvalCount")
-    public void setApprovalCount(int approvalCount){
+    public void setApprovalCount(String approvalCount){
         this.approvalCount = approvalCount;
     }
 
     @ElVoField(physicalName = "simplePayCount")
-    public int getSimplePayCount(){
-        return simplePayCount;
+    public String getSimplePayCount(){
+        String ret = this.simplePayCount;
+        return ret;
     }
 
     @ElVoField(physicalName = "simplePayCount")
-    public void setSimplePayCount(int simplePayCount){
+    public void setSimplePayCount(String simplePayCount){
         this.simplePayCount = simplePayCount;
     }
 

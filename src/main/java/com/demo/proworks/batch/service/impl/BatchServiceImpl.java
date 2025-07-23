@@ -20,6 +20,7 @@ public class BatchServiceImpl implements BatchService {
 	    @Scheduled(cron = "0 0 2 * * *")
 	    @Override
 	    public void executeMonthlyRateBatch() {
+	    
 	        System.out.println("====== [배치 시작] 월별 승인율 집계 ======");
 	        try {
 	            int updatedRows = batchDAO.updateMonthlyApprovalRate();
@@ -28,5 +29,18 @@ public class BatchServiceImpl implements BatchService {
 	            e.printStackTrace();
 	            System.out.println("====== [배치 오류] 월별 승인율 집계 실패 ======");
 	        }
+	        
+	        
+	        // --- 신규 일별 처리 시간 집계 추가 ---
+	        System.out.println("====== [배치 시작] 일별 처리 시간 집계 ======");
+	        try {
+	            int updatedRows = batchDAO.updateDailyProcessingTime();
+	            System.out.println("====== [배치 종료] 업데이트 된 일: " + updatedRows + "건 ======");
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            System.out.println("====== [배치 오류] 일별 처리 시간 집계 실패 ======");
+	        }
 	    }
+	    
+	    
 }

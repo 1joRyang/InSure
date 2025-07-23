@@ -40,4 +40,36 @@
 	        UPDATED_AT = VALUES(UPDATED_AT);
 	    ]]>
 	</update>
+	
+	<update id="updateDailyProcessingTime">
+	    /* QueryID : com.demo.proworks.batch.updateDailyProcessingTime (일별 처리 시간 통계 - 최종) */
+	    <![CDATA[
+	    INSERT INTO DASHBOARD_DAILY_TIME (STAT_DATE, AVG_PROCESSING_TIME, OUTLIER_COUNT, UPDATED_AT)
+	    WITH YesterdayClaims AS (
+	        -- 어제 완료된 모든 건의 처리 시간을 '시간' 단위로 계산
+	        SELECT
+	            TIMESTAMPDIFF(HOUR, c.receipt_date, CAST(CONCAT(cr.date, ' 23:59:59') AS DATETIME)) AS processing_hours
+	        FROM
+	            CLAIM_RESULT cr
+	        JOIN
+	            CLAIM c ON cr.claim_no = c.claim_no
+	        WHERE
+	            cr.date = CURDATE() - INTERVAL 1 DAY
+	            AND c.receipt_date <= CAST(CONCAT(cr.date, ' 23:59:59') AS DATETIME)
+	    )
+	    SELECT
+	        CURDATE() - INTERVAL 1 DAY AS STAT_DATE,
+	        -- 3일(72시간) 이내 처리된 건들의 평균 처리 시간
+	        IFNULL(AVG(CASE WHEN processing_hours <= 72 THEN processing_hours END), 0) AS AVG_PROCESSING_TIME,
+	        -- 3일(72시간)을 초과한 장기 처리 건수
+	        COUNT(CASE WHEN processing_hours > 72 THEN 1 END) AS OUTLIER_COUNT,
+	        NOW() AS UPDATED_AT
+	    FROM
+	        YesterdayClaims
+	    ON DUPLICATE KEY UPDATE
+	        AVG_PROCESSING_TIME = VALUES(AVG_PROCESSING_TIME),
+	        OUTLIER_COUNT = VALUES(OUTLIER_COUNT),
+	        UPDATED_AT = VALUES(UPDATED_AT);
+	    ]]>
+	</update>
 </mapper>
