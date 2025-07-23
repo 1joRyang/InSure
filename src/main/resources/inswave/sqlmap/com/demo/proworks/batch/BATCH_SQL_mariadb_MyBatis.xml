@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject : 대시보드 배치 처리를 담당하는 Sql Mapper
+	@description : 대시보드 배치 처리를 담당하는 Sql Mapper
+	@author : Inswave
+	@since : 2025/07/01
+	@modification
+	===========================================================
+	DATE AUTHOR DESC
+	===========================================================
+	2025/07/01 Inswave 최초 생성
+-->
+<mapper namespace="com.demo.proworks.batch">
+	<update id="updateMonthlyApprovalRate">
+	    /* QueryID : com.demo.proworks.batch.updateMonthlyApprovalRate (월별 승인율 일일 집계) */
+	    <![CDATA[
+	    INSERT INTO DASHBOARD_MONTHLY_RATE (STAT_YEAR, STAT_MONTH, APPROVAL_RATE, UPDATED_AT)
+	    SELECT
+	        YEAR(CURDATE()) AS STAT_YEAR,
+	        m.month AS STAT_MONTH,
+	        /* 분모가 0일 경우를 대비하여 NULLIF 함수 추가 */
+	        IFNULL(ROUND((SUM(CASE WHEN c.status = '완료' THEN 1 ELSE 0 END) / NULLIF(COUNT(c.claim_no), 0)) * 100, 1), 0) AS APPROVAL_RATE,
+	        NOW() AS UPDATED_AT
+	    FROM
+	        (SELECT 1 AS month UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL
+	         SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL
+	         SELECT 9 UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12) AS m
+	    LEFT JOIN
+	        CLAIM c ON m.month = MONTH(c.receipt_date)
+	               AND YEAR(c.receipt_date) = YEAR(CURDATE())
+	               AND c.receipt_date < CURDATE()
+	    GROUP BY
+	        m.month
+	    ON DUPLICATE KEY UPDATE
+	        APPROVAL_RATE = VALUES(APPROVAL_RATE),
+	        UPDATED_AT = VALUES(UPDATED_AT);
+	    ]]>
+	</update>
+</mapper>

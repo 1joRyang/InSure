@@ -40,7 +40,7 @@
         				<w2:key dataType="text" name="전일처리건수" id="yesterdayProcessedCount"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
-        		<w2:dataMap baseNode="map" id="dma_approvalRate">
+        		<w2:dataMap baseNode="map" id="dma_paymentRate">
         			<w2:keyInfo>
         				<w2:key dataType="text" name="승인률" id="approvalRate"></w2:key>
         			</w2:keyInfo>
@@ -70,6 +70,23 @@
         				<w2:column dataType="number" name="값" id="value"></w2:column>
         			</w2:columnInfo>
         		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dlt_monthlyApprovalRateChart" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="월" id="label"></w2:column>
+        				<w2:column dataType="number" name="승인율" id="value"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dlt_processingTimeChart" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="날짜" id="label"></w2:column>
+        				<w2:column dataType="number" name="평균처리시간" id="value"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dmp_outlierInfo">
+        			<w2:keyInfo>
+        				<w2:key dataType="number" name="장기처리건수" id="outlierCount"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
         	<xf:submission id="sbm_getTodayStatus" action="/InsWebApp/selectTodayStatusCounts.pwkjson" method="post"
@@ -99,10 +116,10 @@
         		target='data:json,{"id":"dma_dailyCount","key":"dailyCountVo"}' encoding="UTF-8" instance="" replace="" errorHandler=""
         		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_getApprovalRate" action="/InsWebApp/selectApprovalRate.pwkjson" method="post"
-        		mediatype="application/json" ref='data:json,{"id":"dma_approvalRate","key":"approvalRateVo"}'
-        		target='data:json,{"id":"dma_approvalRate","key":"approvalRateVo"}' encoding="UTF-8" instance="" replace="" errorHandler=""
-        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	<xf:submission id="sbm_getPaymentRate" action="/InsWebApp/selectPaymentRate.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,{"id":"dma_paymentRate","key":"PaymentVo"}' target='data:json,{"id":"dma_paymentRate","key":"PaymentVo"}'
+        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getUrgentClaims" action="/InsWebApp/selectUrgentClaims.pwkjson" method="post"
         		mediatype="application/json" ref="" target='data:json,{"id":"dlt_urgentClaims","key":"dlt_urgentClaims"}' encoding="UTF-8"
@@ -115,9 +132,24 @@
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getClaimType" action="/InsWebApp/selectClaimTypeDistribution.pwkjson" method="post"
-        		mediatype="application/json" ref="" target='' encoding="UTF-8"
-        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
-        		ev:submitdone="scwin.sbm_getClaimType_submitdone" ev:submiterror="" abortTrigger="">
+        		mediatype="application/json" ref="" target='' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+        		mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getClaimType_submitdone" ev:submiterror=""
+        		abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getMonthlyApprovalRate" action="/InsWebApp/selectMonthlyApprovalRate.pwkjson" method="post"
+        		mediatype="application/json" ref="" target='data:json,{"id":"dlt_monthlyApprovalRateChart","key":"monthlyRateData"}'
+        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getMonthlyApprovalRate_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getProcessingTimeTrend" action="/InsWebApp/selectProcessingTimeTrend.pwkjson" method="post"
+        		mediatype="application/json" ref="" target='data:json,{"id":"dlt_processingTimeChart","key":"processingTimeData"}'
+        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getProcessingTimeTrend_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getOutlierCount" action="/InsWebApp/selectProcessingTimeOutlierCount.pwkjson" method="post"
+        		mediatype="application/json" ref="data:json,dmp_outlierInfo" target='data:json,{"id":"dmp_outlierInfo","key":"outlierCountData"}'
+        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getOutlierCount_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -129,10 +161,13 @@ scwin.onpageload = function() {
     $p.executeSubmission("sbm_getClaimMonitor");
     $p.executeSubmission("sbm_getMonthlyPerf");
     $p.executeSubmission("sbm_getYesterdayCount");
-    $p.executeSubmission("sbm_getApprovalRate");
+    $p.executeSubmission("sbm_getPaymentRate");
     $p.executeSubmission("sbm_getUrgentClaims");
     $p.executeSubmission("sbm_getWeeklyTrend");
     $p.executeSubmission("sbm_getClaimType");
+    $p.executeSubmission("sbm_getMonthlyApprovalRate");
+    $p.executeSubmission("sbm_getProcessingTimeTrend");
+    $p.executeSubmission("sbm_getOutlierCount");
 };
         
 scwin.sbm_getTodayStatus_submitdone = function (e) {
@@ -354,7 +389,104 @@ scwin.sbm_getClaimType_submitdone = function (e) {
 
     // 4. 차트를 그립니다.
     chart_claimType.draw();
-};]]></script>
+};
+
+
+
+/**
+ * 월별 승인율 데이터 조회 완료 시
+ */
+scwin.sbm_getMonthlyApprovalRate_submitdone = function (e) {
+    var chartDataFromServer = e.responseJSON.monthlyRateData;
+    dlt_monthlyApprovalRateChart.setJSON(chartDataFromServer);
+    
+    // 차트 스타일 속성 설정
+    var chartAttrs = {
+        "theme": "fusion",
+        "baseFont": "Noto Sans KR, sans-serif",
+        "plotFillColor": "#578FCA", // 막대 색상
+
+        // Y축(세로축) 설정
+        "yAxisMinValue": "0",     // Y축 최소값
+        "yAxisMaxValue": "100",    // Y축 최대값
+        //"yAxisName": "승인율(%)",
+        
+        // 숫자 포맷 설정
+        "numberSuffix": "%",       // 값 뒤에 '%' 단위 표시
+        "formatNumberScale": "0",  // 1000단위 콤마(,) 사용 안 함
+        "decimals": "1",           // 소수점 1자리까지 표시
+
+        // 디자인
+        "showValues": "0",         // 막대 위에 값 숨기기
+        "plottooltext": "$label: $dataValue", // 툴팁
+        "showBorder": "0",
+        "bgAlpha": "0",
+        "canvasBgAlpha": "0"
+    };
+    chartAttrs.chartTopMargin = "40";
+    chartAttrs.chartBottomMargin = "10";
+    chartAttrs.chartLeftMargin = "10";
+    chartAttrs.chartRightMargin = "20";
+
+    chart_monthlyRate.setChartAttribute(chartAttrs);
+
+    // 차트 그리기
+    chart_monthlyRate.draw();
+};
+
+
+scwin.sbm_getProcessingTimeTrend_submitdone = function (e) {
+    // 1. 서버 응답에서 데이터 추출 및 데이터리스트에 설정
+    var chartDataFromServer = e.responseJSON.processingTimeData;
+    dlt_processingTimeChart.setJSON(chartDataFromServer);
+
+    // 2. 차트 스타일 속성 설정 (중복 제거 및 정리)
+    var chartAttrs = {
+        "theme": "fusion",
+        "baseFont": "Noto Sans KR, sans-serif",
+        "plotFillColor": "#62C578", // 막대 색상
+
+        // Y축(세로축) 설정
+        //"yAxisName": "평균 처리 시간 (시간)",
+        
+        // 숫자 포맷 설정
+        "numberSuffix": "시간",      // 값 뒤에 '시간' 단위 표시
+        "formatNumberScale": "0",    // 1000단위 콤마 사용 안 함
+        "decimals": "1",           // 소수점 1자리까지 표시
+
+        // 디자인
+        "showValues": "0",           // 막대 위에 값 숨기기
+        "plottooltext": "$label: $dataValue", // 툴팁
+        "showBorder": "0",
+        "bgAlpha": "0",
+        "canvasBgAlpha": "0"
+    };
+
+    // 3. 여백 속성 추가
+    chartAttrs.chartTopMargin = "40";
+    chartAttrs.chartBottomMargin = "10";
+    chartAttrs.chartLeftMargin = "10";
+    chartAttrs.chartRightMargin = "20";
+
+    // 4. 속성 적용
+    chart_processingTime.setChartAttribute(chartAttrs);
+
+    // 5. 차트 그리기
+    chart_processingTime.draw();
+};
+
+
+scwin.sbm_getOutlierCount_submitdone = function (e) {
+    // 1. 서버 응답에서 실제 데이터 객체를 추출합니다.
+    var outlierData = e.responseJSON.outlierCountData;
+
+    // 2. 데이터맵(dmp_outlierInfo)에 데이터를 설정합니다.
+    dmp_outlierInfo.setJSON(outlierData);
+
+    // 3. (핵심) 데이터맵의 값을 화면 컴포넌트(outlierCountBox)에 강제로 직접 설정합니다.
+    outlierCountBox.setValue(dmp_outlierInfo.get("outlierCount"));
+};
+]]></script>
         <style type="text/css"><![CDATA[
             /* ----- Global & Wrapper ----- */
             .dashboard_wrap { background-color: #f4f6f9; padding: 20px; }
@@ -394,8 +526,8 @@ scwin.sbm_getClaimType_submitdone = function (e) {
 
             /* ----- KPI Card Style ----- */
             .kpi_card { flex: 1; background-color: #fff; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-            .kpi_title_box { border: 1px dotted #ccc; padding: 8px; margin-bottom: 10px; font-size: 14px; color: #555; }
-            .kpi_value_box { border: 1px dotted #ccc; padding: 8px; font-size: 24px; font-weight: bold; color: #333; }
+            .kpi_title_box { padding: 8px; margin-bottom: 10px; font-size: 14px; color: #555; }
+            .kpi_value_box { padding: 8px; font-size: 24px; font-weight: bold; color: #333; }
 
             /* ----- 우선 처리 업무 목록 스타일 ----- */
             .task_panel .panel_header { display: flex; justify-content: space-between; align-items: center; }
@@ -524,13 +656,30 @@ scwin.sbm_getClaimType_submitdone = function (e) {
                 </xf:group>
                 
                 <xf:group class="flex_row" id="grp_bot_charts">
-                    <xf:group class="panel"><w2:textbox class="panel_title" label="월별 승인률 추이" tagname="h3"></w2:textbox><xf:group class="chart_placeholder" style="min-height:150px;"><w2:textbox label="FusionChart Column2D 영역"></w2:textbox></xf:group></xf:group>
-                    <xf:group class="panel"><w2:textbox class="panel_title" label="처리 시간 분포" tagname="h3"></w2:textbox><xf:group class="chart_placeholder" style="min-height:150px;"><w2:textbox label="FusionChart Column2D 영역"></w2:textbox></xf:group></xf:group>
+                    <xf:group class="panel">
+                        <w2:textbox class="panel_title" label="월별 승인율 추이" tagname="h3"></w2:textbox>
+                        <w2:fusionchart id="chart_monthlyRate" chartType="Column2D" ref="data:dlt_monthlyApprovalRateChart"
+                            style="width: 100%; height: 250px;" drawType="javascript">
+                        </w2:fusionchart>
+                    </xf:group>
+                    <xf:group class="panel">
+                        <xf:group style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <w2:textbox class="panel_title" label="평균 처리 시간" tagname="h3"></w2:textbox>
+                            <xf:group tagname="span" style="">
+                                <w2:textbox tagname="span" label="장기처리(3일 초과) " style="font-size: 13px; color: #888;"></w2:textbox>
+                                <w2:textbox id="outlierCountBox" ref="data:dmp_outlierInfo.outlierCount" tagname="span"
+                                style="font-size: 14px; color: #dc3545; font-weight: bold;" displayFormat="#,##건"></w2:textbox>
+                            </xf:group>
+                        </xf:group>    
+                        <w2:fusionchart id="chart_processingTime" chartType="Column2D" ref="data:dlt_processingTimeChart"
+                            style="width: 100%; height: 250px;" drawType="javascript">
+                        </w2:fusionchart>
+                    </xf:group>
                 </xf:group>
                 
                 <xf:group class="flex_row" id="grp_kpi_row">
                     <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="평균 처리 시간"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox ref="data:dma_monthlyPerf.avgProcessingTime" label=""></w2:textbox></xf:group></xf:group>
-                    <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="승인률"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox ref="data:dma_approvalRate.approvalRate" label=""></w2:textbox></xf:group></xf:group>
+                    <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="지급률"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox ref="data:dma_paymentRate.approvalRate" label=""></w2:textbox></xf:group></xf:group>
                     <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="전일 처리"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox ref="data:dma_dailyCount.yesterdayProcessedCount" label=""></w2:textbox></xf:group></xf:group>
                 </xf:group>
                 

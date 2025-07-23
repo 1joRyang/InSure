@@ -10,11 +10,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.demo.proworks.dashboard.service.DashboardService;
-import com.demo.proworks.dashboard.vo.ApprovalRateVo;
+import com.demo.proworks.dashboard.vo.PaymentVo;
+import com.demo.proworks.dashboard.vo.ProcessingTimeVo;
 import com.demo.proworks.dashboard.vo.ChartVo;
 import com.demo.proworks.dashboard.vo.ClaimMonitorVo;
 import com.demo.proworks.dashboard.vo.DailyCountVo;
+import com.demo.proworks.dashboard.vo.MonthlyApprovalRateVo;
 import com.demo.proworks.dashboard.vo.MonthlyPerfVo;
+import com.demo.proworks.dashboard.vo.OutlierCountVo;
 import com.demo.proworks.dashboard.vo.SupplementStatusVo;
 import com.demo.proworks.dashboard.vo.TodayStatusVo;
 import com.demo.proworks.dashboard.vo.UrgentClaimVo;
@@ -125,17 +128,17 @@ public class DashboardController {
 	}
 	
 	/**
-	 * 이번 달 승인률을 조회한다.
+	 * 이번 달 지급률을 조회한다.
 	 * @return ApprovalRateVo
 	 * @throws Exception
      */
-	@ElService(key = "selectApprovalRate")
-	@RequestMapping(value = "selectApprovalRate")
-	@ElDescription(sub = "이번 달 승인률 조회", desc = "대시보드의 이번 달 승인률 데이터를 조회한다.")
-	public Map<String, Object> selectApprovalRate() throws Exception {
-		ApprovalRateVo resultVo = dashboardService.selectMonthlyApprovalRate();
+	@ElService(key = "selectPaymentRate")
+	@RequestMapping(value = "selectPaymentRate")
+	@ElDescription(sub = "이번 달 지급률 조회", desc = "대시보드의 이번 달 지급률 데이터를 조회한다.")
+	public Map<String, Object> selectPaymentRate() throws Exception {
+		PaymentVo resultVo = dashboardService.selectPaymentRate();
 	    Map<String, Object> responseWrapper = new HashMap<>();
-	    responseWrapper.put("approvalRateVo", resultVo);
+	    responseWrapper.put("PaymentVo", resultVo);
 	    return responseWrapper;
 
 	}
@@ -204,6 +207,45 @@ public class DashboardController {
 	    response.put("claimTypeData", resultList);
 	    return response;
 	}
+	
+	/**
+	 * 월별 승인률 차트를 조회한다.
+     */
+	@ElService(key = "selectMonthlyApprovalRate")
+	@RequestMapping(value = "selectMonthlyApprovalRate")
+	@ElDescription(sub = "월별 승인률 데이터 조회", desc = "월별 승인률 데이터 조회한다.")
+	public Map<String, Object> selectMonthlyApprovalRate() throws Exception {
+	    List<MonthlyApprovalRateVo> resultList = dashboardService.selectMonthlyApprovalRate();
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("monthlyRateData", resultList);
+	    return response;
+	}
+	
+	/**
+	 * 처리 시간 분포 차트를 조회한다.
+     */
+	@ElService(key = "selectProcessingTimeTrend")
+	@RequestMapping(value = "selectProcessingTimeTrend")
+	@ElDescription(sub = "처리 시간 분포 데이터 조회", desc = "처리 시간 분포 데이터 조회한다.")
+	public Map<String, Object> selectProcessingTimeTrend() throws Exception {
+        List<ProcessingTimeVo> resultList = dashboardService.selectProcessingTimeTrend();
+        Map<String, Object> response = new HashMap<>();
+        response.put("processingTimeData", resultList);
+        return response;
+    }
+    
+    /**
+	 * 처리 시간 분포에서 제외하는 장기처리건을 조회한다.
+     */
+	@ElService(key = "selectProcessingTimeOutlierCount")
+	@RequestMapping(value = "selectProcessingTimeOutlierCount")
+	@ElDescription(sub = "장기 처리 건수 조회", desc = "처리 시간 분포 차트의 장기 처리 건수를 조회한다.")
+	public Map<String, Object> selectProcessingTimeOutlierCount() throws Exception {
+        OutlierCountVo resultVo = dashboardService.selectProcessingTimeOutlierCount();
+        Map<String, Object> response = new HashMap<>();
+        response.put("outlierCountData", resultVo);
+        return response;
+    }
 	
 	
 

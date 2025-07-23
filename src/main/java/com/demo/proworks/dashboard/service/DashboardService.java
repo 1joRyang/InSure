@@ -3,11 +3,14 @@ package com.demo.proworks.dashboard.service;
 import java.util.List;
 import java.util.Map;
 
-import com.demo.proworks.dashboard.vo.ApprovalRateVo;
+import com.demo.proworks.dashboard.vo.PaymentVo;
+import com.demo.proworks.dashboard.vo.ProcessingTimeVo;
 import com.demo.proworks.dashboard.vo.ChartVo;
 import com.demo.proworks.dashboard.vo.ClaimMonitorVo;
 import com.demo.proworks.dashboard.vo.DailyCountVo;
+import com.demo.proworks.dashboard.vo.MonthlyApprovalRateVo;
 import com.demo.proworks.dashboard.vo.MonthlyPerfVo;
+import com.demo.proworks.dashboard.vo.OutlierCountVo;
 import com.demo.proworks.dashboard.vo.SupplementStatusVo;
 import com.demo.proworks.dashboard.vo.TodayStatusVo;
 import com.demo.proworks.dashboard.vo.UrgentClaimVo;
@@ -36,7 +39,7 @@ public interface DashboardService {
 	 
 	 public DailyCountVo selectYesterdayProcessedCount() throws ElException;
 	 
-	 public ApprovalRateVo selectMonthlyApprovalRate() throws ElException;
+	 public PaymentVo selectPaymentRate() throws ElException;
 	 
 	 /**
      * 우선 처리 업무 목록을 조회한다.
@@ -48,5 +51,12 @@ public interface DashboardService {
     public List<WeeklyTrendVo> selectWeeklyTrend() throws ElException;
     
     public List<ChartVo> selectClaimTypeDistribution() throws ElException;
+    
+    public List<MonthlyApprovalRateVo> selectMonthlyApprovalRate() throws ElException;
+    
+    public List<ProcessingTimeVo> selectProcessingTimeTrend() throws ElException;
+    
+    public OutlierCountVo selectProcessingTimeOutlierCount() throws ElException;
+    
 
 }

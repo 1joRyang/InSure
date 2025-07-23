@@ -7,10 +7,10 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 
 @JsonFilter("elExcludeFilter")
 @ElDto(FldYn = "", delimeterYn = "", logicalName = "부서정보")
-public class ApprovalRateVo extends com.demo.proworks.cmmn.ProworksCommVO {
+public class PaymentVo extends com.demo.proworks.cmmn.ProworksCommVO {
     private static final long serialVersionUID = 1L;
 
-    public ApprovalRateVo(){
+    public PaymentVo(){
     }
 
     @ElDtoField(logicalName = "approvalRate", physicalName = "approvalRate", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")

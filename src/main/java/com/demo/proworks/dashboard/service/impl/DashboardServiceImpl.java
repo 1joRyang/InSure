@@ -11,11 +11,14 @@ import org.springframework.stereotype.Service;
 
 import com.demo.proworks.dashboard.dao.DashboardDAO;
 import com.demo.proworks.dashboard.service.DashboardService;
-import com.demo.proworks.dashboard.vo.ApprovalRateVo;
+import com.demo.proworks.dashboard.vo.PaymentVo;
+import com.demo.proworks.dashboard.vo.ProcessingTimeVo;
 import com.demo.proworks.dashboard.vo.ChartVo;
 import com.demo.proworks.dashboard.vo.ClaimMonitorVo;
 import com.demo.proworks.dashboard.vo.DailyCountVo;
+import com.demo.proworks.dashboard.vo.MonthlyApprovalRateVo;
 import com.demo.proworks.dashboard.vo.MonthlyPerfVo;
+import com.demo.proworks.dashboard.vo.OutlierCountVo;
 import com.demo.proworks.dashboard.vo.SupplementStatusVo;
 import com.demo.proworks.dashboard.vo.TodayStatusVo;
 import com.demo.proworks.dashboard.vo.UrgentClaimVo;
@@ -71,8 +74,8 @@ public class DashboardServiceImpl implements DashboardService{
 	}
 	
 	@Override
-	public ApprovalRateVo selectMonthlyApprovalRate() throws ElException {
-	    return dashboardDAO.selectMonthlyApprovalRate();
+	public PaymentVo selectPaymentRate() throws ElException {
+	    return dashboardDAO.selectPaymentRate();
 	}
 	
 	/**
@@ -96,4 +99,22 @@ public class DashboardServiceImpl implements DashboardService{
 	public List<ChartVo> selectClaimTypeDistribution() throws ElException {
 	    return dashboardDAO.selectClaimTypeDistribution();
 	}
+	
+	@Override
+	public List<MonthlyApprovalRateVo> selectMonthlyApprovalRate() throws ElException {
+	    return dashboardDAO.selectMonthlyApprovalRate();
+	}
+	
+	@Override
+    public List<ProcessingTimeVo> selectProcessingTimeTrend() throws ElException {
+        return dashboardDAO.selectProcessingTimeTrend();
+    }
+    
+    @Override
+    public OutlierCountVo selectProcessingTimeOutlierCount() throws ElException {
+        int count = dashboardDAO.selectProcessingTimeOutlierCount();
+        OutlierCountVo vo = new OutlierCountVo();
+        vo.setOutlierCount(count);
+        return vo;
+    }
 }

@@ -5,10 +5,12 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 import com.inswave.elfw.exception.ElException;
 import com.demo.proworks.claim.vo.ClaimFullJoinVo;
-import com.demo.proworks.dashboard.vo.ApprovalRateVo;
+import com.demo.proworks.dashboard.vo.PaymentVo;
+import com.demo.proworks.dashboard.vo.ProcessingTimeVo;
 import com.demo.proworks.dashboard.vo.ChartVo;
 import com.demo.proworks.dashboard.vo.ClaimMonitorVo;
 import com.demo.proworks.dashboard.vo.DailyCountVo;
+import com.demo.proworks.dashboard.vo.MonthlyApprovalRateVo;
 import com.demo.proworks.dashboard.vo.MonthlyPerfVo;
 import com.demo.proworks.dashboard.vo.SupplementStatusVo;
 import com.demo.proworks.dashboard.vo.TodayStatusVo;
@@ -68,10 +70,10 @@ public class DashboardDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbst
 	}
 	
 	/**
-	 * 이번달 승인률을 조회한다.
+	 * 이번달 지급률을 조회한다.
 	 */
-	public ApprovalRateVo selectMonthlyApprovalRate() throws ElException {
-	    return (ApprovalRateVo) selectByPk("com.demo.proworks.dashboard.selectMonthlyApprovalRate");
+	public PaymentVo selectPaymentRate() throws ElException {
+	    return (PaymentVo) selectByPk("com.demo.proworks.dashboard.selectPaymentRate");
 	}
 	
 	/**
@@ -90,11 +92,36 @@ public class DashboardDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbst
 	    return (List<WeeklyTrendVo>) list("com.demo.proworks.dashboard.selectWeeklyTrend");
 	}
 	
+	/**
+	 * 청구 유형별 분포를 조회한다.
+	 */
 	@SuppressWarnings("unchecked")
 	public List<ChartVo> selectClaimTypeDistribution() throws ElException {
 		return (List<ChartVo>) list("com.demo.proworks.dashboard.selectClaimTypeDistribution");
-}
+	}
 	
+	/**
+	 * 월간 승인율 추이를 조회한다.
+	 */
+	@SuppressWarnings("unchecked")
+	public List<MonthlyApprovalRateVo> selectMonthlyApprovalRate() throws ElException {
+    return (List<MonthlyApprovalRateVo>) list("com.demo.proworks.dashboard.selectMonthlyApprovalRate");
+	}
+	
+	/**
+	 * 직전 업무일 7일간 처리시간을 조회한다.
+	 */
+	@SuppressWarnings("unchecked")
+	public List<ProcessingTimeVo> selectProcessingTimeTrend() throws ElException {
+        return (List<ProcessingTimeVo>) list("com.demo.proworks.dashboard.selectProcessingTimeTrend");
+    }
+	
+	/**
+	 * 장기처리건수
+	 */
+	public int selectProcessingTimeOutlierCount() throws ElException {
+	    return (int) selectByPk("com.demo.proworks.dashboard.selectProcessingTimeOutlierCount");
+	}
 	
 	
 
