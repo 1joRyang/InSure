@@ -244,13 +244,13 @@ scwin.btn_minus_onclick = function (e) {
     		<xf:trigger meta_snippetCategory="08_버튼" anchorWithGroupClass="" meta_snippetName="8_02 아이콘조회버튼"
     			ev:onclick="scwin.btn_minus_onclick" meta_snippetKeyComponent="true"
     			style="margin-right: 5px;width: 50px;height: 50px;z-index: 1000;filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.3));" id="btn_minus"
-    			type="button" class="btn_cm search icon">
+    			type="button" class="btn_cm row_del icon">
     			<xf:label><![CDATA[search]]></xf:label>
     		</xf:trigger>
     		<xf:trigger meta_snippetCategory="08_버튼" anchorWithGroupClass="" meta_snippetName="8_02 아이콘조회버튼"
     			meta_snippetKeyComponent="true"
     			style="width: 50px;height: 50px;z-index: 1000;filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.3));" id="btn_plus" type="button"
-    			class="btn_cm search icon" ev:onclick="scwin.btn_plus_onclick">
+    			class="btn_cm row_add icon" ev:onclick="scwin.btn_plus_onclick">
     			<xf:label><![CDATA[search]]></xf:label>
     		</xf:trigger>
     	</xf:group>
