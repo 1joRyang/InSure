@@ -67,17 +67,29 @@ scwin.btn_submit_onclick = function (e) {
     // textarea 값 검증
     var returnMemo = txa_additional_memo.getValue();
     if (!returnMemo || returnMemo.trim() === "") {
-        alert("반송 사유를 입력해주세요.");
+        $p.closePopup();
+        scwin.toastAlert({
+            icon: 'warning',
+            title: '반송 사유를 입력해주세요.'
+        });
         txa_additional_memo.focus();
         return false;
     }
 
-    dma_returnReq.set("return_memo", returnMemo.trim());
-    
-    console.log("존재 여부 확인 중...");
-    console.log("CLAIM_NO:", dma_claimNo.get("claim_no"));
-    
-    $p.executeSubmission("sbm_checkReturnReq");
+    scwin.twoBtnAlert({
+        title: '반송 처리하시겠습니까?',
+        text: '반송 처리 후에는 취소할 수 없습니다.',
+        icon: 'question'
+    }, (result) => {
+        if (result.isConfirmed) {
+            dma_returnReq.set("return_memo", returnMemo.trim());
+
+            console.log("존재 여부 확인 중...");
+            console.log("CLAIM_NO:", dma_claimNo.get("claim_no"));
+
+            $p.executeSubmission("sbm_checkReturnReq");
+        }
+    });
 };
 
 scwin.btn_close_onclick = function (e) {
@@ -88,9 +100,9 @@ scwin.btn_close_onclick = function (e) {
 
 scwin.sbm_checkReturnReq_submitdone = function (e) {
     var result = e.responseJSON;
-    
+
     console.log("확인 결과:", result);
-    
+
     if (result && result.success) {
         if (result.exists) {
             // 기존 데이터가 있으면 UPDATE
@@ -108,7 +120,11 @@ scwin.sbm_checkReturnReq_submitdone = function (e) {
 
 scwin.sbm_checkReturnReq_submiterror = function (e) {
     console.log("확인 중 에러:", e);
-    alert("데이터 확인 중 오류가 발생했습니다.");
+    $p.closePopup();
+    scwin.toastAlert({
+        icon: 'error',
+        title: '데이터 확인 중 오류가 발생했습니다.'
+    });
     return false;
 };
 
@@ -116,19 +132,34 @@ scwin.sbm_checkReturnReq_submiterror = function (e) {
 scwin.sbm_insertReturnReq_submitdone = function (e) {
     var result = e.responseJSON;
     console.log("INSERT 결과:", result);
-    
+
     if (result && result.success) {
-        alert(result.message);
-        scwin.closeAndRedirect();
+        $p.closePopup();
+        scwin.noBtnAlertWithTimer({
+            icon: 'success',
+            title: result.message || '반송 처리가 등록되었습니다.'
+        });
+        setTimeout(function () {
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+        }, 2000);
+        
     } else {
-        alert(result.message || "등록 중 오류가 발생했습니다.");
+        scwin.toastAlert({
+            icon: 'error',
+            title: result.message || '등록 중 오류가 발생했습니다.'
+        });
     }
     return true;
 };
 
 scwin.sbm_insertReturnReq_submiterror = function (e) {
     console.log("등록 중 에러:", e);
-    alert("등록 중 오류가 발생했습니다.");
+    $p.closePopup();
+    scwin.toastAlert({
+        icon: 'error',
+        title: '등록 중 오류가 발생했습니다.'
+    });
+    
     return false;
 };
 
@@ -136,30 +167,104 @@ scwin.sbm_insertReturnReq_submiterror = function (e) {
 scwin.sbm_updateReturnReq_submitdone = function (e) {
     var result = e.responseJSON;
     console.log("UPDATE 결과:", result);
-    
+    $p.closePopup();
     if (result && result.success) {
-        alert(result.message);
-        scwin.closeAndRedirect();
+        scwin.noBtnAlertWithTimer({
+            icon: 'success',
+            title: result.message || '반송 처리가 수정되었습니다.'
+        });
+        setTimeout(function() {
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+        }, 2000);
     } else {
-        alert(result.message || "수정 중 오류가 발생했습니다.");
+        scwin.toastAlert({
+            icon: 'error',
+            title: result.message || '수정 중 오류가 발생했습니다.'
+        });
     }
     return true;
 };
 
 scwin.sbm_updateReturnReq_submiterror = function (e) {
     console.log("수정 중 에러:", e);
-    alert("수정 중 오류가 발생했습니다.");
+    $p.closePopup();
+    scwin.toastAlert({
+        icon: 'error',
+        title: '수정 중 오류가 발생했습니다.'
+    });
     return false;
 };
 
 
 // 팝업 닫기 및 페이지 이동
-scwin.closeAndRedirect = function() {
+scwin.closeAndRedirect = function () {
     $p.closePopup();
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
 };
 
-        ]]></script>
+const Toast = Swal.mixin({
+    toast: true,
+    showConfirmButton: false,
+})
+
+scwin.toastAlertMobile = (param) => {
+    Toast.fire({
+        ...param,
+        timer: 2000,
+        position: 'center',
+        timerProgressBar: false,
+    });
+}
+
+scwin.toastAlert = (param) => {
+    Toast.fire({
+        ...param,
+        timer: 3000,
+        position: 'top-end',
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+}
+
+scwin.noBtnAlert = (param) => {
+    Swal.fire({
+        ...param,
+        showConfirmButton: false,
+    });
+}
+
+scwin.noBtnAlertWithTimer = (param) => {
+    Swal.fire({
+        ...param,
+        timer: 2000,
+        showConfirmButton: false,
+    });
+}
+
+/** 부르는 형태 예시
+scwin.twoBtnAlert({
+     title: "로그아웃 하시겠습니까?",
+ }, (result) => {
+     if (result.isConfirmed) {
+         $c.sbm.execute(sbm_EmployeeLogout);
+     }
+ });
+ */
+scwin.twoBtnAlert = (param, func) => {
+    Swal.fire({
+        ...param,
+        showCancelButton: true,
+        confirmButtonColor: '#4FACFE',
+        cancelButtonColor: '#d1d1d1',
+        confirmButtonText: '완료',
+        cancelButtonText: '취소',
+        reverseButtons: true
+    }).then(func);
+}
+]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
