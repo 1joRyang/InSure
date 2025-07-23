@@ -77,33 +77,76 @@ public class ReturnReqController {
 		
         return selectReturnReqVo;
     } 
- 
+
     /**
-     * 반송요청정보를 등록 처리 한다.
+     * 반송요청정보 존재 여부만 확인한다.
+     *
+     * @param  returnReqVo 반송요청정보
+     * @return 존재 여부 결과
+     * @throws Exception
+     */
+    @ElService(key = "RETURNREQCheck")    
+    @RequestMapping(value = "RETURNREQCheck")
+    @ElDescription(sub = "반송요청정보 존재 여부 확인", desc = "반송요청정보 존재 여부를 확인한다.")
+    public Map<String, Object> checkReturnReqExists(ReturnReqVo returnReqVo) throws Exception {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            boolean exists = returnReqService.existsReturnReq(returnReqVo);
+            result.put("exists", exists);
+            result.put("success", true);
+            result.put("message", "확인 완료");
+        } catch (Exception e) {
+            result.put("exists", false);
+            result.put("success", false);
+            result.put("message", "확인 중 오류가 발생했습니다.");
+        }
+        return result;
+    }
+
+    /**
+     * 반송요청정보를 INSERT만 처리 한다.
      *
      * @param  returnReqVo 반송요청정보
      * @throws Exception
      */
-    @ElService(key="RETURNREQIns")    
-    @RequestMapping(value="RETURNREQIns")
-    @ElDescription(sub="반송요청정보 등록처리",desc="반송요청정보를 등록 처리 한다.")
-    public void insertReturnReq(ReturnReqVo returnReqVo) throws Exception {    	 
-    	returnReqService.insertAdditionalReqAndUpdateClaimStatus(returnReqVo);   
+    @ElService(key="RETURNREQInsertOnly")    
+    @RequestMapping(value="RETURNREQInsertOnly")
+    @ElDescription(sub="반송요청정보 등록처리 (INSERT만)",desc="반송요청정보를 등록만 처리 한다.")
+    public Map<String, Object> insertReturnReqOnly(ReturnReqVo returnReqVo) throws Exception {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            int insertResult = returnReqService.insertReturnReq(returnReqVo);
+            result.put("success", true);
+            result.put("message", "등록이 완료되었습니다.");
+            result.put("result", insertResult);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "등록 중 오류가 발생했습니다: " + e.getMessage());
+        }
+        return result;
     }
        
     /**
-     * 반송요청정보를 갱신 처리 한다.
+     * 반송요청정보를 UPDATE만 처리 한다.
      *
      * @param  returnReqVo 반송요청정보
      * @throws Exception
      */
-    @ElService(key="RETURNREQUpd")    
-    @RequestMapping(value="RETURNREQUpd")    
-    @ElValidator(errUrl="/returnReq/returnReqRegister", errContinue=true)
-    @ElDescription(sub="반송요청정보 갱신처리",desc="반송요청정보를 갱신 처리 한다.")    
-    public void updateReturnReq(ReturnReqVo returnReqVo) throws Exception {  
- 
-    	returnReqService.updateReturnReq(returnReqVo);                                            
+    @ElService(key="RETURNREQUpdateOnly")    
+    @RequestMapping(value="RETURNREQUpdateOnly")    
+    @ElDescription(sub="반송요청정보 갱신처리 (UPDATE만)",desc="반송요청정보를 갱신만 처리 한다.")    
+    public Map<String, Object> updateReturnReqOnly(ReturnReqVo returnReqVo) throws Exception {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            int updateResult = returnReqService.updateReturnReq(returnReqVo);
+            result.put("success", true);
+            result.put("message", "수정이 완료되었습니다.");
+            result.put("result", updateResult);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "수정 중 오류가 발생했습니다: " + e.getMessage());
+        }
+        return result;
     }
 
     /**
@@ -120,13 +163,45 @@ public class ReturnReqController {
     }
     
     
+    // ============================================
+    // 기존 메소드들 (호환성 유지)
+    // ============================================
+    
+    /**
+     * 반송요청정보를 등록 처리 한다. (기존 호환성)
+     *
+     * @param  returnReqVo 반송요청정보
+     * @throws Exception
+     */
+    @ElService(key="RETURNREQIns")    
+    @RequestMapping(value="RETURNREQIns")
+    @ElDescription(sub="반송요청정보 등록처리",desc="반송요청정보를 등록 처리 한다.")
+    public void insertReturnReq(ReturnReqVo returnReqVo) throws Exception {    	 
+    	returnReqService.insertReturnReq(returnReqVo);   
+    }
+    
+    /**
+     * 반송요청정보를 갱신 처리 한다. (기존 호환성)
+     *
+     * @param  returnReqVo 반송요청정보
+     * @throws Exception
+     */
+    @ElService(key="RETURNREQUpd")    
+    @RequestMapping(value="RETURNREQUpd")    
+    @ElValidator(errUrl="/returnReq/returnReqRegister", errContinue=true)
+    @ElDescription(sub="반송요청정보 갱신처리",desc="반송요청정보를 갱신 처리 한다.")    
+    public void updateReturnReq(ReturnReqVo returnReqVo) throws Exception {  
+ 
+    	returnReqService.updateReturnReq(returnReqVo);                                            
+    }
+    
     @ElService(key = "RETURNREQInsUp")    
     @RequestMapping(value = "RETURNREQInsUp")
     @ElDescription(sub = "반송요청정보 등록처리", desc = "반송요청정보를 등록 처리 한다.")
     public Map<String, Object> insertReturnReqAndClaimStatus(ReturnReqVo returnReqVo) throws Exception {
 	    Map<String, Object> result = new HashMap<>();
 	    try {
-	        int insertResult = returnReqService.insertReturnReqAndClaimStatus(returnReqVo);
+	        int insertResult = returnReqService.insertReturnReq(returnReqVo);
 	        result.put("success", true);
 	        result.put("message", "등록이 완료되었습니다.");
 	    } catch (Exception e) {

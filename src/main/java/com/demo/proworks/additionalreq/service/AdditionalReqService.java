@@ -45,9 +45,18 @@ public interface AdditionalReqService {
      * @throws Exception
      */
 	public AdditionalReqVo selectAdditionalReq(AdditionalReqVo additionalReqVo) throws Exception;
+	
+    /**
+     * 추가요청 존재 여부를 확인한다.
+     *
+     * @param  additionalReqVo 추가요청 정보 AdditionalReqVo
+     * @return 존재 여부
+     * @throws Exception
+     */
+	public boolean existsAdditionalReq(AdditionalReqVo additionalReqVo) throws Exception;
 		
     /**
-     * 추가요청 정보를 등록 처리 한다.
+     * 추가요청 정보를 등록 처리 한다. (INSERT만)
      *
      * @param  additionalReqVo 추가요청 정보 AdditionalReqVo
      * @return 번호
@@ -56,7 +65,7 @@ public interface AdditionalReqService {
 	public int insertAdditionalReq(AdditionalReqVo additionalReqVo) throws Exception;
 	
     /**
-     * 추가요청 정보를 갱신 처리 한다.
+     * 추가요청 정보를 갱신 처리 한다. (UPDATE만)
      *
      * @param  additionalReqVo 추가요청 정보 AdditionalReqVo
      * @return 번호
@@ -74,7 +83,7 @@ public interface AdditionalReqService {
 	public int deleteAdditionalReq(AdditionalReqVo additionalReqVo) throws Exception;
 	
 	/**
-	 * 추가요청 정보를 등록하고 청구 상태를 업데이트 한다.
+	 * 추가요청 정보를 등록하고 청구 상태를 업데이트 한다. (기존 호환성 유지)
 	 *
 	 * @param  additionalReqVo 추가요청 정보 AdditionalReqVo
 	 * @return 번호
@@ -82,10 +91,12 @@ public interface AdditionalReqService {
 	 */
 	public int insertAdditionalReqAndUpdateClaimStatus(AdditionalReqVo additionalReqVo) throws Exception;
 	
-	
+	/**
+	 * 추가요청 정보를 Upsert하고 청구 상태를 업데이트 한다. (기존 호환성 유지)
+	 *
+	 * @param  additionalReqCusVo 추가요청 정보 AdditionalReqCusVo
+	 * @return 번호
+	 * @throws Exception
+	 */
 	public int upsertAdditionalReqAndUpdateClaimStatus(AdditionalReqCusVo additionalReqCusVo) throws Exception;
-	
-	
-	
-	
 }

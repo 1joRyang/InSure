@@ -8,6 +8,11 @@
         <w2:MSA/>
         <xf:model>
         	<w2:dataCollection baseNode="map">
+        		<w2:dataMap baseNode="map" id="dma_claimNo">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
         		<w2:dataMap baseNode="map" id="dma_additionalReq">
         			<w2:keyInfo>
         				<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
@@ -17,9 +22,41 @@
         		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
-        	<xf:submission id="sbm_insertAdditionalReq" action="/InsWebApp/ADDITIONALREQInsUp.pwkjson" method="post"
-        		mediatype="application/json" ref='data:json,{"id":"dma_additionalReq","key":"additionalReqCusVo"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
-        		mode="asynchronous" processMsg="처리중입니다..." ev:submit="" ev:submitdone="scwin.sbm_insertAdditionalReq_submitdone" ev:submiterror="scwin.sbm_insertAdditionalReq_submiterror" abortTrigger="">
+        	
+        	<!-- 존재 여부 확인 submission -->
+        	<xf:submission id="sbm_checkAdditionalReq" action="/InsWebApp/ADDITIONALREQCheck.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_claimNo","key":"additionalReqVo"}' 
+        		target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+        		mode="asynchronous" processMsg="확인중입니다..." 
+        		ev:submit="" ev:submitdone="scwin.sbm_checkAdditionalReq_submitdone" 
+        		ev:submiterror="scwin.sbm_checkAdditionalReq_submiterror" abortTrigger="">
+        	</xf:submission>
+        	
+        	<!-- INSERT 전용 submission -->
+        	<xf:submission id="sbm_insertAdditionalReq" action="/InsWebApp/ADDITIONALREQInsertOnly.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_additionalReq","key":"additionalReqVo"}' 
+        		target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+        		mode="asynchronous" processMsg="등록중입니다..." 
+        		ev:submit="" ev:submitdone="scwin.sbm_insertAdditionalReq_submitdone" 
+        		ev:submiterror="scwin.sbm_insertAdditionalReq_submiterror" abortTrigger="">
+        	</xf:submission>
+        	
+        	<!-- UPDATE 전용 submission -->
+        	<xf:submission id="sbm_updateAdditionalReq" action="/InsWebApp/ADDITIONALREQUpdateOnly.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_additionalReq","key":"additionalReqVo"}' 
+        		target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+        		mode="asynchronous" processMsg="수정중입니다..." 
+        		ev:submit="" ev:submitdone="scwin.sbm_updateAdditionalReq_submitdone" 
+        		ev:submiterror="scwin.sbm_updateAdditionalReq_submiterror" abortTrigger="">
+        	</xf:submission>
+        	
+        	<!-- 기존 submission (호환성 유지) -->
+        	<xf:submission id="sbm_insertAdditionalReqOld" action="/InsWebApp/ADDITIONALREQInsUp.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_additionalReq","key":"additionalReqCusVo"}' 
+        		target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+        		mode="asynchronous" processMsg="처리중입니다..." 
+        		ev:submit="" ev:submitdone="scwin.sbm_insertAdditionalReqOld_submitdone" 
+        		ev:submiterror="scwin.sbm_insertAdditionalReqOld_submiterror" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -30,14 +67,15 @@ scwin.onpageload = function() {
 
     txt_req_supple.setValue(scwin.claim.claimNo);
     dma_additionalReq.set("claim_no", scwin.claim.claimNo);
+    dma_claimNo.set("claim_no", scwin.claim.claimNo);
 };
 
-// 보완요청 등록 및 상태 업데이트
+// 확인 버튼 클릭 - 존재 여부 확인 후 분기
 scwin.btn_submit_onclick = function (e) {
     // textarea 값 검증
     var additionalMemo = txa_supplement_memo.getValue();
     if (!additionalMemo || additionalMemo.trim() === "") {
-       
+        alert("보완 요청 사유를 입력해주세요.");
         txa_supplement_memo.focus();
         return false;
     }
@@ -45,14 +83,89 @@ scwin.btn_submit_onclick = function (e) {
     // dataMap에 값 설정
     dma_additionalReq.set("additional_memo", additionalMemo.trim());
     dma_additionalReq.set("request_type", "SUPPLEMENT"); // 보완요청 타입 설정
-
-
-    // 서버로 데이터 전송
-    $p.executeSubmission("sbm_insertAdditionalReq");
+    
+    console.log("존재 여부 확인 중...");
+    console.log("CLAIM_NO:", dma_claimNo.get("claim_no"));
+    
+    // 1단계: 존재 여부 확인
+    $p.executeSubmission("sbm_checkAdditionalReq");
 };
 
-// 보완요청 등록 성공 처리
+// 닫기 버튼 클릭
+scwin.btn_close_onclick = function(e) {
+    $p.closePopup();
+    return true;
+};
+
+
+scwin.sbm_checkAdditionalReq_submitdone = function (e) {
+    var result = e.responseJSON;
+    
+    console.log("확인 결과:", result);
+    
+    if (result && result.success) {
+        if (result.exists) {
+            // 기존 데이터가 있으면 UPDATE
+            console.log("기존 데이터 존재 - UPDATE 실행");
+            $p.executeSubmission("sbm_updateAdditionalReq");
+        } else {
+            // 기존 데이터가 없으면 INSERT
+            console.log("신규 데이터 - INSERT 실행");
+            $p.executeSubmission("sbm_insertAdditionalReq");
+        }
+    } else {
+        alert("데이터 확인 중 오류가 발생했습니다.");
+    }
+};
+
+scwin.sbm_checkAdditionalReq_submiterror = function (e) {
+    console.log("확인 중 에러:", e);
+    alert("데이터 확인 중 오류가 발생했습니다.");
+    return false;
+};
+
+
 scwin.sbm_insertAdditionalReq_submitdone = function (e) {
+    var result = e.responseJSON;
+    console.log("INSERT 결과:", result);
+    
+    if (result && result.success) {
+        alert(result.message || "보완 요청이 등록되었습니다.");
+        scwin.closeAndRedirect();
+    } else {
+        alert(result.message || "등록 중 오류가 발생했습니다.");
+    }
+    return true;
+};
+
+scwin.sbm_insertAdditionalReq_submiterror = function (e) {
+    console.log("등록 중 에러:", e);
+    alert("등록 중 오류가 발생했습니다.");
+    return false;
+};
+
+
+scwin.sbm_updateAdditionalReq_submitdone = function (e) {
+    var result = e.responseJSON;
+    console.log("UPDATE 결과:", result);
+    
+    if (result && result.success) {
+        alert(result.message || "보완 요청이 수정되었습니다.");
+        scwin.closeAndRedirect();
+    } else {
+        alert(result.message || "수정 중 오류가 발생했습니다.");
+    }
+    return true;
+};
+
+scwin.sbm_updateAdditionalReq_submiterror = function (e) {
+    console.log("수정 중 에러:", e);
+    alert("수정 중 오류가 발생했습니다.");
+    return false;
+};
+
+
+scwin.sbm_insertAdditionalReqOld_submitdone = function (e) {
     console.log("보완요청 처리 성공:", e);
     $p.closePopup();
     alert("보완 요청 완료");
@@ -60,8 +173,7 @@ scwin.sbm_insertAdditionalReq_submitdone = function (e) {
     return true;
 };
 
-// 보완요청 등록 실패 처리
-scwin.sbm_insertAdditionalReq_submiterror = function (e) {
+scwin.sbm_insertAdditionalReqOld_submiterror = function (e) {
     console.log("보완요청 처리 실패:", e);
     
     var errorMsg = "보완요청 전송 중 오류가 발생했습니다.";
@@ -71,9 +183,11 @@ scwin.sbm_insertAdditionalReq_submiterror = function (e) {
     console.log(errorMsg);
 };
 
-scwin.btn_close_onclick = function(e) {
+
+// 팝업 닫기 및 페이지 이동
+scwin.closeAndRedirect = function() {
     $p.closePopup();
-    return true;
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
 };
 ]]></script>
     </head>

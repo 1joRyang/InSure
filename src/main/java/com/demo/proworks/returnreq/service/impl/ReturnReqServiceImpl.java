@@ -81,31 +81,56 @@ public class ReturnReqServiceImpl implements ReturnReqService {
 	}
 
     /**
-     * 반송요청정보를 등록 처리 한다.
+     * 반송요청 존재 여부를 확인한다.
+     *
+     * @process
+     * 1. 반송요청 존재 여부를 확인한다.
+     * 
+     * @param  returnReqVo 반송요청정보 ReturnReqVo
+     * @return 존재 여부
+     * @throws Exception
+     */
+	public boolean existsReturnReq(ReturnReqVo returnReqVo) throws Exception {
+		return returnReqDAO.existsReturnReq(returnReqVo);
+	}
+
+    /**
+     * 반송요청정보를 등록 처리 한다. (INSERT만)
      *
      * @process
      * 1. 반송요청정보를 등록 처리 한다.
+     * 2. 청구 상태를 '반송'으로 업데이트 한다.
      * 
      * @param  returnReqVo 반송요청정보 ReturnReqVo
-     * @return 번호
+     * @return 처리 건수
      * @throws Exception
      */
 	public int insertReturnReq(ReturnReqVo returnReqVo) throws Exception {
-		return returnReqDAO.insertReturnReq(returnReqVo);	
+		int result = returnReqDAO.insertReturnReq(returnReqVo);
+		if (result > 0) {
+			returnReqDAO.updateClaimStatus(returnReqVo);
+		}
+		
+		return result;	
 	}
 	
     /**
-     * 반송요청정보를 갱신 처리 한다.
+     * 반송요청정보를 갱신 처리 한다. (UPDATE만)
      *
      * @process
      * 1. 반송요청정보를 갱신 처리 한다.
+     * 2. 청구 상태를 '반송'으로 업데이트 한다.
      * 
      * @param  returnReqVo 반송요청정보 ReturnReqVo
-     * @return 번호
+     * @return 처리 건수
      * @throws Exception
      */
-	public int updateReturnReq(ReturnReqVo returnReqVo) throws Exception {				
-		return returnReqDAO.updateReturnReq(returnReqVo);	   		
+	public int updateReturnReq(ReturnReqVo returnReqVo) throws Exception {
+		int result = returnReqDAO.updateReturnReq(returnReqVo);
+		if (result > 0) {
+			returnReqDAO.updateClaimStatus(returnReqVo);
+		}
+		return result;	   		
 	}
 
     /**
@@ -115,19 +140,10 @@ public class ReturnReqServiceImpl implements ReturnReqService {
      * 1. 반송요청정보를 삭제 처리 한다.
      * 
      * @param  returnReqVo 반송요청정보 ReturnReqVo
-     * @return 번호
+     * @return 처리 건수
      * @throws Exception
      */
 	public int deleteReturnReq(ReturnReqVo returnReqVo) throws Exception {
 		return returnReqDAO.deleteReturnReq(returnReqVo);
 	}
-	
-	public int insertReturnReqAndClaimStatus(ReturnReqVo vo){
-		return returnReqDAO.insertReturnReqAndClaimStatus(vo);
-	}
-	public int insertAdditionalReqAndUpdateClaimStatus(ReturnReqVo returnReqVo){
-		return returnReqDAO.insertAdditionalReqAndUpdateClaimStatus(returnReqVo);
-	}
-	
-	
 }
