@@ -340,7 +340,8 @@
 		u.user_name,
 		r.amount,
 		e.emp_name,
-		c.status
+		c.status,
+		e.emp_no
 		FROM CLAIM c
 		LEFT JOIN USER u ON c.ID = u.ID
 		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
