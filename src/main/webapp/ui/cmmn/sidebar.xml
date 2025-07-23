@@ -16,6 +16,11 @@
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
 	dashboard.addClass("selected");
+    scwin.role = JSON.parse(localStorage.getItem("employee")).role;
+
+    if (scwin.role === "실무자") {
+        go_assignRule.hide();
+    }
 };
 
 function removeSClass() {
@@ -38,9 +43,8 @@ scwin.dashboard_onclick = function () {
 scwin.my_claim_onclick = function () {
     removeSClass();
     my_claim.addClass("selected");
-
-    let role = JSON.parse(localStorage.getItem("employee")).role;
-    if (role === "실무자") {
+    
+    if (scwin.role === "실무자") {
         movePage("/InsWebApp/ui/claim/my-claims.xml");
     } else {
         movePage("/InsWebApp/ui/approval/my-approval.xml")
