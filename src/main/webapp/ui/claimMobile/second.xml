@@ -285,6 +285,7 @@ scwin.submission1_submitdone = function (e) {
 .arrowUpIcon { background-image: url('/images/arrow_up_icon.png'); }]]></style>
     </head>
     <body ev:onpageload="scwin.onpageload">
+        <w2:wframe src="/InsWebApp/ui/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
         <xf:group class="sub_contents2" id="wrapper" style="">
             <xf:group class="header-section" id="header" style="">
                 <w2:textbox class="step_tit" id="" label="사고일" style="" tagname=""></w2:textbox>

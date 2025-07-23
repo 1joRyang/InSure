@@ -5,6 +5,7 @@
     xmlns:w2="http://www.inswave.com/websquare"
     xmlns:xf="http://www.w3.org/2002/xforms">
     <head>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     	<w2:type>DEFAULT</w2:type>
     	<w2:buildDate />
     	<xf:model>
@@ -86,6 +87,7 @@
     	<w2:css src="/css/custom.css"></w2:css>
     	<w2:js src="/js/final_check.js"></w2:js>
     	<w2:engine-version>5.0.0</w2:engine-version>
+        <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
         <script lazy="false" type="text/javascript"><![CDATA[scwin.isEditMode = false;
 scwin.onpageload = function() {
     // 로그인한 사용자 기본 정보 서버에 요청
@@ -142,7 +144,10 @@ scwin.btnNext_onclick = function (e) {
         dma_step4.set("accountNo", defaultAccountInfo[1].replace(/-/g,''));
         dma_step4.set("bankCode","DEFAULT_BANK_CODE");
         dma_step4.set("accountHolder", accountHolderPart[1]);
-        alert("선택된 계좌: " + txt_default_account.getLabel());
+        scwin.twoBtnAlert({
+            icon:"question",
+            title: "선택된 계좌: " + txt_default_account.getLabel()
+        })
 
     } else if(selectedOption === "NEW"){
         var bankCode = sbx_new_bank.getValue();
@@ -151,7 +156,10 @@ scwin.btnNext_onclick = function (e) {
         var accountHolder = inp_new_accountHolder.getValue();
 
         if(!bankCode || !accountNo || !accountHolder){
-            alert("은행과 계좌번호를 모두 입력해주세요.");
+            scwin.toastAlertMobile({
+                icon: 'warning',
+                title: '은행과 계좌번호를 모두 입력해주세요.'
+            });
             return;
         }
         dma_step4.set("bankCode", bankCode);
@@ -215,7 +223,7 @@ scwin.sbm_getUserInfo_submitdone = function (e) {
     }
 };
 ]]></script>
-    	<style type="text/css"><![CDATA[/* custom.css */
+        <style type="text/css"><![CDATA[/* custom.css */
 
 /*
   ======================================
@@ -389,6 +397,7 @@ scwin.sbm_getUserInfo_submitdone = function (e) {
 .arrowUpIcon { background-image: url('/images/arrow_up_icon.png'); }]]></style>
     </head>
     <body ev:onpageload="scwin.onpageload">
+        <w2:wframe src="/InsWebApp/ui/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
         <xf:group class="sub_contents2" id="wrapper" style="">
             <xf:group class="header-section" id="header" style="">
                 <w2:textbox class="step_tit" id="" label="보험금계좌" style="" tagname=""></w2:textbox>

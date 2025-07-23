@@ -166,17 +166,17 @@ scwin.search_input_back_onkeydown = function(e) {
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
     		style="">
     		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
-    			style="">
+    			style="border-bottom: .2px solid #3674B5;padding-bottom: 20px;">
     			<w2:textbox class="pgt_tit" id="" label="주민번호 조회" style="" tagname=""></w2:textbox>
     		</xf:group>
     		<xf:group style="" id="" class="search-section">
     			<w2:textbox style="" id="" label="주민번호" class="search-label"></w2:textbox>
     			<xf:group style="" id="" class="search-row">
-    				<xf:input id="search_input_front" style="" class="search-input" placeholder="주민번호를 입력하세요."
+    				<xf:input id="search_input_front" style="" class="search-input" placeholder="주민번호 앞자리를 입력하세요."
     					ev:onkeydown="scwin.search_input_front_onkeydown">
     				</xf:input>
     				<w2:textbox id="" label="-" style=""></w2:textbox>
-    				<xf:input id="search_input_back" style="" class="search-input" ev:onkeydown="scwin.search_input_back_onkeydown"></xf:input>
+    				<xf:input id="search_input_back" style="" class="search-input" ev:onkeydown="scwin.search_input_back_onkeydown" placeholder="주민번호 뒷자리를 입력하세요."></xf:input>
     				<w2:button style="" id="btn_search" class="search-btn" label="검색" ev:onclick="scwin.btn_search_onclick"></w2:button>
     			</xf:group>
     		</xf:group>
@@ -198,11 +198,11 @@ scwin.search_input_back_onkeydown = function(e) {
     			</xf:group>
     		</xf:group>
     		<xf:group style="" id="" class="">
-    			<xf:group tagname="caption" text="청구목록" class="results-title"></xf:group>
+    			<xf:group tagname="caption" text="고객 청구목록" class="results-title"></xf:group>
     			<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
     				meta_snippetName="6_01 그리드" style="">
     				<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dlt_request_list"
-    					focusMode="row" id="" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 153px;">
+    					focusMode="row" id="" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 153px;margin-top: 7px;">
     					<w2:caption id="caption3" style="" value="this is a grid caption."></w2:caption>
     					<w2:header id="header" style="" class="gvw-header">
     						<w2:row id="header-row" style="">
