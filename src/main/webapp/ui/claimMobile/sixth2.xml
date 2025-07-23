@@ -35,6 +35,10 @@
     			processMsg="청구서를 제출하고 있습니다..." ev:submit="" ev:submitdone="scwin.sbm_submitFinalClaim_submitdone"
     			ev:submiterror="scwin.sbm_submitFinalClaim_submiterror" abortTrigger="">
     		</xf:submission>
+    		<xf:submission id="sbm_ClaimSaveDone" action="/InsWebApp/ClaimSaveDone.pwkjson" method="post" mediatype="application/json"
+    			ref="" target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg=""
+    			ev:submit="" ev:submitdone="scwin.sbm_ClaimSaveDone_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
     	</xf:model>
     	<w2:leaf>true</w2:leaf>
     	<w2:fileName>final_check.xml</w2:fileName>
@@ -152,12 +156,19 @@ scwin.btn_edit_docs_onclick = function (e) {
 
 scwin.sbm_submitFinalClaim_submitdone = function (e) {
     alert("보험금 청구가 정상적으로 접수되었습니다.");
+    $p.executeSubmission("sbm_ClaimSaveDone");
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
 };
 
 scwin.sbm_submitFinalClaim_submiterror = function (e) {
     var errorMessage = e.responseJSON.elHeader.resMsg;
     alert(errorMessage);
+};
+
+scwin.sbm_ClaimSaveDone_submitdone = function (e) {
+    console.log("후속처리",e);
+    
+    
 };
 ]]></script>
     	<style type="text/css"><![CDATA[/* custom.css */
