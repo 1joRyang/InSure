@@ -291,7 +291,6 @@ scwin.sbm_getTreatment_submitdone = function (e) {
         scwin.isEdit ? $c.sbm.execute(sbm_updatePaymentInfo) : $c.sbm.execute(sbm_insertPaymentInfo);
 
         let requestData = extractClaimItemData(scwin.treatmentId, scwin.claim.claimNo);
-        console.log(requestData);
         requestData.forEach(item => {
             // item마다 저장 요청 실행
             scwin.isEdit ? $c.sbm.execute(sbm_updateClaimItems, {"elData": item}) : $c.sbm.execute(sbm_insertClaimItems, {"elData": item});
@@ -391,19 +390,20 @@ scwin.btn_ocr_onclick = function (e) {
     console.log(scwin.imgUrl);
 
     $.ajax({
-        url: 'http://localhost:5000/process',
+        url: 'http://localhost:5000/ocr',
         type: 'POST',
         data: formData,
         contentType: false,  // multipart/form-data 자동 처리
         processData: false,  // FormData 객체를 문자열로 변환하지 않음
         success: function (response) {
-            console.log(response.data.rows);
-            scwin.createTable(response.data.rows);
+            console.log(response.data);
+            scwin.createTable(response.data);
         },
         error: function (xhr, status, error) {
             console.log(error);
         }
     }); 
+    //scwin.createTable(scwin.data_garo2)
 };
 
 scwin.btn_before_onclick = function (e) {
