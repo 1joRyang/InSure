@@ -63,7 +63,7 @@
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getDoneList" action="/InsWebApp/CLAIMManagerwStatusList.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_getdon","key":"elData"}' target='data:json,{"id":"dl_claimDone","key":"claimListwStatusVoList"}' encoding="UTF-8"
-        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getDoneList_submitdone"
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
@@ -100,13 +100,25 @@ function moveNsave(rowData) {
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
 }
 
-scwin.grid_w_oncelldblclick = function (rowIndex, columnIndex, columnId) {
-    let rowData = grid_w.getRowJSON(rowIndex);
+scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
+    let rowData = grd_d.getRowJSON(rowIndex);
     moveNsave(rowData);
 };
 
-scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
-    let rowData = grid.getRowJSON(rowIndex);
+scwin.sbm_getDoneList_submitdone = function (e) {
+    const len = dl_claimDone.getRowCount();
+    
+    for (let i = 0; i < len; i++) {
+        const status = dl_claimDone.getCellData(i, "status");
+
+        if (status !== "결재반려") {
+            dl_claimDone.setCellData(i, "status", "결재완료");
+        }
+    }
+};
+
+scwin.grid_w_oncelldblclick = function (rowIndex, columnIndex, columnId) {
+    let rowData = grid_w.getRowJSON(rowIndex);
     moveNsave(rowData);
 };
 ]]></script>
@@ -145,7 +157,7 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     						meta_snippetName="6_01 그리드" style="margin-top: 20px">
     						<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dl_claimWait"
     							focusMode="row" id="grid_w" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 500px;"
-    							ev:oncellclick="scwin.grid_oncellclick" readOnly="true" ev:oncelldblclick="scwin.grid_w_oncelldblclick">
+    							readOnly="true" ev:oncelldblclick="scwin.grid_w_oncelldblclick">
     							<w2:caption id="caption9" style="" value="this is a grid caption."></w2:caption>
     							<w2:header id="header2" style="">
     								<w2:row id="row3" style="">
@@ -193,7 +205,7 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     										displayMode="label">
     									</w2:column>
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
-    										displayMode="label">
+    										displayMode="label" customFormatter="scwin.statusFmt">
     									</w2:column>
     									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
     									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
@@ -206,8 +218,7 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     					<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
     						meta_snippetName="6_01 그리드" style="margin-top: 20px">
     						<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dl_claimDone"
-    							focusMode="row" id="grd_d" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 500px;" readOnly="true"
-    							ev:oncelldblclick="scwin.grd_d_oncelldblclick">
+    							focusMode="row" id="grd_d" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 500px;" readOnly="true" ev:oncelldblclick="scwin.grd_d_oncelldblclick">
     							<w2:caption id="caption7" style="" value="this is a grid caption."></w2:caption>
     							<w2:header id="header2" style="">
     								<w2:row id="row3" style="">
@@ -255,7 +266,7 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     										displayMode="label">
     									</w2:column>
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
-    										displayMode="label">
+    										displayMode="label" customFormatter="scwin.statusFmt">
     									</w2:column>
     									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
     									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
