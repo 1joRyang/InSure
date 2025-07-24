@@ -93,6 +93,17 @@ public class SupplementController {
     public void addSupplementDocs(SuppVo paramVo) throws Exception {
         supplementService.addSupplementDocs(paramVo);
     }
+    
+    /**
+     * 보완 요청을 완료 처리한다.
+     */
+    @ElService(key = "updateSupplementComplete")
+    @RequestMapping(value = "updateSupplementComplete")    
+    @ElDescription(sub = "보완 요청 완료 처리", desc = "보완 요청을 완료 상태로 변경하고 완료 시간을 기록한다.")               
+    public void updateSupplementComplete(SuppVo suppVo) throws Exception {
+        supplementService.updateSupplementCompleted(suppVo);
+    }
+    
     	 
     
 }

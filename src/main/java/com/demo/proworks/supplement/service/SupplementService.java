@@ -7,4 +7,6 @@ public interface SupplementService {
 	public SuppVo selectSupplementInfo(SuppVo suppVo) throws Exception;
 	
 	public void  addSupplementDocs(SuppVo vo) throws Exception;
+	
+	public int updateSupplementCompleted(SuppVo vo) throws Exception;
 }

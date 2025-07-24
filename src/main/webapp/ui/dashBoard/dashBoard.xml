@@ -197,159 +197,157 @@
     </head>
     <body ev:onpageload="scwin.onpageload">
         <xf:group class="sub_contents" id="">
-            <xf:group class="dashboard_wrap" id="">
-                <xf:group class="notification_bar" id="">
-                    <w2:textbox label="긴급 심사 요청 - 고객 청구건 3건이 승인 대기 중입니다." tagname="span"></w2:textbox>
-                </xf:group>
+        	<xf:group class="dashboard_wrap" id="">
+        		<xf:group class="notification_bar" id="">
+        			<w2:textbox label="긴급 심사 요청 - 고객 청구건 3건이 승인 대기 중입니다." tagname="span"></w2:textbox>
+        		</xf:group>
 
-                <w2:div class="flex-row">
-                    <xf:group class="panel flex-1">
-                        <xf:group class="panel_header">
-                            <w2:textbox class="panel_title" label="오늘의 처리 현황" tagname="h3"></w2:textbox>
-                        </xf:group>
-                        <xf:group class="panel_content">
-                            <w2:div class="status_item">
-                                <w2:textbox class="status_label" label="처리 대기" tagname="span"></w2:textbox>
-                                <w2:textbox class="status_value" label="23건" tagname="span"></w2:textbox>
-                            </w2:div>
-                            <w2:div class="status_item">
-                                <w2:textbox class="status_label" label="심사 중" tagname="span"></w2:textbox>
-                                <w2:textbox class="status_value red" label="15건" tagname="span"></w2:textbox>
-                            </w2:div>
-                            <w2:div class="status_item">
-                                <w2:textbox class="status_label" label="완료" tagname="span"></w2:textbox>
-                                <w2:textbox class="status_value" label="47건" tagname="span"></w2:textbox>
-                            </w2:div>
-                            <w2:progress id="progress1" value="67.1" style="height: 10px; margin-top: 15px;"></w2:progress>
-                        </xf:group>
-                    </xf:group>
-                    <xf:group class="panel flex-1">
-                        <xf:group class="panel_header">
-                            <w2:textbox class="panel_title" label="보완 요청 현황" tagname="h3"></w2:textbox>
-                        </xf:group>
-                        <xf:group class="panel_content">
-                            <w2:div class="status_item">
-                                <w2:textbox class="status_label" label="보완 요청" tagname="span"></w2:textbox>
-                                <w2:textbox class="status_value" label="12건" tagname="span"></w2:textbox>
-                            </w2:div>
-                            <w2:div class="status_item">
-                                <w2:textbox class="status_label" label="보완 접수" tagname="span"></w2:textbox>
-                                <w2:textbox class="status_value" label="9건" tagname="span"></w2:textbox>
-                            </w2:div>
-                            <w2:div class="status_item">
-                                <w2:textbox class="status_label" label="기한 임박" tagname="span"></w2:textbox>
-                                <w2:textbox class="status_value red" label="3건" tagname="span"></w2:textbox>
-                            </w2:div>
-                            <w2:div class="status_item" style="margin-top:10px; border-top: 1px solid #eee; padding-top:10px;">
-                                <w2:textbox class="status_label" label="평균 보완 시간" tagname="span"></w2:textbox>
-                                <w2:textbox class="status_value" label="2.3일" tagname="span"></w2:textbox>
-                            </w2:div>
-                        </xf:group>
-                    </xf:group>
-                    <xf:group class="panel flex-1">
-                        <xf:group class="panel_header">
-                            <w2:textbox class="panel_title" label="고객 청구 모니터링" tagname="h3"></w2:textbox>
-                        </xf:group>
-                         <xf:group class="panel_content">
-                            <w2:div class="status_item">
-                                <w2:textbox class="status_label" label="500만원 이상" tagname="span"></w2:textbox>
-                                <w2:textbox class="status_value" label="7건" tagname="span"></w2:textbox>
-                            </w2:div>
-                            <w2:div class="status_item">
-                                <w2:textbox class="status_label" label="1000만원 이상" tagname="span"></w2:textbox>
-                                <w2:textbox class="status_value" label="2건" tagname="span"></w2:textbox>
-                            </w2:div>
-                            <w2:div class="status_item">
-                                <w2:textbox class="status_label" label="이상 청구 의심" tagname="span"></w2:textbox>
-                                <w2:textbox class="status_value red" label="5건" tagname="span"></w2:textbox>
-                            </w2:div>
-                            <w2:div class="status_item">
-                                <w2:textbox class="status_label" label="전문가 검토 대기" tagname="span"></w2:textbox>
-                                <w2:textbox class="status_value" label="3건" tagname="span"></w2:textbox>
-                            </w2:div>
-                        </xf:group>
-                    </xf:group>
-                    <xf:group class="panel flex-1">
-                         <xf:group class="panel_header">
-                            <w2:textbox class="panel_title" label="이번 달 성과" tagname="h3"></w2:textbox>
-                        </xf:group>
-                         <xf:group class="panel_content">
-                            <w2:div class="status_item">
-                                <w2:textbox class="status_label" label="총 처리 건수" tagname="span"></w2:textbox>
-                                <w2:textbox class="status_value" label="1,247건" tagname="span"></w2:textbox>
-                            </w2:div>
-                            <w2:div class="status_item">
-                                <w2:textbox class="status_label" label="평균 처리 시간" tagname="span"></w2:textbox>
-                                <w2:textbox class="status_value" label="1.8일" tagname="span"></w2:textbox>
-                            </w2:div>
-                            <w2:div class="status_item">
-                                <w2:textbox class="status_label" label="고객 만족도" tagname="span"></w2:textbox>
-                                <w2:textbox class="status_value" label="94.2%" tagname="span"></w2:textbox>
-                            </w2:div>
-                            <w2:textbox class="status_label" label="목표 달성률" style="margin-top:15px;"></w2:textbox>
-                            <w2:progress id="progress2" value="102" style="height: 10px;" valueLabel="102%"></w2:progress>
-                        </xf:group>
-                    </xf:group>
-                </w2:div>
+        		<w2:div class="flex-row">
+        			<xf:group class="panel flex-1">
+        				<xf:group class="panel_header">
+        					<w2:textbox class="panel_title" label="오늘의 처리 현황" tagname="h3"></w2:textbox>
+        				</xf:group>
+        				<xf:group class="panel_content">
+        					<w2:div class="status_item">
+        						<w2:textbox class="status_label" label="처리 대기" tagname="span"></w2:textbox>
+        						<w2:textbox class="status_value" label="23건" tagname="span"></w2:textbox>
+        					</w2:div>
+        					<w2:div class="status_item">
+        						<w2:textbox class="status_label" label="심사 중" tagname="span"></w2:textbox>
+        						<w2:textbox class="status_value red" label="15건" tagname="span"></w2:textbox>
+        					</w2:div>
+        					<w2:div class="status_item">
+        						<w2:textbox class="status_label" label="완료" tagname="span"></w2:textbox>
+        						<w2:textbox class="status_value" label="47건" tagname="span"></w2:textbox>
+        					</w2:div>
+        					<w2:progress id="progress1" value="67.1" style="height: 10px; margin-top: 15px;"></w2:progress>
+        				</xf:group>
+        			</xf:group>
+        			<xf:group class="panel flex-1">
+        				<xf:group class="panel_header">
+        					<w2:textbox class="panel_title" label="보완 요청 현황" tagname="h3"></w2:textbox>
+        				</xf:group>
+        				<xf:group class="panel_content">
+        					<w2:div class="status_item">
+        						<w2:textbox class="status_label" label="보완 요청" tagname="span"></w2:textbox>
+        						<w2:textbox class="status_value" label="12건" tagname="span"></w2:textbox>
+        					</w2:div>
+        					<w2:div class="status_item">
+        						<w2:textbox class="status_label" label="보완 접수" tagname="span"></w2:textbox>
+        						<w2:textbox class="status_value" label="9건" tagname="span"></w2:textbox>
+        					</w2:div>
+        					<w2:div class="status_item">
+        						<w2:textbox class="status_label" label="기한 임박" tagname="span"></w2:textbox>
+        						<w2:textbox class="status_value red" label="3건" tagname="span"></w2:textbox>
+        					</w2:div>
+        					<w2:div class="status_item" style="margin-top:10px; border-top: 1px solid #eee; padding-top:10px;">
+        						<w2:textbox class="status_label" label="평균 보완 시간" tagname="span"></w2:textbox>
+        						<w2:textbox class="status_value" label="2.3일" tagname="span"></w2:textbox>
+        					</w2:div>
+        				</xf:group>
+        			</xf:group>
+        			<xf:group class="panel flex-1">
+        				<xf:group class="panel_header">
+        					<w2:textbox class="panel_title" label="고객 청구 모니터링" tagname="h3"></w2:textbox>
+        				</xf:group>
+        				<xf:group class="panel_content">
+        					<w2:div class="status_item">
+        						<w2:textbox class="status_label" label="500만원 이상" tagname="span"></w2:textbox>
+        						<w2:textbox class="status_value" label="7건" tagname="span"></w2:textbox>
+        					</w2:div>
+        					<w2:div class="status_item">
+        						<w2:textbox class="status_label" label="1000만원 이상" tagname="span"></w2:textbox>
+        						<w2:textbox class="status_value" label="2건" tagname="span"></w2:textbox>
+        					</w2:div>
+        					<w2:div class="status_item">
+        						<w2:textbox class="status_label" label="이상 청구 의심" tagname="span"></w2:textbox>
+        						<w2:textbox class="status_value red" label="5건" tagname="span"></w2:textbox>
+        					</w2:div>
+        					<w2:div class="status_item">
+        						<w2:textbox class="status_label" label="전문가 검토 대기" tagname="span"></w2:textbox>
+        						<w2:textbox class="status_value" label="3건" tagname="span"></w2:textbox>
+        					</w2:div>
+        				</xf:group>
+        			</xf:group>
+        			<xf:group class="panel flex-1">
+        				<xf:group class="panel_header">
+        					<w2:textbox class="panel_title" label="이번 달 성과" tagname="h3"></w2:textbox>
+        				</xf:group>
+        				<xf:group class="panel_content">
+        					<w2:div class="status_item">
+        						<w2:textbox class="status_label" label="총 처리 건수" tagname="span"></w2:textbox>
+        						<w2:textbox class="status_value" label="1,247건" tagname="span"></w2:textbox>
+        					</w2:div>
+        					<w2:div class="status_item">
+        						<w2:textbox class="status_label" label="평균 처리 시간" tagname="span"></w2:textbox>
+        						<w2:textbox class="status_value" label="1.8일" tagname="span"></w2:textbox>
+        					</w2:div>
+        					<w2:div class="status_item">
+        						<w2:textbox class="status_label" label="고객 만족도" tagname="span"></w2:textbox>
+        						<w2:textbox class="status_value" label="94.2%" tagname="span"></w2:textbox>
+        					</w2:div>
+        					<w2:textbox class="status_label" label="목표 달성률" style="margin-top:15px;"></w2:textbox>
+        					<w2:progress id="progress2" value="102" style="height: 10px;" valueLabel="102%"></w2:progress>
+        				</xf:group>
+        			</xf:group>
+        		</w2:div>
 
-                <w2:div class="flex-row">
-                    <xf:group class="panel flex-2">
-                        <xf:group class="panel_header">
-                            <w2:textbox class="panel_title" label="주간 처리 현황 추이" tagname="h3"></w2:textbox>
-                        </xf:group>
-                        <w2:fusionchart id="chart_weekly" style="width: 100%; height: 250px;" renderer="area2d" dataList="dlt_weeklyStatus"
-                            labelNode="label" series="처리완료:value1,신규접수:value2" drawType="javascript"
-                            paletteColors="#367BF5,#9FC1FB" plotFillAlpha="70">
-                        </w2:fusionchart>
-                    </xf:group>
-                    <xf:group class="panel flex-1">
-                        <xf:group class="panel_header">
-                            <w2:textbox class="panel_title" label="청구 유형별 분포" tagname="h3"></w2:textbox>
-                        </xf:group>
-                        <w2:fusionchart id="chart_type" style="width: 100%; height: 250px;" renderer="doughnut2d"
-                            dataList="dlt_claimType" labelNode="label" valueNode="value" drawType="javascript"
-                            showPercentValues="1" enableSmartLabels="0" showLegend="1" legendPosition="bottom"
-                            paletteColors="#4285F4,#F1BC00,#EA4335,#34A853,#6c757d">
-                        </w2:fusionchart>
-                    </xf:group>
-                </w2:div>
-                
-                <w2:div class="flex-row">
-                    <xf:group class="panel flex-1">
-                        <xf:group class="panel_header">
-                            <w2:textbox class="panel_title" label="월별 승인률 추이" tagname="h3"></w2:textbox>
-                        </xf:group>
-                        <w2:fusionchart id="chart_monthly" style="width: 100%; height: 200px;" renderer="column2d" dataList="dlt_monthlyApproval"
-                            labelNode="label" valueNode="value" drawType="javascript" yAxisName="승인률(%)" numberSuffix="%"
-                            yAxisMinValue="88" yAxisMaxValue="100" paletteColors="#4A8BFA">
-                        </w2:fusionchart>
-                    </xf:group>
-                    <xf:group class="panel flex-1">
-                        <xf:group class="panel_header">
-                            <w2:textbox class="panel_title" label="처리 시간 분포" tagname="h3"></w2:textbox>
-                        </xf:group>
-                        <w2:fusionchart id="chart_proc_time" style="width: 100%; height: 200px;" renderer="column2d"
-                            dataList="dlt_processingTime" labelNode="label" valueNode="value" drawType="javascript"
-                            yAxisName="건수" paletteColors="#367BF5,#367BF5,#367BF5,#F1BC00,#EA4335,#6c757d">
-                        </w2:fusionchart>
-                    </xf:group>
-                </w2:div>
+        		<w2:div class="flex-row">
+        			<xf:group class="panel flex-2">
+        				<xf:group class="panel_header">
+        					<w2:textbox class="panel_title" label="주간 처리 현황 추이" tagname="h3"></w2:textbox>
+        				</xf:group>
+        				<w2:fusionchart id="chart_weekly" style="width: 100%; height: 250px;" renderer="area2d" dataList="dlt_weeklyStatus"
+        					labelNode="label" series="처리완료:value1,신규접수:value2" drawType="javascript" paletteColors="#367BF5,#9FC1FB" plotFillAlpha="70">
+        				</w2:fusionchart>
+        			</xf:group>
+        			<xf:group class="panel flex-1">
+        				<xf:group class="panel_header">
+        					<w2:textbox class="panel_title" label="청구 유형별 분포" tagname="h3"></w2:textbox>
+        				</xf:group>
+        				<w2:fusionchart id="chart_type" style="width: 100%; height: 250px;" renderer="doughnut2d" dataList="dlt_claimType"
+        					labelNode="label" valueNode="value" drawType="javascript" showPercentValues="1" enableSmartLabels="0" showLegend="1"
+        					legendPosition="bottom" paletteColors="#4285F4,#F1BC00,#EA4335,#34A853,#6c757d">
+        				</w2:fusionchart>
+        			</xf:group>
+        		</w2:div>
 
-                <xf:group class="kpi-card-row" id="">
-                    <xf:group class="kpi-card">
-                        <w2:textbox class="kpi-title" label="평균 처리 시간" tagname="p"></w2:textbox>
-                        <w2:textbox class="kpi-value" label="1.8일" tagname="p"></w2:textbox>
-                    </xf:group>
-                    <xf:group class="kpi-card">
-                        <w2:textbox class="kpi-title" label="승인률" tagname="p"></w2:textbox>
-                        <w2:textbox class="kpi-value" label="94.2%" tagname="p"></w2:textbox>
-                    </xf:group>
-                    <xf:group class="kpi-card">
-                        <w2:textbox class="kpi-title" label="오늘 처리" tagname="p"></w2:textbox>
-                        <w2:textbox class="kpi-value" label="85건" tagname="p"></w2:textbox>
-                    </xf:group>
-                </xf:group>
-            </xf:group>
+        		<w2:div class="flex-row">
+        			<xf:group class="panel flex-1">
+        				<xf:group class="panel_header">
+        					<w2:textbox class="panel_title" label="월별 승인률 추이" tagname="h3"></w2:textbox>
+        				</xf:group>
+        				<w2:fusionchart id="chart_monthly" style="width: 100%; height: 200px;" renderer="column2d"
+        					dataList="dlt_monthlyApproval" labelNode="label" valueNode="value" drawType="javascript" yAxisName="승인률(%)" numberSuffix="%"
+        					yAxisMinValue="88" yAxisMaxValue="100" paletteColors="#4A8BFA">
+        				</w2:fusionchart>
+        			</xf:group>
+        			<xf:group class="panel flex-1">
+        				<xf:group class="panel_header">
+        					<w2:textbox class="panel_title" label="처리 시간 분포" tagname="h3"></w2:textbox>
+        				</xf:group>
+        				<w2:fusionchart id="chart_proc_time" style="width: 100%; height: 200px;" renderer="column2d"
+        					dataList="dlt_processingTime" labelNode="label" valueNode="value" drawType="javascript" yAxisName="건수"
+        					paletteColors="#367BF5,#367BF5,#367BF5,#F1BC00,#EA4335,#6c757d">
+        				</w2:fusionchart>
+        			</xf:group>
+        		</w2:div>
+
+        		<xf:group class="kpi-card-row" id="">
+        			<xf:group class="kpi-card">
+        				<w2:textbox class="kpi-title" label="평균 처리 시간" tagname="p"></w2:textbox>
+        				<w2:textbox class="kpi-value" label="1.8일" tagname="p"></w2:textbox>
+        			</xf:group>
+        			<xf:group class="kpi-card">
+        				<w2:textbox class="kpi-title" label="승인률" tagname="p"></w2:textbox>
+        				<w2:textbox class="kpi-value" label="94.2%" tagname="p"></w2:textbox>
+        			</xf:group>
+        			<xf:group class="kpi-card">
+        				<w2:textbox class="kpi-title" label="오늘 처리" tagname="p"></w2:textbox>
+        				<w2:textbox class="kpi-value" label="85건" tagname="p"></w2:textbox>
+        			</xf:group>
+        		</xf:group>
+        	</xf:group>
         </xf:group>
     </body>
 </html>
