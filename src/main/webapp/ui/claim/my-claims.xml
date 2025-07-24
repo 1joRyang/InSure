@@ -148,7 +148,6 @@ function moveNsave(rowData) {
         empNo:rowData.emp_no,
         status: rowData.status
     };
-    console.log(rowData);
     localStorage.setItem("claim", JSON.stringify(claim));
     
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";

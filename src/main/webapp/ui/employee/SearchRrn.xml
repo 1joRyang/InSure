@@ -18,6 +18,8 @@
         				<w2:column dataType="number" name="청구금액" id="amount"></w2:column>
         				<w2:column dataType="text" name="처리자" id="emp_name"></w2:column>
         				<w2:column dataType="text" name="상태" id="status"></w2:column>
+        				<w2:column dataType="text" name="id" id="id"></w2:column>
+        				<w2:column dataType="text" name="emp_no" id="emp_no"></w2:column>
         			</w2:columnInfo>
         		</w2:dataList>
         		<w2:dataMap baseNode="map" id="dm_customer_info">
@@ -32,13 +34,14 @@
         	<w2:workflowCollection />
         	<xf:submission id="sbm_searchClaimList" action="/InsWebApp/CLAIMFullJoinListByRrn.pwkjson" method="post"
         		mediatype="application/json" ref='data:json,{"id":"dm_customer_info","key":"elData"}'
-        		target='data:json,{"id":"dlt_request_list","key":"elData"}' encoding="UTF-8"
-        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
-        		ev:submitdone="scwin.sbm_searchClaimList_submitdone" ev:submiterror="" abortTrigger="">
+        		target='data:json,{"id":"dlt_request_list","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_searchClaimList_submitdone"
+        		ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_searchUserInfo" action="/InsWebApp/UserInfoByRrn.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_customer_info","key":"elData"}' target=''
-        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="검색 중.." ev:submit=""
-        		ev:submitdone="scwin.sbm_searchUserInfo_submitdone" ev:submiterror="" abortTrigger="">
+        	<xf:submission id="sbm_searchUserInfo" action="/InsWebApp/UserInfoByRrn.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,{"id":"dm_customer_info","key":"elData"}' target='' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="검색 중.." ev:submit="" ev:submitdone="scwin.sbm_searchUserInfo_submitdone"
+        		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -71,6 +74,7 @@ scwin.onpageload = function() {
     
     // 초기화
     scwin.clearData();
+    grd_group.hide();
 };
 
 // 조회 버튼 클릭
@@ -148,6 +152,7 @@ scwin.sbm_searchUserInfo_submitdone = function(e) {
 
 // 청구목록 조회 완료 후
 scwin.sbm_searchClaimList_submitdone = function(e) {
+    grd_group.show();
     console.log("=== 청구목록 조회 응답 ===");
     console.log("전체 응답:", e.responseJSON);
     
@@ -165,6 +170,12 @@ scwin.sbm_searchClaimList_submitdone = function(e) {
     
     if(claimList && claimList.length > 0) {
         // 청구목록을 DataList에 설정
+        claimList.forEach(function(item) {
+            if (!item.amount) {  // amount 값이 없으면
+                item.amount = 0;  // 0
+            }
+        });
+
         dlt_request_list.setJSON(claimList);
         console.log("청구목록 설정 완료:", claimList.length + "건");
     } else {
@@ -175,7 +186,6 @@ scwin.sbm_searchClaimList_submitdone = function(e) {
             timer: 2000,
             showConfirmButton: false,
         });
-        //$c.win.alert("해당 고객의 청구 내역이 없습니다.");
     }
 };
 
@@ -190,6 +200,29 @@ scwin.search_input_back_onkeydown = function(e) {
     if (e.keyCode === 13) { // Enter key
         scwin.btn_search_onclick();
     }
+};
+
+function moveNsave(rowData) {
+    // claimNo, ID, user_name, status, empName
+    localStorage.removeItem("claimImg");
+    //console.log(rowData);
+    const claim = {
+        claimNo: rowData.claim_no,
+        ID: rowData.id,
+        empName: rowData.emp_name,
+        userName: rowData.user_name,
+        empNo:rowData.emp_no,
+        status: rowData.status
+    };
+    
+    localStorage.setItem("claim", JSON.stringify(claim));
+    
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
+}
+
+scwin.grid_rnn_oncelldblclick = function (rowIndex, columnIndex, columnId) {
+    let rowData = grid_rnn.getRowJSON(rowIndex);
+    moveNsave(rowData);
 };
 ]]></script>
     </head>
@@ -228,31 +261,42 @@ scwin.search_input_back_onkeydown = function(e) {
     				</xf:group>
     			</xf:group>
     		</xf:group>
-    		<xf:group style="" id="" class="">
+    		<xf:group style="" id="grd_group" class="">
     			<xf:group tagname="caption" text="고객 청구목록" class="results-title"></xf:group>
     			<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
     				meta_snippetName="6_01 그리드" style="">
     				<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dlt_request_list"
-    					focusMode="row" id="" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 153px;margin-top: 7px;">
+    					focusMode="row" id="grid_rnn" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 170px;margin-top: 7px;"
+    					ev:oncelldblclick="scwin.grid_rnn_oncelldblclick" readOnly="true">
     					<w2:caption id="caption3" style="" value="this is a grid caption."></w2:caption>
     					<w2:header id="header" style="" class="gvw-header">
     						<w2:row id="header-row" style="">
-    							<w2:column width="70" inputType="text" style="" id="column1" value="청구번호" displayMode="label" class=""></w2:column>
-    							<w2:column width="70" inputType="text" style="" id="column2" value="청구유형" displayMode="label" class=""></w2:column>
-    							<w2:column width="70" inputType="text" style="" id="column3" value="고객명" displayMode="label" class=""></w2:column>
-    							<w2:column width="70" inputType="text" style="" id="column4" value="청구금액" displayMode="label" class=""></w2:column>
-    							<w2:column width="70" inputType="text" style="" id="column5" value="처리자" displayMode="label" class=""></w2:column>
-    							<w2:column width="70" inputType="text" style="" id="column7" value="상태" displayMode="label" class=""></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column1" value="청구번호" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column2" value="청구유형" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column3" value="고객명" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column4" value="청구금액" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column5" value="처리자" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column7" value="상태" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column29" value="id" displayMode="label"
+    								hidden="true">
+    							</w2:column>
+    							<w2:column hidden="true" width="70" inputType="text" style="" id="column14" value="emp_no"
+    								displayMode="label">
+    							</w2:column>
     						</w2:row>
     					</w2:header>
     					<w2:gBody id="gBody" style="" class="gvw-body">
     						<w2:row id="gvw-row" style="">
-    							<w2:column width="70" inputType="text" style="" id="claim_no" value="" displayMode="label" class=""></w2:column>
-    							<w2:column width="70" inputType="text" style="" id="claim_type" value="" displayMode="label" class=""></w2:column>
-    							<w2:column width="70" inputType="text" style="" id="user_name" value="" displayMode="label" class=""></w2:column>
-    							<w2:column width="70" inputType="text" style="" id="amount" value="" displayMode="label" class=""></w2:column>
-    							<w2:column width="70" inputType="text" style="" id="emp_name" value="" displayMode="label" class=""></w2:column>
-    							<w2:column width="70" inputType="text" style="" id="status" value="" displayMode="label" class="" customFormatter="scwin.statusFmt"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="claim_no" value="" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="claim_type" value="" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="user_name" value="" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="amount" value="" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="emp_name" value="" class="" displayMode="label"></w2:column>
+    							<w2:column customFormatter="scwin.statusFmt" width="70" inputType="text" style="" id="status" value=""
+    								class="" displayMode="label">
+    							</w2:column>
+    							<w2:column width="70" inputType="text" style="" id="id" value="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
     						</w2:row>
     					</w2:gBody>
     				</w2:gridView>
