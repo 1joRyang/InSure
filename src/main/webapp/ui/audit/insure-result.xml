@@ -1802,7 +1802,6 @@ scwin.sbm_approveApprovalReq_submitdone = function (e) {
             title: '완료',
             text: '결재가 승인되었습니다.',
             icon: 'success',
-            confirmButtonText: '확인',
             timer: 1500
         }).then(() => {
             // 성공 시 페이지 이동
