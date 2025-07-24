@@ -167,17 +167,26 @@ scwin.btn_submit_onclick = function (e) {
     if (!returnMemo || returnMemo.trim() === "") {
         scwin.toastAlert({
             icon: 'warning',
-            title: '반송 사유를 입력해주세요.'
+            title: '반송 사유를 입력해주세요.',
+            customClass: {
+                container: 'high-z-index-alert'
+            },
+            didOpen: () => {
+                const container = Swal.getContainer();
+                if (container) {
+                    container.style.zIndex = '999999';
+                }
+            }
         });
         txa_additional_memo.focus();
         return false;
     }
 
     dma_returnReq.set("return_memo", returnMemo.trim());
-    
+
     console.log("존재 여부 확인 중...");
     console.log("CLAIM_NO:", dma_claimNo.get("claim_no"));
-    
+
     $p.executeSubmission("sbm_checkReturnReq");
 };
 
@@ -190,9 +199,9 @@ scwin.btn_close_onclick = function (e) {
 // 반송 요청 확인 완료
 scwin.sbm_checkReturnReq_submitdone = function (e) {
     var result = e.responseJSON;
-    
+
     console.log("확인 결과:", result);
-    
+
     if (result && result.success) {
         if (result.exists) {
             // 기존 데이터가 있으면 UPDATE
@@ -227,15 +236,14 @@ scwin.sbm_checkReturnReq_submiterror = function (e) {
 scwin.sbm_insertReturnReq_submitdone = function (e) {
     var result = e.responseJSON;
     console.log("INSERT 결과:", result);
-    
+
     if (result && result.success) {
         Swal.fire({
             icon: 'success',
             title: result.message,
-            confirmButtonText: '확인',
-            confirmButtonColor: '#4FACFE',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
+            showConfirmButton: false,
+            // allowOutsideClick: false,
+            // allowEscapeKey: false,
             customClass: {
                 container: 'high-z-index-alert'
             },
@@ -244,7 +252,12 @@ scwin.sbm_insertReturnReq_submitdone = function (e) {
                 if (container) {
                     container.style.zIndex = '999999';
                 }
-            }
+                setTimeout(function () {
+                    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+                }, 2000);
+            },
+
+
         }).then((result) => {
             if (result.isConfirmed) {
                 scwin.closeAndRedirect();
@@ -273,15 +286,14 @@ scwin.sbm_insertReturnReq_submiterror = function (e) {
 scwin.sbm_updateReturnReq_submitdone = function (e) {
     var result = e.responseJSON;
     console.log("UPDATE 결과:", result);
-    
+
     if (result && result.success) {
         Swal.fire({
             icon: 'success',
             title: result.message,
-            confirmButtonText: '확인',
-            confirmButtonColor: '#4FACFE',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
+            showConfirmButton: false,
+            // allowOutsideClick: false,
+            // allowEscapeKey: false,
             customClass: {
                 container: 'high-z-index-alert'
             },
@@ -290,6 +302,9 @@ scwin.sbm_updateReturnReq_submitdone = function (e) {
                 if (container) {
                     container.style.zIndex = '999999';
                 }
+                setTimeout(function () {
+                    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+                }, 2000);
             }
         }).then((result) => {
             if (result.isConfirmed) {
@@ -316,7 +331,7 @@ scwin.sbm_updateReturnReq_submiterror = function (e) {
 };
 
 // 팝업 닫기 및 페이지 이동
-scwin.closeAndRedirect = function() {
+scwin.closeAndRedirect = function () {
     $p.closePopup();
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
 };]]></script>
