@@ -221,7 +221,7 @@ scwin.search_input_back_onkeydown = function(e) {
     							<w2:column width="70" inputType="text" style="" id="user_name" value="" displayMode="label" class=""></w2:column>
     							<w2:column width="70" inputType="text" style="" id="amount" value="" displayMode="label" class=""></w2:column>
     							<w2:column width="70" inputType="text" style="" id="emp_name" value="" displayMode="label" class=""></w2:column>
-    							<w2:column width="70" inputType="text" style="" id="status" value="" displayMode="label" class=""></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="status" value="" displayMode="label" class="" customFormatter="scwin.statusFmt"></w2:column>
     						</w2:row>
     					</w2:gBody>
     				</w2:gridView>

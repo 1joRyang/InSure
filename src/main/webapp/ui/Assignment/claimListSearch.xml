@@ -380,7 +380,7 @@ function moveNsave(rowData) {
     							id="amount" blockSelect="false" displayMode="label">
     						</w2:column>
     						<w2:column width="100" inputType="text" style="" id="emp_name" value="" displayMode="label"></w2:column>
-    						<w2:column width="80" inputType="text" style="" id="status" value="" displayMode="label"></w2:column>
+    						<w2:column width="80" inputType="text" style="" id="status" value="" displayMode="label" customFormatter="scwin.statusFmt"></w2:column>
     						<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
     					</w2:row>
     				</w2:gBody>
