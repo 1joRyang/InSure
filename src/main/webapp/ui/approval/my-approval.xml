@@ -63,7 +63,7 @@
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getDoneList" action="/InsWebApp/CLAIMManagerwStatusList.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_getdon","key":"elData"}' target='data:json,{"id":"dl_claimDone","key":"claimListwStatusVoList"}' encoding="UTF-8"
-        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getDoneList_submitdone"
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
@@ -100,7 +100,7 @@ function moveNsave(rowData) {
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
 }
 
-scwin.grid_w_oncelldblclick = function (rowIndex, columnIndex, columnId) {
+scwin.grd_w_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     let rowData = grid_w.getRowJSON(rowIndex);
     moveNsave(rowData);
 };
@@ -108,6 +108,18 @@ scwin.grid_w_oncelldblclick = function (rowIndex, columnIndex, columnId) {
 scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     let rowData = grid.getRowJSON(rowIndex);
     moveNsave(rowData);
+};
+
+scwin.sbm_getDoneList_submitdone = function (e) {
+    const len = dl_claimDone.getRowCount();
+    
+    for (let i = 0; i < len; i++) {
+        const status = dl_claimDone.getCellData(i, "status");
+
+        if (status !== "결재반려") {
+            dl_claimDone.setCellData(i, "status", "결재완료");
+        }
+    }
 };
 ]]></script>
     </head>
@@ -193,7 +205,7 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     										displayMode="label">
     									</w2:column>
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
-    										displayMode="label">
+    										displayMode="label" customFormatter="scwin.statusFmt">
     									</w2:column>
     									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
     									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
@@ -255,7 +267,7 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     										displayMode="label">
     									</w2:column>
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
-    										displayMode="label">
+    										displayMode="label" customFormatter="scwin.statusFmt">
     									</w2:column>
     									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
     									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>

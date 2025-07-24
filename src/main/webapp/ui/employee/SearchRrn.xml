@@ -227,11 +227,6 @@ scwin.search_input_back_onkeydown = function(e) {
     				</w2:gridView>
     			</xf:group>
     		</xf:group>
-    		<xf:group style="" id="" class="status-badge">
-    			<xf:group style="" id="" text="완료" class="status-badge status-complete"></xf:group>
-    			<xf:group style="" id="" text="접수" class="status-badge status-pending"></xf:group>
-    			<xf:group style="" id="" text="심사 중" class="status-badge status-processing"></xf:group>
-    		</xf:group>
     	</xf:group>
     </body>
 </html>
