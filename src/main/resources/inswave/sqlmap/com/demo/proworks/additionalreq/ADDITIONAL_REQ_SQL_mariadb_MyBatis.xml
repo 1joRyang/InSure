@@ -113,22 +113,14 @@
 	</insert>
 
 	<update id="updateClaimStatus" parameterType="com.demo.proworks.additionalreq.vo.AdditionalReqCusVo">
-	<!-- 청구 상태를 업데이트한다. -->
 	
-	UPDATE CLAIM /* QueryID : com.demo.proworks.additionalreq.updateClaimStatus */
-	SET STATUS = 
-	<choose>
-	        <when test="request_type == 'RETURN'">
-                '반송'
-            </when>
-            <when test="request_type == 'SUPPLEMENT'">
-                '보완'
-            </when>
-            <otherwise>
-                '처리중'
-            </otherwise>
-        </choose>
-        WHERE CLAIM_NO = #{claim_no}
+	    UPDATE CLAIM 
+	    SET STATUS = '보완' 
+	    WHERE CLAIM_NO = #{claim_no}
     </update>
-
+	<select id="countAdditionalReq" parameterType="com.demo.proworks.additionalreq.vo.AdditionalReqVo" resultType="int">
+	    SELECT COUNT(*)   /* QueryID : com.demo.proworks.additionalreq.countAdditionalReq */
+	    FROM ADDITIONAL_REQ
+	    WHERE CLAIM_NO = #{claim_no}
+	</select>
 </mapper>

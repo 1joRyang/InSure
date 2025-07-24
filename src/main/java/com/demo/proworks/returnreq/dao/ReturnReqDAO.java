@@ -57,25 +57,25 @@ public class ReturnReqDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbst
     }
         
     /**
-     * 반송요청정보를 등록한다.
+     * 반송요청정보를 등록한다. (INSERT만)
      *  
      * @param  ReturnReqVo 반송요청정보
      * @return 번호
      * @throws ElException
      */
-    public int insertReturnReq(ReturnReqVo vo) throws ElException {    	
-        return insert("com.demo.proworks.returnreq.insertReturnReq", vo);
+    public int insertReturnReq(ReturnReqVo vo) throws ElException { 
+        return insert("com.demo.proworks.returnreq.insertReturnReqOnly", vo); 
     }
 
     /**
-     * 반송요청정보를 갱신한다.
+     * 반송요청정보를 갱신한다. (UPDATE만)
      *  
      * @param  ReturnReqVo 반송요청정보
      * @return 번호
      * @throws ElException
      */
     public int updateReturnReq(ReturnReqVo vo) throws ElException {
-        return update("com.demo.proworks.returnreq.updateReturnReq", vo);
+        return update("com.demo.proworks.returnreq.updateReturnReqOnly", vo);
     }
 
     /**
@@ -89,19 +89,45 @@ public class ReturnReqDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbst
         return delete("com.demo.proworks.returnreq.deleteReturnReq", vo);
     }
 
-	public int insertReturnReqAndClaimStatus(ReturnReqVo vo) {
-		int result = insert("com.demo.proworks.returnreq.upsertReturnReqAndClaimStatus",vo);
-		
-		update("com.demo.proworks.returnreq.updateClaimStatusReturn",vo);
-		return result;
-	}
+    /**
+     * 반송요청 존재 여부 확인
+     *  
+     * @param  ReturnReqVo 반송요청정보
+     * @return boolean 존재 여부
+     */
+    public boolean existsReturnReq(ReturnReqVo vo) {
+        try {
+            Integer count = (Integer) selectByPk("com.demo.proworks.returnreq.countReturnReq", vo);
+            return count != null && count > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
-	public int insertAdditionalReqAndUpdateClaimStatus(ReturnReqVo returnReqVo) {
-		
-		int result1 = insert("com.demo.proworks.returnreq.insertReturnReqAndClaimStatus",returnReqVo);
-		int result2=update("com.demo.proworks.returnreq.updateClaimStatusReturn",returnReqVo);
-		
-		return result1;
-	}
+    // ============================================
+    // 기존 메소드들 (호환성 유지)
+    // ============================================
 
+    public int insertReturnReqAndClaimStatus(ReturnReqVo vo) {
+        try {
+            int result = insert("com.demo.proworks.returnreq.upsertReturnReqAndClaimStatus", vo);
+            int updateResult = update("com.demo.proworks.returnreq.updateClaimStatusReturn", vo);
+            if (updateResult == 0) {
+                throw new RuntimeException("청구상태 업데이트에 실패했습니다. CLAIM_NO: " + vo.getClaim_no());
+            }
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException("반송요청 등록 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    public int insertAdditionalReqAndUpdateClaimStatus(ReturnReqVo returnReqVo) {
+        int result1 = insert("com.demo.proworks.returnreq.insertReturnReqAndClaimStatus",returnReqVo);
+        int result2=update("com.demo.proworks.returnreq.updateClaimStatusReturn",returnReqVo);
+        return result1;
+    }
+
+    public int updateClaimStatus(ReturnReqVo vo) {
+        return update("com.demo.proworks.returnreq.updateClaimStatusReturn", vo);
+    }
 }
