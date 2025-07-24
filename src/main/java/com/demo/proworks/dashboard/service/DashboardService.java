@@ -14,6 +14,7 @@ import com.demo.proworks.dashboard.vo.OutlierCountVo;
 import com.demo.proworks.dashboard.vo.SupplementStatusVo;
 import com.demo.proworks.dashboard.vo.TodayStatusVo;
 import com.demo.proworks.dashboard.vo.UrgentClaimVo;
+import com.demo.proworks.dashboard.vo.UrgentCountVo;
 import com.demo.proworks.dashboard.vo.WeeklyTrendVo;
 import com.inswave.elfw.exception.ElException;
 
@@ -57,6 +58,8 @@ public interface DashboardService {
     public List<ProcessingTimeVo> selectProcessingTimeTrend() throws ElException;
     
     public OutlierCountVo selectProcessingTimeOutlierCount() throws ElException;
+    
+    public int selectMyUrgentClaimCount(UrgentCountVo vo) throws ElException;
     
 
 }

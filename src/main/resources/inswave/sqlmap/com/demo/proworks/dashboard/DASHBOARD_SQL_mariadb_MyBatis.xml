@@ -102,63 +102,44 @@
 	    ]]>
 	</select>
 	
-	<select id="selectUrgentClaims" resultType="com.demo.proworks.dashboard.vo.UrgentClaimVo">
-	    /* QueryID : com.demo.proworks.dashboard.selectUrgentClaims */
+<select id="selectUrgentClaims" resultType="com.demo.proworks.dashboard.vo.UrgentClaimVo">
+	    /* QueryID : com.demo.proworks.dashboard.selectUrgentClaims (단순화) */
 	    <![CDATA[
 	    WITH RECURSIVE BusinessDays AS (
 	        SELECT
-	            c.claim_no,
-	            c.receipt_date,
-	            c.receipt_date AS next_day,
-	            0 AS business_day_count
-	        FROM
-	            CLAIM c
-	        WHERE
-	            c.status != '완료'
-	
-	        UNION ALL
-	
+	            c.claim_no, c.receipt_date, c.receipt_date AS next_day, 0 AS business_day_count
+	        FROM CLAIM c
+	        WHERE c.status NOT IN ('완료', '반송')
+	    UNION ALL
 	        SELECT
-	            b.claim_no,
-	            b.receipt_date,
-	            DATE_ADD(b.next_day, INTERVAL 1 DAY),
+	            b.claim_no, b.receipt_date, DATE_ADD(b.next_day, INTERVAL 1 DAY),
 	            b.business_day_count + CASE
 	                WHEN DAYOFWEEK(DATE_ADD(b.next_day, INTERVAL 1 DAY)) IN (1, 7) THEN 0
 	                WHEN EXISTS (SELECT 1 FROM TBL_HOLIDAYS h WHERE h.holiday_date = DATE(DATE_ADD(b.next_day, INTERVAL 1 DAY))) THEN 0
 	                ELSE 1
 	            END
-	        FROM
-	            BusinessDays b
-	        WHERE
-	            b.business_day_count < 3
+	        FROM BusinessDays b
+	        WHERE b.business_day_count < 3
 	    ),
 	    Deadlines AS (
-	        SELECT
-	            claim_no,
-	            MIN(next_day) AS deadline_date
-	        FROM
-	            BusinessDays
-	        WHERE
-	            business_day_count = 3
-	        GROUP BY
-	            claim_no
+	        SELECT claim_no, MIN(next_day) AS deadline_date
+	        FROM BusinessDays
+	        WHERE business_day_count = 3
+	        GROUP BY claim_no
 	    )
 	    SELECT
 	        d.claim_no AS claimNo,
-	        u.user_name AS userName,
+	        IFNULL(u.user_name, '-') AS userName,
 	        c.claim_content AS claimContent,
 	        c.claim_type AS claimType,
-	        e.emp_name AS empName,
+	        IFNULL(e.emp_name, '미배정') AS empName,
 	        c.status AS status,
-	        /* CASE 문 수정 */
 	        CASE
-	            /* 1. 마감 시간이 지났을 경우 (시간/분 단위로 초과 시간 표시) */
 	            WHEN TIMESTAMPDIFF(MINUTE, NOW(), d.deadline_date) <= 0 THEN
 	                IF(ABS(TIMESTAMPDIFF(MINUTE, NOW(), d.deadline_date)) >= 60,
 	                   CONCAT(ABS(TIMESTAMPDIFF(HOUR, NOW(), d.deadline_date)), '시간 초과'),
 	                   CONCAT(ABS(TIMESTAMPDIFF(MINUTE, NOW(), d.deadline_date)), '분 초과')
 	                )
-	            /* 2. 마감 시간이 남았을 경우 (시간/분 단위로 남은 시간 표시) */
 	            ELSE
 	                IF(TIMESTAMPDIFF(MINUTE, NOW(), d.deadline_date) < 60,
 	                   CONCAT(TIMESTAMPDIFF(MINUTE, NOW(), d.deadline_date), '분 남음'),
@@ -166,17 +147,12 @@
 	                )
 	        END AS deadline,
 	        'high' AS timeRemaining
-	    FROM
-	        Deadlines d
-	    JOIN CLAIM c ON d.claim_no = c.claim_no
-	    JOIN USER u ON c.ID = u.ID
-	    JOIN EMPLOYEE e ON c.emp_no = e.emp_no
-	    WHERE
-	        /* 마감일이 이미 지났거나, 24시간 이내로 남은 모든 건을 포함하도록 수정 */
-	        d.deadline_date <= DATE_ADD(NOW(), INTERVAL 24 HOUR)
-	    ORDER BY
-	        d.deadline_date ASC
-	    LIMIT 5
+	    FROM Deadlines d
+	    LEFT JOIN CLAIM c ON d.claim_no = c.claim_no
+	    LEFT JOIN USER u ON c.ID = u.ID
+	    LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+	    WHERE d.deadline_date <= DATE_ADD(NOW(), INTERVAL 24 HOUR)
+	    ORDER BY d.deadline_date ASC
 	    ]]>
 	</select>
 	
@@ -293,6 +269,48 @@
 	    LEFT JOIN
 	        DASHBOARD_DAILY_TIME d ON b.Date = d.STAT_DATE
 	    ]]>
+	</select>
+	
+	<select id="selectMyUrgentClaimCount" parameterType="com.demo.proworks.dashboard.vo.UrgentCountVo" resultType="int">
+	    /* QueryID: com.demo.proworks.dashboard.selectMyUrgentClaimCount (나의 긴급 처리 건수 조회) */
+	    <![CDATA[
+	    WITH RECURSIVE BusinessDays AS (
+	        SELECT
+	            c.claim_no, c.emp_no,
+	            (SELECT ar.manager_no FROM APPROVAL_REQ ar WHERE ar.claim_no = c.claim_no LIMIT 1) AS manager_no,
+	            c.receipt_date,
+	            c.receipt_date AS next_day,
+	            0 AS business_day_count
+	        FROM CLAIM c
+	        WHERE c.status NOT IN ('완료', '결재완료')
+	    UNION ALL
+	        SELECT
+	            b.claim_no, b.emp_no, b.manager_no, b.receipt_date,
+	            DATE_ADD(b.next_day, INTERVAL 1 DAY),
+	            b.business_day_count +
+	                CASE WHEN DAYOFWEEK(DATE_ADD(b.next_day, INTERVAL 1 DAY)) IN (1, 7) THEN 0
+	                     WHEN EXISTS (SELECT 1 FROM TBL_HOLIDAYS h WHERE h.holiday_date = DATE(DATE_ADD(b.next_day, INTERVAL 1 DAY))) THEN 0
+	                     ELSE 1
+	                END
+	        FROM BusinessDays b
+	        WHERE b.business_day_count < 3
+	    ),
+	    Deadlines AS (
+	        SELECT claim_no, emp_no, manager_no, MIN(next_day) AS deadline_date
+	        FROM BusinessDays
+	        WHERE business_day_count = 3
+	        GROUP BY claim_no, emp_no, manager_no
+	    )
+	    SELECT COUNT(*)
+	    FROM Deadlines d
+	    WHERE d.deadline_date <= DATE_ADD(NOW(), INTERVAL 24 HOUR)
+	    ]]>
+	    <if test="role == '실무자'">
+	        AND d.emp_no = #{empNo}
+	    </if>
+	    <if test="role == '관리자'">
+	        AND d.manager_no = #{empNo}
+	    </if>
 	</select>
 	
 

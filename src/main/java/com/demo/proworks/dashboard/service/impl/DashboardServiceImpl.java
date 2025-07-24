@@ -22,6 +22,7 @@ import com.demo.proworks.dashboard.vo.OutlierCountVo;
 import com.demo.proworks.dashboard.vo.SupplementStatusVo;
 import com.demo.proworks.dashboard.vo.TodayStatusVo;
 import com.demo.proworks.dashboard.vo.UrgentClaimVo;
+import com.demo.proworks.dashboard.vo.UrgentCountVo;
 import com.demo.proworks.dashboard.vo.WeeklyTrendVo;
 import com.inswave.elfw.exception.ElException;
 import com.inswave.elfw.log.AppLog;
@@ -117,4 +118,9 @@ public class DashboardServiceImpl implements DashboardService{
         vo.setOutlierCount(count);
         return vo;
     }
+    
+    @Override
+	public int selectMyUrgentClaimCount(UrgentCountVo vo) throws ElException {
+	    return dashboardDAO.selectMyUrgentClaimCount(vo);
+	}
 }

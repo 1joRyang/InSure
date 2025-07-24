@@ -99,6 +99,17 @@
         				<w2:column dataType="text" name="건수" id="value"></w2:column>
         			</w2:columnInfo>
         		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dma_urgentCount_req">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="직원번호" id="empNo"></w2:key>
+        				<w2:key dataType="text" name="역할" id="role"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_urgentCount_res">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="긴급건수" id="urgentCount"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
         	<xf:submission id="sbm_getTodayStatus" action="/InsWebApp/selectTodayStatusCounts.pwkjson" method="post"
@@ -163,10 +174,24 @@
         		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
         		ev:submitdone="scwin.sbm_getOutlierCount_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
+        	<xf:submission id="sbm_getMyUrgentCount" action="/InsWebApp/selectMyUrgentClaimCount.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_urgentCount_req","key":"vo"}' target='data:json,{"id":"dma_urgentCount_res"}' encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getMyUrgentCount_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
-        <script lazy="false" type="text/javascript"><![CDATA[
+        <script lazy="false" type="text/javascript"><![CDATA[function getEmployee() {
+    try {
+        const employeeData = localStorage.getItem("employee");
+        return employeeData ? JSON.parse(employeeData) : null;
+    } catch (error) {
+        console.error("employee 데이터 읽기 실패:", error);
+        return null;
+    }
+}
+
 scwin.onpageload = function() {
     $p.executeSubmission("sbm_getTodayStatus");
     $p.executeSubmission("sbm_getSupplementStatus");
@@ -180,6 +205,19 @@ scwin.onpageload = function() {
     $p.executeSubmission("sbm_getMonthlyApprovalRate");
     $p.executeSubmission("sbm_getProcessingTimeTrend");
     $p.executeSubmission("sbm_getOutlierCount");
+
+    var employee = getEmployee();
+    console.log("1. 로그인 정보 (from getEmployee):", employee);
+    if (employee && employee.empNo && employee.role) {
+        console.log("2. 직원 번호와 역할을 DataMap에 설정합니다:", employee.empNo, employee.role);
+        dma_urgentCount_req.set("empNo", employee.empNo);
+        dma_urgentCount_req.set("role", employee.role);
+        console.log("3. 긴급 건수 조회를 위한 submission을 실행합니다.");
+        $p.executeSubmission("sbm_getMyUrgentCount");
+    } else {
+        console.log("로그인 정보가 없어 알림 바를 숨깁니다.");
+        grp_noti.hide();
+    }
 };
         
 scwin.sbm_getTodayStatus_submitdone = function (e) {
@@ -265,13 +303,14 @@ let itemId = "task_item_" + index;
 
     // 4-1. 상태 배지 (배경색/글자색 동적 변경)
     let statusColors = {
-        "대기": { "bg": "#fff8e1", "color": "#f59f0b" },
-        "결재중": { "bg": "#e7f5ff", "color": "#339af0" },
-        "결재반려": { "bg": "#fff5f5", "color": "#fa5252" },
-        "결재완료": { "bg": "#e6fcf5", "color": "#20c997" },
-        "보완": { "bg": "#f1f3f5", "color": "#868e96" },
-        "보완완료": { "bg": "#e6fcf5", "color": "#087f5b" }
+        "대기": { "bg": "#E3F2FD", "color": "#1565C0" },
+        "결재중": { "bg": "#F3E5F5", "color": "#6A1B9A" },
+        "결재반려": { "bg": "#FFF3E0", "color": "#F57C00" },
+        "결재완료": { "bg": "#E3F2FD", "color": "#1565C0" },
+        "보완": { "bg": "#FFF8E1", "color": "#F9A825" },
+        "보완완료": { "bg": "#E3F2FD", "color": "#1565C0" }
     };
+
     let currentStatusColor = statusColors[taskData.status] || statusColors["보완"];
     
     let statusBadge = $p.dynamicCreate(itemId + "_status", "textbox", {
@@ -280,11 +319,20 @@ let itemId = "task_item_" + index;
     statusBadge.setValue(taskData.status);
 
     // 4-2. 남은 시간
+    let deadlineText = taskData.deadline || "";
+    let isOverdue = deadlineText.includes("초과");
+    
+let deadlineColors = {
+    "overdue": { "bg": "#fff5f5", "color": "#fa5252" },
+    "imminent": { "bg": "#f1f3f5", "color": "#495057" }
+    };
+    let currentDeadlineColor = isOverdue ? deadlineColors.overdue : deadlineColors.imminent;
+    
     let deadlineBox = $p.dynamicCreate(itemId + "_deadline", "textbox", {
-        "style": "color: #c92a2a; font-weight: 500; font-size:13px;",
-        "tagname": "span"
+        "tagname": "span",
+        "style": "font-size: 12px; padding: 4px 8px; border-radius: 4px; font-weight: 500; background-color: " + currentDeadlineColor.bg + "; color: " + currentDeadlineColor.color + ";"
     }, actionsGroup);
-    deadlineBox.setValue(taskData.deadline);
+    deadlineBox.setValue(deadlineText);
 };
 
 scwin.sbm_getWeeklyTrend_submitdone = function (e) {
@@ -360,9 +408,9 @@ scwin.sbm_getClaimType_submitdone = function (e) {
         "doughnutRadius": "50",
         "startingAngle": "300",
 
-        // ✨✨✨ [핵심] 값 & 라벨 표시 설정 ✨✨✨
-        "showPercentValues": "0", // 차트의 모든 퍼센트 값 표시 기능을 끕니다.
-        "showValues": "0",        // 차트의 모든 숫자 값 표시 기능을 끕니다.
+        //[핵심] 값 & 라벨 표시 설정
+        "showPercentValues": "0", // 차트의 모든 퍼센트 값 표시 기능을 끈다.
+        "showValues": "0",        // 차트의 모든 숫자 값 표시 기능을 끈다.
 
         // 툴팁 (마우스 올렸을 때) 설정
         "plottooltext": "<b>$label:</b> $dataValue건 ($percentValue)",
@@ -376,7 +424,7 @@ scwin.sbm_getClaimType_submitdone = function (e) {
     };
     chart_claimType.setChartAttribute(chartAttrs);
 
-    // 4. 차트를 그립니다.
+    // 4. 차트를 그리기
     chart_claimType.draw();
 };
 
@@ -476,6 +524,27 @@ scwin.sbm_getOutlierCount_submitdone = function (e) {
     // 3. (핵심) 데이터맵의 값을 화면 컴포넌트(outlierCountBox)에 강제로 직접 설정합니다.
     outlierCountBox.setValue(dmp_outlierInfo.get("outlierCount"));
 };
+
+scwin.sbm_getMyUrgentCount_submitdone = function (e) {
+    try {
+        var count = e.responseJSON.urgentCount; 
+        
+        console.log("서버 응답에서 직접 추출한 건수:", count);
+
+        if (count > 0) {
+            var noti_textbox = $p.getComponentById("grp_noti_text");
+            if (noti_textbox) {
+                noti_textbox.setValue("긴급 처리 요청: " + count + "건이 처리 대기 중입니다.");
+                grp_noti.show();
+            }
+        } else {
+            grp_noti.hide();
+        }
+    } catch (error) {
+        console.error("긴급 건수 처리 중 오류 발생:", error);
+        grp_noti.hide();
+    }
+};
 ]]></script>
         <style type="text/css"><![CDATA[
             /* ----- Global & Wrapper ----- */
@@ -494,8 +563,10 @@ scwin.sbm_getOutlierCount_submitdone = function (e) {
             
             /* ----- Panel Header Style ----- */
             .panel_header_with_icon { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
-            .header_icon { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; }
-            .icon_pink { background-color: #fff0f0; }
+            .header_icon { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+                          background-size: 60%; background-repeat: no-repeat; background-position: center; }
+            .icon_pink { background-color: #fff0f0; 
+                        background-image: url('../../images/insure/doc.png')}
             .icon_yellow { background-color: #fff9e0; }
             .icon_blue { background-color: #e7f5ff; }
             .icon_green { background-color: #e6fcf5; }
@@ -549,7 +620,9 @@ scwin.sbm_getOutlierCount_submitdone = function (e) {
         <xf:group class="sub_contents" id="">
             <xf:group class="dashboard_wrap" id="grp_dashboard">
 
-                <xf:group class="notification_bar" id="grp_noti"><w2:textbox label="긴급 심사 요청 - 고객 청구건 3건이 승인 대기 중입니다." tagname="span"></w2:textbox></xf:group>
+                <xf:group class="notification_bar" id="grp_noti">
+                    <w2:textbox id="grp_noti_text" label="긴급 심사 요청 - 고객 청구건 3건이 승인 대기 중입니다." tagname="span"></w2:textbox>
+                </xf:group>
 
                 <xf:group class="flex_row" id="grp_top_panels">
                     <xf:group class="panel">

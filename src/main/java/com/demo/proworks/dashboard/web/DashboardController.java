@@ -23,9 +23,12 @@ import com.demo.proworks.dashboard.vo.OutlierCountVo;
 import com.demo.proworks.dashboard.vo.SupplementStatusVo;
 import com.demo.proworks.dashboard.vo.TodayStatusVo;
 import com.demo.proworks.dashboard.vo.UrgentClaimVo;
+import com.demo.proworks.dashboard.vo.UrgentCountVo;
 import com.demo.proworks.dashboard.vo.WeeklyTrendVo;
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
+import org.springframework.web.bind.annotation.RequestMethod;
+import com.inswave.elfw.annotation.ElValidator;
 
 /**
  * @subject : 대시보드 관련 요청을 처리하는 컨트롤러
@@ -253,6 +256,19 @@ public class DashboardController {
         response.put("outlierCountData", resultVo);
         return response;
     }
+    
+    /**
+	 * 로그인한 사용자에게 할당된 긴급처리업무를 카운트하여 조회한다.
+     */
+	@ElService(key = "selectMyUrgentClaimCount")
+	@RequestMapping(value = "selectMyUrgentClaimCount")
+	@ElDescription(sub = "로그인한 사용자에게 할당된 긴급처리업무", desc = "로그인한 사용자에게 할당된 긴급처리업무 건수를 조회한다.")
+	public Map<String, Object> selectMyUrgentClaimCount(UrgentCountVo vo) throws Exception {
+	    int count = dashboardService.selectMyUrgentClaimCount(vo);
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("urgentCount", count);
+	    return response;
+	}
 	
 	
 

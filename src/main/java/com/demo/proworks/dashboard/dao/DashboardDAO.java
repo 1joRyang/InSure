@@ -15,6 +15,7 @@ import com.demo.proworks.dashboard.vo.MonthlyPerfVo;
 import com.demo.proworks.dashboard.vo.SupplementStatusVo;
 import com.demo.proworks.dashboard.vo.TodayStatusVo;
 import com.demo.proworks.dashboard.vo.UrgentClaimVo;
+import com.demo.proworks.dashboard.vo.UrgentCountVo;
 import com.demo.proworks.dashboard.vo.WeeklyTrendVo;
 
 /**
@@ -123,6 +124,11 @@ public class DashboardDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbst
 	    return (int) selectByPk("com.demo.proworks.dashboard.selectProcessingTimeOutlierCount");
 	}
 	
-	
+	/**
+	 * 나의 긴급업무 건수 카운트
+	 */
+	public int selectMyUrgentClaimCount(UrgentCountVo vo) throws ElException {
+	    return (Integer) selectByPk("com.demo.proworks.dashboard.selectMyUrgentClaimCount", vo);
+	}
 
 }
