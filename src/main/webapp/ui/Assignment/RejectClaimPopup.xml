@@ -3,6 +3,7 @@
     xmlns:ev="http://www.w3.org/2001/xml-events"
     xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
     <head>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <w2:type>COMPONENT</w2:type>
         <w2:buildDate/>
         <w2:MSA/>
@@ -24,37 +25,114 @@
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
-        <script lazy="false" type="text/javascript"><![CDATA[
+        <script lazy="false" type="text/javascript"><![CDATA[const Toast = Swal.mixin({
+	    toast: true,
+	    showConfirmButton: false,
+	})
+
+scwin.toastAlertMobile = (param) => {
+	Toast.fire({
+		...param, 
+		timer: 2000,
+		position: 'center',
+		timerProgressBar: false,
+	});
+}
+	
+scwin.toastAlert = (param) => {
+	Toast.fire({
+		...param, 
+		timer: 3000,
+		position: 'top-end',
+		timerProgressBar: true,
+		didOpen: (toast) => {
+			        toast.addEventListener('mouseenter', Swal.stopTimer)
+			        toast.addEventListener('mouseleave', Swal.resumeTimer)
+			    }
+	});
+} 
+
+scwin.noBtnAlert = (param) => {
+	Swal.fire({
+		...param,
+		showConfirmButton: false,
+	});
+}
+
+scwin.noBtnAlertWithTimer = (param) => {
+	Swal.fire({
+		...param,
+		timer: 2000,
+		showConfirmButton: false,
+	});
+}
+
+/** 부르는 형태 예시
+scwin.twoBtnAlert({
+     title: "로그아웃 하시겠습니까?",
+ }, (result) => {
+     if (result.isConfirmed) {
+         $c.sbm.execute(sbm_EmployeeLogout);
+     }
+ });
+ */
+scwin.twoBtnAlert = (param, func) => {
+	Swal.fire({
+		...param,
+		showCancelButton: true,
+		confirmButtonColor: '#4FACFE',
+		cancelButtonColor: '#d1d1d1',
+		confirmButtonText: '완료',
+		cancelButtonText: '취소',
+		reverseButtons: true
+	}).then(func);
+}
+
 scwin.onpageload = function() {
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
 
     txt_req_supple.setValue(scwin.claim.claimNo);
     dma_approvalReq.set("claim_no", scwin.claim.claimNo);
+    console.log(dma_approvalReq.get("claim_no"));
 };
 
 // 결재반려 처리
 scwin.btn_submit_onclick = function (e) {
     // textarea 값 검증
     var approvalMemo = txa_supplement_memo.getValue();
+    dma_approvalReq.set("approval_memo", approvalMemo);
     if (!approvalMemo || approvalMemo.trim() === "") {
-        txa_supplement_memo.focus();
+        $p.closePopup();
+        scwin.toastAlert({
+        icon: 'warning',
+        title: '결재 반려 메모를 작성해주세요'
+    });
         return false;
     }
     
-    dma_approvalReq.set("approval_memo", approvalMemo);
     $c.sbm.execute(sbm_rejectApprovalReq); // 변경된 submission 사용
 };
 
 // 성공 콜백
 scwin.sbm_rejectApprovalReq_submitdone = function(e) {
-    alert("결재반려 처리가 완료되었습니다.");
+    
     $p.closePopup();
-   location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
+    scwin.noBtnAlertWithTimer({
+        icon: 'success',
+        title: '결재반려 처리가 완료되었습니다.'
+    });
+    setTimeout(function() {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+    }, 2000);
 };
 
 // 에러 콜백
 scwin.sbm_rejectApprovalReq_submiterror = function(e) {
-    alert("결재반려 처리 중 오류가 발생했습니다.");
+    $p.closePopup();
+    scwin.toastAlert({
+        icon: 'error',
+        title: '결재반려 처리 중 오류가 발생했습니다.'
+    });
     console.log(e);
 };
 
