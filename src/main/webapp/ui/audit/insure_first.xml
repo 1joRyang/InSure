@@ -28,7 +28,7 @@ scwin.onpageload = function () {
     dm_header.set("claimNo", scwin.claim.claimNo);
 
     // 담당자 아니면 readonly
-    if (scwin.emp.empNo != scwin.claim.empNo) {
+    if (scwin.emp.empNo != scwin.claim.empNo || scwin.claim.status == "완료" || scwin.claim.status == "반송") {
         btn_reject.hide();
         btn_change.hide();
     }

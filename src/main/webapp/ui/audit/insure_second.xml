@@ -171,8 +171,8 @@ scwin.onpageload = function() {
     scwin.genList.push(scwin.index);
 	gen_date.insertChild(scwin.index++);   
 
-    // 담당자 아니면 readonly
-    if (scwin.emp.empNo != scwin.claim.empNo) {
+    // 담당자 아니면 + status 대기 아니면 readonly
+    if (scwin.emp.empNo != scwin.claim.empNo || scwin.claim.status == "완료" || scwin.claim.status == "반송") {
         gen_date.hide();
         ipt_claimNo.setReadOnly(true);
         ipt_reason.setReadOnly(true);
