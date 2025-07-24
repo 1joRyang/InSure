@@ -72,4 +72,34 @@
 	        UPDATED_AT = VALUES(UPDATED_AT);
 	    ]]>
 	</update>
+	
+	<update id="updateWeeklyTrend">
+	    /* QueryID : com.demo.proworks.batch.updateWeeklyTrend (주간 처리 현황 일일 집계) */
+	    <![CDATA[
+	    INSERT INTO DASHBOARD_WEEKLY_TREND (STAT_DATE, APPROVAL_COUNT, SIMPLEPAY_COUNT, UPDATED_AT)
+	    SELECT
+	        y.date AS STAT_DATE,
+	        COUNT(CASE WHEN ar.claim_no IS NOT NULL THEN 1 END) AS APPROVAL_COUNT,
+	        COUNT(CASE WHEN ar.claim_no IS NULL THEN 1 END) AS SIMPLEPAY_COUNT,
+	        NOW() AS UPDATED_AT
+	    FROM
+	        ( -- 어제 날짜 하나만 생성
+	            SELECT CURDATE() - INTERVAL 1 DAY AS date
+	        ) AS y
+	    LEFT JOIN
+	        ( SELECT DATE(cr.date) AS date, cr.claim_no
+	          FROM CLAIM_RESULT cr
+	          JOIN CLAIM c ON cr.claim_no = c.claim_no
+	          WHERE c.status = '완료'
+	        ) AS processed_claims ON y.date = processed_claims.date
+	    LEFT JOIN
+	        APPROVAL_REQ ar ON processed_claims.claim_no = ar.claim_no
+	    GROUP BY
+	        y.date
+	    ON DUPLICATE KEY UPDATE
+	        APPROVAL_COUNT = VALUES(APPROVAL_COUNT),
+	        SIMPLEPAY_COUNT = VALUES(SIMPLEPAY_COUNT),
+	        UPDATED_AT = VALUES(UPDATED_AT);
+	    ]]>
+	</update>
 </mapper>

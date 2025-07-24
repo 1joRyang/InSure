@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -24,8 +26,6 @@ import com.demo.proworks.dashboard.vo.UrgentClaimVo;
 import com.demo.proworks.dashboard.vo.WeeklyTrendVo;
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
-import org.springframework.web.bind.annotation.RequestMethod;
-import com.inswave.elfw.annotation.ElValidator;
 
 /**
  * @subject : 대시보드 관련 요청을 처리하는 컨트롤러
@@ -34,6 +34,8 @@ import com.inswave.elfw.annotation.ElValidator;
  */
 @Controller
 public class DashboardController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(DashboardController.class);
 	
 	@Resource(name = "dashboardService")
     private DashboardService dashboardService;
@@ -183,13 +185,18 @@ public class DashboardController {
 	@RequestMapping(value = "selectWeeklyTrend")
 	@ElDescription(sub = "주간 처리 현황 추이 조회", desc = "대시보드의 주간 처리 현황 추이 데이터를 조회한다.")
 	public Map<String, Object> selectWeeklyTrend() throws Exception {
-	    System.out.println("====== [서버] 주간 처리 현황 추이 데이터를 조회 시작 ======");
-	    
-	    // 반환 타입을 List<WeeklyTrendVo>로 변경 ✅
+		
+		long startTime = System.currentTimeMillis();
+        logger.info("╔═══════ [START] selectWeeklyTrend ═══════╗");
+        
 	    List<WeeklyTrendVo> resultList = dashboardService.selectWeeklyTrend();
 	
 	    Map<String, Object> responseWrapper = new HashMap<>();
 	    responseWrapper.put("weeklyTrendList", resultList);
+	    
+	    long endTime = System.currentTimeMillis();
+        logger.info("╚═══════ [END] selectWeeklyTrend (총 소요시간: {}ms) ═══════╝", (endTime - startTime));
+	    
 	    return responseWrapper;
 	}
 	

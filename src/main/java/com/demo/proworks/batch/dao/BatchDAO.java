@@ -30,6 +30,11 @@ public class BatchDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstract
     public int updateDailyProcessingTime() throws ElException {
         return update("com.demo.proworks.batch.updateDailyProcessingTime", null);
     }
+    
+    /*주간 처리 현황*/
+    public int updateWeeklyTrend() throws ElException {
+	    return update("com.demo.proworks.batch.updateWeeklyTrend", null);
+	}
 	
 
 }

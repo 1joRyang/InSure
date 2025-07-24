@@ -42,5 +42,17 @@ public class BatchServiceImpl implements BatchService {
 	        }
 	    }
 	    
+	    @Scheduled(cron = "0 5 2 * * *") // 매일 새벽 2시 5분
+		public void executeWeeklyTrendBatch() {
+		    System.out.println("====== [배치 시작] 주간 처리 현황 집계 ======");
+		    try {
+		        batchDAO.updateWeeklyTrend();
+		        System.out.println("====== [배치 종료] 주간 처리 현황 집계 완료 ======");
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		        System.out.println("====== [배치 오류] 주간 처리 현황 집계 실패 ======");
+		    }
+		}
+	    
 	    
 }

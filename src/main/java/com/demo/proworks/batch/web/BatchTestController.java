@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.demo.proworks.batch.service.BatchService;
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
+import org.springframework.web.bind.annotation.RequestMethod;
+import com.inswave.elfw.annotation.ElValidator;
 
 /**
  * @subject : 배치 테스트 처리를 담당하는 컨트롤러
@@ -55,6 +57,25 @@ public class BatchTestController {
         }
         
         // 실행 결과 메시지를 담은 Map 객체를 직접 반환
+        return result;
+    }
+    
+    /**
+     * 주간 처리 현황 집계 배치를 수동으로 실행한다. (테스트용)
+     */
+	@ElService(key = "runWeeklyTrendBatch")
+	@RequestMapping(value = "runWeeklyTrendBatch")
+	@ElDescription(sub = "주간 현황 배치 수동 실행", desc = "주간 현황 배치를 수동으로 실행하는 테스트용.")
+	public Map<String, String> runWeeklyTrendBatch() throws Exception {
+        Map<String, String> result = new HashMap<>();
+        try {
+            batchService.executeWeeklyTrendBatch();
+            result.put("message", "주간 처리 현황 배치 작업이 성공적으로 실행되었습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("message", "주간 처리 현황 배치 실행 중 오류가 발생했습니다.");
+        }
+        System.out.println("====== [수동 배치 실행] " + result.get("message") + " ======");
         return result;
     }
   
