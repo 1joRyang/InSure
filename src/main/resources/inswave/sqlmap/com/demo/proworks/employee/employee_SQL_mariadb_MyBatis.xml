@@ -190,5 +190,41 @@
 		ORDER BY EMP_NO
 		LIMIT 1
 	</select>
+<!-- 부서별 직원 목록 조회 -->
+<select id="selectListEmployeeByDept" parameterType="com.demo.proworks.employee.vo.EmployeeVo" resultType="com.demo.proworks.employee.vo.EmployeeVo">
+    SELECT 
+        emp_no as empNo,
+        emp_name as empName,
+        status,
+        dept_id as deptId,
+        role
+    FROM EMPLOYEE 
+    WHERE 1=1
+    <if test="deptId != null and deptId != ''">
+        AND dept_id = #{deptId}
+    </if>
+    <if test="status != null and status != ''">
+        AND status = #{status}
+    </if>
+    ORDER BY emp_name
+    <!-- 페이징 처리 수정 -->
+    <if test="pageSize != null and pageSize > 0">
+        <if test="pageIndex != null and pageIndex > 0">
+            LIMIT #{pageSize} OFFSET ${(pageIndex - 1) * pageSize}
+        </if>
+    </if>
+</select>
 
+<!-- 부서별 직원 수 조회 -->
+<select id="selectListCountEmployeeByDept" parameterType="com.demo.proworks.employee.vo.EmployeeVo" resultType="long">
+    SELECT COUNT(*)
+    FROM EMPLOYEE 
+    WHERE 1=1
+    <if test="deptId != null and deptId != ''">
+        AND dept_id = #{deptId}
+    </if>
+    <if test="status != null and status != ''">
+        AND status = #{status}
+    </if>
+</select>
 </mapper>

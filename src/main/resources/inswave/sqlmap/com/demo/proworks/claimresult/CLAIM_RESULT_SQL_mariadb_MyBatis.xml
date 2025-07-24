@@ -45,7 +45,13 @@
     WHERE   
             claim_no = #{claim_no}  
     </update>
+	<update id="updateClaimStatus" parameterType="com.demo.proworks.claimresult.vo.ClaimResultVo">
+	<!-- 청구 상태를 업데이트한다. -->
 	
+	UPDATE CLAIM 
+	SET STATUS = '완료'
+        WHERE CLAIM_NO = #{claim_no}
+    </update>
     <delete id="deleteClaimResult" parameterType="com.demo.proworks.claimresult.vo.ClaimResultVo">
     <!-- 심사결과를 삭제한다. -->
     

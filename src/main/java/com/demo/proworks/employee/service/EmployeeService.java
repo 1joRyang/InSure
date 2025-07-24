@@ -80,4 +80,20 @@ public interface EmployeeService {
      */
 	public String getEmpNameByNo(String empNo) throws Exception;
 	
+	/**
+	 * 부서별 직원 목록을 조회한다.
+	 * @param employeeVo 직원정보 (deptId 필수)
+	 * @return 부서별 직원 목록
+	 * @throws Exception
+	 */
+	public List<EmployeeVo> selectListEmployeeByDept(EmployeeVo employeeVo) throws Exception;
+
+	/**
+	 * 부서별 직원 수를 조회한다.
+	 * @param employeeVo 직원정보 (deptId 필수)
+	 * @return 부서별 직원 수
+	 * @throws Exception
+	 */
+	public long selectListCountEmployeeByDept(EmployeeVo employeeVo) throws Exception;
+	
 }

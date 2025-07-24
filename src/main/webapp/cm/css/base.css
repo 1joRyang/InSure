@@ -1,6 +1,77 @@
 @charset "utf-8"; 
 
+/* 커스텀 CSS */
+.status-color {
+	display: inline-block; 
+	padding: 4px 12px; 
+	border-radius: 12px; 
+	font-size: 12px; 
+	font-weight: bold;
+}
+/* 상태별 클래스 */
+.status-color.완료 {
+    color: var(--color-completed);
+    background: var(--bg-completed);
+}
+
+.status-color.대기  {
+    color: var(--color-approval);
+    background: var(--bg-approval);
+}
+
+.status-color.반송 {
+    color: var(--color-return);
+    background: var(--bg-return);
+}
+
+.status-color.보완 {
+    color: var(--color-supplement);
+    background: var(--bg-supplement);
+}
+
+.status-color.보완완료 {
+    color: var(--color-approval);
+    background: var(--bg-approval);
+}
+
+.status-color.결재완료 {
+    color: var(--color-approval);
+    background: var(--bg-approval);
+}
+
+.status-color.결재중 {
+	color: var(--color-reject);
+    background: var(--bg-reject);
+}
+
+.status-color.결재반려 {
+	color: var(--color-pending);
+    background: var(--bg-pending);
+}
+
 :root {
+	--color-pending: #F57C00;
+    --bg-pending: #FFF3E0;
+
+    --color-completed: #2E7D32;
+    --bg-completed: #E8F5E9;
+
+    --color-waiting: #7B1FA2;
+    --bg-waiting: #F3E5F5;
+
+    --color-supplement: #F9A825;
+    --bg-supplement: #FFF8E1;
+
+    --color-return: #C62828;
+    --bg-return: #FFEBEE;
+
+    --color-approval: #1565C0;
+    --bg-approval: #E3F2FD;
+
+    --color-reject: #6A1B9A; 
+    --bg-reject: #F3E5F5;
+        
+    
     --ws-gray-0:#FFFFFF;
     --ws-gray-50:#F9FAFB;
     --ws-gray-100:#F4F6F8;

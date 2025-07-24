@@ -27,7 +27,7 @@ scwin.initpub = function() {
     <body ev:onpageload="scwin.onpageload" class="mobile">
     	<xf:group style="" id="m_wrap" class="m_wrap">
     		<w2:wframe style="" id="" src="/InsWebApp/ui/cmmn/m_header.xml" class="wfm_m_header"></w2:wframe>
-    		<w2:wframe style="" id="m_container" class="m_container" src="/InsWebApp/main/main.xml"></w2:wframe>
+    		<w2:wframe style="margin-top: 130px;padding: 0pxl" id="m_container" class="m_container" src="/InsWebApp/ui/Assignment/m_home.xml"></w2:wframe>
     		<w2:wframe style="" id="" class="wfm_m_footer" src="/InsWebApp/ui/cmmn/m_footer.xml"></w2:wframe>
     	</xf:group>
     </body>

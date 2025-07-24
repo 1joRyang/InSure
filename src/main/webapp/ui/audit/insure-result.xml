@@ -290,13 +290,13 @@
 
 			<xf:submission id="sbm_approveApprovalReq" action="/InsWebApp/APPROVALREQApprove.pwkjson" method="post"
 				mediatype="application/json" ref='data:json,{"id":"dma_approvalReq","key":"approvalReqVo"}' target="" encoding="UTF-8" instance=""
-				replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror=""
+				replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_approveApprovalReq_submitdone" ev:submiterror=""
 				abortTrigger="">
 			</xf:submission>
 		</xf:model>
 		<w2:layoutInfo />
 		<w2:publicInfo method="" />
-
+        <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
 		<style type="text/css"><![CDATA[
             .container {
              
@@ -497,11 +497,59 @@
                 100% { transform: rotate(360deg); }
             }
 
+            /* 비활성화된 버튼 스타일 */
+            .disabled-button {
+                opacity: 0.5 !important;
+                cursor: not-allowed !important;
+                pointer-events: none !important;
+                background-color: #cccccc !important;
+                color: #666666 !important;
+                border-color: #cccccc !important;
+            }
+
+            /* 읽기 전용 텍스트 영역 스타일 */
+            .readonly-textarea {
+                background-color: #f5f5f5 !important;
+                color: #666666 !important;
+                cursor: not-allowed !important;
+            }
+
+            /* 권한 없음 안내 메시지 */
+            .permission-notice {
+                color: #ff6b6b;
+                font-size: 12px;
+                margin-top: 5px;
+                font-style: italic;
+            }
+            /* 새로운 상태 스타일 추가 */
+            .status_waiting {
+                background-color: #F3E5F5;
+                color: #7B1FA2;
+            }
+
+            .status_supplement {
+                background-color: #FFF8E1;
+                color: #F9A825;
+            }
+
+            .status_return {
+                background-color: #FFEBEE;
+                color: #C62828;
+            }
+
+            .status_approval {
+                background-color: #E3F2FD;
+                color: #1565C0;
+            }
+
+            .status_reject {
+                background-color: #FFCDD2;
+                color: #D32F2F;
+            }
 
         ]]></style>
 
-		<script lazy="false" type="text/javascript"><![CDATA[
-// 로딩 표시 함수
+		<script lazy="false" type="text/javascript"><![CDATA[// 로딩 표시 함수
 scwin.showLoading = function (show) {
     try {
         if (typeof $p.showLoading === 'function') {
@@ -522,27 +570,19 @@ scwin.showLoading = function (show) {
 
 scwin.onpageload = function () {
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
-    // 로컬스토리지에서 가져오기
-    console.log("청구번호:", scwin.claim.claimNo);
+    scwin.employee = JSON.parse(localStorage.getItem("employee"));
+
+
     // 검색 조건에 설정
     dma_search.set("claim_no", scwin.claim.claimNo);
     dma_ID.set("ID", scwin.claim.ID);
     dma_excludedItemsSearch.set("SC_claim_no", scwin.claim.claimNo);
-    // 페이징 정보 설정
     dmp_settlementVo.set("SC_claim_no", scwin.claim.claimNo);
-    scwin.employee = JSON.parse(localStorage.getItem("employee"));
-    btn_reject.hide();
-    if (scwin.employee.role !== "실무자") {
-        btn_return.hide();
-        btn_supplement.hide();
-        txt_examMemo.setReadOnly(true);
 
-        btn_approval.setValue("결재 승인");
-        btn_complete.hide();
-        btn_reject.show();
-        btn_generateMemo.hide();
+    // 상태 표시 및 UI 제어
+    scwin.setClaimStatus();
+    scwin.setUIPermissions();
 
-    }
     // 데이터 조회
     scwin.loadClaimUserEmpInfo();
     scwin.searchSettlementData();
@@ -550,24 +590,130 @@ scwin.onpageload = function () {
     scwin.sbm_selectSettlementSummary();
     scwin.searchExcludedItems();
     scwin.loadExistingMemo();
-
 };
 
-scwin.loadExistingMemo = function () {
-    console.log("메모 불러오기")
-    // 로컬스토리지에서 가져오기
-    if (scwin.claim.claimNo) {
-        dma_claimResult.set("claim_no", scwin.claim.claimNo);
-        console.log("메모 불러오기 서브미션 실 행")
-        $p.executeSubmission("sbm_selectClaimResult");
+// 권한에 따른 UI 제어 함수
+scwin.setUIPermissions = function () {
+    var userRole = scwin.employee.role;
+    var isOwnClaim = scwin.claim.empNo === scwin.employee.empNo;
+    var claimStatus = scwin.claim.status;
+
+
+    // 기본적으로 모든 버튼 숨기기
+    btn_reject.hide();
+
+    // 상태별 버튼 비활성화 처리
+    scwin.setStatusBasedPermissions(claimStatus);
+
+    if (userRole === "실무자") {
+        if (isOwnClaim) {
+            // 본인 청구건 - 모든 권한 허용 (상태 제한 적용)
+            btn_return.show();
+            btn_supplement.show();
+            btn_approval.show();
+            btn_complete.show();
+            btn_approve_complete.hide();  // 관리자용 버튼 숨김
+            btn_reject.hide();           // 관리자용 버튼 숨김
+            btn_generateMemo.show();
+
+            txt_examMemo.setReadOnly(false);
+            btn_approval.setValue("결재 신청");
+
+        } else {
+            // 다른 실무자의 청구건 - 조회만 가능
+            btn_return.show();
+            btn_supplement.show();
+            btn_approval.show();
+            btn_complete.show();
+            btn_approve_complete.hide();  // 관리자용 버튼 숨김
+            btn_reject.hide();           // 관리자용 버튼 숨김
+            btn_generateMemo.show();
+
+            // 모든 버튼 비활성화
+            btn_return.setDisabled(true);
+            btn_supplement.setDisabled(true);
+            btn_approval.setDisabled(true);
+            btn_complete.setDisabled(true);
+            btn_generateMemo.setDisabled(true);
+
+            // 입력 필드 읽기 전용
+            txt_examMemo.setReadOnly(true);
+
+            // 추가적으로 스타일로 시각적 표시
+            btn_return.addClass("disabled-button");
+            btn_supplement.addClass("disabled-button");
+            btn_approval.addClass("disabled-button");
+            btn_complete.addClass("disabled-button");
+            btn_generateMemo.addClass("disabled-button");
+        }
+
     } else {
-        console.log("메모 불러오기할 claim넘버가 없어요");
+        // 관리자/승인자 (실무자가 아닌 경우)
+        btn_return.hide();
+        btn_supplement.hide();
+        btn_generateMemo.hide();
+        btn_complete.hide();  // 실무자용 완료 버튼 숨김
+        btn_approval.hide();  // 결재 신청/승인 버튼 숨김
+        
+        // 관리자용 버튼들 표시
+        btn_approve_complete.show();
+        btn_reject.show();
+        
+        // 결재중 상태에서만 두 버튼 모두 활성화
+        if (claimStatus === "결재중") {
+            btn_approve_complete.setDisabled(false);
+            btn_approve_complete.removeClass("disabled-button");
+            btn_reject.setDisabled(false);
+            btn_reject.removeClass("disabled-button");
+        } else {
+            // 다른 모든 상태에서는 비활성화
+            btn_approve_complete.setDisabled(true);
+            btn_approve_complete.addClass("disabled-button");
+            btn_reject.setDisabled(true);
+            btn_reject.addClass("disabled-button");
+        }
+
+        txt_examMemo.setReadOnly(true);
     }
 };
 
+// 권한 체크 공통 함수
+scwin.checkPermission = function (actionName) {
+    var userRole = scwin.employee.role;
+    var isOwnClaim = scwin.claim.empNo === scwin.employee.empNo;
+
+    if (userRole === "실무자" && !isOwnClaim) {
+        Swal.fire({
+            title: '권한 없음',
+            text: '본인이 담당한 청구건만 ' + actionName + '할 수 있습니다.',
+            icon: 'warning',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
+        return false;
+    }
+    return true;
+};
+
+scwin.loadExistingMemo = function () {
+    // 로컬스토리지에서 가져오기
+    if (scwin.claim.claimNo) {
+        dma_claimResult.set("claim_no", scwin.claim.claimNo);
+        $p.executeSubmission("sbm_selectClaimResult");
+    } else {
+    }
+};
+
+
 scwin.sbm_selectSettlementTreatment = function () {
     if (!scwin.claim.claimNo) {
-        alert("청구번호가 설정되지 않았습니다.")
+        Swal.fire({
+            title: '오류',
+            text: '청구번호가 설정되지 않았습니다.',
+            icon: 'error',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
         return;
     }
     dma_settlementTreatmentSearch.set("SC_claim_no", scwin.claim.claimNo);
@@ -575,7 +721,13 @@ scwin.sbm_selectSettlementTreatment = function () {
     try {
         $p.executeSubmission("sbm_selectSettlementTreatment");
     } catch (error) {
-        alert("정산치료 조회 중 오류가 발생했습니다: " + error.message);
+        Swal.fire({
+            title: '오류',
+            text: '정산치료 조회 중 오류가 발생했습니다: ' + error.message,
+            icon: 'error',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
     }
 }
 
@@ -590,7 +742,6 @@ scwin.searchExcludedItems = function () {
     dma_excludedItemsSearch.set("claim_no", scwin.claim.claimNo); // 백업 파라미터
     //청구 번호 없으면 
     if (!dma_excludedItemsSearch.get("claim_no")) {
-        console.log("제외항목 조회 스킵 - 청구번호 없음");
         scwin.calculateTotalExcludedAmount();
         scwin.searchInsuranceProducts();
         return;
@@ -707,7 +858,6 @@ scwin.sbm_selectExcludedItems_submitdone = function (e) {
                         item.category_name = "기타";
                 }
             }
-            console.log("제외항목[" + index + "] 처리:", item.exc_reason, item.exc_cost + "원");
         });
 
         // DataList에 설정
@@ -772,13 +922,10 @@ scwin.calculateTotalExcludedAmount = function () {
 };
 
 scwin.searchInsuranceProducts = function () {
-    console.log("보험상품 조회 시작");
 
     // 사용자 ID 설정 - claim에서 ID 가져오기
     var userId = scwin.claim && scwin.claim.ID ? scwin.claim.ID : null;
 
-    console.log("claim 데이터:", scwin.claim);
-    console.log("사용자 ID:", userId);
 
     if (!userId) {
         console.warn("사용자 ID가 없어 보험상품 조회를 스킵합니다.");
@@ -790,8 +937,6 @@ scwin.searchInsuranceProducts = function () {
     // dma_ID에 사용자 ID 설정
     dma_ID.set("ID", userId);
 
-    console.log("보험상품 조회 요청 - 사용자 ID:", userId);
-    console.log("dma_ID 데이터:", dma_ID.getJSON());
 
     // 보험상품 조회 실행
     try {
@@ -804,33 +949,18 @@ scwin.searchInsuranceProducts = function () {
 
 // 보험상품 조회 성공 콜백 - 실제 응답 구조에 맞게 수정
 scwin.sbm_selectInsuranceProducts_submitdone = function (e) {
-    console.log("보험상품 조회 성공:", e);
 
     var responseData = e.responseJSON;
-    console.log("전체 응답 데이터:", responseData);
 
     var elHeader = responseData ? responseData.elHeader : null;
-    console.log("elHeader:", elHeader);
 
     if (elHeader && elHeader.resSuc !== false) {
         // 응답 구조: { subInsuranceProductVoList: [...] }
         var productData = responseData.subInsuranceProductVoList;
 
-        console.log("보험상품 원본 데이터:", productData);
 
         if (productData && Array.isArray(productData) && productData.length > 0) {
             console.log("보험상품 데이터 수신:", productData.length + "건");
-
-            // 데이터가 이미 올바른 형태이므로 바로 사용
-            console.log("첫 번째 데이터 샘플:", productData[0]);
-
-            // DataList에 직접 설정 (target에서 자동으로 설정되지만 확인차 로그)
-            console.log("DataList 설정 전 행 수:", dlt_insuranceProducts.getRowCount());
-
-            // target 설정으로 자동 매핑되므로 수동 설정 불필요
-            // dlt_insuranceProducts.setJSON(productData);
-
-            console.log("DataList 설정 후 행 수:", dlt_insuranceProducts.getRowCount());
 
             // 그리드 데이터 확인
             for (var i = 0; i < Math.min(3, dlt_insuranceProducts.getRowCount()); i++) {
@@ -856,12 +986,26 @@ scwin.sbm_selectInsuranceProducts_submitdone = function (e) {
     scwin.showLoading(false);
 };
 
-// FastAPI 심사메모 생성 - claim_no 기준으로 수정
+
+// 메모 생성 버튼 클릭 핸들러도 업데이트
 scwin.generateMemoFromAPI = function () {
+    // 기본 권한 체크
+    if (!scwin.checkPermission("메모 생성")) return;
+
+    // 상태별 권한 체크
+    if (!scwin.checkStatusPermission("메모 생성")) return;
+
     if (!scwin.claim.claimNo) {
-        alert("청구번호를 확인해주세요.");
+        Swal.fire({
+            title: '오류',
+            text: '청구번호를 확인해주세요.',
+            icon: 'error',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
         return;
     }
+
 
     // 제외항목 검증
     if (!scwin.validateExcludedItemsBeforeMemo()) {
@@ -872,7 +1016,13 @@ scwin.generateMemoFromAPI = function () {
     var requestData = scwin.prepareFastAPIRequestData();
 
     if (!requestData) {
-        alert("요청 데이터 준비에 실패했습니다.");
+        Swal.fire({
+            title: '오류',
+            text: '요청 데이터 준비에 실패했습니다.',
+            icon: 'error',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
         return;
     }
 
@@ -882,7 +1032,7 @@ scwin.generateMemoFromAPI = function () {
     scwin.showLoading(true);
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "http://localhost:8000/api/v1/generate-memo-by-claim", true);
+    xhr.open("POST", "http://localhost:8000/api/v1/insurance/generate-memo-by-claim", true);
     xhr.setRequestHeader("Content-Type", "application/json");
 
     xhr.onreadystatechange = function () {
@@ -910,18 +1060,42 @@ scwin.generateMemoFromAPI = function () {
                             }
                         }
 
-                        alert("심사 메모가 성공적으로 생성되었습니다.\n처리된 진료 건수: " + result.treatment_count + "건");
+                        Swal.fire({
+                            title: '메모 생성 완료',
+                            text: '심사 메모가 성공적으로 생성되었습니다.처리된 진료 건수:'  + result.treatment_count + '건',
+                            icon: 'success',
+                            confirmButtonText: '확인',
+                            confirmButtonColor: '#3085d6'
+                        });
 
                     } else {
-                        alert("메모 생성에 실패했습니다. 응답 데이터가 없습니다.");
+                        Swal.fire({
+                            title: '메모 생성 실패',
+                            text: '메모 생성에 실패했습니다. 응답 데이터가 없습니다.',
+                            icon: 'error',
+                            confirmButtonText: '확인',
+                            confirmButtonColor: '#3085d6'
+                        });
                     }
                 } catch (e) {
                     console.error("응답 파싱 오류:", e);
-                    alert("응답 처리 중 오류가 발생했습니다.");
+                    Swal.fire({
+                        title: '오류',
+                        text: '응답 처리 중 오류가 발생했습니다.',
+                        icon: 'error',
+                        confirmButtonText: '확인',
+                        confirmButtonColor: '#3085d6'
+                    });
                 }
             } else {
                 console.error("API 호출 실패:", xhr.status);
-                alert("API 호출에 실패했습니다. (상태: " + xhr.status + ")");
+                Swal.fire({
+                    title: 'API 호출 실패',
+                    text: 'API 호출에 실패했습니다. (상태: ' + xhr.status + ')',
+                    icon: 'error',
+                    confirmButtonText: '확인',
+                    confirmButtonColor: '#3085d6'
+                });
             }
         }
     };
@@ -929,7 +1103,13 @@ scwin.generateMemoFromAPI = function () {
     xhr.onerror = function () {
         scwin.showLoading(false);
         console.error("네트워크 오류");
-        alert("네트워크 오류가 발생했습니다. FastAPI 서버를 확인해주세요.");
+        Swal.fire({
+            title: '네트워크 오류',
+            text: '네트워크 오류가 발생했습니다. FastAPI 서버를 확인해주세요.',
+            icon: 'error',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
     };
 
     xhr.send(JSON.stringify(requestData));
@@ -938,7 +1118,6 @@ scwin.generateMemoFromAPI = function () {
 // FastAPI 요청 데이터 준비 함수
 scwin.prepareFastAPIRequestData = function () {
     try {
-        console.log("=== FastAPI 요청 데이터 준비 시작 ===");
 
         // 1. Settlements 데이터 준비 (실제 데이터 사용)
         var settlements = [];
@@ -976,7 +1155,6 @@ scwin.prepareFastAPIRequestData = function () {
         var treatments = [];
 
         if (settlementRowCount > 0) {
-            console.log("settlementTreatmentList에서 치료 데이터 생성");
             for (var j = 0; j < settlementRowCount; j++) {
                 var treatment = {
                     treatment_id: parseInt(dlt_settlementTreatmentList.getCellData(j, "treatment_id")),
@@ -991,7 +1169,6 @@ scwin.prepareFastAPIRequestData = function () {
                 console.log("치료[" + j + "]:", treatment);
             }
         } else {
-            console.log("기본 치료 데이터 생성");
             treatments.push({
                 treatment_id: 1,
                 claim_no: scwin.claim.claimNo,
@@ -1004,7 +1181,6 @@ scwin.prepareFastAPIRequestData = function () {
         }
 
         // 3. Excluded Items 데이터 준비 (실제 데이터 사용)
-        console.log("=== 제외항목 데이터 준비 ===");
 
         if (typeof dlt_excludedItems === 'undefined') {
             console.error("dlt_excludedItems가 정의되지 않음!");
@@ -1012,7 +1188,6 @@ scwin.prepareFastAPIRequestData = function () {
         }
 
         var excludedRowCount = dlt_excludedItems.getRowCount();
-        console.log("dlt_excludedItems 행 수:", excludedRowCount);
 
         var excludedItems = [];
 
@@ -1023,12 +1198,6 @@ scwin.prepareFastAPIRequestData = function () {
             var excCategory = dlt_excludedItems.getCellData(l, "exc_category");
             var treatmentId = dlt_excludedItems.getCellData(l, "treatment_id");
 
-            console.log("제외항목[" + l + "] 원본 데이터:");
-            console.log("  - exc_id:", excId);
-            console.log("  - exc_reason:", excReason);
-            console.log("  - exc_cost:", excCost);
-            console.log("  - exc_category:", excCategory);
-            console.log("  - treatment_id:", treatmentId);
 
             var item = {
                 exc_id: parseInt(excId || (l + 1)),
@@ -1040,7 +1209,6 @@ scwin.prepareFastAPIRequestData = function () {
                 exc_category: excCategory || ""
             };
 
-            console.log("제외항목[" + l + "] 변환 후:", item);
             excludedItems.push(item);
         }
 
@@ -1058,7 +1226,6 @@ scwin.prepareFastAPIRequestData = function () {
         console.log("- excluded_items: " + excludedItems.length + "건");
 
         if (excludedItems.length > 0) {
-            console.log("제외항목 상세:");
             excludedItems.forEach(function (item, index) {
                 console.log("  [" + index + "] " + item.exc_reason + ": " + item.exc_cost + "원");
             });
@@ -1075,7 +1242,6 @@ scwin.prepareFastAPIRequestData = function () {
 };
 
 scwin.validateExcludedItemsBeforeMemo = function () {
-    console.log("=== 메모 생성 전 제외항목 검증 ===");
 
     if (typeof dlt_excludedItems === 'undefined') {
         console.error("dlt_excludedItems가 정의되지 않음");
@@ -1083,7 +1249,6 @@ scwin.validateExcludedItemsBeforeMemo = function () {
     }
 
     var rowCount = dlt_excludedItems.getRowCount();
-    console.log("현재 제외항목 행 수:", rowCount);
 
     if (rowCount === 0) {
         console.warn("제외항목이 0건입니다. 제외항목 조회가 완료되었는지 확인하세요.");
@@ -1175,11 +1340,16 @@ scwin.sbm_selectSettlement_submiterror = function (e) {
 // 유저 정보 불러오기 
 scwin.loadClaimUserEmpInfo = function (e) {
     if (!scwin.claim.claimNo) {
-        alert("저장된 청구번호가 없습니다.");
+        Swal.fire({
+            title: '오류',
+            text: '저장된 청구번호가 없습니다.',
+            icon: 'error',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
         return;
     }
     dma_claimNoVo.set("claim_no", scwin.claim.claimNo);
-
     $p.executeSubmission("sbm_selectClaimUserEmpInfo");
 };
 
@@ -1209,36 +1379,80 @@ scwin.prepareClaimResultData = function () {
 };
 
 // 최종 심사 완료 (수정된 함수)
+
 scwin.btn_complete_onclick = function () {
+    // 기본 권한 체크
+    if (!scwin.checkPermission("심사 완료")) return;
+
+    // 상태별 세부 권한 체크
+    // if (!scwin.checkCompletePermission()) return;
+
     var memo = txt_examMemo.getValue();
 
     if (!memo || memo.trim() === "") {
-        alert("심사 메모를 먼저 생성해주세요.");
+        scwin.toastAlert({
+            icon: 'warning',
+            title: '심사 메모를 먼저 입력해주세요.'
+        });
+
         return;
     }
 
     if (!scwin.claim.claimNo) {
-        alert("청구번호가 없습니다.");
+        // Swal.fire({
+        //     title: '오류',
+        //     text: '청구번호가 없습니다.',
+        //     icon: 'error',
+        //     confirmButtonText: '확인',
+        //     confirmButtonColor: '#3085d6'
+        // });
+
+        scwin.noBtnAlertWithTimer({
+            title: '오류',
+            icon: 'error',
+            text: result.message || '청구번호가 없습니다.'
+        });
+
         return;
     }
 
     // CLAIM_RESULT 데이터 준비
     var resultData = scwin.prepareClaimResultData();
-    console.log(resultData);
-    if (confirm(
-        "최종 심사를 완료하시겠습니까?\n\n" +
-        "- 청구번호: " + resultData.claim_no +
-        "\n- 지급금액: " + resultData.amount + "원" +
-        "\n- 처리일자: " + resultData.date
-    )) {
-        scwin.showLoading(true);
 
-        // 2단계: CLAIM_RESULT 테이블에 저장
-        $p.executeSubmission("sbm_saveClaimResult");
-        localStorage.removeItem("claim");
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
-    }
+    // Swal.fire({
+    //     title: '최종 심사 완료',
+    //     html: '최종 심사를 완료하시겠습니까?<br><br>' +
+    //         '• 청구번호: ' + resultData.claim_no + '<br>' +
+    //         '• 지급금액: ' + resultData.amount + '원<br>' +
+    //         '• 처리일자: ' + resultData.date,
+    //     icon: 'question',
+    //     showCancelButton: true,
+    //     confirmButtonColor: '#3085d6',
+    //     cancelButtonColor: '#d33',
+    //     confirmButtonText: '완료',
+    //     cancelButtonText: '취소'
+    // })
+        scwin.twoBtnAlert({
+            title: '최종 심사 완료',
+            icon: 'question',
+            text: '청구번호가 없습니다.',
+            html: '<div style="text-align: left;">' +
+                '최종 심사를 완료하시겠습니까?<br><br>' +
+                '• 청구번호: ' + resultData.claim_no + '<br>' +
+                '• 지급금액: ' + resultData.amount + '원<br>' +
+                '• 처리일자: ' + resultData.date +
+                '</div>',
+        })
+    .then((result) => {
+        if (result.isConfirmed) {
+            scwin.showLoading(true);
+            $p.executeSubmission("sbm_saveClaimResult");
+            localStorage.removeItem("claim");
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
+        }
+    });
 };
+
 
 // CLAIM_RESULT 저장 성공 콜백
 scwin.sbm_saveClaimResult_submitdone = function (e) {
@@ -1246,14 +1460,19 @@ scwin.sbm_saveClaimResult_submitdone = function (e) {
     var elHeader = responseData ? responseData.elHeader : null;
 
     if (elHeader && elHeader.resSuc !== false) {
-        // 저장 성공
         console.log("CLAIM_RESULT 저장 성공");
     } else {
         // 저장 실패
         scwin.showLoading(false);
         var errorMsg = elHeader && elHeader.resMsg ? elHeader.resMsg : "저장에 실패했습니다.";
         console.error("CLAIM_RESULT 저장 실패:", errorMsg);
-        alert("CLAIM_RESULT 저장 실패: " + errorMsg);
+        scwin.noBtnAlertWithTimer({
+            title: '오류',
+            icon: 'error',
+            text: errorMsg || 'CLAIM_RESULT 저장 실패.'
+        });
+
+
     }
 };
 
@@ -1268,7 +1487,12 @@ scwin.sbm_updateClaimResult_submitdone = function (e) {
         alert("CLAIM_RESULT가 성공적으로 업데이트되었습니다.");
     } else {
         var errorMsg = elHeader && elHeader.resMsg ? elHeader.resMsg : "업데이트에 실패했습니다.";
-        alert("CLAIM_RESULT 업데이트 실패: " + errorMsg);
+        scwin.noBtnAlertWithTimer({
+            title: '오류',
+            icon: 'error',
+            text: "CLAIM_RESULT 업데이트 실패: " + errorMsg,
+        });
+        
     }
 };
 
@@ -1276,10 +1500,6 @@ scwin.sbm_updateClaimResult_submitdone = function (e) {
 scwin.sbm_saveClaimResult_submiterror = function (e) {
     scwin.showLoading(false);
 
-    console.error("=== CLAIM_RESULT 저장 오류 ===");
-    console.error("오류 객체:", e);
-    console.error("상태 코드:", e.status);
-    console.error("응답 텍스트:", e.responseText);
 
     var errorMsg = "CLAIM_RESULT 저장 중 오류가 발생했습니다.";
 
@@ -1295,9 +1515,12 @@ scwin.sbm_saveClaimResult_submiterror = function (e) {
             errorMsg += "\n" + e.responseText;
         }
     }
-
-    alert(errorMsg);
-
+    scwin.noBtnAlertWithTimer({
+        title: '오류',
+        icon: 'error',
+        text: errorMsg,
+    });
+    
     // 심사완료 상태였다면 되돌리기
     if (dma_settlementInfo.get("status") === "심사완료") {
         dma_settlementInfo.set("status", "심사중");
@@ -1308,25 +1531,37 @@ scwin.sbm_saveClaimResult_submiterror = function (e) {
 scwin.sbm_updateClaimResult_submiterror = function (e) {
     scwin.showLoading(false);
     console.error("=== CLAIM_RESULT 업데이트 오류 ===", e);
-    alert("CLAIM_RESULT 업데이트 중 오류가 발생했습니다.");
+    scwin.noBtnAlertWithTimer({
+        title: '오류',
+        icon: 'error',
+        text: "CLAIM_RESULT 업데이트 중 오류가 발생했습니다.",
+    });
+    
 };
 
 // 1. 수정된 콜백 함수 - 서버 응답에 따른 데이터 처리
 scwin.sbm_selectSettlementTreatment_submitdone = function (e) {
-    console.log("=== settlementTreatment 조회 완료 ===");
-    console.log("전체 응답:", e);
 
     // 응답 데이터 구조 확인
     var responseData = e.responseJSON;
-    console.log("responseJSON:", responseData);
 
     // elHeader 확인
     var elHeader = responseData ? responseData.elHeader : null;
-    console.log("elHeader:", elHeader);
 
     if (!elHeader || elHeader.resSuc === false) {
         console.error("settlementTreatment 조회 실패:", elHeader);
-        alert("정산치료 조회에 실패했습니다: " + (elHeader ? elHeader.resMsg : "응답 없음"));
+        // Swal.fire({
+        //     title: '조회 실패',
+        //     text: '정산치료 조회에 실패했습니다: ' + (elHeader ? elHeader.resMsg : "응답 없음"),
+        //     icon: 'error',
+        //     confirmButtonText: '확인',
+        //     confirmButtonColor: '#3085d6'
+        // });
+        scwin.toastAlert({
+            icon: 'warning',
+            title: '정산치료 조회에 실패했습니다'
+        });
+        
         return;
     }
 
@@ -1337,20 +1572,16 @@ scwin.sbm_selectSettlementTreatment_submitdone = function (e) {
         // 1. List<SettlementTreatmentVo> 직접 반환하는 경우
         if (Array.isArray(responseData.elData)) {
             treatmentData = responseData.elData;
-            console.log("elData가 직접 배열:", treatmentData.length);
         }
         // 2. 래핑된 구조인 경우 (가능한 키들 확인)
         else if (responseData.elData.settlementTreatmentVoList) {
             treatmentData = responseData.elData.settlementTreatmentVoList;
-            console.log("settlementTreatmentVoList:", treatmentData.length);
         }
         else if (responseData.elData.list) {
             treatmentData = responseData.elData.list;
-            console.log("list 키로 수신:", treatmentData.length);
         }
         else {
             // 구조를 확인하기 위해 모든 키 출력
-            console.log("elData 구조 확인:");
             Object.keys(responseData.elData).forEach(function (key) {
                 console.log("- " + key + ":", responseData.elData[key]);
             });
@@ -1366,11 +1597,9 @@ scwin.sbm_selectSettlementTreatment_submitdone = function (e) {
 
     // 데이터 설정
     if (treatmentData && Array.isArray(treatmentData) && treatmentData.length > 0) {
-        console.log("치료 데이터 샘플:", treatmentData[0]);
 
         // DataList에 설정
         dlt_settlementTreatmentList.setJSON(treatmentData);
-        console.log("DataList 설정 완료, 행 수:", dlt_settlementTreatmentList.getRowCount());
 
         // 첫 번째 행의 데이터를 settlementInfo에도 반영 (선택사항)
         var firstRow = treatmentData[0];
@@ -1397,44 +1626,50 @@ scwin.sbm_selectSettlementTreatment_submitdone = function (e) {
 };
 
 // 1. 수정된 정산집계 조회 함수
+
 scwin.sbm_selectSettlementSummary = function () {
     if (!scwin.claim.claimNo) {
         console.error("청구번호가 없습니다.")
-        alert("청구번호가 설정되지 않았습니다.")
+       scwin.noBtnAlertWithTimer({
+            title: '오류',
+            text: '청구번호가 설정되지 않았습니다.',
+            icon: 'error',
+        });
         return;
     }
 
-    //  파라미터명 확인 (SC_claim_no vs claim_no)
     dma_settlementSummarySearch.set("SC_claim_no", scwin.claim.claimNo);
-    console.log("dma : ", dma_settlementSummarySearch);
-    console.log("요청 데이터:", dma_settlementSummarySearch.getJSON());
 
     try {
         $p.executeSubmission("sbm_selectSettlementSummary");
-
     } catch (error) {
         console.error("Submission 실행 오류:", error);
-        alert("정산집계 조회 중 오류가 발생했습니다: " + error.message);
+      scwin.noBtnAlertWithTimer({
+            title: '오류',
+            text: '정산집계 조회 중 오류가 발생했습니다: ' + error.message,
+            icon: 'error',
+        });
     }
 };
 
 // 2. 개선된 성공 콜백 함수
 scwin.sbm_selectSettlementSummary_submitdone = function (e) {
-    console.log("sbm_selectSettlementSummary 실행됨");
-    console.log("=== 정산집계 조회 완료 ===");
-    console.log("전체 응답:", e);
 
     // 응답 데이터 구조 확인
     var responseData = e.responseJSON;
-    console.log("responseJSON:", responseData);
 
     // elHeader 확인
     var elHeader = responseData ? responseData.elHeader : null;
-    console.log("elHeader:", elHeader);
 
     if (!elHeader || elHeader.resSuc === false) {
         console.error("정산집계 조회 실패:", elHeader);
-        alert("정산집계 조회에 실패했습니다: " + (elHeader ? elHeader.resMsg : "응답 없음"));
+        Swal.fire({
+            title: '조회 실패',
+            text: '정산집계 조회에 실패했습니다: ' + (elHeader ? elHeader.resMsg : "응답 없음"),
+            icon: 'error',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
 
         // 실패 시 테스트 데이터 설정
         return;
@@ -1442,11 +1677,9 @@ scwin.sbm_selectSettlementSummary_submitdone = function (e) {
 
     // elData 확인 및 처리
     if (responseData.elData) {
-        console.log("정산집계 데이터:", responseData.elData);
 
         // dma_settlementSummary에 데이터가 자동으로 설정되었는지 확인
         var summaryData = dma_settlementSummary.getJSON();
-        console.log("설정된 정산집계 데이터:", summaryData);
 
         // 데이터 유효성 검증
         if (summaryData.total_final_due && summaryData.total_final_due !== "") {
@@ -1477,24 +1710,33 @@ scwin.sbm_selectSettlementSummary_submiterror = function (e) {
 
     console.log(errorMsg);
 };
+
+
 scwin.btn_approval_onclick = function (e) {
+    // 실무자의 경우에만 권한 체크 (관리자는 모든 청구건 승인 가능)
+    if (scwin.employee.role === "실무자" && !scwin.checkPermission("결재 신청"))return;
+    
+
     if (scwin.employee.role !== "실무자") {
-        // 배경 오버레이 제거 옵션들
-        Swal.fire({
+        // 관리자/승인자의 결재 승인
+        // Swal.fire({
+        //     title: '결재 승인',
+        //     text: '결재를 승인하시겠습니까?',
+        //     icon: 'question',
+        //     showCancelButton: true,
+        //     confirmButtonColor: '#3085d6',
+        //     cancelButtonColor: '#d33',
+        //     confirmButtonText: '승인',
+        //     cancelButtonText: '취소',
+        //     backdrop: 'rgba(0,0,0,0.1)',
+        //     allowOutsideClick: true
+        // })
+        scwin.twoBtnAlert({
             title: '결재 승인',
             text: '결재를 승인하시겠습니까?',
             icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: '승인',
-            cancelButtonText: '취소',
-            // // 배경 오버레이 관련 설정
-            // backdrop: false,  // 배경 오버레이 완전 제거
-            // 또는
-            backdrop: 'rgba(0,0,0,0.1)',  // 투명도 조절 (0~1)
-            allowOutsideClick: true  // 바깥 클릭시 닫기 허용
-        }).then((result) => {
+        })
+        .then((result) => {
             if (result.isConfirmed) {
                 if (!scwin.claim.claimNo) {
                     Swal.fire({
@@ -1502,28 +1744,30 @@ scwin.btn_approval_onclick = function (e) {
                         text: '청구번호가 없습니다.',
                         icon: 'error',
                         confirmButtonText: '확인',
-                        backdrop: false,  // 에러 알림도 배경 제거
+                        backdrop: false,
                         allowOutsideClick: true
                     });
                     return;
                 }
-                
+
                 dma_approvalReq.set("claim_no", scwin.claim.claimNo);
                 $p.executeSubmission("sbm_approveApprovalReq");
             }
         });
     } else {
-        alert("결재 신청");
-         openClaimApprovalPopup("/InsWebApp/ui/approval/approval-modal.xml");
+        // 실무자의 결재 신청 - 상태 체크 추가
+        if (!scwin.checkApprovalPermission()) return;
+
+        openClaimApprovalPopup("/InsWebApp/ui/approval/approval-modal.xml");
     }
 };
 
-function openClaimApprovalPopup(){
-     requires("uiplugin.popup");
+function openClaimApprovalPopup(link) {
+    requires("uiplugin.popup");
     var winWid = $(window).width();
     var winHei = $(window).height();
     var popWid = 600;
-    var popHei = 250;
+    var popHei = 350;
     var sumLeft = (winWid - popWid) / 2;
     var sumTop = (winHei - popHei) / 2;
 
@@ -1547,22 +1791,37 @@ function openClaimApprovalPopup(){
 }
 // 결재승인 성공 콜백
 scwin.sbm_approveApprovalReq_submitdone = function (e) {
-    alert("결재승인이 완료되었습니다.");
     var responseData = e.responseJSON;
     var elHeader = responseData ? responseData.elHeader : null;
     console.log(e);
+    
+    scwin.showLoading(false);  // 로딩 종료
+    
     if (elHeader && elHeader.resSuc !== false) {
-        alert("결재승인이 완료되었습니다.");
-        // 페이지 새로고침 또는 상태 업데이트
-        location.reload();
+        Swal.fire({
+            title: '완료',
+            text: '결재가 승인되었습니다.',
+            icon: 'success',
+            showConfirmButton: false,
+            timer: 1500
+        }).then(() => {
+            // 성공 시 페이지 이동
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+        });
     } else {
-        var errorMsg = elHeader && elHeader.resMsg ? elHeader.resMsg : "결재승인에 실패했습니다.";
-        alert("결재승인 실패: " + errorMsg);
+        Swal.fire({
+            title: '오류',
+            text: e.responseJSON?.message || '결재 승인 중 오류가 발생했습니다.',
+            icon: 'error',
+            confirmButtonText: '확인'
+        });
     }
 };
 
 // 결재승인 에러 콜백
 scwin.sbm_approveApprovalReq_submiterror = function (e) {
+    scwin.showLoading(false);  // 로딩 종료
+    
     console.error("=== 결재승인 오류 ===");
     console.error("오류 객체:", e);
     console.error("상태 코드:", e.status);
@@ -1581,10 +1840,20 @@ scwin.sbm_approveApprovalReq_submiterror = function (e) {
             errorMsg += "\n" + e.responseText;
         }
     }
-    alert(errorMsg);
+    
+    scwin.noBtnAlertWithTimer({
+        title: '에러 발생',
+        text: errorMsg,
+        icon: 'error',
+    });
 };
-
 scwin.btn_return_onclick = function (e) {
+    // 기본 권한 체크
+    if (!scwin.checkPermission("반송")) return;
+
+    // 상태별 세부 권한 체크
+    if (!scwin.checkReturnPermission()) return;
+
     openClaimReturnPopup("/InsWebApp/ui/Assignment/claimReturnPopup.xml");
 };
 
@@ -1618,9 +1887,13 @@ function openClaimReturnPopup(link) {
 
 //Request for supple
 scwin.btn_supplement_onclick = function (e) {
+    // 기본 권한 체크
+    if (!scwin.checkPermission("보완 요청")) return;
+
+    // 상태별 세부 권한 체크
+    if (!scwin.checkSupplementPermission()) return;
 
     openReqSupplePopup("/InsWebApp/ui/Assignment/reqSupplePopup.xml");
-
 };
 
 function openReqSupplePopup(link) {
@@ -1651,7 +1924,6 @@ function openReqSupplePopup(link) {
 }
 
 scwin.sbm_selectClaimResult_submitdone = function (e) {
-    console.log("메모 가지고오기 : ", e);
     var responseData = e.responseJSON;
 
     if (responseData && responseData.elData && responseData.elData.claimResultVoList) {
@@ -1689,7 +1961,6 @@ scwin.sbm_selectClaimResult_submiterror = function (e) {
 };
 
 scwin.sbm_selectClaimUserEmpInfo_submitdone = function (e) {
-    console.log("유저 정보 불러오기 성공:", e);
     var responseData = e.responseJSON;
 
     if (responseData && responseData.elData) {
@@ -1748,14 +2019,552 @@ function openRejectClaimPopup(link) {
 
     $p.openPopup(link, opts);
 }
-]]></script>
+
+
+// 청구 상태 설정 함수 추가
+scwin.setClaimStatus = function () {
+    var status = scwin.claim.status;
+
+    if (status) {
+        // spn_status에 상태 값 설정
+        spn_status.setValue(status);
+
+        // 상태별 CSS 클래스 설정
+        scwin.setStatusStyle(status);
+    }
+};
+
+// 상태별 스타일 설정 함수
+scwin.setStatusStyle = function (status) {
+    // 기존 상태 클래스 제거
+    spn_status.removeClass("status_pending");
+    spn_status.removeClass("status_completed");
+    spn_status.removeClass("status_waiting");
+    spn_status.removeClass("status_supplement");
+    spn_status.removeClass("status_return");
+    spn_status.removeClass("status_approval");
+    spn_status.removeClass("status_reject");
+
+    // 상태별 클래스 추가
+    switch (status) {
+        case "보완":
+            spn_status.addClass("status_supplement");
+            break;
+        case "대기":
+            spn_status.addClass("status_waiting");
+            break;
+        case "결재완료":
+            spn_status.addClass("status_completed");
+            break;
+        case "결재반려":
+            spn_status.addClass("status_reject");
+            break;
+        case "완료":
+            spn_status.addClass("status_completed");
+            break;
+        case "결재중":
+            spn_status.addClass("status_approval");
+            break;
+        case "반송":
+            spn_status.addClass("status_return");
+            break;
+        default:
+            spn_status.addClass("status_pending");
+            break;
+    }
+};
+
+// 상태별 권한 설정 함수 추가
+scwin.setStatusBasedPermissions = function (status) {
+    console.log("상태별 권한 설정:", status);
+
+    if (status === "결재중") {
+        // 결재중 상태: 보완, 반송 버튼 비활성화, 결재신청도 비활성화
+        console.log("결재중 상태 - 보완, 반송, 결재신청 비활성화");
+
+        btn_supplement.setDisabled(true);
+        btn_supplement.addClass("disabled-button");
+
+        btn_return.setDisabled(true);
+        btn_return.addClass("disabled-button");
+
+        btn_approval.setDisabled(true);
+        btn_approval.addClass("disabled-button");
+
+        // 메모 수정도 제한
+        txt_examMemo.setReadOnly(true);
+        txt_examMemo.addClass("readonly-textarea");
+
+        btn_generateMemo.setDisabled(true);
+        btn_generateMemo.addClass("disabled-button");
+
+        btn_complete.setDisabled(true);
+        btn_complete.addClass("disabled-button");
+    } else if (status === "결재완료") {
+        // 결재완료 상태: 모든 수정 작업 비활성화, 완료 버튼만 활성화
+        console.log("결재완료 상태 - 대부분의 작업 비활성화, 완료만 가능");
+
+        btn_supplement.setDisabled(true);
+        btn_supplement.addClass("disabled-button");
+
+        btn_return.setDisabled(true);
+        btn_return.addClass("disabled-button");
+
+        btn_approval.setDisabled(true);
+        btn_approval.addClass("disabled-button");
+
+        btn_generateMemo.setDisabled(true);
+        btn_generateMemo.addClass("disabled-button");
+
+        // 메모 수정 제한
+        txt_examMemo.setReadOnly(true);
+        txt_examMemo.addClass("readonly-textarea");
+
+        // 완료 버튼은 활성화 유지 (본인 청구건인 경우)
+        if (scwin.employee.role === "실무자" && scwin.claim.empNo === scwin.employee.empNo) {
+            btn_complete.setDisabled(false);
+            btn_complete.removeClass("disabled-button");
+        }
+
+    } else if (status === "결재반려") {
+        // 결재반려 상태: 모든 작업 가능 (재작업을 위해)
+        console.log("결재반려 상태 - 모든 작업 가능 (재작업)");
+
+        if (scwin.employee.role === "실무자" && scwin.claim.empNo === scwin.employee.empNo) {
+            btn_supplement.setDisabled(false);
+            btn_supplement.removeClass("disabled-button");
+
+            btn_return.setDisabled(false);
+            btn_return.removeClass("disabled-button");
+
+            btn_approval.setDisabled(false);
+            btn_approval.removeClass("disabled-button");
+
+            btn_complete.setDisabled(false);  // 결재반려 상태에서도 심사완료 가능
+            btn_complete.removeClass("disabled-button");
+
+            btn_generateMemo.setDisabled(false);
+            btn_generateMemo.removeClass("disabled-button");
+
+            txt_examMemo.setReadOnly(false);
+            txt_examMemo.removeClass("readonly-textarea");
+        }
+
+    } else if (status === "완료") {
+        // 완료 상태: 모든 수정 작업 비활성화 (조회만 가능)
+        console.log("완료 상태 - 모든 수정 작업 비활성화");
+
+        btn_supplement.setDisabled(true);
+        btn_supplement.addClass("disabled-button");
+
+        btn_return.setDisabled(true);
+        btn_return.addClass("disabled-button");
+
+        btn_approval.setDisabled(true);
+        btn_approval.addClass("disabled-button");
+
+        btn_complete.setDisabled(true);
+        btn_complete.addClass("disabled-button");
+
+        btn_generateMemo.setDisabled(true);
+        btn_generateMemo.addClass("disabled-button");
+
+        txt_examMemo.setReadOnly(true);
+        txt_examMemo.addClass("readonly-textarea");
+
+    } else if (status === "보완" || status === "반송") {
+        // 보완/반송 상태: 제한적 작업만 가능
+        console.log(status + " 상태 - 제한적 작업 가능");
+
+        if (scwin.employee.role === "실무자" && scwin.claim.empNo === scwin.employee.empNo) {
+            // 보완/반송 상태에서는 재신청을 위한 작업만 가능
+            btn_supplement.setDisabled(true);
+            btn_supplement.addClass("disabled-button");
+
+            btn_return.setDisabled(true);
+            btn_return.addClass("disabled-button");
+
+            // 결재신청과 메모 생성, 심사완룼도 가능
+            btn_approval.setDisabled(false);
+            btn_approval.removeClass("disabled-button");
+
+            btn_complete.setDisabled(false);  // 보완/반송 상태에서도 심사완료 가능
+            btn_complete.removeClass("disabled-button");
+
+            btn_generateMemo.setDisabled(false);
+            btn_generateMemo.removeClass("disabled-button");
+
+            txt_examMemo.setReadOnly(false);
+            txt_examMemo.removeClass("readonly-textarea");
+        }
+
+    } else if (status === "대기") {
+        // 대기 상태: 모든 작업 가능 (심사완료 포함)
+        console.log("대기 상태 - 모든 작업 가능");
+
+        if (scwin.employee.role === "실무자" && scwin.claim.empNo === scwin.employee.empNo) {
+            btn_supplement.setDisabled(false);
+            btn_supplement.removeClass("disabled-button");
+
+            btn_return.setDisabled(false);
+            btn_return.removeClass("disabled-button");
+
+            btn_approval.setDisabled(false);
+            btn_approval.removeClass("disabled-button");
+
+            btn_complete.setDisabled(false);  // 대기 상태에서도 심사완료 가능
+            btn_complete.removeClass("disabled-button");
+
+            btn_generateMemo.setDisabled(false);
+            btn_generateMemo.removeClass("disabled-button");
+
+            txt_examMemo.setReadOnly(false);
+            txt_examMemo.removeClass("readonly-textarea");
+        }
+
+    } else {
+        // 기타 상태 또는 상태가 없는 경우: 기본 권한 적용
+        console.log("기타/기본 상태 - 기본 권한 적용");
+
+        if (scwin.employee.role === "실무자" && scwin.claim.empNo === scwin.employee.empNo) {
+            btn_supplement.setDisabled(false);
+            btn_supplement.removeClass("disabled-button");
+
+            btn_return.setDisabled(false);
+            btn_return.removeClass("disabled-button");
+
+            btn_approval.setDisabled(false);
+            btn_approval.removeClass("disabled-button");
+
+            btn_generateMemo.setDisabled(false);
+            btn_generateMemo.removeClass("disabled-button");
+
+            txt_examMemo.setReadOnly(false);
+            txt_examMemo.removeClass("readonly-textarea");
+        }
+    }
+
+    // 상태 정보 표시 업데이트
+    scwin.updateStatusInfo(status);
+    
+    // 관리자 권한 재설정 (상태별 권한 후에 실행)
+    if (scwin.employee && scwin.employee.role !== "실무자") {
+        if (status === "결재중") {
+            // 결재중 상태에서는 관리자 버튼들 활성화
+            btn_approve_complete.setDisabled(false);
+            btn_approve_complete.removeClass("disabled-button");
+            btn_reject.setDisabled(false);
+            btn_reject.removeClass("disabled-button");
+        } else {
+            // 다른 상태에서는 관리자 버튼들 비활성화
+            btn_approve_complete.setDisabled(true);
+            btn_approve_complete.addClass("disabled-button");
+            btn_reject.setDisabled(true);
+            btn_reject.addClass("disabled-button");
+        }
+    }
+};
+// 상태 정보 업데이트 함수 추가
+scwin.updateStatusInfo = function (status) {
+    var statusMessage = "";
+
+    if (status === "결재중") {
+        statusMessage = "현재 결재 진행 중입니다. 수정이 제한됩니다.";
+    } else if (status === "결재완료") {
+        statusMessage = "결재가 완료되었습니다. 최종 심사 완료만 가능합니다.";
+    } else if (status === "결재반려") {
+        statusMessage = "결재가 반려되었습니다. 재작업 후 다시 신청해주세요.";
+    } else if (status === "완료") {
+        statusMessage = "심사가 완료되었습니다. 수정이 불가능합니다.";
+    } else if (status === "보완") {
+        statusMessage = "보완 요청 상태입니다. 보완 후 재신청해주세요.";
+    } else if (status === "반송") {
+        statusMessage = "반송 상태입니다. 수정 후 재신청해주세요.";
+    } else if (status === "대기") {
+        statusMessage = "심사 대기 중입니다.";
+    }
+
+    // 상태 메시지를 화면에 표시 (선택적)
+    if (statusMessage) {
+        console.log("상태 메시지:", statusMessage);
+        // 필요시 화면에 표시할 수 있음
+        // alert(statusMessage);
+    }
+};
+// 상태별 권한 체크 함수 세분화
+scwin.checkStatusPermission = function (actionName) {
+    var status = scwin.claim.status;
+
+    console.log("권한 체크 - 액션:", actionName, "상태:", status);
+
+    if (status === "결재중") {
+        if (actionName === "반송" || actionName === "보완 요청" || actionName === "결재 신청" || actionName === "메모 생성") {
+            scwin.noBtnAlertWithTimer({
+                title: '작업 제한',
+                text: '현재 결재 진행 중이므로 ' + actionName + '을(를) 할 수 없습니다.',
+                icon: 'info',
+            });
+            return false;
+        }
+
+    } else if (status === "결재완료") {
+        if (actionName === "반송" || actionName === "보완 요청" || actionName === "결재 신청" || actionName === "메모 생성") {
+            Swal.fire({
+                title: '작업 제한',
+                text: '결재가 완료된 상태입니다. ' + actionName + '을(를) 할 수 없습니다.',
+                icon: 'info',
+                confirmButtonText: '확인',
+                confirmButtonColor: '#3085d6'
+            });
+            return false;
+        }
+
+    } else if (status === "완료") {
+        if (actionName === "반송" || actionName === "보완 요청" || actionName === "결재 신청" ||
+            actionName === "메모 생성" || actionName === "심사 완료") {
+            Swal.fire({
+                title: '작업 불가',
+                text: '이미 심사가 완료된 건입니다. ' + actionName + '을(를) 할 수 없습니다.',
+                icon: 'warning',
+                confirmButtonText: '확인',
+                confirmButtonColor: '#3085d6'
+            });
+            return false;
+        }
+
+    } else if (status === "보완") {
+        if (actionName === "반송" || actionName === "보완 요청") {
+           scwin.noBtnAlertWithTimer({
+                title: '보완 진행 중',
+                text: '현재 보완 요청 상태입니다. 보완 완료 후 재신청해주세요.',
+                icon: 'info',
+            });
+            return false;
+        }
+
+    } else if (status === "반송") {
+        if (actionName === "반송" || actionName === "보완 요청") {
+            scwin.noBtnAlertWithTimer({
+                title: '반송 상태',
+                text: '현재 반송 상태입니다. 수정 완료 후 재신청해주세요.',
+                icon: 'info',
+                confirmButtonText: '확인',
+                confirmButtonColor: '#3085d6'
+            });
+            return false;
+        }
+    }
+
+    return true;
+};
+
+
+// 각 버튼별 상세 권한 체크 함수들
+scwin.checkReturnPermission = function () {
+    var status = scwin.claim.status;
+    var restrictedStatuses = ["결재중", "결재완료", "완료", "보완", "반송"];
+
+    if (restrictedStatuses.includes(status)) {
+        var message = "";
+        var title = "";
+
+        if (status === "결재중") {
+            title = "결재 진행 중";
+            message = "결재 진행 중에는 반송할 수 없습니다.";
+        } else if (status === "결재완료") {
+            title = "결재 완료";
+            message = "결재 완료된 건은 반송할 수 없습니다.";
+        } else if (status === "완료") {
+            title = "심사 완료";
+            message = "완료된 건은 반송할 수 없습니다.";
+        } else if (status === "보완") {
+            title = "보완 진행 중";
+            message = "이미 보완 요청된 건입니다.";
+        } else if (status === "반송") {
+            title = "반송 상태";
+            message = "이미 반송된 건입니다.";
+        }
+
+        Swal.fire({
+            title: title,
+            text: message,
+            icon: 'warning',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
+        return false;
+    }
+
+    return true;
+};
+
+scwin.checkSupplementPermission = function () {
+    var status = scwin.claim.status;
+    var restrictedStatuses = ["결재중", "결재완료", "완료", "보완", "반송"];
+
+    if (restrictedStatuses.includes(status)) {
+        var message = "";
+        var title = "";
+
+        if (status === "결재중") {
+            title = "결재 진행 중";
+            message = "결재 진행 중에는 보완 요청할 수 없습니다.";
+        } else if (status === "결재완료") {
+            title = "결재 완료";
+            message = "결재 완료된 건은 보완 요청할 수 없습니다.";
+        } else if (status === "완료") {
+            title = "심사 완료";
+            message = "완료된 건은 보완 요청할 수 없습니다.";
+        } else if (status === "보완") {
+            title = "보완 진행 중";
+            message = "이미 보완 요청된 건입니다.";
+        } else if (status === "반송") {
+            title = "반송 상태";
+            message = "반송된 건은 먼저 수정해주세요.";
+        }
+
+        scwin.noBtnAlertWithTimer({
+            title: title,
+            text: message,
+            icon: 'warning',
+        });
+        return false;
+    }
+
+    return true;
+};
+
+scwin.checkApprovalPermission = function () {
+    var status = scwin.claim.status;
+    var restrictedStatuses = ["결재중", "결재완료", "완료"];
+
+    if (restrictedStatuses.includes(status)) {
+        var message = "";
+        var title = "";
+
+        if (status === "결재중") {
+            title = "결재 진행 중";
+            message = "이미 결재 진행 중입니다.";
+        } else if (status === "결재완료") {
+            title = "결재 완료";
+            message = "이미 결재 완료된 건입니다.";
+        } else if (status === "완료") {
+            title = "심사 완료";
+            message = "완료된 건은 결재신청할 수 없습니다.";
+        }
+
+        Swal.fire({
+            title: title,
+            text: message,
+            icon: 'info',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
+        return false;
+    }
+
+    return true;
+};
+
+// scwin.checkCompletePermission = function () {
+//     var status = scwin.claim.status;
+
+//     if (status !== "결재완료") {
+//         var message = "";
+//         var title = "심사 완료 불가";
+
+//         if (status === "대기") message = "먼저 결재를 완료해주세요.";
+//         else if (status === "결재중") message = "결재 완료 후 심사를 완료할 수 있습니다.";
+//         else if (status === "완료") message = "이미 완료된 건입니다.";
+//         else if (status === "보완" || status === "반송") message = "보완/수정 완료 후 결재를 진행해주세요.";
+//         else if (status === "결재반려") message = "결재 재신청 후 완료할 수 있습니다.";
+//         else message = "결재 완료된 건만 심사 완료할 수 있습니다.";
+
+//         Swal.fire({
+//             title: title,
+//             text: message,
+//             icon: 'warning',
+//             confirmButtonText: '확인',
+//             confirmButtonColor: '#3085d6'
+//         });
+//         return false;
+//     }
+
+//     return true;
+// };
+
+// 관리자용 결재 완료 버튼 클릭 함수 (상태 변경용)
+scwin.btn_approve_complete_onclick = function () {
+    // 관리자만 사용 가능
+    if (scwin.employee.role === "실무자") {
+        Swal.fire({
+            title: '권한 없음',
+            text: '관리자만 결재 완료를 할 수 있습니다.',
+            icon: 'warning',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
+        return;
+    }
+
+    // 결재중 상태가 아니면 비활성화
+    if (scwin.claim.status !== "결재중") {
+        Swal.fire({
+            title: '작업 불가',
+            text: '결재중 상태에서만 결재 완료가 가능합니다.',
+            icon: 'warning',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
+        return;
+    }
+
+    if (!scwin.claim.claimNo) {
+        Swal.fire({
+            title: '오류',
+            text: '청구번호가 없습니다.',
+            icon: 'error',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
+        return;
+    }
+
+    // SweetAlert2 직접 사용 (scwin.twoBtnAlert 대신)
+    Swal.fire({
+        title: '결재 승인',
+        html: '<div style="text-align: left;">' +
+            '결재를 승인하시겠습니까?<br><br>' +
+            '• 청구번호: ' + scwin.claim.claimNo + '<br>' +
+            '• 담당자: ' + (scwin.employee.empName || '관리자') +
+            '</div>',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '승인',
+        cancelButtonText: '취소',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            scwin.showLoading(true);
+            
+            // CLAIM 테이블의 status를 "결재완료"로 변경하는 요청
+            dma_approvalReq.set("claim_no", scwin.claim.claimNo);
+            dma_approvalReq.set("approval_memo", "관리자 결재 승인");
+            dma_approvalReq.set("request_type", "APPROVE");
+            
+            $p.executeSubmission("sbm_approveApprovalReq");
+            
+        }
+    });
+};]]></script>
 	</head>
 	<body ev:onpageload="scwin.onpageload">
 		<w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/header.xml"></w2:wframe>
-		<xf:group class="container" id="" style="padding:20px; top:100px; ">
+		<xf:group class="sub_content" id="" style="padding:20px; top:100px;">
 			<!-- 헤더 영역 -->
 			<xf:group class="header_section" id=""
-				style="background-color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+				style="background-color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);border: 1px solid #d9d9d9">
 				<xf:group id="" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
 					<w2:textbox id="" label="보험금 정산 심사" style="font-size:24px;font-weight:bold;"></w2:textbox>
 					<xf:group id="" style="display:flex;align-items:center;gap:10px;">
@@ -1790,7 +2599,7 @@ function openRejectClaimPopup(link) {
 			<xf:group class="main_content" id="" style="display: flex; gap: 20px;">
 				<!-- 왼쪽 패널 -->
 				<xf:group class="left_panel" id=""
-					style="flex: 1; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+					style="flex: 1; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);border: 1px solid #d9d9d9">
 					<!-- 금액 표시 영역 -->
 					<xf:group class="amount_display" id=""
 						style="text-align: center; padding: 30px; background: #d9e3f0; color: black; border-radius: 8px; margin-bottom: 20px;">
@@ -1904,31 +2713,35 @@ function openRejectClaimPopup(link) {
 
 				<!-- 오른쪽 패널 -->
 				<xf:group class="right_panel" id=""
-					style="width: 500px; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+					style="width: 500px; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);border: 1px solid #d9d9d9;">
 
 					<!-- 보험상품 그리드 - SQL 구조에 맞게 수정 -->
-					<w2:textbox class="section_title" id="" label="보험 상품별 지급 내역" style="margin-top:20px;"></w2:textbox>
-					<w2:gridView id="grd_insuranceProducts" style="height:130px;" dataList="data:dlt_insuranceProducts" autoFit="allColumn"
-						readOnly="true" class="gvw">
-						<w2:caption style="" id="caption2" value="보험 상품 목록"></w2:caption>
-						<w2:header style="" id="header2">
-							<w2:row style="" id="row3">
-								<w2:column width="100" inputType="text" id="column4" value="보험ID" displayMode="label"></w2:column>
-								<w2:column width="150" inputType="text" id="column5" value="보험상품명" displayMode="label"></w2:column>
-								<w2:column width="100" inputType="text" id="column6" value="가입자명" displayMode="label"></w2:column>
-								<w2:column width="100" inputType="text" id="column7" value="보험금액" displayMode="label"></w2:column>
-							</w2:row>
-						</w2:header>
-						<w2:gBody style="" id="gBody2">
-							<w2:row style="" id="row4">
-								<w2:column width="100" inputType="text" id="insu_id" displayMode="label"></w2:column>
-								<w2:column width="150" inputType="text" id="insu_name" displayMode="label"></w2:column>
-								<w2:column width="100" inputType="text" id="user_name" displayMode="label"></w2:column>
-								<w2:column width="100" inputType="text" id="insu_amt" displayMode="label" dataType="number" displayFormat="#,###">
-								</w2:column>
-							</w2:row>
-						</w2:gBody>
-					</w2:gridView>
+					<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
+						meta_snippetName="6_01 그리드" style="">
+						<w2:gridView id="grd_insuranceProducts" style="height:180px;border: 1px solid #d9d9d9;"
+							dataList="data:dlt_insuranceProducts" autoFit="allColumn" readOnly="true" class="gvw" scrollByColumn="false"
+							scrollByColumnAdaptive="false">
+							<w2:caption style="" id="caption2" value="보험 상품 목록"></w2:caption>
+							<w2:header style="" id="header2">
+								<w2:row style="" id="row3">
+									<w2:column width="100" inputType="text" id="column4" value="보험ID" displayMode="label"></w2:column>
+									<w2:column width="150" inputType="text" id="column5" value="보험상품명" displayMode="label"></w2:column>
+									<w2:column width="100" inputType="text" id="column6" value="가입자명" displayMode="label"></w2:column>
+									<w2:column width="100" inputType="text" id="column7" value="보험금액" displayMode="label"></w2:column>
+								</w2:row>
+							</w2:header>
+							<w2:gBody style="" id="gBody2">
+								<w2:row style="" id="row4">
+									<w2:column width="100" inputType="text" id="insu_id" displayMode="label"></w2:column>
+									<w2:column width="150" inputType="text" id="insu_name" displayMode="label"></w2:column>
+									<w2:column width="100" inputType="text" id="user_name" displayMode="label"></w2:column>
+									<w2:column width="100" inputType="text" id="insu_amt" displayMode="label" dataType="number" displayFormat="#,###">
+									</w2:column>
+								</w2:row>
+							</w2:gBody>
+						</w2:gridView>
+					</xf:group>
+
 
 
 					<w2:textbox class="section_title" id="" label="심사 메모"></w2:textbox>
@@ -1950,8 +2763,7 @@ function openRejectClaimPopup(link) {
 					</xf:group>
 
 					<!-- 심사 액션 버튼들 -->
-					<xf:group id="" style="margin-top:30px;padding-top:30px;border-top:1px solid #eee;">
-						<w2:textbox class="section_title" id="" label="심사 처리"></w2:textbox>
+					<xf:group id="" style="border-top:1px solid #eee;padding-top: 20px;">
 
 						<xf:group class="button_group" id="">
 							<xf:trigger class="btn_secondary" id="btn_return" type="button" ev:onclick="scwin.btn_return_onclick">
@@ -1963,8 +2775,8 @@ function openRejectClaimPopup(link) {
 						</xf:group>
 
 						<xf:group class="button_group" id="">
-							<xf:trigger style="width:100%;padding:16px;font-size:16px;background:red; color:white;hide;" id="btn_reject" type="button"
-								class="btn_secondary" ev:onclick="scwin.btn_reject_onclick">
+							<xf:trigger style="width:100%;padding:16px;font-size:16px;" id="btn_reject" type="button" class="btn_secondary"
+								ev:onclick="scwin.btn_reject_onclick">
 								<xf:label>결재 반려</xf:label>
 							</xf:trigger>
 							<xf:trigger class="btn_secondary" id="btn_approval" type="button" style="" ev:onclick="scwin.btn_approval_onclick">
@@ -1973,6 +2785,10 @@ function openRejectClaimPopup(link) {
 							<xf:trigger ev:onclick="scwin.btn_complete_onclick" style="width:100%;padding:16px;font-size:16px;" id="btn_complete"
 								type="button" class="btn_primary">
 								<xf:label>최종 심사 완료</xf:label>
+							</xf:trigger>
+							<xf:trigger ev:onclick="scwin.btn_approve_complete_onclick"
+								style="width:100%;padding:16px;font-size:16px;background-color:#28a745;" id="btn_approve_complete" type="button" class="btn_primary">
+								<xf:label>결재 완료</xf:label>
 							</xf:trigger>
 
 						</xf:group>

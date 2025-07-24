@@ -49,13 +49,26 @@
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
-        <script lazy="false" type="text/javascript"><![CDATA[scwin.zoomScale = 1;
-scwin.currentImgIndex = 1;
-
+        <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function () {
+    scwin.zoomScale = 1;
+    scwin.currentImgIndex = 1;
+    
     let claim = JSON.parse(localStorage.getItem("claim"));
     let req = {"elData": {"claim_no": claim.claimNo}};
-    $c.sbm.execute(sbm_getS3Key, req);
+
+    // todo: localstorage에 있으면 순서대로 load...?
+    let claimImg = JSON.parse(localStorage.getItem("claimImg"));
+    if (claimImg) {
+        console.log(claimImg, "HAS");
+        
+        dl_imgList.setJSON(claimImg);
+        scwin.renderImageList();
+        scwin.renderFullImageViewer();
+        scwin.highlightSelectedThumbnail(1);
+    } else {
+        $c.sbm.execute(sbm_getS3Key, req);
+    }  
 };
 
 scwin.sbm_getS3Key_submitdone = function (e) {
@@ -86,12 +99,14 @@ scwin.sbm_getImg_submitdone = function (e) {
         scwin.renderImageList();
         scwin.renderFullImageViewer();
         scwin.highlightSelectedThumbnail(1);
+
+        // localStorage에 claimImg라는 이름으로 저장
+        localStorage.setItem("claimImg", JSON.stringify(dl_imgList.getAllJSON()));
     }
 };
 
 // 썸네일 목록
 scwin.renderImageList = function () {
-    console.log(dl_imgList.getAllJSON())
     const len = dl_imgList.getRowCount();
     const targetGrp = $p.getComponentById("imgList");
 
@@ -187,6 +202,9 @@ scwin.onThumbnailClick = function (e) {
     scwin.highlightSelectedThumbnail(index);
 
     if (e?.target?.blur) e.target.blur();
+
+    let len = $p.parent().scwin.genList?.length;
+    $p.parent().gen_date?.getChild($p.parent().scwin.genList[len-1], "ipt_idx").setValue(e.target.alt);
 };
 
 // 줌 조절 함수
@@ -220,20 +238,19 @@ scwin.btn_minus_onclick = function (e) {
     		<xf:group
     			style="width:90%; height:100%; overflow-y:auto; display:flex; flex-direction:column; align-items:center; padding-top:20px; background-color:gainsboro;"
     			id="imgContainer" class="imgContainer">
-    			<xf:image src="" style="" id="img"></xf:image>
     		</xf:group>
     	</xf:group>
-    	<xf:group style="position: fixed;bottom: 40px;right: 50px;" id="">
+    	<xf:group style="position: relative;float: right;bottom: 70px;right: 50px;" id="">
     		<xf:trigger meta_snippetCategory="08_버튼" anchorWithGroupClass="" meta_snippetName="8_02 아이콘조회버튼"
     			ev:onclick="scwin.btn_minus_onclick" meta_snippetKeyComponent="true"
     			style="margin-right: 5px;width: 50px;height: 50px;z-index: 1000;filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.3));" id="btn_minus"
-    			type="button" class="btn_cm search icon">
+    			type="button" class="btn_cm row_del icon">
     			<xf:label><![CDATA[search]]></xf:label>
     		</xf:trigger>
     		<xf:trigger meta_snippetCategory="08_버튼" anchorWithGroupClass="" meta_snippetName="8_02 아이콘조회버튼"
     			meta_snippetKeyComponent="true"
     			style="width: 50px;height: 50px;z-index: 1000;filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.3));" id="btn_plus" type="button"
-    			class="btn_cm search icon" ev:onclick="scwin.btn_plus_onclick">
+    			class="btn_cm row_add icon" ev:onclick="scwin.btn_plus_onclick">
     			<xf:label><![CDATA[search]]></xf:label>
     		</xf:trigger>
     	</xf:group>

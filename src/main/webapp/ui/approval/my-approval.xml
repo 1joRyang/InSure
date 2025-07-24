@@ -16,7 +16,8 @@
         				<w2:column dataType="text" name="마감일" id="deadline"></w2:column>
         				<w2:column dataType="text" name="담당자" id="emp_name"></w2:column>
         				<w2:column dataType="text" name="상태" id="status"></w2:column>
-        				<w2:column dataType="text" name="id" id="id"></w2:column>
+        				<w2:column dataType="text" name="ID" id="ID"></w2:column>
+        				<w2:column dataType="text" name="emp_no" id="emp_no"></w2:column>
         			</w2:columnInfo>
         		</w2:dataList>
         		<w2:dataList baseNode="list" repeatNode="map" id="dl_claimDone" saveRemovedData="true">
@@ -27,7 +28,8 @@
         				<w2:column dataType="text" name="마감일" id="deadline"></w2:column>
         				<w2:column dataType="text" name="담당자" id="emp_name"></w2:column>
         				<w2:column dataType="text" name="상태" id="status"></w2:column>
-        				<w2:column dataType="text" name="id" id="id"></w2:column>
+        				<w2:column dataType="text" name="ID" id="ID"></w2:column>
+        				<w2:column dataType="text" name="emp_no" id="emp_no"></w2:column>
         			</w2:columnInfo>
         		</w2:dataList>
         		<w2:dataMap baseNode="map" id="dm_empInfo">
@@ -38,14 +40,30 @@
         				<w2:key defaultValue="100" dataType="text" name="페이지_건수" id="pageSize"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dm_geting">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="emo_no" id="emp_no"></w2:key>
+        				<w2:key dataType="text" name="status" id="status"></w2:key>
+        				<w2:key dataType="text" name="pageSize" id="pageSize" defaultValue="100"></w2:key>
+        				<w2:key dataType="text" name="pageIndex" id="pageIndex" defaultValue="1"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dm_getdon">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="emo_no" id="emp_no"></w2:key>
+        				<w2:key dataType="text" name="status" id="status"></w2:key>
+        				<w2:key dataType="text" name="pageSize" id="pageSize" defaultValue="100"></w2:key>
+        				<w2:key dataType="text" name="pageIndex" id="pageIndex" defaultValue="1"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
         	</w2:dataCollection>
         	<w2:workflowCollection />
-        	<xf:submission id="sbm_getWaitList" action="/InsWebApp/CLAIMManagerwStatusList.pwkjson" method="post" mediatype="application/json" ref='' target='data:json,{"id":"dl_claimWait","key":"claimListwStatusVoList"}' encoding="UTF-8"
+        	<xf:submission id="sbm_getWaitList" action="/InsWebApp/CLAIMManagerwStatusList.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_geting","key":"elData"}' target='data:json,{"id":"dl_claimWait","key":"claimListwStatusVoList"}' encoding="UTF-8"
         		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="로딩 중.." ev:submit="" ev:submitdone="scwin.sbm_getWaitList_submitdone"
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_getDoneList" action="/InsWebApp/CLAIMManagerwStatusList.pwkjson" method="post" mediatype="application/json" ref='' target='data:json,{"id":"dl_claimDone","key":"claimListwStatusVoList"}' encoding="UTF-8"
-        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
+        	<xf:submission id="sbm_getDoneList" action="/InsWebApp/CLAIMManagerwStatusList.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_getdon","key":"elData"}' target='data:json,{"id":"dl_claimDone","key":"claimListwStatusVoList"}' encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getDoneList_submitdone"
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
@@ -58,11 +76,13 @@ scwin.onpageload = function() {
     dm_empInfo.set("emp_name", scwin.emp.empName)
 
     // 가져오기
-    let req = {elData: {"emp_no": scwin.emp.empNo, "status": "결재중"}};
-    $c.sbm.execute(sbm_getWaitList, req);
+    dm_geting.set("emp_no", scwin.emp.empNo);
+    dm_geting.set("status", "결재중");
+    $c.sbm.execute(sbm_getWaitList);
 
-    let req2 = {elData: {"emp_no": scwin.emp.empNo, "status": "결재완료"}};
-    $c.sbm.execute(sbm_getDoneList, req2);
+    dm_getdon.set("emp_no", scwin.emp.empNo);
+    dm_getdon.set("status", "결재완료");
+    $c.sbm.execute(sbm_getDoneList);
 }; 
 
 function moveNsave(rowData) {
@@ -70,8 +90,9 @@ function moveNsave(rowData) {
     const claim = {
         claimNo: rowData.claim_no,
         ID: rowData.ID,
-        empName: rowData.empName,
+        empName: rowData.emp_name,
         userName: rowData.user_name,
+        empNo:rowData.emp_no,
         status: rowData.status
     };
     localStorage.setItem("claim", JSON.stringify(claim));
@@ -79,13 +100,25 @@ function moveNsave(rowData) {
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
 }
 
-scwin.grid_w_oncelldblclick = function (rowIndex, columnIndex, columnId) {
-    let rowData = grid_w.getRowJSON(rowIndex);
+scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
+    let rowData = grd_d.getRowJSON(rowIndex);
     moveNsave(rowData);
 };
 
-scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
-    let rowData = grid.getRowJSON(rowIndex);
+scwin.sbm_getDoneList_submitdone = function (e) {
+    const len = dl_claimDone.getRowCount();
+    
+    for (let i = 0; i < len; i++) {
+        const status = dl_claimDone.getCellData(i, "status");
+
+        if (status !== "결재반려") {
+            dl_claimDone.setCellData(i, "status", "결재완료");
+        }
+    }
+};
+
+scwin.grid_w_oncelldblclick = function (rowIndex, columnIndex, columnId) {
+    let rowData = grid_w.getRowJSON(rowIndex);
     moveNsave(rowData);
 };
 ]]></script>
@@ -124,7 +157,7 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     						meta_snippetName="6_01 그리드" style="margin-top: 20px">
     						<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dl_claimWait"
     							focusMode="row" id="grid_w" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 500px;"
-    							ev:oncellclick="scwin.grid_oncellclick" readOnly="true" ev:oncelldblclick="scwin.grid_w_oncelldblclick">
+    							readOnly="true" ev:oncelldblclick="scwin.grid_w_oncelldblclick">
     							<w2:caption id="caption9" style="" value="this is a grid caption."></w2:caption>
     							<w2:header id="header2" style="">
     								<w2:row id="row3" style="">
@@ -146,8 +179,11 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     									<w2:column hidden="false" removeBorderStyle="false" width="70" inputType="text" id="column7"
     										value="상태" blockSelect="false" displayMode="label">
     									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="column6" value="id" displayMode="label"
+    									<w2:column width="70" inputType="text" style="" id="column6" value="ID" displayMode="label"
     										hidden="true">
+    									</w2:column>
+    									<w2:column hidden="true" width="70" inputType="text" style="" id="column5" value="emp_no"
+    										displayMode="label">
     									</w2:column>
     								</w2:row>
     							</w2:header>
@@ -169,9 +205,10 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     										displayMode="label">
     									</w2:column>
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
-    										displayMode="label">
+    										displayMode="label" customFormatter="scwin.statusFmt">
     									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="id" value="" displayMode="label"></w2:column>
+    									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
+    									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
     								</w2:row>
     							</w2:gBody>
     						</w2:gridView>
@@ -203,8 +240,11 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column7" value="상태"
     										blockSelect="false" displayMode="label">
     									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="column8" value="id" displayMode="label"
+    									<w2:column width="70" inputType="text" style="" id="column6" value="ID" displayMode="label"
     										hidden="true">
+    									</w2:column>
+    									<w2:column hidden="true" width="70" inputType="text" style="" id="column5" value="emp_no"
+    										displayMode="label">
     									</w2:column>
     								</w2:row>
     							</w2:header>
@@ -226,9 +266,10 @@ scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     										displayMode="label">
     									</w2:column>
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
-    										displayMode="label">
+    										displayMode="label" customFormatter="scwin.statusFmt">
     									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="id" value="" displayMode="label"></w2:column>
+    									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
+    									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
     								</w2:row>
     							</w2:gBody>
     						</w2:gridView>

@@ -175,5 +175,27 @@ public class EmployeeDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstr
         return (String) selectByPk("employee.selectEmpNameByNo", empNo);
     }
 
+/**
+     * 부서별 직원 목록을 조회한다.
+     *  
+     * @param  EmployeeVo 직원정보 (deptId 포함)
+     * @return List<EmployeeVo> 부서별 직원 목록
+     * @throws ElException
+     */
+    public List<EmployeeVo> selectListEmployeeByDept(EmployeeVo vo) throws ElException {      	
+        return (List<EmployeeVo>)list("com.demo.proworks.employee.selectListEmployeeByDept", vo);
+    }
+
+    /**
+     * 부서별 직원 수를 조회한다.
+     *  
+     * @param  EmployeeVo 직원정보 (deptId 포함)
+     * @return 부서별 직원 수
+     * @throws ElException
+     */
+    public long selectListCountEmployeeByDept(EmployeeVo vo) throws ElException {               
+        return (Long)selectByPk("com.demo.proworks.employee.selectListCountEmployeeByDept", vo);
+    }
+
 
 }

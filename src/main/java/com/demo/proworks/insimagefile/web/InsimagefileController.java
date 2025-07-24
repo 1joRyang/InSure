@@ -31,6 +31,7 @@ import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
 import com.inswave.elfw.annotation.ElValidator;
 import com.inswave.elfw.exception.ElException;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**  
  * @subject     : 이미지파일테이블 관련 처리를 담당하는 컨트롤러
@@ -392,101 +393,129 @@ public class InsimagefileController {
 	@RequestMapping(value = "submitFinalClaim")
 	@ElDescription(sub = "최종 보험금 청구 제출", desc = "세션의 모든 정보를 취합하여 최종 청구를 접수한다.")
 	public void submitFinalClaim(HttpServletRequest request) throws Exception {
-		System.out.println("================최종 청구 제출 컨트롤러 진입=======================");
-		HttpSession session = request.getSession();
-		Map<String, Object> claimData = (Map<String, Object>) session.getAttribute("claim_data");
+  System.out.println("================최종 청구 제출 컨트롤러 진입=======================");
+    HttpSession session = request.getSession();
+    Map<String, Object> claimData = (Map<String, Object>) session.getAttribute("claim_data");
 
-		// 1. 데이터 유효성 검사
-		if (claimData == null ||
-				claimData.get("claimType") == null ||
-				claimData.get("agreed") == null ||
-				claimData.get("accidentDate") == null||
-				claimData.get("symptom") == null ||
-				claimData.get("accountNo") == null||
-				claimData.get("s3fileKeys") == null) {
+    // 1. 데이터 유효성 검사
+    if (claimData == null ||
+            claimData.get("claimType") == null ||
+            claimData.get("agreed") == null ||
+            claimData.get("accidentDate") == null||
+            claimData.get("symptom") == null ||
+            claimData.get("accountNo") == null||
+            claimData.get("s3fileKeys") == null) {
 
-			// 누락된 항목 있으면 에러 메시지 전달 후 다시 진행
-			throw new ElException("ERROR.BIZ.001", new String[] { "필수 청구 정보가 누락되었습니다. 처음부터 다시 진행해주세요." });
-		}
+        throw new ElException("ERROR.BIZ.001", new String[] { "필수 청구 정보가 누락되었습니다. 처음부터 다시 진행해주세요." });
+    }
 
-		System.out.println("========최종 데이터 유효성 검사 통과=====================");
+    System.out.println("========최종 데이터 유효성 검사 통과=====================");
 
-		// 2. 사용자가 처음 입력한 claimType을 claim_content용으로 보존
-		String originalClaimTypeEng = (String) claimData.get("claimType");
-		String originalClaimTypeKor = convertClaimTypeToKorean(originalClaimTypeEng);
+    // 2. 고유번호 생성
+    String claimNo = generateClaimNumber();
+    claimData.put("claimNo", claimNo);
+    
+    // 3. 사용자 ID 설정 (임시)
+    claimData.put("userId", 1L);
 
-		// 3. claim_content 먼저 생성 (사용자 입력값 기준)
-		String symptom = (String) claimData.get("symptom");
-		String claimContent = String.format("[%s] %s", originalClaimTypeKor, symptom);
-		claimData.put("claimContent", claimContent);
+    //  4. 영문 claimType을 한글로 변환하여 DB 저장용으로 설정
+    String originalClaimTypeEng = (String) claimData.get("claimType");
+    String claimTypeKor = convertEngToKoreanClaimType(originalClaimTypeEng);
+    claimData.put("claimType", claimTypeKor); // 한글로 변경
+    
+    System.out.println("DB 저장용 claimType 변환: " + originalClaimTypeEng + " -> " + claimTypeKor);
 
-		System.out.println("사용자 입력 기준 claim_content 생성: " + claimContent);
-
-		// 4. OCR 분석을 통한 자동 claim_type 결정
-		String s3KeysAsString = (String) claimData.get("s3fileKeys");
-		String analyzedClaimTypeEng = "disease"; // 기본값 (영문 코드)
-
-		if (s3KeysAsString != null && !s3KeysAsString.isEmpty()) {
-			try {
-				// S3 키 목록 파싱
-				String[] keysArray = s3KeysAsString.split(",");
-				List<String> s3ObjectKeys = new ArrayList<String>();
-				for (String key : keysArray) {
-					s3ObjectKeys.add(key.trim());
-				}
-
-				System.out.println("OCR 분석 시작 - 파일 수: " + s3ObjectKeys.size());
-
-				// OCR 분석 수행 (영문 코드 반환)
-				analyzedClaimTypeEng = ocrService.analyzeDocumentType(s3ObjectKeys);
-				System.out.println("OCR 분석 완료 - 영문 코드: " + analyzedClaimTypeEng);
-
-				// 유효한 claim_type인지 검증
-				if (!isValidClaimType(analyzedClaimTypeEng)) {
-					System.out.println("유효하지 않은 문서 타입, 기본값 사용: " + analyzedClaimTypeEng);
-					analyzedClaimTypeEng = "disease";
-				}
-
-			} catch (Exception e) {
-				System.err.println("OCR 분석 실패: " + e.getMessage());
-				System.out.println("OCR 실패로 기본값 사용: " + analyzedClaimTypeEng);
-				e.printStackTrace();
-				// OCR 실패시에도 청구는 계속 진행 (기본값 사용)
-			}
-		}
-
-		// 5. DB 저장용으로 한글 코드로 변환
-		String analyzedClaimTypeKor = convertEngToKoreanClaimType(analyzedClaimTypeEng);
-		System.out.println("OCR 분석 결과 - DB 저장용 한글 코드: " + analyzedClaimTypeKor);
-
-		// 6. 기존 claimType 제거 후 OCR 분석 결과로 교체
-		claimData.remove("claimType");
-		claimData.put("claimType", analyzedClaimTypeKor);
-
-		System.out.println("=== 처리 결과 요약 ===");
-		System.out.println("사용자 입력 claimType (원본): " + originalClaimTypeEng + " -> " + originalClaimTypeKor);
-		System.out.println("OCR 분석 결과: " + analyzedClaimTypeEng + " -> " + analyzedClaimTypeKor);
-		System.out.println("claim_content (사용자 입력 기준): " + claimContent);
-		System.out.println("최종 DB 저장 claimType (OCR 기준): " + analyzedClaimTypeKor);
-		System.out.println("==================");
-
-		// 7. 사용자 ID 설정 (임시)
-		claimData.put("userId", 1L);
-
-		// 8. 고유번호 생성
-		String claimNo = generateClaimNumber();
-		claimData.put("claimNo", claimNo);
-
-		// 9. Service를 호출하여 DB 저장 (트랜잭션 처리)
-		claimService.saveFinalClaim(claimData);
-
-		System.out.println("최종 청구 프로세스 완료 - claim_type: " + analyzedClaimTypeKor + ", claim_no: " + claimNo);
-
-		// 10. 세션 무효화
-		session.invalidate();
+    // 5. DB 저장 (한글 claimType으로 저장)
+    claimService.saveFinalClaim(claimData);
+    
+    System.out.println("청구 저장 완료 - claim_no: " + claimNo + ", claim_type: " + claimTypeKor);
 
 	}
+	
+	 @ElService(key = "ClaimSaveDone")    
+    @RequestMapping(value = "ClaimSaveDone")
+    @ElDescription(sub = "OCR 과 자동배정 ", desc = "OCR로 분류하고 자동배정 한다.")
+    public void ClaimSaveDone(HttpServletRequest request) throws Exception {
+    
+    System.out.println("================청구 후속처리 (OCR 분석 및 자동배정) 컨트롤러 진입=======================");
+    HttpSession session = request.getSession();
+    Map<String, Object> claimData = (Map<String, Object>) session.getAttribute("claim_data");
+    
+    // claimNo만 확인 (submitFinalClaim에서 생성되어 세션에 저장됨)
+    if (claimData == null || claimData.get("claimNo") == null) {
+        throw new ElException("ERROR.BIZ.001", new String[] { "청구번호를 찾을 수 없습니다. submitFinalClaim이 먼저 실행되어야 합니다." });
+    }
+    
+    String claimNo = (String) claimData.get("claimNo");
+    System.out.println("========후속처리 대상 청구번호: " + claimNo + " =====================");
+    
+    // ===== DB 조회 제거, 세션 데이터만 사용 =====
+    
+    // 2. OCR 처리에 필요한 데이터는 모두 세션에서 가져오기
+    // 사용자가 처음 입력한 claimType (세션에서)
+    String originalClaimTypeEng = (String) claimData.get("claimType");
+    String originalClaimTypeKor = convertClaimTypeToKorean(originalClaimTypeEng);
 
+    // symptom과 s3fileKeys는 세션에서
+    String symptom = (String) claimData.get("symptom");
+    String s3KeysAsString = (String) claimData.get("s3fileKeys");
+    
+    // 3. claim_content 생성 (사용자 입력값 기준)
+    String claimContent = String.format("[%s] %s", originalClaimTypeKor, symptom);
+    System.out.println("사용자 입력 기준 claim_content 생성: " + claimContent);
+
+    // 4. OCR 분석을 통한 자동 claim_type 결정
+    String analyzedClaimTypeEng = "disease"; // 기본값 (영문 코드)
+
+    if (s3KeysAsString != null && !s3KeysAsString.isEmpty()) {
+        try {
+            // S3 키 목록 파싱
+            String[] keysArray = s3KeysAsString.split(",");
+            List<String> s3ObjectKeys = new ArrayList<String>();
+            for (String key : keysArray) {
+                s3ObjectKeys.add(key.trim());
+            }
+
+            System.out.println("OCR 분석 시작 - 파일 수: " + s3ObjectKeys.size());
+
+            // OCR 분석 수행 (영문 코드 반환)
+            analyzedClaimTypeEng = ocrService.analyzeDocumentType(s3ObjectKeys);
+            System.out.println("OCR 분석 완료 - 영문 코드: " + analyzedClaimTypeEng);
+
+            // 유효한 claim_type인지 검증
+            if (!isValidClaimType(analyzedClaimTypeEng)) {
+                System.out.println("유효하지 않은 문서 타입, 기본값 사용: " + analyzedClaimTypeEng);
+                analyzedClaimTypeEng = "disease";
+            }
+
+        } catch (Exception e) {
+            System.err.println("OCR 분석 실패: " + e.getMessage());
+            System.out.println("OCR 실패로 기본값 사용: " + analyzedClaimTypeEng);
+            e.printStackTrace();
+            // OCR 실패시에도 처리는 계속 진행 (기본값 사용)
+        }
+    }
+
+    // 5. DB 저장용으로 한글 코드로 변환
+    String analyzedClaimTypeKor = convertEngToKoreanClaimType(analyzedClaimTypeEng);
+    System.out.println("OCR 분석 결과 - 한글 코드: " + analyzedClaimTypeKor);
+
+    System.out.println("=== OCR 분석 및 자동배정 결과 요약 ===");
+    System.out.println("사용자 입력 claimType (원본): " + originalClaimTypeEng + " -> " + originalClaimTypeKor);
+    System.out.println("OCR 분석 결과: " + analyzedClaimTypeEng + " -> " + analyzedClaimTypeKor);
+    System.out.println("claim_content (사용자 입력 기준): " + claimContent);
+    System.out.println("최종 자동배정 claimType: " + analyzedClaimTypeKor);
+    System.out.println("==================");
+
+    // 6. 기존 저장된 청구건에 OCR 분석 결과를 업데이트
+    claimService.updateClaimWithOcrResult(claimNo, analyzedClaimTypeKor, claimContent);
+    
+    System.out.println("청구 후속처리 완료 - claim_no: " + claimNo + ", 최종 claim_type: " + analyzedClaimTypeKor);
+    
+    // 7. 후속처리 완료 후 세션 정리
+    session.removeAttribute("claim_data");    
+    
+    }
 	/**
 	 * 유효한 claim_type인지 검증
 	 */

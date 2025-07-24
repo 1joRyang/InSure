@@ -36,7 +36,7 @@
         	<w2:workflowCollection />
         	<xf:submission id="sbm_insertApprovalReq" action="/InsWebApp/APPROVALREQIns.pwkjson" method="post" mediatype="application/json"
         		ref='data:json,{"id":"dm_approvalReq","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
-        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_insertApprovalReq_submitdone" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getManager" action="/InsWebApp/EmployeeForRule.pwkjson" method="post" mediatype="application/json" ref=""
         		target='data:json,{"id":"dl_manager","key":"employeeVoList"}' encoding="UTF-8" instance="" replace="" errorHandler=""
@@ -57,11 +57,11 @@
 
 scwin.onpageload = function() {
     scwin.emp = JSON.parse(localStorage.getItem("employee"));
-	ipt_claimNo.setValue(localStorage.getItem("claimNo"));
-    
+    scwin.claim = JSON.parse(localStorage.getItem("claim"));
+	ipt_claimNo.setValue(scwin.claim.claimNo);
     ipt_emp.setValue(scwin.emp.empName);
 
-    dm_claim.set("claim_no", localStorage.getItem("claimNo"));
+    dm_claim.set("claim_no", scwin.claim.claimNo);
 
     $c.sbm.execute(sbm_getDeptName, {"elData": {"dept_id": scwin.emp.deptId}});
 
@@ -79,22 +79,19 @@ scwin.btn_close_onclick = function (e) {
 
 scwin.btn_confirm_onclick = function (e) {
     dm_approvalReq.set("emp_no", scwin.emp.empNo);
-    $c.sbm.execute(sbm_insertApprovalReq);
-
-    dm_claim.set("status", "결재중");
-    console.log(dm_claim.getJSON());
-    $c.sbm.execute(sbm_updateClaim);
-};
-
-scwin.sbm_insertApprovalReq_submitdone = function (e) {
-    // todo: 청구상태 업데이트
-    
+    $c.sbm.execute(sbm_insertApprovalReq);    
 };
 
 scwin.sbm_updateClaim_submitdone = function (e) {
     $p.closePopup();
 };
 
+
+scwin.sbm_insertApprovalReq_submitdone = function (e) {
+    dm_claim.set("status", "결재중");
+    // console.log(dm_claim.getJSON());
+    $c.sbm.execute(sbm_updateClaim);
+};
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.demo.proworks.claim.vo.ClaimNClaimResultVo;
 import com.demo.proworks.claim.vo.ClaimNoVo;
+import com.demo.proworks.claim.vo.ClaimUserCalcVo;
 import com.demo.proworks.claim.vo.ClaimUserEmpVo;
 import com.demo.proworks.claim.vo.ClaimEmployeeVo;
 import com.demo.proworks.claim.vo.ClaimFullJoinVo;
@@ -24,6 +25,11 @@ import com.demo.proworks.claim.vo.ClaimVo;
  * 
  */
 public interface ClaimService {
+
+	/**
+	 * 고객 계산
+	 */
+	public ClaimUserCalcVo selectUserClaimCalc(ClaimVo claimVo) throws Exception;
 
 	/**
 	 * 관리자 청구 목록 조회
@@ -163,5 +169,14 @@ public interface ClaimService {
 	 */
 	public List<ClaimFullJoinVo> selectUserClaimsByRrn(ClaimFullJoinVo claimFullJoinVo) throws Exception;
 
+	/**
+	 * OCR 분석 결과로 기존 청구건 업데이트
+	 * 
+	 * @param claimNo 청구번호
+	 * @param analyzedClaimTypeKor OCR 분석된 청구타입 (한글)
+	 * @param claimContent 청구내용
+	 * @throws Exception
+	 */
+	public void updateClaimWithOcrResult(String claimNo, String analyzedClaimTypeKor, String claimContent) throws Exception;
 
 }

@@ -78,17 +78,23 @@
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
         <script lazy="false" type="text/javascript"><![CDATA[
-scwin.onpageload = function() {
+scwin.onpageload = function() {    
     scwin.excTotal = Number(localStorage.getItem("excTotal")) || 0;
 	let itemId = localStorage.getItem('itemId');
     let excId = localStorage.getItem('excId');
     let treatmentId = localStorage.getItem("treatmentId");
-    let claimNo = localStorage.getItem("claimNo");
+
+    let claim = JSON.parse(localStorage.getItem("claim"));
+    let emp = JSON.parse(localStorage.getItem("employee"));
+    if (claim.empNo != emp.empNo) {
+        btn_edit.hide();
+        btn_save.hide();
+    }
 
     dm_excitems.set("exc_id", excId);
     dm_excitems.set("item_id", itemId);
     dm_excitems.set("treatment_id", treatmentId);
-    dm_excitems.set("claim_no", claimNo);
+    dm_excitems.set("claim_no", claim.claimNo);
 
     $c.sbm.execute(sbm_getExc, {"elData": dm_excitems.getJSON()});
 };
@@ -176,7 +182,7 @@ scwin.btn_close_onclick = function (e) {
     			<xf:group class="" id="" style="">
     				<w2:textbox style="width: 150px;height: 23px;" id="" label="금액"></w2:textbox>
     				<xf:input class="" id="ipt_cost" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    					meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_excitems.exc_cost">
+    					meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_excitems.exc_cost" displayFormat="##,###,###,###">
     				</xf:input>
     			</xf:group>
     		</xf:group>
@@ -184,7 +190,7 @@ scwin.btn_close_onclick = function (e) {
     			style="margin-top: 50px">
     			<xf:group class="rt" id="" style="">
     				<xf:trigger style="" id="btn_close" type="button" class="btn_cm " ev:onclick="scwin.btn_close_onclick">
-    					<xf:label><![CDATA[취소]]></xf:label>
+    					<xf:label><![CDATA[닫기]]></xf:label>
     				</xf:trigger>
     				<xf:trigger class="btn_cm pt" id="btn_save" style="" type="button" ev:onclick="scwin.btn_save_onclick">
     					<xf:label><![CDATA[저장]]></xf:label>

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import com.inswave.elfw.exception.ElException;
 import com.demo.proworks.claim.vo.ClaimNClaimResultVo;
 import com.demo.proworks.claim.vo.ClaimNoVo;
+import com.demo.proworks.claim.vo.ClaimUserCalcVo;
 import com.demo.proworks.claim.vo.ClaimUserEmpVo;
 import com.demo.proworks.claim.vo.ClaimEmployeeVo;
 import com.demo.proworks.claim.vo.ClaimFullJoinVo;
@@ -28,6 +29,13 @@ import com.demo.proworks.claim.dao.ClaimDAO;
  */
 @Repository("claimDAO")
 public class ClaimDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstractDAO {
+
+	/**
+	 * 고객 청구 목록
+	 */
+	public ClaimUserCalcVo selectUserClaimCalc(ClaimVo claimVo) throws ElException {
+		return (ClaimUserCalcVo) selectByPk("com.demo.proworks.claim.selectUserClaimCalc", claimVo);
+	}
 
 	/**
 	 * 관리자 청구 목록 조회

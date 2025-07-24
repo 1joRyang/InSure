@@ -15,6 +15,29 @@
 	2025/07/01 Inswave 최초 생성
 -->
 <mapper namespace="com.demo.proworks.claim">
+	<select id="selectUserClaimCalc" parameterType="com.demo.proworks.claim.vo.ClaimVo"
+		resultType="com.demo.proworks.claim.vo.ClaimUserCalcVo">
+		<!-- 고객 청구 CALC -->
+		SELECT 
+		    COUNT(CASE WHEN S.status = '완료' THEN 1 END) AS completed_count,  
+		    COUNT(*) AS total_count,  
+		    SUM(S.amount) AS total_payment, 
+		    FLOOR((COUNT(CASE WHEN S.status = '완료' THEN 1 END) / COUNT(*)) * 100) AS approval_rate  
+		FROM (
+		    SELECT c.claim_no, 
+		           c.status, 
+		           c.ID,
+		           cr.amount,
+		           CEIL((@ROWNUM := @ROWNUM + 1) / 100) AS PAGE
+		    FROM CLAIM c
+		    LEFT JOIN CLAIM_RESULT cr ON c.claim_no = cr.claim_no
+		    WHERE c.ID = 1
+		) AS S 
+		WHERE 
+		   PAGE = #{pageIndex};
+
+	</select>
+	
 	<select id="selectClaimWithStatusManager" parameterType="com.demo.proworks.claim.vo.ClaimVo"
 		resultType="com.demo.proworks.claim.vo.ClaimListwStatusVo">
 		<!-- 관리자 청구내역 조회 (status, emp_no를 기준으로...) -->
@@ -25,6 +48,7 @@
 		    deadline,
 		    emp_name,
 		    status,
+		    emp_no,
 		    ID
 		FROM (
 		    SELECT S.*, CEIL((@ROWNUM := @ROWNUM + 1) / #{pageSize}) AS PAGE
@@ -36,6 +60,7 @@
 		            DATE_ADD(c.receipt_date, INTERVAL 3 DAY) AS deadline, 
 		            reg.emp_name, 
 		            c.status,
+		            c.emp_no,
 		            c.ID
 		        FROM 
 		            CLAIM c
@@ -44,12 +69,16 @@
 		        JOIN APPROVAL_REQ ar ON c.claim_no = ar.claim_no
 		        WHERE 
 		            ar.manager_no = #{emp_no}
-		            AND c.status = #{status}
-		        ORDER BY 
-		            deadline ASC
+		            <if test="status == '결재중'">
+		            	AND c.status = #{status}
+		            </if>
+		            <if test="status != '결재중'">
+		            	AND c.status != '결재중'
+		            </if>
 		    ) S, (SELECT @ROWNUM := 0) TMP
-		) A
-		WHERE PAGE = #{pageIndex};
+		) A 
+		WHERE PAGE = #{pageIndex}
+		ORDER BY receipt_date DESC;
 	</select>
 	
 	<select id="selectClaimWithStatusWait" parameterType="com.demo.proworks.claim.vo.ClaimVo"
@@ -62,6 +91,7 @@
 		    deadline,
 		    emp_name,
 		    status,
+		    emp_no,
 		    ID
 		FROM (
 		    SELECT S.*, CEIL((@ROWNUM := @ROWNUM + 1) / #{pageSize}) AS PAGE
@@ -73,6 +103,7 @@
 		            DATE_ADD(c.receipt_date, INTERVAL 3 DAY) AS deadline, 
 		            e.emp_name, 
 		            c.status,
+		            c.emp_no,
 		            c.ID
 		        FROM 
 		            CLAIM c
@@ -80,12 +111,11 @@
 		        JOIN EMPLOYEE e ON c.emp_no = e.emp_no
 		        WHERE 
 		            c.emp_no = #{emp_no}
-		            AND c.status IN ('대기', '보완', '결재완료', '결재반려')
-		        ORDER BY 
-		            c.receipt_date ASC
+		            AND c.status IN ('대기', '보완', '결재완료', '결재반려', '보완완료')
 		    ) S, (SELECT @ROWNUM := 0) TMP
-		) A
-		WHERE PAGE = #{pageIndex};
+		) A 
+		WHERE PAGE = #{pageIndex}
+		ORDER BY receipt_date DESC;
 	</select>
 
 	<select id="selectClaimWithStatus" parameterType="com.demo.proworks.claim.vo.ClaimVo"
@@ -98,6 +128,7 @@
 		    deadline,
 		    emp_name,
 		    status,
+		    emp_no,
 		    ID
 		FROM (
 		    SELECT S.*, CEIL((@ROWNUM := @ROWNUM + 1) / #{pageSize}) AS PAGE
@@ -109,6 +140,7 @@
 		            DATE_ADD(c.receipt_date, INTERVAL 3 DAY) AS deadline, 
 		            e.emp_name, 
 		            c.status,
+		            c.emp_no,
 		            c.ID
 		        FROM 
 		            CLAIM c
@@ -117,11 +149,10 @@
 		        WHERE 
 		            c.emp_no = #{emp_no}
 		            AND c.status = #{status}
-		        ORDER BY 
-		            c.receipt_date ASC
 		    ) S, (SELECT @ROWNUM := 0) TMP
-		) A
-		WHERE PAGE = #{pageIndex};
+		) A 
+		WHERE PAGE = #{pageIndex}
+		ORDER BY receipt_date DESC;
 	</select>
 	
 	<select id="selectClaimJoinClaimResult" parameterType="com.demo.proworks.claim.vo.ClaimUserVo"
@@ -225,6 +256,7 @@
          AND ID like '%${SC_ID}%'
              </if>	     																																																							
         ) S, (SELECT @ROWNUM := 0) TMP
+        ORDER BY RECEIPT_DATE DESC
     ) A
             WHERE PAGE = #{pageIndex}
     </select>
@@ -308,7 +340,8 @@
 		u.user_name,
 		r.amount,
 		e.emp_name,
-		c.status
+		c.status,
+		e.emp_no
 		FROM CLAIM c
 		LEFT JOIN USER u ON c.ID = u.ID
 		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
@@ -344,4 +377,30 @@
 		</if>
 	</select>
 
+
+	<!-- 주민번호로 사용자의 청구내역 조회 -->
+	<select id="selectUserClaimsByRrn" parameterType="com.demo.proworks.claim.vo.ClaimFullJoinVo"
+        resultType="com.demo.proworks.claim.vo.ClaimFullJoinVo">
+    SELECT /* QueryID : com.demo.proworks.claim.selectUserClaimsByRrn */
+        c.claim_no,
+        c.claim_type,
+        u.user_name,
+        r.amount,
+        e.emp_name,
+        c.status,
+        c.emp_no,
+        c.ID
+    FROM CLAIM c
+    LEFT JOIN USER u ON c.ID = u.ID
+    LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+    LEFT JOIN CLAIM_RESULT r ON c.claim_no = r.claim_no
+    WHERE 1=1
+    <if test="id != null and id != ''">
+        AND c.ID = #{id}
+    </if>
+    <if test="SC_claim_type != null and SC_claim_type != ''">
+        AND c.claim_type = #{SC_claim_type}
+    </if>
+    ORDER BY c.claim_no DESC
+</select>
 </mapper>

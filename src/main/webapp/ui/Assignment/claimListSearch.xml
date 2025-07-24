@@ -23,12 +23,13 @@
         	<!-- 전체 조인 결과 리스트 -->
         	<w2:dataList baseNode="list" repeatNode="map" id="dlt_claimFullJoinList" saveRemovedData="true">
         	<w2:columnInfo>
-        	<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
-        	<w2:column dataType="text" name="claim_type" id="claim_type"></w2:column>
-        	<w2:column dataType="text" name="user_name" id="user_name"></w2:column>
-        	<w2:column dataType="text" name="amount" id="amount"></w2:column>
-        	<w2:column dataType="text" name="emp_name" id="emp_name"></w2:column>
-        	<w2:column dataType="text" name="status" id="status"></w2:column>
+        		<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+        		<w2:column dataType="text" name="claim_type" id="claim_type"></w2:column>
+        		<w2:column dataType="text" name="user_name" id="user_name"></w2:column>
+        		<w2:column dataType="text" name="amount" id="amount"></w2:column>
+        		<w2:column dataType="text" name="emp_name" id="emp_name"></w2:column>
+        		<w2:column dataType="text" name="status" id="status"></w2:column>
+        		<w2:column dataType="text" name="emp_no" id="emp_no"></w2:column>
         	</w2:columnInfo>
         	</w2:dataList>
         	
@@ -280,14 +281,36 @@ scwin.checkSearchCondition = function() {
     } else {
         console.log("전체 조회 모드");
     }
-};]]></script>
+};
+scwin.grd_claimEmployee_oncellclick = function (rowIndex, columnIndex, columnId) {
+    let rowData = grd_claimEmployee.getRowJSON(rowIndex);
+    moveNsave(rowData);
+};
+
+function moveNsave(rowData) {
+    // claimNo, ID, user_name, status, empName
+    localStorage.removeItem("claimImg");
+    
+    const claim = {
+        claimNo: rowData.claim_no,
+        ID: rowData.ID,
+        empName: rowData.emp_name,
+        userName: rowData.user_name,
+        empNo:rowData.emp_no,
+        status: rowData.status
+    };
+    console.log(rowData);
+    localStorage.setItem("claim", JSON.stringify(claim));
+    
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
+}]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
     		style="">
     		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
     			style="">
-    			<w2:textbox class="pgt_tit" id="" label="청구번호 조회" style="" tagname="h2"></w2:textbox>
+    			<w2:textbox class="pgt_tit" id="" label="청구번호 조회" style="padding-bottom: 20px;width: 100%;border-bottom: .2px solid #3674B5;padding-bottom: 20px;" tagname="h2"></w2:textbox>
     		</xf:group>
 
     		<!-- 검색 조건 영역 (수정됨) -->
@@ -297,11 +320,11 @@ scwin.checkSearchCondition = function() {
     				<xf:input id="input_search" style="width:200px; margin-right:10px;" placeholder="청구번호를 입력하세요"
     					ev:onkeyup="scwin.input_search_onkeyup">
     				</xf:input>
-    				<xf:trigger class="btn_cm" id="btn_search" style="background-color: #4CAF50; margin-right:5px;" type="button"
+    				<xf:trigger class="btn_cm" id="btn_search" style="background-color: #4CAF50; margin-right:5px; color: white;" type="button"
     					ev:onclick="scwin.btn_search_onclick">
     					<xf:label><![CDATA[검색]]></xf:label>
     				</xf:trigger>
-    				<xf:trigger class="btn_cm" id="btn_reset" style="background-color: #f44336;" type="button"
+    				<xf:trigger class="btn_cm" id="btn_reset" style="" type="button"
     					ev:onclick="scwin.btn_reset_onclick">
     					<xf:label><![CDATA[전체조회]]></xf:label>
     				</xf:trigger>
@@ -313,14 +336,13 @@ scwin.checkSearchCondition = function() {
 
     		<!-- 조회 결과 표시 영역 -->
     		<xf:group id="" style="margin-bottom:10px;">
-    			<w2:textbox id="" label="청구 목록" style="font-weight:bold; display:inline-block; margin-right:10px; color:#1976D2;"></w2:textbox>
     		</xf:group>
 
     		<!-- 전체 조인 그리드 -->
     		<xf:group adaptiveThreshold="" class="gvwbox" id="" style="">
     			<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dlt_claimFullJoinList"
-    				focusMode="row" id="grd_claimEmployee" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 400px;"
-    				ev:ondblclick="scwin.grd_claimEmployee_ondblclick" readOnly="true">
+    				focusMode="row" id="grd_claimEmployee" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 500px;"
+    				ev:ondblclick="scwin.grd_claimEmployee_ondblclick" readOnly="true" ev:oncellclick="scwin.grd_claimEmployee_oncellclick">
     				<w2:caption id="caption2" style="" value="청구 정보 그리드"></w2:caption>
     				<w2:header id="header2" style="">
     					<w2:row id="row3" style="">
@@ -336,8 +358,11 @@ scwin.checkSearchCondition = function() {
     						<w2:column removeBorderStyle="false" width="100" inputType="text" id="column10" value="지급금액" blockSelect="false"
     							displayMode="label">
     						</w2:column>
-    						<w2:column width="100" inputType="text" style="" id="column5" value="담당직원" displayMode="label"></w2:column>
+    						<w2:column width="100" inputType="text" style="" id="column5" value="담당자" displayMode="label"></w2:column>
     						<w2:column width="80" inputType="text" style="" id="column6" value="상태" displayMode="label"></w2:column>
+    						<w2:column width="70" inputType="text" style="" id="column12" value="emp_no" displayMode="label"
+    							hidden="true">
+    						</w2:column>
     					</w2:row>
     				</w2:header>
     				<w2:gBody id="gBody2" style="">
@@ -351,11 +376,12 @@ scwin.checkSearchCondition = function() {
     						<w2:column removeBorderStyle="false" width="100" inputType="text" id="user_name" blockSelect="false"
     							displayMode="label">
     						</w2:column>
-    						<w2:column removeBorderStyle="false" width="100" inputType="text" id="amount" blockSelect="false"
-    							displayMode="label" displayFormat="#,### 원" defaultValue="0">
+    						<w2:column defaultValue="0" removeBorderStyle="false" width="100" displayFormat="#,### 원" inputType="text"
+    							id="amount" blockSelect="false" displayMode="label">
     						</w2:column>
     						<w2:column width="100" inputType="text" style="" id="emp_name" value="" displayMode="label"></w2:column>
-    						<w2:column width="80" inputType="text" style="" id="status" value="" displayMode="label"></w2:column>
+    						<w2:column width="80" inputType="text" style="" id="status" value="" displayMode="label" customFormatter="scwin.statusFmt"></w2:column>
+    						<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
     					</w2:row>
     				</w2:gBody>
     			</w2:gridView>
