@@ -146,8 +146,13 @@ scwin.btnNext_onclick = function (e) {
         dma_step4.set("accountHolder", accountHolderPart[1]);
         scwin.twoBtnAlert({
             icon:"question",
-            title: "선택된 계좌: " + txt_default_account.getLabel()
-        })
+            title: "선택된 계좌: " + txt_default_account.getLabel(),
+            }, (result) => {
+                if (result.isConfirmed) {
+                    $p.executeSubmission("sbm_saveStep4");
+                }
+            }
+        )
 
     } else if(selectedOption === "NEW"){
         var bankCode = sbx_new_bank.getValue();
@@ -166,8 +171,10 @@ scwin.btnNext_onclick = function (e) {
         dma_step4.set("bankName", bankName);
         dma_step4.set("accountNo", accountNo);
         dma_step4.set("accountHolder", accountHolder);
+
+        $p.executeSubmission("sbm_saveStep4");
     }
-    $p.executeSubmission("sbm_saveStep4");
+    
 };
 
 scwin.onAccountNoKeyup = function(e){

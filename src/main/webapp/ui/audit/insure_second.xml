@@ -137,7 +137,7 @@
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
-        <script lazy="false" type="text/javascript"><![CDATA[
+        <script lazy="false" type="text/javascript"><![CDATA[// TODO: 상계 있으면 조회
 scwin.onpageload = function() {
     scwin.index = 0;
     scwin.genList = [];
