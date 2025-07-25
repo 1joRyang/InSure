@@ -172,11 +172,11 @@ scwin.onpageload = function() {
 	gen_date.insertChild(scwin.index++);   
 
     // 담당자 아니면 + status 대기 아니면 readonly
-    if (scwin.emp.empNo != scwin.claim.empNo || 
-        scwin.claim.status != "결재완료" || 
-        scwin.claim.status != "결재반려" || 
-        scwin.claim.status != "대기" ||
-        scwin.claim.status != "보완완료") {
+    if (scwin.emp.empNo != scwin.claim.empNo ||(
+        scwin.claim.status != "결재완료" &&
+        scwin.claim.status != "결재반려" &&
+        scwin.claim.status != "대기" &&
+        scwin.claim.status != "보완완료" )) {
 
         gen_date.hide();
         ipt_claimNo.setReadOnly(true);
@@ -352,12 +352,12 @@ function openPopup(link, popupId, popupName, size = {}) {
 scwin.grd_befClaim_oncellclick = function (rowIndex, columnIndex, columnId) {
     let claimNo = dl_claimbefore.getRowJSON(rowIndex).claim_no;
     localStorage.setItem("claimBefore", claimNo);
-    openPopup("/InsWebApp/ui/audit/claimMemo-popup.xml", "bef_popup", claimNo, {width: 500});
+    openPopup("/InsWebApp/ui/audit/claimMemo-popup.xml", "term_popup", claimNo, {width: 500});
 };
 
 scwin.grd_insure_oncellclick = function (rowIndex, columnIndex, columnId) {
-    // TODO: 모달 띄우기
     // openPopup
+    openPopup("/InsWebApp/ui/Assignment/terms.xml", "term_popup", "보험 약관", {width: 700});
 };
 ]]></script>
     </head>
