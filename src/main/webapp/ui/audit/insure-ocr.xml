@@ -395,9 +395,9 @@ scwin.btn_ocr_onclick = function (e) {
     let formData = new FormData();
     formData.append("img_url", scwin.imgUrl);
     console.log(scwin.imgUrl);
-
+//'http://localhost:8000/api/v1/insurance/ocr',
     $.ajax({
-        url: 'http://localhost:8000/api/v1/insurance/ocr',
+        url: 'http://localhost:5000/ocr',
         type: 'POST',
         data: formData,
         contentType: false,  // multipart/form-data 자동 처리
