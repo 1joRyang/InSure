@@ -231,22 +231,19 @@ scwin.createInsuranceCard = function(container, insuranceData, index) {
  * 보험 카드 클릭 이벤트
  */
 scwin.onInsuranceCardClick = function(e) {
-    try {
-        let clickedCard = e.target;
-        let insuranceData = clickedCard.getUserData("insuranceData");
+    console.log("보험 클릭");
+    // try {
+    //     let clickedCard = e.target;
+    //     let insuranceData = clickedCard.getUserData("insuranceData");
         
-        if (insuranceData) {
-            console.log("선택된 보험:", insuranceData);
-            
-            // 보험 상세 정보 표시
-            alert("보험 상세 정보:\n" + 
-                  "보험명: " + insuranceData.insu_name + "\n" +
-                  "보험료: " + scwin.formatNumber(insuranceData.insu_amt) + "원\n" +
-                  "기간: " + scwin.formatDate(insuranceData.start_date) + " ~ " + scwin.formatDate(insuranceData.end_date));
-        }
-    } catch (error) {
-        console.error("보험 카드 클릭 이벤트 처리 중 오류:", error);
-    }
+    //     if (insuranceData) {
+    //         console.log("선택된 보험:", insuranceData);
+                
+    //     }
+              location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/terms.xml"
+    // } catch (error) {
+    //     console.error("보험 카드 클릭 이벤트 처리 중 오류:", error);
+    // }
 };
 
 /**
@@ -360,8 +357,9 @@ scwin.refreshInsurance = function() {
 ]]></script>
 	</head>
 	<body ev:onpageload="scwin.onpageload">
+         <w2:wframe src="/InsWebApp/ui/cmmn/m_header_title.xml" style="flex-shrink: 0;" id="" class="wfm_m_header"></w2:wframe>
 		<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
-			style="">
+			style="background-color: #f8f9fa">
 			<xf:group class="number_item" id="header_info"
 				style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
 				<w2:span class="number_label" label="월 보험료"></w2:span>
@@ -383,5 +381,6 @@ scwin.refreshInsurance = function() {
 				<!-- 카드들이 여기에 동적으로 생성됩니다 -->
 			</xf:group>
 		</xf:group>
+        <w2:wframe style="flex-shrink: 0;" id="" class="wfm_m_footer" src="/InsWebApp/ui/cmmn/m_footer.xml"></w2:wframe>
 	</body>
 </html>
