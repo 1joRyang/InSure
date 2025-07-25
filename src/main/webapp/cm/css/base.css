@@ -1,4 +1,13 @@
 @charset "utf-8"; 
+.mobile-page-body {
+	display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+}
+.mobile-page-contain {
+	padding: 20px;
+	margin-top: 65px;
+	margin-bottom: 70px;
+	display: flex; flex-direction: column; gap: 15px;  flex: 1; overflow-y: auto;
+}
 
 /* 커스텀 CSS */
 .status-color {
@@ -997,7 +1006,7 @@ span.w2autoComplete_label {padding:0 0 0 8px;text-align:left;color:var(--ws-form
 .w2pageList .w2pageList_control_pagePrev {background:var(--ws-gray-0) url(../images/base/ico_pagelist_prevall.svg) no-repeat center !important}
 .w2pageList .w2pageList_control_next {background:var(--ws-gray-0) url(../images/base/ico_pagelist_next.svg) no-repeat center !important}
 .w2pageList .w2pageList_control_pageNext {background:var(--ws-gray-0) url(../images/base/ico_pagelist_nextall.svg) no-repeat center !important}
-
+.prev_icon {background:var(--ws-gray-0) url(../images/base/ico_pagelist_prev.svg) no-repeat center !important;}
 .pgl {position:relative;margin:8px 0 16px}
 .pgl .w2pageList_table {border-collapse:separate;border-spacing:4px 0}
 .pgl .w2pageList_col_label {width:24px;height:24px;vertical-align:middle}

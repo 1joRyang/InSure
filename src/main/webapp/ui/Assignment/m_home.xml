@@ -23,7 +23,7 @@
         <w2:engine-version>5.0.0</w2:engine-version>
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
-    // 내선번호 조회 버튼 클릭 이벤트
+    // 접수내역 조회 버튼 클릭 이벤트
     scwin.onInternalCallClick = function() {
         location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claim/my-claims-m.xml"
     };
@@ -292,13 +292,11 @@ scwin.suppDocs_onclick = function (e) {
 }
 ]]></style>
     </head>
-    <body ev:onpageload="scwin.onpageload">
-        <xf:group class="sub_content pageWrapper" id="pageWrapper" style="height: 100%;">
-            <!-- 헤더 -->
-
-            
+    <body ev:onpageload="scwin.onpageload" class="mobile-page-body">
+        <w2:wframe src="/InsWebApp/ui/cmmn/m_header_title.xml" style="flex-shrink: 0;" id="" class="wfm_m_header"></w2:wframe>
+        <xf:group class="sub_content pageWrapper" id="pageWrapper" style='height: auto;overflow: hidden;flex: 1;'>
             <!-- 메인 콘텐츠 래퍼 -->
-            <xf:group id="mainContentWrapper" style="background-color: white;height: 100%;">
+            <xf:group id="mainContentWrapper" style="margin-top: 65px;background-color: white;flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;margin-bottom: 70px;">
                 <!-- 내선번호 현황 섹션 -->
                 <xf:group class="internal_num_section" style="margin-left: 20px;margin-right: 20px;margin-bottom: 20px;margin-top: 10px">
                     <xf:group class="section_title">
@@ -355,5 +353,6 @@ scwin.suppDocs_onclick = function (e) {
             </xf:group>
             
         </xf:group>
+        <w2:wframe style="flex-shrink: 0;" id="" class="wfm_m_footer" src="/InsWebApp/ui/cmmn/m_footer.xml"></w2:wframe>
     </body>
 </html>
