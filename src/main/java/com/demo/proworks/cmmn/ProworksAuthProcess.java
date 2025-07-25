@@ -157,7 +157,9 @@ public class ProworksAuthProcess {
             return true;
         }
         
+
         // EMPLOYEE 역할 체크 (ADMIN, MANAGER 등 포함)
+
         if ("ADMIN".equals(userRole) || "MANAGER".equals(userRole) || "EMPLOYEE".equals(userRole)||
         "실무자".equals(userRole) || "관리자".equals(userRole)) {
             // EMPLOYEE는 USER 전용 서비스 제외하고 모든 서비스 접근 가능

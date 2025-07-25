@@ -148,7 +148,6 @@ function moveNsave(rowData) {
         empNo:rowData.emp_no,
         status: rowData.status
     };
-    console.log(rowData);
     localStorage.setItem("claim", JSON.stringify(claim));
     
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
@@ -259,7 +258,7 @@ scwin.grd_re_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     										displayMode="label">
     									</w2:column>
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
-    										displayMode="label">
+    										displayMode="label" customFormatter="scwin.statusFmt">
     									</w2:column>
     									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
     									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
@@ -321,7 +320,7 @@ scwin.grd_re_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     										displayMode="label">
     									</w2:column>
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
-    										displayMode="label">
+    										displayMode="label" customFormatter="scwin.statusFmt">
     									</w2:column>
     									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
     									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
@@ -383,7 +382,7 @@ scwin.grd_re_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     										displayMode="label">
     									</w2:column>
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
-    										displayMode="label">
+    										displayMode="label" customFormatter="scwin.statusFmt">
     									</w2:column>
     									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
     									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
@@ -445,7 +444,7 @@ scwin.grd_re_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     										displayMode="label">
     									</w2:column>
     									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
-    										displayMode="label">
+    										displayMode="label" customFormatter="scwin.statusFmt">
     									</w2:column>
     									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
     									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>

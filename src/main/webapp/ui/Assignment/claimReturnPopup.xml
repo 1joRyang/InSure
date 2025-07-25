@@ -53,8 +53,105 @@
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
-        <script lazy="false" type="text/javascript"><![CDATA[
+        <script lazy="false" type="text/javascript"><![CDATA[// SweetAlert2 설정 - z-index 문제 해결
+const Toast = Swal.mixin({
+    toast: true,
+    showConfirmButton: false,
+    customClass: {
+        container: 'high-z-index-toast'
+    },
+    didOpen: () => {
+        // SweetAlert2 컨테이너의 z-index를 매우 높게 설정
+        const container = Swal.getContainer();
+        if (container) {
+            container.style.zIndex = '999999';
+        }
+    }
+})
 
+scwin.toastAlertMobile = (param) => {
+    Toast.fire({
+        ...param,
+        timer: 2000,
+        position: 'center',
+        customClass: {
+            container: 'high-z-index-alert'
+        },
+        timerProgressBar: false,
+    });
+}
+
+scwin.toastAlert = (param) => {
+    Toast.fire({
+        ...param,
+        timer: 3000,
+        position: 'top-end',
+        customClass: {
+            container: 'high-z-index-alert'
+        },
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+}
+
+scwin.noBtnAlert = (param) => {
+    Swal.fire({
+        ...param,
+        showConfirmButton: false,
+        customClass: {
+            container: 'high-z-index-alert'
+        },
+        didOpen: () => {
+            const container = Swal.getContainer();
+            if (container) {
+                container.style.zIndex = '999999';
+            }
+        }
+    });
+}
+
+scwin.noBtnAlertWithTimer = (param) => {
+    Swal.fire({
+        ...param,
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: {
+            container: 'high-z-index-alert'
+        },
+        didOpen: () => {
+            const container = Swal.getContainer();
+            if (container) {
+                container.style.zIndex = '999999';
+            }
+        }
+    });
+}
+
+scwin.twoBtnAlert = (param, func) => {
+    Swal.fire({
+        ...param,
+        showCancelButton: true,
+        confirmButtonColor: '#4FACFE',
+        cancelButtonColor: '#d1d1d1',
+        confirmButtonText: '완료',
+        cancelButtonText: '취소',
+        reverseButtons: true,
+        customClass: {
+            container: 'high-z-index-alert'
+        },
+        didOpen: () => {
+            const container = Swal.getContainer();
+            if (container) {
+                container.style.zIndex = '999999';
+            }
+        }
+    }).then(func);
+}
+
+// 페이지 로드 시
 scwin.onpageload = function () {
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
 
@@ -63,34 +160,48 @@ scwin.onpageload = function () {
     dma_claimNo.set("claim_no", scwin.claim.claimNo);
 };
 
+// 제출 버튼 클릭
 scwin.btn_submit_onclick = function (e) {
     // textarea 값 검증
     var returnMemo = txa_additional_memo.getValue();
     if (!returnMemo || returnMemo.trim() === "") {
-        alert("반송 사유를 입력해주세요.");
+        scwin.toastAlert({
+            icon: 'warning',
+            title: '반송 사유를 입력해주세요.',
+            customClass: {
+                container: 'high-z-index-alert'
+            },
+            didOpen: () => {
+                const container = Swal.getContainer();
+                if (container) {
+                    container.style.zIndex = '999999';
+                }
+            }
+        });
         txa_additional_memo.focus();
         return false;
     }
 
     dma_returnReq.set("return_memo", returnMemo.trim());
-    
+
     console.log("존재 여부 확인 중...");
     console.log("CLAIM_NO:", dma_claimNo.get("claim_no"));
-    
+
     $p.executeSubmission("sbm_checkReturnReq");
 };
 
+// 닫기 버튼 클릭
 scwin.btn_close_onclick = function (e) {
     $p.closePopup();
     return true;
 };
 
-
+// 반송 요청 확인 완료
 scwin.sbm_checkReturnReq_submitdone = function (e) {
     var result = e.responseJSON;
-    
+
     console.log("확인 결과:", result);
-    
+
     if (result && result.success) {
         if (result.exists) {
             // 기존 데이터가 있으면 UPDATE
@@ -102,64 +213,128 @@ scwin.sbm_checkReturnReq_submitdone = function (e) {
             $p.executeSubmission("sbm_insertReturnReq");
         }
     } else {
-        alert("데이터 확인 중 오류가 발생했습니다.");
+        scwin.toastAlert({
+            icon: 'error',
+            title: '데이터 확인 중 오류가 발생했습니다.'
+        });
     }
 };
 
+// 반송 요청 확인 에러
 scwin.sbm_checkReturnReq_submiterror = function (e) {
     console.log("확인 중 에러:", e);
-    alert("데이터 확인 중 오류가 발생했습니다.");
+    scwin.toastAlert({
+        icon: 'error',
+        title: '데이터 확인 중 오류가 발생했습니다.'
+    });
     return false;
 };
 
+// INSERT 완료
 
+// INSERT 완료
 scwin.sbm_insertReturnReq_submitdone = function (e) {
     var result = e.responseJSON;
     console.log("INSERT 결과:", result);
-    
+
     if (result && result.success) {
-        alert(result.message);
-        scwin.closeAndRedirect();
+        Swal.fire({
+            icon: 'success',
+            title: result.message,
+            showConfirmButton: false,
+            // allowOutsideClick: false,
+            // allowEscapeKey: false,
+            customClass: {
+                container: 'high-z-index-alert'
+            },
+            didOpen: () => {
+                const container = Swal.getContainer();
+                if (container) {
+                    container.style.zIndex = '999999';
+                }
+                setTimeout(function () {
+                    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+                }, 2000);
+            },
+
+
+        }).then((result) => {
+            if (result.isConfirmed) {
+                scwin.closeAndRedirect();
+            }
+        });
     } else {
-        alert(result.message || "등록 중 오류가 발생했습니다.");
+        scwin.toastAlert({
+            icon: 'error',
+            title: result.message || '등록 중 오류가 발생했습니다.'
+        });
     }
     return true;
 };
 
+// INSERT 에러
 scwin.sbm_insertReturnReq_submiterror = function (e) {
     console.log("등록 중 에러:", e);
-    alert("등록 중 오류가 발생했습니다.");
+    scwin.toastAlert({
+        icon: 'error',
+        title: '등록 중 오류가 발생했습니다.'
+    });
     return false;
 };
 
-
+// UPDATE 완료
 scwin.sbm_updateReturnReq_submitdone = function (e) {
     var result = e.responseJSON;
     console.log("UPDATE 결과:", result);
-    
+
     if (result && result.success) {
-        alert(result.message);
-        scwin.closeAndRedirect();
+        Swal.fire({
+            icon: 'success',
+            title: result.message,
+            showConfirmButton: false,
+            // allowOutsideClick: false,
+            // allowEscapeKey: false,
+            customClass: {
+                container: 'high-z-index-alert'
+            },
+            didOpen: () => {
+                const container = Swal.getContainer();
+                if (container) {
+                    container.style.zIndex = '999999';
+                }
+                setTimeout(function () {
+                    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+                }, 2000);
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                scwin.closeAndRedirect();
+            }
+        });
     } else {
-        alert(result.message || "수정 중 오류가 발생했습니다.");
+        scwin.toastAlert({
+            icon: 'error',
+            title: result.message || '수정 중 오류가 발생했습니다.'
+        });
     }
     return true;
 };
 
+// UPDATE 에러
 scwin.sbm_updateReturnReq_submiterror = function (e) {
     console.log("수정 중 에러:", e);
-    alert("수정 중 오류가 발생했습니다.");
+    scwin.toastAlert({
+        icon: 'error',
+        title: '수정 중 오류가 발생했습니다.'
+    });
     return false;
 };
 
-
 // 팝업 닫기 및 페이지 이동
-scwin.closeAndRedirect = function() {
+scwin.closeAndRedirect = function () {
     $p.closePopup();
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
-};
-
-        ]]></script>
+};]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"

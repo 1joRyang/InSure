@@ -20,5 +20,14 @@
             c.claim_no = #{claimNo}       -- 파라미터로 받은 청구번호
             AND c.ID = #{ID};             -- 파라미터로 받은 사용자 ID (ProworksCommVO에 ID 필드가 있다고 가정)
     </select>
+    
+    <update id="updateSupplementCompleted" parameterType="com.demo.proworks.supplement.vo.SuppVo">
+	    /* QueryID: com.demo.proworks.supplement.updateSupplementCompleted */
+	    UPDATE ADDITIONAL_REQ
+	    SET
+	        completed_date = NOW()
+	    WHERE
+	        claim_no = #{claimNo}
+	</update>
 
 </mapper>

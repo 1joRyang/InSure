@@ -177,7 +177,8 @@ scwin.btn_camera_onclick = function() {
         encodingType: $h.camera.EncodingType.JPEG,
         mediaType: $h.camera.MediaType.PICTURE,
         allowEdit: false,
-        saveToPhotoAlbum: true
+        saveToPhotoAlbum: true,
+        correctOrientation: true
     };
 
    $h.camera.capturePhoto(scwin.camera_callback,options);
@@ -192,7 +193,7 @@ scwin.btn_gallery_onclick = function() {
         encodingType: $h.camera.EncodingType.JPEG,
         mediaType: $h.camera.MediaType.PICTURE,
         allowEdit: false,
-        correctOrientation: false
+        correctOrientation: true
     };
 
     $h.camera.capturePhoto(scwin.camera_callback,options);

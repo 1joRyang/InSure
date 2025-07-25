@@ -16,7 +16,7 @@
 -->
 <mapper namespace="com.demo.proworks.dashboard">
 	<select id="selectTodayStatusCounts"
-		resultType="com.demo.proworks.dashboard.vo.TodayStatusVo">
+		resultType="com.demo.proworks.dashboard.vo.TodayStatusVo" useCache="false">
 		<!-- QueryID : com.demo.proworks.dashboard.selectTodayStatusCounts -->
 		SELECT
             COUNT(CASE WHEN status = '대기' THEN 1 END) AS waitingCount,
@@ -29,6 +29,289 @@
             DATE(receipt_date) = CURDATE()
 	</select>
 	
+	<select id="selectClaimMonitorCounts"
+		resultType="com.demo.proworks.dashboard.vo.ClaimMonitorVo" useCache="false">
+		<!-- QueryID : com.demo.proworks.dashboard.selectClaimMonitorCounts -->
+		<![CDATA[
+    SELECT
+        COUNT(CASE WHEN amount <= 1000000 THEN 1 END) AS countUnder1M,
+        COUNT(CASE WHEN amount > 1000000 THEN 1 END) AS countOver1M
+    FROM
+        CLAIM_RESULT
+    ]]>
+	</select>
+	
+	<select id="selectMonthlyPerformance" resultType="com.demo.proworks.dashboard.vo.MonthlyPerfVo" useCache="false">
+	    /* QueryID : com.demo.proworks.dashboard.selectMonthlyPerformance */
+	    <![CDATA[
+	    SELECT
+	        -- 이번 달에 처리된 건수 총합
+	        CONCAT(COUNT(*), '건') AS totalProcessedCount,
+	        -- 처리일(cr.date)과 접수일(c.receipt_date)의 날짜 차이(일)를 계산하여 평균을 구하고, '일'을 붙임
+	        CONCAT(ROUND(AVG(DATEDIFF(cr.date, c.receipt_date)), 1), '일') AS avgProcessingTime
+	    FROM
+	        CLAIM_RESULT cr
+	    JOIN
+	        CLAIM c ON cr.claim_no = c.claim_no
+	    WHERE
+	        -- 처리일(cr.date)이 이번 달에 해당하는 데이터만 필터링
+	        YEAR(cr.date) = YEAR(CURDATE()) AND MONTH(cr.date) = MONTH(CURDATE())
+	    ]]>
+	</select>
+	
+	<select id="selectSupplementStatus" resultType="com.demo.proworks.dashboard.vo.SupplementStatusVo" useCache="false">
+	    /* QueryID : com.demo.proworks.dashboard.selectSupplementStatus */
+	    <![CDATA[
+	    SELECT
+	        COUNT(CASE WHEN completed_date IS NULL THEN 1 END) AS requestCount,
+	        COUNT(CASE WHEN completed_date IS NOT NULL THEN 1 END) AS completedCount,
+	        CONCAT(IFNULL(ROUND(AVG(TIMESTAMPDIFF(MINUTE, request_date, completed_date)) / 60, 1), 0), '시간') AS avgProcessingTime
+	    FROM
+	        ADDITIONAL_REQ
+	    ]]>
+	</select>
+	
+	<select id="selectYesterdayProcessedCount" resultType="com.demo.proworks.dashboard.vo.DailyCountVo" useCache="false">
+	    /* QueryID : com.demo.proworks.dashboard.selectYesterdayProcessedCount */
+	    SELECT
+	        CONCAT(COUNT(*), '건') AS yesterdayProcessedCount
+	    FROM
+	        CLAIM_RESULT
+	    WHERE
+	        date = CURDATE() - INTERVAL 1 DAY
+	</select>
+	
+	<select id="selectPaymentRate" resultType="com.demo.proworks.dashboard.vo.PaymentVo" useCache="false">
+	    /* QueryID : com.demo.proworks.dashboard.selectPaymentRate */
+	    <![CDATA[
+	    SELECT
+	        -- (지급액 합계 / 청구액 합계) * 100, 소수점 1자리까지 반올림 후 '%' 기호 붙이기
+	        CONCAT(
+	            ROUND(
+	                -- 분모(SUM(s.final_due))가 0일 경우 에러 방지
+	                IFNULL(SUM(s.refund_amt) / NULLIF(SUM(s.final_due), 0) * 100, 0)
+	            , 1)
+	        , '%') AS approvalRate
+	    FROM
+	        SETTLEMENT s
+	    JOIN
+	        CLAIM_RESULT cr ON s.claim_no = cr.claim_no
+	    WHERE
+	        -- 처리일(cr.date)이 이번 달에 해당하는 데이터만 필터링
+	        YEAR(cr.date) = YEAR(CURDATE()) AND MONTH(cr.date) = MONTH(CURDATE())
+	    ]]>
+	</select>
+	
+<select id="selectUrgentClaims" resultType="com.demo.proworks.dashboard.vo.UrgentClaimVo">
+	    /* QueryID : com.demo.proworks.dashboard.selectUrgentClaims (단순화) */
+	    <![CDATA[
+	    WITH RECURSIVE BusinessDays AS (
+	        SELECT
+	            c.claim_no, c.receipt_date, c.receipt_date AS next_day, 0 AS business_day_count
+	        FROM CLAIM c
+	        WHERE c.status NOT IN ('완료', '반송')
+	    UNION ALL
+	        SELECT
+	            b.claim_no, b.receipt_date, DATE_ADD(b.next_day, INTERVAL 1 DAY),
+	            b.business_day_count + CASE
+	                WHEN DAYOFWEEK(DATE_ADD(b.next_day, INTERVAL 1 DAY)) IN (1, 7) THEN 0
+	                WHEN EXISTS (SELECT 1 FROM TBL_HOLIDAYS h WHERE h.holiday_date = DATE(DATE_ADD(b.next_day, INTERVAL 1 DAY))) THEN 0
+	                ELSE 1
+	            END
+	        FROM BusinessDays b
+	        WHERE b.business_day_count < 3
+	    ),
+	    Deadlines AS (
+	        SELECT claim_no, MIN(next_day) AS deadline_date
+	        FROM BusinessDays
+	        WHERE business_day_count = 3
+	        GROUP BY claim_no
+	    )
+	    SELECT
+	        d.claim_no AS claimNo,
+	        IFNULL(u.user_name, '-') AS userName,
+	        c.claim_content AS claimContent,
+	        c.claim_type AS claimType,
+	        IFNULL(e.emp_name, '미배정') AS empName,
+	        c.status AS status,
+	        CASE
+	            WHEN TIMESTAMPDIFF(MINUTE, NOW(), d.deadline_date) <= 0 THEN
+	                IF(ABS(TIMESTAMPDIFF(MINUTE, NOW(), d.deadline_date)) >= 60,
+	                   CONCAT(ABS(TIMESTAMPDIFF(HOUR, NOW(), d.deadline_date)), '시간 초과'),
+	                   CONCAT(ABS(TIMESTAMPDIFF(MINUTE, NOW(), d.deadline_date)), '분 초과')
+	                )
+	            ELSE
+	                IF(TIMESTAMPDIFF(MINUTE, NOW(), d.deadline_date) < 60,
+	                   CONCAT(TIMESTAMPDIFF(MINUTE, NOW(), d.deadline_date), '분 남음'),
+	                   CONCAT(TIMESTAMPDIFF(HOUR, NOW(), d.deadline_date), '시간 남음')
+	                )
+	        END AS deadline,
+	        'high' AS timeRemaining
+	    FROM Deadlines d
+	    LEFT JOIN CLAIM c ON d.claim_no = c.claim_no
+	    LEFT JOIN USER u ON c.ID = u.ID
+	    LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+	    WHERE d.deadline_date <= DATE_ADD(NOW(), INTERVAL 24 HOUR)
+	    ORDER BY d.deadline_date ASC
+	    ]]>
+	</select>
+	
+	<select id="selectWeeklyTrend" resultType="com.demo.proworks.dashboard.vo.WeeklyTrendVo">
+	    /* QueryID : com.demo.proworks.dashboard.selectWeeklyTrend (배치 통계 테이블 조회 - 7 영업일) */
+	    <![CDATA[
+	    WITH RECURSIVE DateRange AS (
+	        -- 어제부터 14일간의 날짜를 생성
+	        SELECT CURDATE() - INTERVAL 1 DAY AS Date
+	        UNION ALL
+	        SELECT Date - INTERVAL 1 DAY FROM DateRange WHERE Date > CURDATE() - INTERVAL 14 DAY
+	    ),
+	    BusinessDays AS (
+	        -- 생성된 날짜에서 주말과 공휴일을 제외하고 최신 7일만 선택
+	        SELECT Date FROM DateRange
+	        WHERE DAYOFWEEK(Date) NOT IN (1, 7)
+	          AND NOT EXISTS (SELECT 1 FROM TBL_HOLIDAYS h WHERE h.holiday_date = Date)
+	        ORDER BY Date DESC
+	        LIMIT 7
+	    )
+	    -- 위에서 구한 7 영업일을 기준으로 통계 테이블을 조회
+	    SELECT
+	        DATE_FORMAT(b.Date, '%m/%d') AS reportDate,
+	        IFNULL(d.APPROVAL_COUNT, 0) AS approvalCount,
+	        IFNULL(d.SIMPLEPAY_COUNT, 0) AS simplePayCount
+	    FROM
+	        BusinessDays b
+	    LEFT JOIN
+	        DASHBOARD_WEEKLY_TREND d ON b.Date = d.STAT_DATE
+	    ORDER BY
+	        b.Date ASC;
+	    ]]>
+	</select>
+	
+	<select id="selectClaimTypeDistribution" resultType="com.demo.proworks.dashboard.vo.ChartVo">
+	    /* QueryID : com.demo.proworks.dashboard.selectClaimTypeDistribution (청구 유형별 분포) */
+	    SELECT
+	        -- IFNULL을 사용해 claim_type이 NULL이면 '기타'로 표시하도록 수정
+	        IFNULL(claim_type, '기타') AS label,
+	        COUNT(*) AS value
+	    FROM
+	        CLAIM
+	    WHERE
+	        status = '완료'
+	    GROUP BY
+	        label  -- 별칭(label)으로 그룹핑
+	    ORDER BY
+	        value DESC
+	</select>
+	
+	<select id="selectMonthlyApprovalRate" resultType="com.demo.proworks.dashboard.vo.MonthlyApprovalRateVo">
+	    /* QueryID : com.demo.proworks.dashboard.selectMonthlyApprovalRate (배치 통계 테이블 조회) */
+	    <![CDATA[
+	    SELECT
+	        CONCAT(STAT_MONTH, '월') AS label,
+	        APPROVAL_RATE AS value
+	    FROM
+	        DASHBOARD_MONTHLY_RATE
+	    WHERE
+	        STAT_YEAR = YEAR(CURDATE())
+	        AND STAT_MONTH < MONTH(CURDATE()) -- 이번 달 제외하고 지난달까지
+	    ORDER BY
+	        STAT_MONTH ASC
+	    LIMIT 6 -- 최근 6개월
+	    ]]>
+	</select>
+	
+	
+	<select id="selectProcessingTimeTrend" resultType="com.demo.proworks.dashboard.vo.ProcessingTimeVo">
+	    /* QueryID : com.demo.proworks.dashboard.selectProcessingTimeTrend (배치 통계 테이블 조회) */
+	    <![CDATA[
+	    WITH RECURSIVE DateRange AS (
+	        SELECT CURDATE() - INTERVAL 1 DAY AS `Date`
+	        UNION ALL
+	        SELECT `Date` - INTERVAL 1 DAY FROM DateRange WHERE `Date` > CURDATE() - INTERVAL 14 DAY
+	    ),
+	    BusinessDays AS (
+	        SELECT `Date` FROM DateRange
+	        WHERE DAYOFWEEK(`Date`) NOT IN (1, 7)
+	          AND NOT EXISTS (SELECT 1 FROM TBL_HOLIDAYS h WHERE h.holiday_date = `Date`)
+	        LIMIT 7
+	    )
+	    SELECT
+	        DATE_FORMAT(b.Date, '%m/%d') AS label,
+	        IFNULL(d.AVG_PROCESSING_TIME, 0) AS value
+	    FROM
+	        BusinessDays b
+	    LEFT JOIN
+	        DASHBOARD_DAILY_TIME d ON b.Date = d.STAT_DATE
+	    ORDER BY
+	        b.Date ASC
+	    ]]>
+	</select>
+	
+	
+	<select id="selectProcessingTimeOutlierCount" resultType="int">
+	    /* QueryID : com.demo.proworks.dashboard.selectProcessingTimeOutlierCount (배치 통계 테이블 조회) */
+	    <![CDATA[
+	    WITH RECURSIVE DateRange AS (
+	        SELECT CURDATE() - INTERVAL 1 DAY AS `Date`
+	        UNION ALL
+	        SELECT `Date` - INTERVAL 1 DAY FROM DateRange WHERE `Date` > CURDATE() - INTERVAL 14 DAY
+	    ),
+	    BusinessDays AS (
+	        SELECT `Date` FROM DateRange
+	        WHERE DAYOFWEEK(`Date`) NOT IN (1, 7)
+	          AND NOT EXISTS (SELECT 1 FROM TBL_HOLIDAYS h WHERE h.holiday_date = `Date`)
+	        LIMIT 7
+	    )
+	    SELECT
+	        IFNULL(SUM(d.OUTLIER_COUNT), 0)
+	    FROM
+	        BusinessDays b
+	    LEFT JOIN
+	        DASHBOARD_DAILY_TIME d ON b.Date = d.STAT_DATE
+	    ]]>
+	</select>
+	
+	<select id="selectMyUrgentClaimCount" parameterType="com.demo.proworks.dashboard.vo.UrgentCountVo" resultType="int">
+	    /* QueryID: com.demo.proworks.dashboard.selectMyUrgentClaimCount (나의 긴급 처리 건수 조회) */
+	    <![CDATA[
+	    WITH RECURSIVE BusinessDays AS (
+	        SELECT
+	            c.claim_no, c.emp_no,
+	            (SELECT ar.manager_no FROM APPROVAL_REQ ar WHERE ar.claim_no = c.claim_no LIMIT 1) AS manager_no,
+	            c.receipt_date,
+	            c.receipt_date AS next_day,
+	            0 AS business_day_count
+	        FROM CLAIM c
+	        WHERE c.status NOT IN ('완료', '결재완료')
+	    UNION ALL
+	        SELECT
+	            b.claim_no, b.emp_no, b.manager_no, b.receipt_date,
+	            DATE_ADD(b.next_day, INTERVAL 1 DAY),
+	            b.business_day_count +
+	                CASE WHEN DAYOFWEEK(DATE_ADD(b.next_day, INTERVAL 1 DAY)) IN (1, 7) THEN 0
+	                     WHEN EXISTS (SELECT 1 FROM TBL_HOLIDAYS h WHERE h.holiday_date = DATE(DATE_ADD(b.next_day, INTERVAL 1 DAY))) THEN 0
+	                     ELSE 1
+	                END
+	        FROM BusinessDays b
+	        WHERE b.business_day_count < 3
+	    ),
+	    Deadlines AS (
+	        SELECT claim_no, emp_no, manager_no, MIN(next_day) AS deadline_date
+	        FROM BusinessDays
+	        WHERE business_day_count = 3
+	        GROUP BY claim_no, emp_no, manager_no
+	    )
+	    SELECT COUNT(*)
+	    FROM Deadlines d
+	    WHERE d.deadline_date <= DATE_ADD(NOW(), INTERVAL 24 HOUR)
+	    ]]>
+	    <if test="role == '실무자'">
+	        AND d.emp_no = #{empNo}
+	    </if>
+	    <if test="role == '관리자'">
+	        AND d.manager_no = #{empNo}
+	    </if>
+	</select>
 	
 
 </mapper>

@@ -5,7 +5,18 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 import com.inswave.elfw.exception.ElException;
 import com.demo.proworks.claim.vo.ClaimFullJoinVo;
+import com.demo.proworks.dashboard.vo.PaymentVo;
+import com.demo.proworks.dashboard.vo.ProcessingTimeVo;
+import com.demo.proworks.dashboard.vo.ChartVo;
+import com.demo.proworks.dashboard.vo.ClaimMonitorVo;
+import com.demo.proworks.dashboard.vo.DailyCountVo;
+import com.demo.proworks.dashboard.vo.MonthlyApprovalRateVo;
+import com.demo.proworks.dashboard.vo.MonthlyPerfVo;
+import com.demo.proworks.dashboard.vo.SupplementStatusVo;
 import com.demo.proworks.dashboard.vo.TodayStatusVo;
+import com.demo.proworks.dashboard.vo.UrgentClaimVo;
+import com.demo.proworks.dashboard.vo.UrgentCountVo;
+import com.demo.proworks.dashboard.vo.WeeklyTrendVo;
 
 /**
  * @subject : 대시보드 처리를 담당하는 DAO
@@ -31,18 +42,93 @@ public class DashboardDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbst
 		 return (List<TodayStatusVo>) list("com.demo.proworks.dashboard.selectTodayStatusCounts");
 	 }
 	
-	
-		
 	/**
-	 * 사용자 주민번호로 청구목록 조회 (사용자, 직원, 결과 정보 조인)
-	 *
-	 * @param claimFullJoinVo 청구-전체조인 VO (주민번호 포함)
-	 * @return 사용자의 청구목록
-	 * @throws Exception
-	 
-	public List<ClaimFullJoinVo> selectUserClaimsByRrn(ClaimFullJoinVo vo) throws ElException {
-		return (List<ClaimFullJoinVo>) list("com.demo.proworks.claim.selectUserClaimsByRrn", vo);
+	 * 고객 청구 모니터링을 조회한다.
+	 */
+	public ClaimMonitorVo selectClaimMonitorCounts() throws ElException {
+		return (ClaimMonitorVo) selectByPk("com.demo.proworks.dashboard.selectClaimMonitorCounts");
 	}
-*/
+
+	/**
+	 * 이번달 성과를 조회한다.
+	 */
+	public MonthlyPerfVo selectMonthlyPerformance() throws ElException {
+	    return (MonthlyPerfVo) selectByPk("com.demo.proworks.dashboard.selectMonthlyPerformance");
+	}
+	
+	/**
+	 * 보완 요청시간, 완료시간, 평균시간 조회한다.
+	 */
+	public SupplementStatusVo selectSupplementStatus() throws ElException {
+	    return (SupplementStatusVo) selectByPk("com.demo.proworks.dashboard.selectSupplementStatus");
+	}
+	
+	/**
+	 * 전일 처리건수 조회한다.
+	 */
+	public DailyCountVo selectYesterdayProcessedCount() throws ElException {
+	    return (DailyCountVo) selectByPk("com.demo.proworks.dashboard.selectYesterdayProcessedCount");
+	}
+	
+	/**
+	 * 이번달 지급률을 조회한다.
+	 */
+	public PaymentVo selectPaymentRate() throws ElException {
+	    return (PaymentVo) selectByPk("com.demo.proworks.dashboard.selectPaymentRate");
+	}
+	
+	/**
+	 * 우선 처리 업무를 조회한다.
+	 */
+	@SuppressWarnings("unchecked")
+	public List<UrgentClaimVo> selectUrgentClaims() throws ElException{
+		return (List<UrgentClaimVo>) list("com.demo.proworks.dashboard.selectUrgentClaims");
+	}
+	
+	/**
+	 * 주간 처리 현황 추이를 조회한다.
+	 */
+	@SuppressWarnings("unchecked")
+	public List<WeeklyTrendVo> selectWeeklyTrend() throws ElException {
+	    return (List<WeeklyTrendVo>) list("com.demo.proworks.dashboard.selectWeeklyTrend");
+	}
+	
+	/**
+	 * 청구 유형별 분포를 조회한다.
+	 */
+	@SuppressWarnings("unchecked")
+	public List<ChartVo> selectClaimTypeDistribution() throws ElException {
+		return (List<ChartVo>) list("com.demo.proworks.dashboard.selectClaimTypeDistribution");
+	}
+	
+	/**
+	 * 월간 승인율 추이를 조회한다.
+	 */
+	@SuppressWarnings("unchecked")
+	public List<MonthlyApprovalRateVo> selectMonthlyApprovalRate() throws ElException {
+    return (List<MonthlyApprovalRateVo>) list("com.demo.proworks.dashboard.selectMonthlyApprovalRate");
+	}
+	
+	/**
+	 * 직전 업무일 7일간 처리시간을 조회한다.
+	 */
+	@SuppressWarnings("unchecked")
+	public List<ProcessingTimeVo> selectProcessingTimeTrend() throws ElException {
+        return (List<ProcessingTimeVo>) list("com.demo.proworks.dashboard.selectProcessingTimeTrend");
+    }
+	
+	/**
+	 * 장기처리건수
+	 */
+	public int selectProcessingTimeOutlierCount() throws ElException {
+	    return (int) selectByPk("com.demo.proworks.dashboard.selectProcessingTimeOutlierCount");
+	}
+	
+	/**
+	 * 나의 긴급업무 건수 카운트
+	 */
+	public int selectMyUrgentClaimCount(UrgentCountVo vo) throws ElException {
+	    return (Integer) selectByPk("com.demo.proworks.dashboard.selectMyUrgentClaimCount", vo);
+	}
 
 }

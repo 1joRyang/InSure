@@ -89,7 +89,7 @@ scwin.sbm_updateClaim_submitdone = function (e) {
 
 scwin.sbm_insertApprovalReq_submitdone = function (e) {
     dm_claim.set("status", "결재중");
-    console.log(dm_claim.getJSON());
+    // console.log(dm_claim.getJSON());
     $c.sbm.execute(sbm_updateClaim);
 };
 ]]></script>

@@ -1,0 +1,69 @@
+package com.demo.proworks.dashboard.vo;
+
+import com.inswave.elfw.annotation.ElDto;
+import com.inswave.elfw.annotation.ElDtoField;
+import com.inswave.elfw.annotation.ElVoField;
+import com.fasterxml.jackson.annotation.JsonFilter;
+
+@JsonFilter("elExcludeFilter")
+@ElDto(FldYn = "", delimeterYn = "", logicalName = "부서정보")
+public class MonthlyPerfVo extends com.demo.proworks.cmmn.ProworksCommVO {
+    private static final long serialVersionUID = 1L;
+
+    public MonthlyPerfVo(){
+    }
+
+    @ElDtoField(logicalName = "totalProcessedCount", physicalName = "totalProcessedCount", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String totalProcessedCount;
+
+    @ElDtoField(logicalName = "avgProcessingTime", physicalName = "avgProcessingTime", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String avgProcessingTime;
+
+    @ElVoField(physicalName = "totalProcessedCount")
+    public String getTotalProcessedCount(){
+        String ret = this.totalProcessedCount;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "totalProcessedCount")
+    public void setTotalProcessedCount(String totalProcessedCount){
+        this.totalProcessedCount = totalProcessedCount;
+    }
+
+    @ElVoField(physicalName = "avgProcessingTime")
+    public String getAvgProcessingTime(){
+        String ret = this.avgProcessingTime;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "avgProcessingTime")
+    public void setAvgProcessingTime(String avgProcessingTime){
+        this.avgProcessingTime = avgProcessingTime;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("MonthlyPerfVo [");
+        sb.append("totalProcessedCount").append("=").append(totalProcessedCount).append(",");
+        sb.append("avgProcessingTime").append("=").append(avgProcessingTime);
+        sb.append("]");
+        return sb.toString();
+
+    }
+
+    public boolean isFixedLengthVo() {
+        return false;
+    }
+
+    @Override
+    public void _xStreamEnc() {
+    }
+
+
+    @Override
+    public void _xStreamDec() {
+    }
+
+
+}
