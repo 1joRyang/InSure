@@ -415,6 +415,9 @@
           CLAIM c ON c.claim_no = ar.claim_no
       WHERE
           c.claim_no = #{claimNo}
+      ORDER BY
+	      approval_id DESC
+	  LIMIT 1
     </select>
     
     

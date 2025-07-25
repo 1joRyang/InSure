@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.demo.proworks.approvalreq.service.ApprovalReqService;
 import com.demo.proworks.approvalreq.vo.ApprovalReqVo;
+import com.demo.proworks.claim.service.ClaimService;
+import com.demo.proworks.claim.vo.ClaimVo;
 import com.demo.proworks.approvalreq.vo.ApprovalReqListVo;
 
 import com.inswave.elfw.annotation.ElDescription;
@@ -33,6 +35,10 @@ public class ApprovalReqController {
     /** ApprovalReqService */
     @Resource(name = "approvalReqServiceImpl")
     private ApprovalReqService approvalReqService;
+    
+    /** ClaimService */
+	@Resource(name = "claimServiceImpl")
+	private ClaimService claimService;
 	
     
     /**
@@ -138,8 +144,9 @@ public class ApprovalReqController {
     @ElService(key="APPROVALREQApprove")    
     @RequestMapping(value="APPROVALREQApprove")
     @ElDescription(sub="결재요청 승인처리",desc="결재요청을 승인 처리하고 청구 상태를 변경한다.")    
-    public void approveApprovalReq(ApprovalReqVo approvalReqVo) throws Exception {  
+   public void approveApprovalReq(ApprovalReqVo approvalReqVo) throws Exception {  
         approvalReqService.approveApprovalReq(approvalReqVo);                                            
     }
+    
 
 }

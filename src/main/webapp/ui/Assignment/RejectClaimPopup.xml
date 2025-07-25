@@ -110,6 +110,11 @@ scwin.btn_submit_onclick = function (e) {
         return false;
     }
     
+
+    dma_approvalReq.set("approval_memo", approvalMemo);
+
+    dma_approvalReq.set("request_type", "REJECT"); 
+
     $c.sbm.execute(sbm_rejectApprovalReq); // 변경된 submission 사용
 };
 

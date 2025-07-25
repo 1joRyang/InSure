@@ -360,7 +360,7 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 			e.printStackTrace();
 			throw new Exception("청구 배정 중 오류 발생: " + e.getMessage(), e);
 		}
-		return null; // 컴파일 에러 방지
+		 
 	}
 
 	/**

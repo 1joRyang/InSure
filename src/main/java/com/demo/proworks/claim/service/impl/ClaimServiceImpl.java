@@ -3,6 +3,7 @@ package com.demo.proworks.claim.service.impl;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -35,6 +36,7 @@ import com.demo.proworks.claim.vo.ClaimVo;
 import com.demo.proworks.cmmn.ProworksUserHeader;
 import com.demo.proworks.insimagefile.dao.InsimagefileDAO;
 import com.demo.proworks.insimagefile.vo.InsimagefileVo;
+import com.demo.proworks.notification.service.NotificationService;
 import com.inswave.elfw.exception.ElException;
 import com.demo.proworks.claim.dao.ClaimDAO;
 
@@ -60,6 +62,10 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Resource(name = "messageSource")
 	private MessageSource messageSource;
+	
+	@Resource(name = "notificationServiceImpl")
+	private NotificationService notificationService;
+	
 	
 	/**
 	 * 고객 계산
@@ -168,6 +174,17 @@ public class ClaimServiceImpl implements ClaimService {
             String assignResult = assignRuleService.assignEmployeeToClaim(claimVo.getClaim_no());
             System.out.println("[자동 배정 완료] " + assignResult);
             
+            // ✨ 자동 배정 성공 시 고객 등록 알림 추가
+            if (assignResult.contains("자동 배정 완료")) {
+                // 배정 완료 후 최신 청구 정보 조회
+                ClaimVo updatedClaim = claimDAO.selectClaim(tempUpdateVo);
+                if (updatedClaim != null && updatedClaim.getEmp_no() != null) {
+                   // 🔔 담당자에게 "고객이 새 청구를 등록했다"는 알림
+                    sendCustomerClaimRegistrationNotification(updatedClaim, originalClaimType);
+                }
+            }
+            
+            
             ClaimVo restoreVo = new ClaimVo();
             restoreVo.setClaim_no(claimVo.getClaim_no());
             restoreVo.setClaim_type(originalClaimType);
@@ -213,6 +230,47 @@ public class ClaimServiceImpl implements ClaimService {
 	            return "질병";  // 기본값
 	    }
 	}
+	
+	
+	/**
+	 * 고객이 청구를 등록했다는 알림을 담당자에게 전송 (청구번호 기반)
+	 */
+	private void sendCustomerClaimRegistrationNotification(ClaimVo claimVo, String originalClaimType) {
+	    CompletableFuture.runAsync(() -> {
+	        try {
+	            System.out.println("[NOTIFICATION] 고객 청구 등록 알림 전송 시작: " + claimVo.getClaim_no());
+	            
+	            // 고객 이름 조회
+	            String customerName = getCustomerName(claimVo.getID());
+	            
+	            Map<String, Object> data = new HashMap<>();
+	            data.put("claimNo", claimVo.getClaim_no());
+	            data.put("targetEmpNo", claimVo.getEmp_no());
+	            data.put("actionType", "new_claim");
+	            data.put("customerName", customerName);
+	            data.put("claimType", originalClaimType);
+	            
+	            // 기존 sendNotification 메서드 사용
+	            sendNotification("/api/notify-customer-action", data);
+	            
+	            // 데이터베이스에도 알림 저장
+	            notificationService.insertAutoAssignNotification(
+	                claimVo.getEmp_no(), 
+	                claimVo.getClaim_no(), 
+	                customerName + "님이 새로운 " + originalClaimType + " 청구를 등록했습니다."
+	            );
+	            
+	            System.out.println("[WEBSOCKET] 고객 청구 등록 알림 전송 완료: " + claimVo.getClaim_no() + " -> " + claimVo.getEmp_no());
+	            
+	        } catch (Exception e) {
+	            System.err.println("고객 청구 등록 알림 전송 실패: " + e.getMessage());
+	            e.printStackTrace();
+	        }
+	    });
+	}
+	
+	
+	
 	/**
 	 * 청구를 갱신 처리 한다.
 	 *
@@ -227,109 +285,41 @@ public class ClaimServiceImpl implements ClaimService {
 	}*/
 	public int updateClaim(ClaimVo claimVo) throws Exception {
         // 1. 기존 상태 조회 (알림 비교용)
-        ClaimVo existingClaim = claimDAO.selectClaim(claimVo);
-        String oldStatus = existingClaim != null ? existingClaim.getStatus() : null;
-        System.out.println(oldStatus);
-        
-        // 2. 청구 정보 업데이트
-        int result = claimDAO.updateClaim(claimVo);
-        
-        // 3. 업데이트 성공 시 status 변경 알림 전송
-        if (result > 0 && claimVo.getStatus() != null) {
-            try {
-                sendStatusChangeNotification(claimVo, oldStatus, claimVo.getStatus());
-            } catch (Exception e) {
-                // 알림 전송 실패해도 업데이트는 유지
-                System.err.println("Status 변경 알림 전송 실패: " + e.getMessage());
-            }
-        }
-        
-        return result;
-    }
+         ClaimVo beforeClaim = null;
+	    try {
+	        beforeClaim = claimDAO.selectClaim(claimVo);
+	    } catch (Exception e) {
+	        System.out.println("기존 청구 조회 실패, 새 청구로 처리: " + e.getMessage());
+	    }
+	    
+	    String beforeStatus = beforeClaim != null ? beforeClaim.getStatus() : null;
+	    
+	    // 청구 정보 업데이트
+	    int result = claimDAO.updateClaim(claimVo);
+	    
+	    // 상태 변경에 따른 알림 처리
+	    if (result > 0) {
+	        sendStatusChangeNotification(claimVo, beforeStatus, claimVo.getStatus());
+	    }
+	    
+	    return result;
+	}
     
     
-//    /**
-//     * Status 변경 웹소켓 알림 전송
-//     */
-//    private void sendStatusChangeNotification(ClaimVo claimVo, String oldStatus, String newStatus) {
-//        try {
-//            // Status 변경이 없으면 알림 전송하지 않음
-//            if (oldStatus != null && oldStatus.equals(newStatus)) {
-//                return;
-//            }
-//            
-//            RestTemplate restTemplate = new RestTemplate();
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.setContentType(MediaType.APPLICATION_JSON);
-//            
-//            Map<String, Object> notificationData = new HashMap<>();
-//            notificationData.put("claimNo", claimVo.getClaim_no());
-//            notificationData.put("oldStatus", oldStatus);
-//            notificationData.put("newStatus", newStatus);
-//            notificationData.put("claimType", claimVo.getClaim_type());
-//            notificationData.put("updatedBy", "SYSTEM"); // 실제로는 로그인 사용자 정보
-//            
-//            // 알림 대상자 결정
-//            String targetEmpNo = determineNotificationTarget(claimVo, newStatus);
-//            if (targetEmpNo != null) {
-//                notificationData.put("targetEmpNo", targetEmpNo);
-//                
-//                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(notificationData, headers);
-//                
-//                restTemplate.postForObject(
-//                    "http://localhost:8081/api/notify-status-change", 
-//                    entity, 
-//                    Map.class
-//                );
-//                
-//                System.out.println("✅ Status 변경 알림 전송: " + claimVo.getClaim_no() + 
-//                                 " (" + oldStatus + " → " + newStatus + ") → " + targetEmpNo);
-//            }
-//            
-//        } catch (Exception e) {
-//            System.err.println("❌ Status 변경 알림 전송 실패: " + e.getMessage());
-//        }
-//    }
-//    
-//    /**
-//     * Status에 따른 알림 대상자 결정
-//     */
-//    private String determineNotificationTarget(ClaimVo claimVo, String newStatus) {
-//        switch (newStatus) {
-//            case "보완":
-//                // 보완 요청 시 → 담당 실무자에게 알림
-//                return claimVo.getEmp_no(); // 고객
-//                
-//            case "결재중": // 수정필요
-//                // 결재 신청 시 → 관리자에게 알림 (실제로는 APPROVAL_REQ 테이블에서 manager_no 조회 필요)
-//                return getManagerByClaimNo(claimVo.getClaim_no());
-//                
-//            case "결재완료":
-//            case "결재반려":
-//                // 결재 완료/반려 시 → 결재 신청한 실무자에게 알림
-//                return claimVo.getEmp_no();
-//                
-//            case "보완완료":
-//                // 보완 완료 시 → 담당자에게 알림
-//                return claimVo.getEmp_no();
-//                
-//            default:
-//                return null; // 알림 전송하지 않음
-//        }
-//    }
-//    
-//    /**
-//     * 청구번호로 관리자 번호 조회 (APPROVAL_REQ 테이블 연동 필요)
-//     */
-//    private String getManagerByClaimNo(String claimNo) {
-//        try {
-//            // 실제로는 APPROVAL_REQ 테이블에서 manager_no를 조회해야 함
-//            // 현재는 임시로 기본 관리자 반환
-//            return "MANAGER001"; // 임시 관리자 번호
-//        } catch (Exception e) {
-//            return "MANAGER001"; // 기본 관리자
-//        }
-//    }
+	
+	/**
+	 * 청구번호로 관리자 번호 조회
+	 */
+	private String getManagerNoByClaimNo(String claimNo) {
+	    try {
+	        return claimDAO.selectManagerNo(claimNo);
+	    } catch (Exception e) {
+	        System.err.println("관리자 번호 조회 실패: " + e.getMessage());
+	        return null;
+	    }
+	}
+    
+
 
 
 
@@ -393,13 +383,14 @@ public class ClaimServiceImpl implements ClaimService {
 		 */
 		private void sendApprovalResultNotification(String claim_no, String emp_no, String approval_result, String approver_name) {
 		    Map<String, Object> data = new HashMap<>();
-		    data.put("claim_no", claim_no);
-		    data.put("emp_no", emp_no);
-		    data.put("approval_result", approval_result);
-		    data.put("approver_name", approver_name);
+		    data.put("claimNo", claim_no);
+		    data.put("targetEmpNo", emp_no);
+		    data.put("approvalResult", approval_result);
+		    data.put("approverName", approver_name);
 		    
 		    sendNotification("/api/notify-approval-result", data);
 		}
+		
 		
 		/**
 		 * 4. 고객 알림 (보완요청/반송/완료)
@@ -429,7 +420,7 @@ public class ClaimServiceImpl implements ClaimService {
 		
 		/**
 		 * 5. 보완 완료 알림 (담당자에게)
-		 */
+		*/
 		private void sendSupplementCompleteNotification(String claim_no, String emp_no, String customer_name) {
 		    Map<String, Object> data = new HashMap<>();
 		    data.put("claim_no", claim_no);
@@ -593,11 +584,17 @@ public class ClaimServiceImpl implements ClaimService {
 		                
 		            case "결재완료":
 		            case "결재반려":
-		                // 관리자가 실무자에게 결재 결과 알림
-		                String approvalResult = "결재완료".equals(newStatus) ? "APPROVED" : "REJECTED";
-		                sendApprovalResultNotification(claim_no, claimVo.getEmp_no(), approvalResult, currentUserName);
-		                break;
-		                
+		            	 // --- ▼ [디버깅 로그 추가] claimVo 객체의 전체 내용을 확인합니다. ▼ ---
+		            	System.out.println("[디버깅] 결재완료/반려 시점의 claimVo 데이터: " + claimVo.toString());
+		            	
+		            			         
+		                // 결재를 신청했던 실무자에게 결과(완료/반려)를 알립니다.
+		                String approver_name = getCurrentUserName(); // 현재 사용자는 관리자
+		                String result = "결재완료".equals(newStatus) ? "완료" : "반려";
+				        
+				        sendApprovalResultNotification(claimVo.getClaim_no(), claimVo.getEmp_no(), result, approver_name);
+				        break;
+						                
 		            case "반송":
 		                // 고객에게 반송 알림
 		                sendCustomerNotification(claim_no, claimVo.getID(), "반송");
@@ -630,7 +627,6 @@ public class ClaimServiceImpl implements ClaimService {
 		    }
 		}
 				
-		
 		
 
 
