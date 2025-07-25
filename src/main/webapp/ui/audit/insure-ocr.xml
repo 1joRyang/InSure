@@ -191,7 +191,11 @@ scwin.onpageload = function() {
     scwin.isEmp = true;
 
     // 담당자 아니면 readonly
-    if (scwin.emp.empNo != scwin.claim.empNo || scwin.claim.status == "완료" || scwin.claim.status == "반송") {
+    if (scwin.emp.empNo != scwin.claim.empNo || 
+        scwin.claim.status != "결재완료" || 
+        scwin.claim.status != "결재반려" || 
+        scwin.claim.status != "대기" ||
+        scwin.claim.status != "보완완료") {
         scwin.isEmp = false;
 
         btn_ocr.hide();
