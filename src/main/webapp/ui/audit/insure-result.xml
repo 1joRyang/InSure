@@ -2076,12 +2076,8 @@ scwin.setStatusStyle = function (status) {
 
 // 상태별 권한 설정 함수 추가
 scwin.setStatusBasedPermissions = function (status) {
-    console.log("상태별 권한 설정:", status);
 
     if (status === "결재중") {
-        // 결재중 상태: 보완, 반송 버튼 비활성화, 결재신청도 비활성화
-        console.log("결재중 상태 - 보완, 반송, 결재신청 비활성화");
-
         btn_supplement.setDisabled(true);
         btn_supplement.addClass("disabled-button");
 
@@ -2091,15 +2087,14 @@ scwin.setStatusBasedPermissions = function (status) {
         btn_approval.setDisabled(true);
         btn_approval.addClass("disabled-button");
 
-        // 메모 수정도 제한
-        txt_examMemo.setReadOnly(true);
-        txt_examMemo.addClass("readonly-textarea");
+        btn_complete.setDisabled(true);
+        btn_complete.addClass("disabled-button");
 
         btn_generateMemo.setDisabled(true);
         btn_generateMemo.addClass("disabled-button");
 
-        btn_complete.setDisabled(true);
-        btn_complete.addClass("disabled-button");
+        txt_examMemo.setReadOnly(true);
+        txt_examMemo.addClass("readonly-textarea");
     } else if (status === "결재완료") {
         // 결재완료 상태: 모든 수정 작업 비활성화, 완료 버튼만 활성화
         console.log("결재완료 상태 - 대부분의 작업 비활성화, 완료만 가능");
@@ -2172,10 +2167,31 @@ scwin.setStatusBasedPermissions = function (status) {
         txt_examMemo.setReadOnly(true);
         txt_examMemo.addClass("readonly-textarea");
 
-    } else if (status === "보완" || status === "반송") {
-        // 보완/반송 상태: 제한적 작업만 가능
-        console.log(status + " 상태 - 제한적 작업 가능");
+    }
+    else if(status === "보완"){
+           if (scwin.employee.role === "실무자" && scwin.claim.empNo === scwin.employee.empNo) {
+            // 보완/반송 상태에서는 재신청을 위한 작업만 가능
+            btn_supplement.setDisabled(true);
+            btn_supplement.addClass("disabled-button");
 
+            btn_return.setDisabled(true);
+            btn_return.addClass("disabled-button");
+
+            btn_approval.setDisabled(true);
+            btn_approval.addClass("disabled-button");
+
+            btn_complete.setDisabled(true);
+            btn_complete.addClass("disabled-button");
+
+            btn_generateMemo.setDisabled(true);
+            btn_generateMemo.addClass("disabled-button");
+
+            txt_examMemo.setReadOnly(true);
+            txt_examMemo.addClass("readonly-textarea");
+        }
+    }
+    
+     else if (status === "반송") {
         if (scwin.employee.role === "실무자" && scwin.claim.empNo === scwin.employee.empNo) {
             // 보완/반송 상태에서는 재신청을 위한 작업만 가능
             btn_supplement.setDisabled(true);
@@ -2184,18 +2200,17 @@ scwin.setStatusBasedPermissions = function (status) {
             btn_return.setDisabled(true);
             btn_return.addClass("disabled-button");
 
-            // 결재신청과 메모 생성, 심사완룼도 가능
-            btn_approval.setDisabled(false);
-            btn_approval.removeClass("disabled-button");
+            btn_approval.setDisabled(true);
+            btn_approval.addClass("disabled-button");
 
-            btn_complete.setDisabled(false);  // 보완/반송 상태에서도 심사완료 가능
-            btn_complete.removeClass("disabled-button");
+            btn_complete.setDisabled(true);
+            btn_complete.addClass("disabled-button");
 
-            btn_generateMemo.setDisabled(false);
-            btn_generateMemo.removeClass("disabled-button");
+            btn_generateMemo.setDisabled(true);
+            btn_generateMemo.addClass("disabled-button");
 
-            txt_examMemo.setReadOnly(false);
-            txt_examMemo.removeClass("readonly-textarea");
+            txt_examMemo.setReadOnly(true);
+            txt_examMemo.addClass("readonly-textarea");
         }
 
     } else if (status === "대기") {
