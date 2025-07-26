@@ -9967,13 +9967,14 @@
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
+        <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/search-hcode.js" scopeVariable="" type="text/javascript"></script>
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
 	dl_result.setJSON(dl_hcode2.getAllJSON());
 };
 
 function searchHcode() {
-    keyword = ipt_hcode2.getValue().trim().toUpperCase();
+    let keyword = ipt_hcode2.getValue().trim().toUpperCase();
 
     dl_hcode2.setColumnFilter(
         {
@@ -10033,7 +10034,7 @@ scwin.grd_result_oncellclick = function (rowIndex, columnIndex, columnId) {
     		style="">
     		<xf:group style="width: 100%;display: flex;justify-content: center;margin-bottom: 25px;" id="">
     			<xf:input meta_snippetCategory="10_입력폼" meta_snippetName="10_10 InputBox_조회버튼" meta_snippetKeyComponent="true"
-    				style="width:50%;" id="ipt_hcode1" placeholder="" class="" ev:onkeydown="scwin.ipt_hcode1_onkeydown">
+    				style="width:50%;" id="ipt_hcode2" placeholder="" class="" ev:onkeydown="scwin.ipt_hcode1_onkeydown">
     			</xf:input>
     			<xf:trigger meta_snippetCategory="10_입력폼" meta_snippetName="10_10 InputBox_조회버튼" ev:onclick="scwin.btn_search_onclick"
     				style="" id="btn_search" type="button" class="btn_cm search icon">
