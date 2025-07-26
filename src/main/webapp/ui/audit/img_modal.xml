@@ -57,7 +57,6 @@ scwin.onpageload = function () {
     let claim = JSON.parse(localStorage.getItem("claim"));
     let req = {"elData": {"claim_no": claim.claimNo}};
 
-    // todo: localstorage에 있으면 순서대로 load...?
     let claimImg = JSON.parse(localStorage.getItem("claimImg"));
     if (claimImg) {
         console.log(claimImg, "HAS");
@@ -146,10 +145,10 @@ scwin.renderFullImageViewer = function () {
     }
 
     const len = dl_imgList.getRowCount();
-    for (let i = 0; i < len; i++) {
-        const row = dl_imgList.getRowData(i);
-
-        const visible = i === 0 ? "block" : "none";
+    for (let i = 1; i < len + 1; i++) {
+        const row = dl_imgList.getRowData(i - 1);
+        console.log(row)
+        const visible = i === 1 ? "block" : "none";
 
         const img = document.createElement("img");
         img.id = "viewer_img_" + i;
@@ -167,7 +166,7 @@ scwin.renderFullImageViewer = function () {
     }
 
     scwin.zoomScale = 1;
-    scwin.currentImgIndex = 0;
+    scwin.currentImgIndex = 1;
 };
 
 scwin.highlightSelectedThumbnail = function(index) {
@@ -211,9 +210,9 @@ scwin.onThumbnailClick = function (e) {
 scwin.adjustZoom = function (factor) {
     scwin.zoomScale *= factor;
 
-    const currentId = "viewer_img_" + (scwin.currentImgIndex - 1);
+    const currentId = "viewer_img_" + (scwin.currentImgIndex);
     const targetImg = document.getElementById(currentId);
-
+    console.log(currentId, targetImg);
     if (targetImg) {
         targetImg.style.transform = "scale(" + scwin.zoomScale + ")";
         targetImg.style.transformOrigin = "top center";
@@ -221,10 +220,12 @@ scwin.adjustZoom = function (factor) {
 };
 
 scwin.btn_plus_onclick = function (e) {
+    console.log("+")
     scwin.adjustZoom(1.1);
 };
 
 scwin.btn_minus_onclick = function (e) {
+    console.log("-")
     scwin.adjustZoom(0.9);
 };
 ]]></script>

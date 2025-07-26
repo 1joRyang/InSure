@@ -37,7 +37,7 @@ scwin.onpageload = function() {
 };
 
 scwin.img_logo_onclick = function (e) {
-    localStorage.setItem("nowSelect", "dash");
+    localStorage.setItem("nowSelect", "myClaim");
     location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
 };
 
