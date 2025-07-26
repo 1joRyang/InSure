@@ -190,17 +190,12 @@
 	<select id="selectClaimTypeDistribution" resultType="com.demo.proworks.dashboard.vo.ChartVo">
 	    /* QueryID : com.demo.proworks.dashboard.selectClaimTypeDistribution (청구 유형별 분포) */
 	    SELECT
-	        -- IFNULL을 사용해 claim_type이 NULL이면 '기타'로 표시하도록 수정
-	        IFNULL(claim_type, '기타') AS label,
-	        COUNT(*) AS value
+	        LABEL AS label,
+	        VALUE AS value
 	    FROM
-	        CLAIM
-	    WHERE
-	        status = '완료'
-	    GROUP BY
-	        label  -- 별칭(label)으로 그룹핑
+	        DASHBOARD_CLAIM_TYPE
 	    ORDER BY
-	        value DESC
+	        VALUE DESC;
 	</select>
 	
 	<select id="selectMonthlyApprovalRate" resultType="com.demo.proworks.dashboard.vo.MonthlyApprovalRateVo">

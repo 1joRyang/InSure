@@ -36,5 +36,8 @@ public class BatchDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstract
 	    return update("com.demo.proworks.batch.updateWeeklyTrend", null);
 	}
 	
-
+	/*청구 유형 분포*/
+	public int updateClaimTypeDistribution() throws ElException {
+	    return update("com.demo.proworks.batch.updateClaimTypeDistribution", null);
+	}
 }
