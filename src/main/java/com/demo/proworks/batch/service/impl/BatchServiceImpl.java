@@ -53,6 +53,19 @@ public class BatchServiceImpl implements BatchService {
 		        System.out.println("====== [배치 오류] 주간 처리 현황 집계 실패 ======");
 		    }
 		}
+		
+		@Scheduled(cron = "0 10 2 * * *")
+		@Override
+		public void executeClaimTypeDistributionBatch() {
+		    System.out.println("====== [배치 시작] 청구 유형 분포 집계 ======");
+		    try {
+		        batchDAO.updateClaimTypeDistribution();
+		        System.out.println("====== [배치 종료] 청구 유형 분포 집계 완료 ======");
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		        System.out.println("====== [배치 오류] 청구 유형 분포 집계 실패 ======");
+		    }
+		}
 	    
 	    
 }
