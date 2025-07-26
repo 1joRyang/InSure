@@ -116,27 +116,44 @@
         SET  
             APPROVAL_MEMO = #{approval_memo}
         WHERE   
-            CLAIM_NO = #{claim_no}  
+            CLAIM_NO = #{claim_no}
+    		AND APPROVAL_ID = (
+        	SELECT MAX(APPROVAL_ID) 
+	        FROM APPROVAL_REQ 
+	        WHERE CLAIM_NO = #{claim_no}
+    )
     </update>
 
-    <!-- 청구 상태를 결재반려로 변경 -->
     <update id="updateClaimStatusToReject" parameterType="com.demo.proworks.approvalreq.vo.ApprovalReqVo">
         <!-- 청구 상태를 결재반려로 변경한다. -->
         UPDATE CLAIM    /* QueryID : com.demo.proworks.approvalreq.updateClaimStatusToReject */      
         SET  
             STATUS = '결재반려'
         WHERE   
-            CLAIM_NO = #{claim_no}  
+            CLAIM_NO = #{claim_no}
+
     </update>
 
-    <!-- 청구 상태를 결재완료로 변경 -->
     <update id="updateClaimStatusToApprove" parameterType="com.demo.proworks.approvalreq.vo.ApprovalReqVo">
         <!-- 청구 상태를 결재완료로 변경한다. -->
         UPDATE CLAIM    /* QueryID : com.demo.proworks.approvalreq.updateClaimStatusToApprove */      
         SET  
             STATUS = '결재완료'
         WHERE   
-            CLAIM_NO = #{claim_no}  
-    </update>
+            CLAIM_NO = #{claim_no}
 
+    </update>
+	<select id="selectLatestApprovalReqMemo" parameterType="com.demo.proworks.approvalreq.vo.ApprovalReqVo" resultType="com.demo.proworks.approvalreq.vo.ApprovalReqVo">
+	    <!-- claim_no로 approval_id가 가장 높은 결재요청의 메모를 조회한다. -->	
+	    SELECT     /* QueryID : com.demo.proworks.approvalreq.selectLatestApprovalReqMemo */
+	        APPROVAL_ID, CLAIM_NO, EMP_NO, MANAGER_NO, APPROVAL_MEMO
+	    FROM APPROVAL_REQ 
+	    WHERE 
+	        CLAIM_NO = #{claim_no}
+	        AND APPROVAL_ID = (
+	            SELECT MAX(APPROVAL_ID) 
+	            FROM APPROVAL_REQ 
+	            WHERE CLAIM_NO = #{claim_no}
+	        )
+	</select>
 </mapper>

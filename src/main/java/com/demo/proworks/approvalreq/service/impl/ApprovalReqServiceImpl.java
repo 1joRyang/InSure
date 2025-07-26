@@ -156,5 +156,21 @@ public class ApprovalReqServiceImpl implements ApprovalReqService {
 		// 1. CLAIM 테이블의 status를 "결재완료"로 변경
 		approvalReqDAO.updateClaimStatusToApprove(approvalReqVo);
 	}
+	/**
+	 * claim_no로 approval_id가 가장 높은 결재요청의 메모를 조회한다.
+	 *
+	 * @process
+	 * 1. claim_no로 approval_id가 가장 높은 결재요청의 메모를 조회한다.
+	 * 2. 결과 ApprovalReqVo을(를) 리턴한다.
+	 * 
+	 * @param  approvalReqVo 결재요청 ApprovalReqVo
+	 * @return 결재요청 메모 조회 결과
+	 * @throws Exception
+	 */
+	public ApprovalReqVo selectLatestApprovalReqMemo(ApprovalReqVo approvalReqVo) throws Exception {
+	    ApprovalReqVo resultVO = approvalReqDAO.selectLatestApprovalReqMemo(approvalReqVo);			
+	    
+	    return resultVO;
+	}
 
 }
