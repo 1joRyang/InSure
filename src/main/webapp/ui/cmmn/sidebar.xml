@@ -18,8 +18,8 @@ scwin.onpageload = function() {
     let now = localStorage.getItem("nowSelect");
     scwin.role = JSON.parse(localStorage.getItem("employee")).role;
 
-    if (now == "myClaim") {
-        scwin.my_claim_onclick();
+    if (now == "dash") {
+        scwin.dashboard_onclick();
     } else if (now == "searchClaim") {
         scwin.search_claimNum_onclick();
     } else if (now == "searchPerson") {
@@ -27,7 +27,7 @@ scwin.onpageload = function() {
     } else if (now == "goAssign" && scwin.role === "관리자") {
         scwin.go_assignRule_onclick();
     } else { 
-        scwin.dashboard_onclick();
+        scwin.my_claim_onclick();
     }
 
     if (scwin.role === "실무자") {

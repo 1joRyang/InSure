@@ -189,10 +189,10 @@ scwin.onpageload = function() {
     scwin.emp = JSON.parse(localStorage.getItem("employee"));
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
     scwin.isEmp = true;
+    loadingScreen.hide();
 
     // 담당자 아니면 readonly
     if (scwin.emp.empNo != scwin.claim.empNo ||(
-        scwin.claim.status != "결재완료" &&
         scwin.claim.status != "결재반려" &&
         scwin.claim.status != "대기" &&
         scwin.claim.status != "보완완료" )) {
@@ -391,13 +391,16 @@ scwin.updateExclusionCell = function(rowIndex, colIndex, newValue) {
 }
 
 scwin.btn_ocr_onclick = function (e) {
+    loadingScreen.show();
+    loadingScreen.setStyle("display", "flex");
+
     // OCR 버튼 클릭 시 OCR 결과를 받아서 테이블을 동적으로 업데이트
     let formData = new FormData();
     formData.append("img_url", scwin.imgUrl);
     console.log(scwin.imgUrl);
-//'http://localhost:8000/api/v1/insurance/ocr',
+
     $.ajax({
-        url: 'http://localhost:5000/ocr',
+        url: 'http://localhost:5000/ocr', //'http://localhost:8000/api/v1/insurance/ocr',
         type: 'POST',
         data: formData,
         contentType: false,  // multipart/form-data 자동 처리
@@ -407,10 +410,16 @@ scwin.btn_ocr_onclick = function (e) {
             scwin.createTable(response.data);
         },
         error: function (xhr, status, error) {
-            console.log(error);
+            loadingScreen.hide();
+            scwin.noBtnAlertWithTimer({
+                title: 'OCR 인식에 실패했습니다', 
+                icon: 'error'
+            });
+        },
+        complete: function() {
+            loadingScreen.hide();
         }
     }); 
-    //scwin.createTable(scwin.data_garo2)
 };
 
 scwin.btn_before_onclick = function (e) {
@@ -590,6 +599,10 @@ function extractClaimItemData(treatmentId, claimNo) {
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
+        <xf:group id="loadingScreen" style="background-color: rgba(0, 0, 0, 0.5);display: flex;" class="loading-overlay">
+
+        	<xf:group style="background-color: transparent;" id="" class="loading-spinner"></xf:group>
+        </xf:group>
         <w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/header.xml"></w2:wframe>
         <xf:group class="sub_contents">
         	<xf:group class="pgtbox" style="justify-content: space-between;">
