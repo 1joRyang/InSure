@@ -149,8 +149,14 @@ function moveNsave(rowData) {
         status: rowData.status
     };
     localStorage.setItem("claim", JSON.stringify(claim));
+
+    if (rowData.status === "결재완료") {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-result.xml";
+    } else {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
+    }
     
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
+    
 }
 
 scwin.grid_w_oncelldblclick = function (rowIndex, columnIndex, columnId) {
