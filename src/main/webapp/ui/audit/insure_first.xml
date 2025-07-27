@@ -80,6 +80,7 @@ function openChangeAssigneePopup(link) {
 scwin.btn_reject_onclick = function (e) {
     openClaimReturnPopup("/InsWebApp/ui/Assignment/claimReturnPopup.xml");
 };
+
 function openClaimReturnPopup(link) {
     requires("uiplugin.popup");
     var winWid = $(window).width();
@@ -106,6 +107,7 @@ function openClaimReturnPopup(link) {
 
     $p.openPopup(link, opts);
 }
+
 scwin.btn_sup_onclick = function (e) {
      openClaimSupplyPopup("/InsWebApp/ui/Assignment/reqSupplePopup.xml");
 

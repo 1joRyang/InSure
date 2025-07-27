@@ -57,6 +57,7 @@ scwin.onpageload = function () {
     let claim = JSON.parse(localStorage.getItem("claim"));
     let req = {"elData": {"claim_no": claim.claimNo}};
 
+    // todo: 로직 고치기.. 
     let claimImg = JSON.parse(localStorage.getItem("claimImg"));
     if (claimImg) {
         console.log(claimImg, "HAS");
