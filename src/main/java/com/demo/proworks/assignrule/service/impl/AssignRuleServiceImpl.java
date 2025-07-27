@@ -232,49 +232,62 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 			System.out.println("[DEBUG] 조회된 배정 정보: " + assignmentInfo.toString());
 
 			String claimType = (String) assignmentInfo.get("CLAIM_TYPE");
-			String currentEmpNo = (String) assignmentInfo.get("CURRENT_EMP_NO");
+			// 🔥 EMP_NO는 숫자형 필드이므로 Object로 받아서 String으로 변환 (더 안전한 방법)
+			Object currentEmpNoObj = assignmentInfo.get("CURRENT_EMP_NO");
+			String currentEmpNo = null;
+			if (currentEmpNoObj != null) {
+				// 모든 타입에 대해 안전하게 처리
+				if (currentEmpNoObj instanceof Long) {
+					currentEmpNo = String.valueOf((Long) currentEmpNoObj);
+				} else if (currentEmpNoObj instanceof Integer) {
+					currentEmpNo = String.valueOf((Integer) currentEmpNoObj);
+				} else if (currentEmpNoObj instanceof String) {
+					currentEmpNo = (String) currentEmpNoObj;
+				} else {
+					currentEmpNo = String.valueOf(currentEmpNoObj);
+				}
+			}
 			String assignDeptName = (String) assignmentInfo.get("ASSIGN_DEPT_NAME");
+			// 🔥 TARGET_DEPT_ID도 마찬가지로 안전하게 처리
 			Object targetDeptIdObj = assignmentInfo.get("TARGET_DEPT_ID");
-
-			System.out.println("[DEBUG] 파싱된 정보:");
-			System.out.println("  - 청구유형: " + claimType);
-			System.out.println("  - 현재담당자: " + currentEmpNo);
-			System.out.println("  - 대상부서명: " + assignDeptName);
-			System.out.println("  - 대상부서ID객체: " + targetDeptIdObj + " (타입: "
-					+ (targetDeptIdObj != null ? targetDeptIdObj.getClass().getSimpleName() : "null") + ")");
-
-			// 🔥 Long에서 Integer로 안전하게 변환
-			Integer targetDeptId = null;
+			String targetDeptIdStr = null;
 			if (targetDeptIdObj != null) {
 				if (targetDeptIdObj instanceof Long) {
-					targetDeptId = ((Long) targetDeptIdObj).intValue();
-					System.out.println("[DEBUG] Long -> Integer 변환: " + targetDeptId);
+					targetDeptIdStr = String.valueOf((Long) targetDeptIdObj);
 				} else if (targetDeptIdObj instanceof Integer) {
-					targetDeptId = (Integer) targetDeptIdObj;
-					System.out.println("[DEBUG] Integer 유지: " + targetDeptId);
+					targetDeptIdStr = String.valueOf((Integer) targetDeptIdObj);
 				} else if (targetDeptIdObj instanceof String) {
-					try {
-						targetDeptId = Integer.parseInt((String) targetDeptIdObj);
-						System.out.println("[DEBUG] String -> Integer 변환: " + targetDeptId);
-					} catch (NumberFormatException e) {
-						System.err.println("[ERROR] String을 Integer로 변환 실패: " + targetDeptIdObj);
-					}
+					targetDeptIdStr = (String) targetDeptIdObj;
 				} else {
-					System.err.println("[ERROR] 알 수 없는 타입: " + targetDeptIdObj.getClass().getSimpleName());
+					targetDeptIdStr = String.valueOf(targetDeptIdObj);
 				}
 			}
 
+			System.out.println("[DEBUG] 파싱된 정보:");
+			System.out.println("  - 청구유형: " + claimType);
+			System.out.println("  - 현재담당자: " + currentEmpNo + " (타입: " + 
+				(assignmentInfo.get("CURRENT_EMP_NO") != null ? assignmentInfo.get("CURRENT_EMP_NO").getClass().getSimpleName() : "null") + ")");
+			System.out.println("  - 대상부서명: " + assignDeptName);
+			System.out.println("  - 대상부서ID: " + targetDeptIdStr + " (타입: " + 
+				(assignmentInfo.get("TARGET_DEPT_ID") != null ? assignmentInfo.get("TARGET_DEPT_ID").getClass().getSimpleName() : "null") + ")");
+
 			// 이미 배정된 청구서 체크
 			System.out.println("[DEBUG] 2단계: 기존 배정 확인");
-			if (currentEmpNo != null && !currentEmpNo.trim().isEmpty()) {
-				String message = "이미 배정된 청구서입니다. 청구번호: " + claimNo + ", 담당자: " + currentEmpNo;
-				System.out.println("[DEBUG] " + message);
-				return message;
+			// 🔥 숫자형 값이 String으로 변환된 경우를 고려한 체크
+			if (currentEmpNo != null && !currentEmpNo.trim().isEmpty() && 
+				!"null".equals(currentEmpNo.toLowerCase()) && !"-1".equals(currentEmpNo) && !"0".equals(currentEmpNo)) {
+				
+				// 🔥 OCR 후 재배정 시나리오: 컬트롤러에서 배정해제를 했지만 아직 반영안됨 가능성
+				System.out.println("[INFO] 기존 배정이 있음 - 현재담당자: " + currentEmpNo);
+				System.out.println("[INFO] 이미 배정된 청구이지만, OCR 후 재배정 요청으로 추정하여 재배정 진행");
+				
+				// 🔥 바로 재배정 진행 (컬트롤러에서 배정해제를 이미 수행했다고 가정)
+				// 기존에는 return을 했지만, 이제는 그냥 재배정 진행
 			}
 
 			// 배정 규칙이 없는 경우
 			System.out.println("[DEBUG] 3단계: 배정 규칙 확인");
-			if (assignDeptName == null || targetDeptId == null) {
+			if (assignDeptName == null || targetDeptIdStr == null) {
 				String error = "청구 유형 '" + claimType + "'에 대한 배정 규칙을 찾을 수 없습니다.";
 				System.err.println("[ERROR] " + error);
 				throw new Exception(error);
@@ -282,11 +295,11 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 
 			// ✅ ② 해당 부서의 재직중인 직원 수 확인
 			System.out.println("[DEBUG] 4단계: 부서 직원 수 확인");
-			System.out.println("[DEBUG] 조회할 부서ID: " + targetDeptId);
+			System.out.println("[DEBUG] 조회할 부서ID: " + targetDeptIdStr);
 
 			int employeeCount = 0;
 			try {
-				employeeCount = assignRuleDAO.selectDeptEmployeeCount(targetDeptId.toString());
+				employeeCount = assignRuleDAO.selectDeptEmployeeCount(targetDeptIdStr);
 				System.out.println("[DEBUG] 부서 직원 수 조회 결과: " + employeeCount);
 			} catch (Exception e) {
 				System.err.println("[ERROR] 직원 수 조회 오류: " + e.getMessage());
@@ -295,14 +308,14 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 			}
 
 			if (employeeCount == 0) {
-				String error = "부서 '" + assignDeptName + "'(ID: " + targetDeptId + ")에 재직중인 실무자 직원이 없습니다.";
+				String error = "부서 '" + assignDeptName + "'(ID: " + targetDeptIdStr + ")에 재직중인 실무자 직원이 없습니다.";
 				System.err.println("[ERROR] " + error);
 				throw new Exception(error);
 			}
 
 			// ✅ ③ 라운드로빈 방식으로 다음 배정할 직원 선택
 			System.out.println("[DEBUG] 5단계: 라운드로빈 직원 선택");
-			EmployeeAssignRuleVo assignedEmployee = selectNextEmployeeRoundRobin(targetDeptId.toString());
+			EmployeeAssignRuleVo assignedEmployee = selectNextEmployeeRoundRobin(targetDeptIdStr);
 
 			if (assignedEmployee == null) {
 				System.err.println("[ERROR] 배정 가능한 직원을 찾을 수 없음");
@@ -346,7 +359,6 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 	}
 
 	/**
-	 * 🔥 라운드로빈 방식으로 다음 배정할 직원 선택
 	 * 
 	 * @param deptId 부서 ID
 	 * @return 다음 배정할 직원 정보

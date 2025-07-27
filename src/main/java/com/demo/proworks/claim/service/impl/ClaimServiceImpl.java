@@ -185,7 +185,7 @@ public class ClaimServiceImpl implements ClaimService {
     return result;
 	}
 	private String convertEngToKoreanForAssignment(String engClaimType) {
-	    if (engClaimType == null) return "질병";
+//	    if (engClaimType == null) return "질병";
 	    
 	    switch (engClaimType) {
 	        case "death":
@@ -201,7 +201,7 @@ public class ClaimServiceImpl implements ClaimService {
 	        case "other":
 	            return "질병";  // 기타는 질병으로 처리
 	        default:
-	            return "질병";  // 기본값
+	            return null;  // 기본값
 	    }
 	}
 	/**
@@ -416,6 +416,78 @@ public class ClaimServiceImpl implements ClaimService {
         System.err.println("[OCR 결과 DB 업데이트 실패] 청구번호: " + claimNo + ", 오류: " + e.getMessage());
         e.printStackTrace();
         throw e; // RuntimeException 대신 원본 Exception 전달
-    	}
+        }
+        }
+	
+	/**
+	 * 청구의 기존 배정을 해제한다 (emp_no를 null로 설정)
+	 * 
+	 * @param claimNo 청구번호
+	 * @throws Exception
+	 */
+	@Override
+	@Transactional
+	public void clearClaimAssignment(String claimNo) throws Exception {
+	    try {
+	        System.out.println("[배정 해제 시작] 청구번호: " + claimNo);
+	        
+	        // 배정 해제용 ClaimVo 생성
+	        ClaimVo clearVo = new ClaimVo();
+	        clearVo.setClaim_no(claimNo);
+	        clearVo.setEmp_no(null); // 담당자를 null로 설정
+	        
+	        // DB 업데이트 수행
+	        int updateResult = claimDAO.updateClaim(clearVo);
+	        
+	        if (updateResult <= 0) {
+	            throw new Exception("배정 해제에 실패했습니다. 청구번호: " + claimNo);
+	        }
+	        
+	        System.out.println("[배정 해제 완료] 청구번호: " + claimNo);
+	        
+	        // 트랜잭션 즐시 커밋 및 대기
+	        try {
+	            Thread.sleep(200); // 200ms 대기로 트랜잭션 커밋 보장
+	        } catch (InterruptedException e) {
+	            Thread.currentThread().interrupt();
+	        }
+	        
+	    } catch (Exception e) {
+	        System.err.println("[배정 해제 실패] 청구번호: " + claimNo + ", 오류: " + e.getMessage());
+	        e.printStackTrace();
+	        throw e;
+	    }
+	}
+	
+	/**
+	 * 배정 해제를 별도 트랜잭션으로 수행 (강제 커밋)
+	 * 
+	 * @param claimNo 청구번호
+	 * @throws Exception
+	 */
+	@Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+	public void clearClaimAssignmentForced(String claimNo) throws Exception {
+	    try {
+	        System.out.println("🔥 [강제 배정 해제 시작] 청구번호: " + claimNo);
+	        
+	        // 배정 해제용 ClaimVo 생성
+	        ClaimVo clearVo = new ClaimVo();
+	        clearVo.setClaim_no(claimNo);
+	        clearVo.setEmp_no(null); // 담당자를 null로 설정
+	        
+	        // DB 업데이트 수행
+	        int updateResult = claimDAO.updateClaim(clearVo);
+	        
+	        if (updateResult <= 0) {
+	            throw new Exception("강제 배정 해제에 실패했습니다. 청구번호: " + claimNo);
+	        }
+	        
+	        System.out.println("🔥 [강제 배정 해제 완료] 청구번호: " + claimNo);
+	        
+	    } catch (Exception e) {
+	        System.err.println("🔥 [강제 배정 해제 실패] 청구번호: " + claimNo + ", 오류: " + e.getMessage());
+	        e.printStackTrace();
+	        throw e;
+	    }
 	}
 }
