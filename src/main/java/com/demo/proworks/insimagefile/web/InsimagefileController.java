@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.demo.proworks.assignrule.service.AssignRuleService;
 import com.demo.proworks.claim.service.ClaimService;
 import com.demo.proworks.insimagefile.service.InsimagefileService;
 import com.demo.proworks.insimagefile.vo.ConsentVo;
@@ -63,6 +64,10 @@ public class InsimagefileController {
 	/** OcrService 주입 */
 	@Resource(name = "ocrService")
 	private OcrService ocrService;
+	
+	/** AssignRuleService 주입 */
+	@Resource(name = "assignRuleServiceImpl")
+	private AssignRuleService assignRuleService;
     
     /**
      * 이미지파일테이블 목록을 조회합니다.
@@ -510,9 +515,53 @@ public class InsimagefileController {
     // 6. 기존 저장된 청구건에 OCR 분석 결과를 업데이트
     claimService.updateClaimWithOcrResult(claimNo, analyzedClaimTypeKor, claimContent);
     
+    System.out.println("[OCR 결과 DB 업데이트 완료] 청구번호: " + claimNo + ", 최종 타입: " + analyzedClaimTypeKor);
+    
+    // 6.5. *** 강제 배정 해제 - OCR 분석 후 무조건 수행 ***
+    // 🔥 중요: originalClaimTypeKor ≠ analyzedClaimTypeKor 일 때만 배정 해제
+    System.out.println("[DEBUG - 배정 해제 체크] originalClaimTypeKor: " + originalClaimTypeKor + ", analyzedClaimTypeKor: " + analyzedClaimTypeKor);
+    
+    if (!originalClaimTypeKor.equals(analyzedClaimTypeKor)) {
+        System.out.println("🔥 [배정 해제] 청구 타입 변경됨: " + originalClaimTypeKor + " -> " + analyzedClaimTypeKor);
+        try {
+            // 🔥 별도 트랜잭션으로 강제 배정 해제 수행
+            claimService.clearClaimAssignmentForced(claimNo);
+            System.out.println("🔥 [배정 해제 완료] 청구번호: " + claimNo);
+            
+            // 트랜잭션 강제 커밋을 위해 잠시 대기
+            Thread.sleep(300); // 300ms 대기
+            
+        } catch (Exception e) {
+            System.err.println("🔥 [배정 해제 실패] 청구번호: " + claimNo + ", 오류: " + e.getMessage());
+            e.printStackTrace();
+        }
+    } else {
+        System.out.println("[배정 해제 생략] 청구 타입이 동일함: " + originalClaimTypeKor);
+    }
+    
+    // 7. *** 자동 배정 수행 *** 
+    System.out.println("[디버그] 자동 배정 로직 시작 전 - 청구번호: " + claimNo);
+    try {
+        System.out.println("[자동 배정 시작] 청구번호: " + claimNo + ", 청구타입: " + analyzedClaimTypeKor);
+        
+        // null 체크 추가
+        if (assignRuleService == null) {
+            System.err.println("[오류] assignRuleService가 null입니다!");
+            throw new Exception("assignRuleService가 주입되지 않았습니다.");
+        }
+        
+        String assignResult = assignRuleService.assignEmployeeToClaim(claimNo);
+        System.out.println("[자동 배정 완료] " + assignResult);
+    } catch (Exception e) {
+        System.err.println("[자동 배정 실패] 청구번호: " + claimNo + ", 오류: " + e.getMessage());
+        e.printStackTrace();
+        // 자동 배정 실패해도 전체 프로세스는 계속 진행
+    }
+    System.out.println("[디버그] 자동 배정 로직 완료 후");
+    
     System.out.println("청구 후속처리 완료 - claim_no: " + claimNo + ", 최종 claim_type: " + analyzedClaimTypeKor);
     
-    // 7. 후속처리 완료 후 세션 정리
+    // 8. 후속처리 완료 후 세션 정리
     session.removeAttribute("claim_data");    
     
     }
