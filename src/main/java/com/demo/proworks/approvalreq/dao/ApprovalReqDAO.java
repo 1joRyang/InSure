@@ -121,5 +121,15 @@ public class ApprovalReqDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAb
     public int updateClaimStatusToApprove(ApprovalReqVo vo) throws ElException {
         return update("com.demo.proworks.approvalreq.updateClaimStatusToApprove", vo);
     }
+    /**
+	 * claim_no로 approval_id가 가장 높은 결재요청의 메모를 조회한다.
+	 *  
+	 * @param  ApprovalReqVo 결재요청
+	 * @return ApprovalReqVo 결재요청 (approval_memo 포함)
+	 * @throws ElException
+	 */
+	public ApprovalReqVo selectLatestApprovalReqMemo(ApprovalReqVo vo) throws ElException {
+	    return (ApprovalReqVo) selectByPk("com.demo.proworks.approvalreq.selectLatestApprovalReqMemo", vo);
+	}
 
 }

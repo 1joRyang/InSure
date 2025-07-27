@@ -16,21 +16,37 @@
 scwin.onpageload = function() {
 	
 };
+
+scwin.footer_home_onclick = function () {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
+};
+
+scwin.footer_claim_onclick = function () {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/first.xml";
+};
+
+scwin.footer_list_onclick = function () {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claim/my-claims-m.xml";
+};
+
+scwin.footer_insu_onclick = function () {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/insurePageTab1.xml";
+};
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="m_footer" id="" style="">
-    		<w2:anchor class="btn_foot01" id="" outerDiv="false" style="">
-    			<xf:label><![CDATA[HOME]]></xf:label>
+    		<w2:anchor class="btn_foot05" id="footer_home" outerDiv="false" style="" ev:onclick="scwin.footer_home_onclick">
+    			<xf:label><![CDATA[홈]]></xf:label>
     		</w2:anchor>
-    		<w2:anchor class="btn_foot02" id="" outerDiv="false" style="">
+    		<w2:anchor class="btn_foot06" id="footer_claim" outerDiv="false" style="" ev:onclick="scwin.footer_claim_onclick">
     			<xf:label><![CDATA[청구]]></xf:label>
     		</w2:anchor>
-    		<w2:anchor class="btn_foot03" id="" outerDiv="false" style="">
+    		<w2:anchor class="btn_foot07" id="footer_list" outerDiv="false" style="" ev:onclick="scwin.footer_list_onclick">
     			<xf:label><![CDATA[이력]]></xf:label>
     		</w2:anchor>
-    		<w2:anchor class="btn_foot04" id="" outerDiv="false" style="">
-    			<xf:label><![CDATA[메뉴]]></xf:label>
+    		<w2:anchor class="btn_foot08" id="footer_insu" outerDiv="false" style="" ev:onclick="scwin.footer_insu_onclick">
+    			<xf:label><![CDATA[내 보험]]></xf:label>
     		</w2:anchor>
     	</xf:group>
     </body>

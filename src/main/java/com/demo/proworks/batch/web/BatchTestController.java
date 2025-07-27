@@ -78,5 +78,24 @@ public class BatchTestController {
         System.out.println("====== [수동 배치 실행] " + result.get("message") + " ======");
         return result;
     }
+    
+    /**
+     * 청구 유형별 분포 집계 배치를 수동으로 실행한다. (테스트용)
+     */
+	@ElService(key = "runClaimTypeDistributionBatch")
+	@RequestMapping(value = "runClaimTypeDistributionBatch")
+	@ElDescription(sub = "청구 유형 분포 배치 수동 실행", desc = "청구 유형 분포 배치 수동 실행하는 테스트용.")
+	public Map<String, String> runClaimTypeDistributionBatch() throws Exception {
+        Map<String, String> result = new HashMap<>();
+        try {
+            batchService.executeClaimTypeDistributionBatch();
+            result.put("message", "청구 유형 분포 배치 작업이 성공적으로 실행되었습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("message", "청구 유형 분포 배치 실행 중 오류가 발생했습니다.");
+        }
+        System.out.println("====== [수동 배치 실행] " + result.get("message") + " ======");
+        return result;
+    }
   
 }

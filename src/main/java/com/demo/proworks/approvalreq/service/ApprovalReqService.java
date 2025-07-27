@@ -85,4 +85,14 @@ public interface ApprovalReqService {
 	 * @throws Exception
 	 */	
 	public void approveApprovalReq(ApprovalReqVo approvalReqVo) throws Exception;
+	
+	
+	/**
+	 * claim_no로 approval_id가 가장 높은 결재요청의 메모를 조회한다.
+	 *
+	 * @param  approvalReqVo 결재요청 ApprovalReqVo
+	 * @return 결재요청 메모 조회 결과
+	 * @throws Exception
+	 */
+	public ApprovalReqVo selectLatestApprovalReqMemo(ApprovalReqVo approvalReqVo) throws Exception;
 }

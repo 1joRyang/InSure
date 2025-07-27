@@ -192,6 +192,11 @@ body > .m_contents{padding:10px 20px 20px 20px;}
 .m_footer .btn_foot02.on{background:url(/cm/images/mobile/m_ico_footer02_on.png) no-repeat center top 15px;}
 .m_footer .btn_foot03.on{background:url(/cm/images/mobile/m_ico_footer03_on.png) no-repeat center top 15px;}
 .m_footer .btn_foot04.on{background:url(/cm/images/mobile/m_ico_footer04_on.png) no-repeat center top 15px;}
+
+.m_footer .btn_foot05{background:url(../../cm/images/mobile/homeicon.png) no-repeat center top 15px;}
+.m_footer .btn_foot06{background:url(../../cm/images/mobile/claimicon.png) no-repeat center top 15px;}
+.m_footer .btn_foot07{background:url(../../cm/images/mobile/claimlist.png) no-repeat center top 15px;}
+.m_footer .btn_foot08{background:url(../../cm/images/mobile/mypage.png) no-repeat center top 15px;}
 /* footer - END */
 
 /* openpopup - START */
