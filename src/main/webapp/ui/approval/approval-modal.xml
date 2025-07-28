@@ -54,9 +54,13 @@
         		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_updateClaim_submitdone" ev:submiterror=""
         		abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_insertMemo" action="/InsWebApp/CLAIMRESULTIns.pwkjson" method="post" mediatype="application/json" ref="" target=""
-        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        	<xf:submission id="sbm_insertMemo" action="/InsWebApp/CLAIMRESULTIns.pwkjson" method="post" mediatype="application/json" ref=""
+        		target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
         		ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_deleteResult" action="/InsWebApp/CLAIMRESULTDel.pwkjson" method="post" mediatype="application/json"
+        		ref="" target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg=""
+        		ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -100,6 +104,7 @@ scwin.sbm_insertApprovalReq_submitdone = function (e) {
     $c.sbm.execute(sbm_updateClaim);
 
     let memo = $p.parent().txt_examMemo.getValue();
+    $c.sbm.execute(sbm_deleteResult, {"elData" : {claim_no: scwin.claim.claimNo}});
     $c.sbm.execute(sbm_insertMemo, {"elData" : {claim_memo: memo, claim_no: scwin.claim.claimNo}});
 
     Swal.fire({
