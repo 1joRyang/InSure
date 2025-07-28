@@ -137,7 +137,7 @@ scwin.createTable = function(result) {
 
 			console.log(`"${row.col1}"을 "${result.name}"에 병합 (유사도: ${result.similarity.toFixed(2)})`);
 		} else {
-			console.log(`"${row.col1}"은 유사도가 낮아 무시됨 (최대 유사도: ${result.similarity.toFixed(2)})`);
+			console.log(`"${row.col1}"은 "${rowName}"과 유사도가 낮아 무시됨 (최대 유사도: ${result.similarity.toFixed(2)})`);
 		}
 	});
 	
@@ -500,7 +500,7 @@ function calculateSimilarity(str1, str2) {
 	const matrix = [];
 
 	// 빈 문자열인 경우 매칭으로 간주
-	if (!str1 || !str2) return 1.0;
+	//if (!str1 || !str2) return 1.0;
 
 	// 행렬 초기화
 	for (let i = 0; i <= str2.length; i++) {

@@ -399,7 +399,8 @@ scwin.btn_ocr_onclick = function (e) {
     // formData.append("img_url", scwin.imgUrl);
     // console.log(scwin.imgUrl);
 
-    scwin.createTable(scwin.data_garo3_imp);
+    console.log(scwin.data_rows_imp);
+    scwin.createTable(scwin.data_rows_imp);
     loadingScreen.hide();
     // $.ajax({
     //     url: 'http://localhost:5000/ocr', //'http://localhost:8000/api/v1/insurance/ocr',
