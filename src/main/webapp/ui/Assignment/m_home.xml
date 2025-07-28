@@ -35,7 +35,7 @@ scwin.onpageload = function() {
                 location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/first.xml"
                 break;
             case 'claim':
-                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/terms.xml"
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/requestDoc.xml"
                 break;
             case 'consultation':
                 location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/insurePageTab1.xml"
