@@ -4,52 +4,52 @@
     xmlns:ev="http://www.w3.org/2001/xml-events"
     xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
     <head>
-        <w2:type>COMPONENT</w2:type>
-        <w2:buildDate/>
-        <w2:MSA/>
-        <xf:model>
-        	<w2:dataCollection baseNode="map">
-        		<w2:dataList baseNode="list" repeatNode="map" id="dl_imgKey" saveRemovedData="true">
-        			<w2:columnInfo>
-        				<w2:column dataType="text" name="file_path" id="file_path"></w2:column>
-        				<w2:column dataType="text" name="file_id" id="file_id"></w2:column>
-        			</w2:columnInfo>
-        			<w2:data use="false">
-        			</w2:data>
-        		</w2:dataList>
-        		<w2:dataList baseNode="list" repeatNode="map" id="dl_imgList" saveRemovedData="true">
-        			<w2:columnInfo>
-        				<w2:column dataType="text" name="imgSrc" id="imgSrc"></w2:column>
-        				<w2:column dataType="text" name="imgTitle" id="imgTitle"></w2:column>
-        			</w2:columnInfo>
-        		</w2:dataList>
-        		<w2:dataMap baseNode="map" id="dm_img">
-        			<w2:keyInfo>
-        				<w2:key dataType="text" name="presignedUrl" id="presignedUrl"></w2:key>
-        				<w2:key dataType="text" name="objectKey" id="objectKey"></w2:key>
-        				<w2:key dataType="text" name="filename" id="filename"></w2:key>
-        			</w2:keyInfo>
-        		</w2:dataMap>
-        		<w2:dataMap baseNode="map" id="dm_objectKey">
-        			<w2:keyInfo>
-        				<w2:key dataType="text" name="objectKey" id="objectKey"></w2:key>
-        			</w2:keyInfo>
-        		</w2:dataMap>
-        	</w2:dataCollection>
-        	<w2:workflowCollection />
-        	<xf:submission id="sbm_getS3Key" action="/InsWebApp/InsimagefileList.pwkjson" method="post" mediatype="application/json" ref=""
-        		target='data:json,{"id":"dl_imgKey","key":"elData.insimagefileVoList"}' encoding="UTF-8" instance="" replace="" errorHandler=""
-        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getS3Key_submitdone" ev:submiterror=""
-        		abortTrigger="">
-        	</xf:submission>
-        	<xf:submission id="sbm_getImg" action="/InsWebApp/getS3ViewUrl.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_objectKey","key":"param"}' target='data:json,{"id":"dm_img","key":"elData"}' encoding="UTF-8"
-        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getImg_submitdone"
-        		ev:submiterror="" abortTrigger="">
-        	</xf:submission>
-        </xf:model>
-        <w2:layoutInfo/>
-        <w2:publicInfo method=""/>
-        <script lazy="false" type="text/javascript"><![CDATA[
+    	<w2:type>COMPONENT</w2:type>
+    	<w2:buildDate />
+    	<w2:MSA />
+    	<xf:model>
+    		<w2:dataCollection baseNode="map">
+    			<w2:dataList baseNode="list" repeatNode="map" id="dl_imgKey" saveRemovedData="true">
+    				<w2:columnInfo>
+    					<w2:column dataType="text" name="file_path" id="file_path"></w2:column>
+    					<w2:column dataType="text" name="file_id" id="file_id"></w2:column>
+    				</w2:columnInfo>
+    				<w2:data use="false"></w2:data>
+    			</w2:dataList>
+    			<w2:dataList baseNode="list" repeatNode="map" id="dl_imgList" saveRemovedData="true">
+    				<w2:columnInfo>
+    					<w2:column dataType="text" name="imgSrc" id="imgSrc"></w2:column>
+    					<w2:column dataType="text" name="imgTitle" id="imgTitle"></w2:column>
+    				</w2:columnInfo>
+    			</w2:dataList>
+    			<w2:dataMap baseNode="map" id="dm_img">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="presignedUrl" id="presignedUrl"></w2:key>
+    					<w2:key dataType="text" name="objectKey" id="objectKey"></w2:key>
+    					<w2:key dataType="text" name="filename" id="filename"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    			<w2:dataMap baseNode="map" id="dm_objectKey">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="objectKey" id="objectKey"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    		</w2:dataCollection>
+    		<w2:workflowCollection />
+    		<xf:submission id="sbm_getS3Key" action="/InsWebApp/InsimagefileList.pwkjson" method="post" mediatype="application/json" ref=""
+    			target='data:json,{"id":"dl_imgKey","key":"elData.insimagefileVoList"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+    			customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getS3Key_submitdone" ev:submiterror=""
+    			abortTrigger="">
+    		</xf:submission>
+    		<xf:submission id="sbm_getImg" action="/InsWebApp/getS3ViewUrl.pwkjson" method="post" mediatype="application/json"
+    			ref='data:json,{"id":"dm_objectKey","key":"param"}' target='data:json,{"id":"dm_img","key":"elData"}' encoding="UTF-8" instance=""
+    			replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+    			ev:submitdone="scwin.sbm_getImg_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
+    	</xf:model>
+    	<w2:layoutInfo />
+    	<w2:publicInfo method="" />
+    	<script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function () {
     scwin.zoomScale = 1;
     scwin.currentImgIndex = 1;
@@ -148,7 +148,6 @@ scwin.renderFullImageViewer = function () {
     const len = dl_imgList.getRowCount();
     for (let i = 1; i < len + 1; i++) {
         const row = dl_imgList.getRowData(i - 1);
-        console.log(row)
         const visible = i === 1 ? "block" : "none";
 
         const img = document.createElement("img");
@@ -163,7 +162,18 @@ scwin.renderFullImageViewer = function () {
             object-fit: contain;
         `;
 
-        container.appendChild(img);
+        const wrapper = document.createElement("div");
+        wrapper.style.cssText = `
+            display: inline-block;
+            overflow: visible;
+            width: max-content;
+        `;
+
+        // 이미지 삽입
+        wrapper.appendChild(img);
+
+        // wrapper를 컨테이너에 추가
+        container.appendChild(wrapper);
     }
 
     scwin.zoomScale = 1;
@@ -211,14 +221,14 @@ scwin.onThumbnailClick = function (e) {
 scwin.adjustZoom = function (factor) {
     scwin.zoomScale *= factor;
 
-    const currentId = "viewer_img_" + (scwin.currentImgIndex);
+    const currentId = "viewer_img_" + scwin.currentImgIndex;
     const targetImg = document.getElementById(currentId);
-    console.log(currentId, targetImg);
     if (targetImg) {
         targetImg.style.transform = "scale(" + scwin.zoomScale + ")";
-        targetImg.style.transformOrigin = "top center";
+        targetImg.style.transformOrigin = "top left";  // 왼쪽 상단 기준 확대
     }
 };
+
 
 scwin.btn_plus_onclick = function (e) {
     console.log("+")
@@ -230,6 +240,7 @@ scwin.btn_minus_onclick = function (e) {
     scwin.adjustZoom(0.9);
 };
 ]]></script>
+    	<style type="text/css"><![CDATA[]]></style>
     </head>
     <body ev:onpageload="scwin.onpageload" style="">
     	<xf:group meta_snippetCategory="01_화면분할" meta_snippetName="1_05 좌측 고정 2단 분할_width값 200px" meta_snippetKeyComponent="true"
@@ -238,7 +249,7 @@ scwin.btn_minus_onclick = function (e) {
     			id="imgList" class="imgList">
     		</xf:group>
     		<xf:group
-    			style="width:90%; height:100%; overflow-y:auto; display:flex; flex-direction:column; align-items:center; padding-top:20px; background-color:gainsboro; overflow-x: auto; display:block;  white-space:nowrap"
+    			style="width:90%; overflow-y:auto; display:flex; flex-direction:column; align-items:center; padding-top:20px; background-color:gainsboro; overflow-x: auto;  white-space:nowrap;justify-content: center;    align-items: center;"
     			id="imgContainer" class="imgContainer">
     		</xf:group>
     	</xf:group>
