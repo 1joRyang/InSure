@@ -131,7 +131,12 @@
         	</xf:submission>
         	<xf:submission id="sbm_updateClaim" action="/InsWebApp/CLAIMUpd.pwkjson" method="post" mediatype="application/json"
         		ref='data:json,{"id":"dm_claim","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
-        		customHandler="" mode="asynchronous" processMsg="저장 중..." ev:submit="" ev:submitdone="scwin.sbm_updateClaim_submitdone" ev:submiterror="" abortTrigger="">
+        		customHandler="" mode="asynchronous" processMsg="저장 중..." ev:submit="" ev:submitdone="scwin.sbm_updateClaim_submitdone"
+        		ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getOffset" action="/InsWebApp/CLAIMOFFSETUpdView.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_claimoffset","key":"elData"}' target='data:json,{"id":"dm_claimoffset","key":"elData"}' encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
+        		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -157,6 +162,9 @@ scwin.onpageload = function() {
 
     let request = {"claimVo": {"claim_no": scwin.claim.claimNo}};
     $c.sbm.execute(sbm_getClaim, request);
+
+    dm_claimoffset.set("claim_no", scwin.claim.claimNo); 
+    $c.sbm.execute(sbm_getOffset);
 
     var jsnOptions = {
         id: "img_popup",
@@ -213,7 +221,6 @@ scwin.btn_next_onclick = function (e) {
 
     if (claimNo !== "" && reason !== "" && charge !== "") {
         // 상계 저장 처리
-        dm_claimoffset.set("claim_no", localStorage.getItem("claimNo")); 
         isClaimOffset = true;
         isSaveOffset = true;
     } 
@@ -281,7 +288,7 @@ scwin.btn_next_onclick = function (e) {
         console.log(scwin)
         scwin.noBtnAlertWithTimer({
             title:'다음 항목의 입력을 확인하세요', 
-            text: missingFields.join("<br>"), 
+            html: missingFields.join(`<br>`), 
             icon:'warning'
         })
     }
@@ -490,7 +497,7 @@ scwin.grd_insure_oncellclick = function (rowIndex, columnIndex, columnId) {
     						<xf:group class=" col_3" id="" style="">
     							<w2:textbox style="width: 150px;height: 23px;" id="" label="금액"></w2:textbox>
     							<xf:input class="" id="ipt_charge" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    								meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_claimoffset.charge">
+    								meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_claimoffset.charge" displayFormat="##,###,###,###">
     							</xf:input>
     						</xf:group>
     					</xf:group>
