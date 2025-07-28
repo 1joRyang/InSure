@@ -199,14 +199,18 @@ scwin.onpageload = function() {
         scwin.isEmp = false;
 
         btn_ocr.hide();
-        ipt_department.setReadOnly(true);
-        ipt_hospitalName.setReadOnly(true);
+        sel_department.setReadOnly(true);
+        sel_hospitalName.setReadOnly(true);
         sel_hospital.setReadOnly(true);
-        ipt_patientType.setReadOnly(true);
+        sel_patient.setReadOnly(true);
 
         ipt_paid.setReadOnly(true);
         ipt_willpay.setReadOnly(true);
         ipt_pay.setReadOnly(true);
+    }
+
+    if (scwin.claim.status === "결재반려") {
+        btn_ocr.setDisabled(true);
     }
 
     var jsnOptions = {
@@ -229,7 +233,7 @@ scwin.onpageload = function() {
     scwin.isGetTreatId = false; // insert 끝내고 treatmentId 가져오기.......
 
 
-    if (scwin.isEmp) {
+    if (scwin.isEmp && scwin.claim.status != "결재반려") {
         let savedData = JSON.parse(localStorage.getItem('dateList') || '[]');
         savedData.forEach(item => {
             date_drop.addItem(item.imgIdx, item.dateRange);
@@ -247,8 +251,8 @@ scwin.onpageload = function() {
 
 function getTreatmentWithDate() {
     dm_treatment.set("treatment_date", date_drop.getText());
-
-    if (scwin.isEmp) { // 담당자
+    
+    if (scwin.isEmp && scwin.claim.status != "결재반려") { // 담당자
         scwin.claimImg = JSON.parse(localStorage.getItem("claimImg"));
         scwin.imgUrl = scwin.claimImg[date_drop.getValue()-1].imgSrc;
     }
@@ -307,7 +311,7 @@ scwin.sbm_getTreatment_submitdone = function (e) {
     }
 
     // 값이 있으면 수정
-    if (ipt_department.getValue() !== "") {
+    if (sel_department.getValue() !== "") {
         localStorage.setItem("treatmentId", dm_treatment.getJSON().treatment_id)
         scwin.treatmentId = localStorage.getItem("treatmentId");
 
@@ -395,34 +399,31 @@ scwin.btn_ocr_onclick = function (e) {
     loadingScreen.setStyle("display", "flex");
 
     // OCR 버튼 클릭 시 OCR 결과를 받아서 테이블을 동적으로 업데이트
-    // let formData = new FormData();
-    // formData.append("img_url", scwin.imgUrl);
-    // console.log(scwin.imgUrl);
+    let formData = new FormData();
+    formData.append("img_url", scwin.imgUrl);
+    console.log(scwin.imgUrl);
 
-    console.log(scwin.data_rows_imp);
-    scwin.createTable(scwin.data_rows_imp);
-    loadingScreen.hide();
-    // $.ajax({
-    //     url: 'http://localhost:5000/ocr', //'http://localhost:8000/api/v1/insurance/ocr',
-    //     type: 'POST',
-    //     data: formData,
-    //     contentType: false,  // multipart/form-data 자동 처리
-    //     processData: false,  // FormData 객체를 문자열로 변환하지 않음
-    //     success: function (response) {
-    //         console.log(response.data);
-    //         scwin.createTable(response.data);
-    //     },
-    //     error: function (xhr, status, error) {
-    //         loadingScreen.hide();
-    //         scwin.noBtnAlertWithTimer({
-    //             title: 'OCR 인식에 실패했습니다', 
-    //             icon: 'error'
-    //         });
-    //     },
-    //     complete: function() {
-    //         loadingScreen.hide();
-    //     }
-    // }); 
+    $.ajax({
+        url: 'http://localhost:5000/ocr', //'http://localhost:8000/api/v1/insurance/ocr',
+        type: 'POST',
+        data: formData,
+        contentType: false,  // multipart/form-data 자동 처리
+        processData: false,  // FormData 객체를 문자열로 변환하지 않음
+        success: function (response) {
+            console.log(response.data);
+            scwin.createTable(response.data);
+        },
+        error: function (xhr, status, error) {
+            loadingScreen.hide();
+            scwin.noBtnAlertWithTimer({
+                title: 'OCR 인식에 실패했습니다', 
+                icon: 'error'
+            });
+        },
+        complete: function() {
+            loadingScreen.hide();
+        }
+    }); 
 };
 
 scwin.btn_before_onclick = function (e) {
@@ -453,7 +454,7 @@ function saveInsure(idx = -1) {
         return;
     }
 
-    if (sel_hospital.getValue() && ipt_department.getValue()&& ipt_hospitalName.getValue() && ipt_patientType.getValue()) {
+    if (sel_hospital.getValue() && sel_department.getValue()&& sel_hospitalName.getValue() && sel_patient.getValue()) {
         dm_treatment.set("claim_no", scwin.claim.claimNo);
 
         scwin.imgUrl = scwin.claimImg[date_drop.getValue()-1].imgSrc;
@@ -602,7 +603,7 @@ function extractClaimItemData(treatmentId, claimNo) {
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
-        <xf:group id="loadingScreen" style="background-color: rgba(0, 0, 0, 0.5);display: flex;" class="loading-overlay">
+        <xf:group id="loadingScreen" style="background-color: rgba(0, 0, 0, 0.5);display: none;" class="loading-overlay">
 
         	<xf:group style="background-color: transparent;" id="" class="loading-spinner"></xf:group>
         </xf:group>
@@ -646,8 +647,122 @@ function extractClaimItemData(treatmentId, claimNo) {
         						<w2:textbox style="" id="" label="병원명/진료과" class="req"></w2:textbox>
         					</xf:group>
         					<xf:group tagname="td" style="" id="" class="w2tb_td">
-        						<xf:input style="width:150px;" id="ipt_department" ref="data:dm_treatment.hospital_name"></xf:input>
-        						<xf:input style="width:150px;" id="ipt_hospitalName" ref="data:dm_treatment.department"></xf:input>
+        						<xf:select1 allOption="" appearance="minimal" chooseOption="true" chooseOptionLabel="선택" direction="auto"
+        							disabled="false" disabledClass="w2selectbox_disabled" id="sel_hospitalName" ref="data:dm_treatment.hospital_name"
+        							style="width:150px;" submenuSize="auto">
+        							<xf:choices>
+        								<xf:item>
+        									<xf:label><![CDATA[고려대학교 안암병원]]></xf:label>
+        									<xf:value><![CDATA[고려대학교 안암병원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[코코이비인후과의원]]></xf:label>
+        									<xf:value><![CDATA[코코이비인후과의원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[경희대학교병원]]></xf:label>
+        									<xf:value><![CDATA[경희대학교병원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[정의원]]></xf:label>
+        									<xf:value><![CDATA[정의원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[빈센트치과의원]]></xf:label>
+        									<xf:value><![CDATA[빈센트치과의원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[서울대학교병원]]></xf:label>
+        									<xf:value><![CDATA[서울대학교병원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[서울대학교어린이병원]]></xf:label>
+        									<xf:value><![CDATA[서울대학교어린이병원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[서울대학교암병원]]></xf:label>
+        									<xf:value><![CDATA[서울대학교암병원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[서울대학교치과병원]]></xf:label>
+        									<xf:value><![CDATA[서울대학교치과병원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[연세소아청년과의원]]></xf:label>
+        									<xf:value><![CDATA[연세소아청년과의원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[애플산부인과의원]]></xf:label>
+        									<xf:value><![CDATA[애플산부인과의원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[포레스트병원]]></xf:label>
+        									<xf:value><![CDATA[포레스트병원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[홍성의료원]]></xf:label>
+        									<xf:value><![CDATA[홍성의료원]]></xf:value>
+        								</xf:item>
+        							</xf:choices>
+        						</xf:select1>
+        						<xf:select1 allOption="" appearance="minimal" chooseOption="true" chooseOptionLabel="선택" direction="auto"
+        							disabled="false" disabledClass="w2selectbox_disabled" id="sel_department" ref="data:dm_treatment.department"
+        							style="width:150px;" submenuSize="auto">
+        							<xf:choices>
+        								<xf:item>
+        									<xf:label><![CDATA[순환기내과]]></xf:label>
+        									<xf:value><![CDATA[순환기내과]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[피부과]]></xf:label>
+        									<xf:value><![CDATA[피부과]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[안과]]></xf:label>
+        									<xf:value><![CDATA[안과]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[호흡기내과]]></xf:label>
+        									<xf:value><![CDATA[호흡기내과]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[소화기내과]]></xf:label>
+        									<xf:value><![CDATA[소화기내과]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[혈액종양내과]]></xf:label>
+        									<xf:value><![CDATA[혈액종양내과]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[내분비대사내과]]></xf:label>
+        									<xf:value><![CDATA[내분비대사내과]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[알레르기내과]]></xf:label>
+        									<xf:value><![CDATA[알레르기내과]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[신장내과]]></xf:label>
+        									<xf:value><![CDATA[신장내과]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[감염내과]]></xf:label>
+        									<xf:value><![CDATA[감염내과]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[류마티스내과]]></xf:label>
+        									<xf:value><![CDATA[류마티스내과]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[내과(일반)]]></xf:label>
+        									<xf:value><![CDATA[내과(일반)]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[내과(입원의학)]]></xf:label>
+        									<xf:value><![CDATA[내과(입원의학)]]></xf:value>
+        								</xf:item>
+        							</xf:choices>
+        						</xf:select1>
         					</xf:group>
         				</xf:group>
         				<xf:group tagname="tr" style="" id="" class="">
@@ -678,7 +793,28 @@ function extractClaimItemData(treatmentId, claimNo) {
         						<w2:textbox style="" id="" label="환자구분" class=""></w2:textbox>
         					</xf:group>
         					<xf:group tagname="td" style="" id="" class="w2tb_td">
-        						<xf:input style="width:150px;" id="ipt_patientType" ref="data:dm_treatment.patient_type"></xf:input>
+        						<xf:select1 allOption="" appearance="minimal" chooseOption="true" chooseOptionLabel="선택" direction="auto"
+        							disabled="false" disabledClass="w2selectbox_disabled" id="sel_patient"
+        							ref="data:dm_treatment.patient_type" style="width:150px;" submenuSize="auto">
+        							<xf:choices>
+        								<xf:item>
+        									<xf:label><![CDATA[국민공단]]></xf:label>
+        									<xf:value><![CDATA[국민공단]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[일반]]></xf:label>
+        									<xf:value><![CDATA[일반]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[산재]]></xf:label>
+        									<xf:value><![CDATA[산재]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[자동차재해]]></xf:label>
+        									<xf:value><![CDATA[자동차재해]]></xf:value>
+        								</xf:item>
+        							</xf:choices>
+        						</xf:select1>
         					</xf:group>
         				</xf:group>
         			</xf:group>

@@ -238,7 +238,7 @@ scwin.btn_minus_onclick = function (e) {
     			id="imgList" class="imgList">
     		</xf:group>
     		<xf:group
-    			style="width:90%; height:100%; overflow-y:auto; display:flex; flex-direction:column; align-items:center; padding-top:20px; background-color:gainsboro;"
+    			style="width:90%; height:100%; overflow-y:auto; display:flex; flex-direction:column; align-items:center; padding-top:20px; background-color:gainsboro; overflow-x: auto; display:block;  white-space:nowrap"
     			id="imgContainer" class="imgContainer">
     		</xf:group>
     	</xf:group>
