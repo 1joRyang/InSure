@@ -78,7 +78,7 @@
 		    ) S, (SELECT @ROWNUM := 0) TMP
 		) A 
 		WHERE PAGE = #{pageIndex}
-		ORDER BY receipt_date DESC;
+		ORDER BY receipt_date ASC;
 	</select>
 	
 	<select id="selectClaimWithStatusWait" parameterType="com.demo.proworks.claim.vo.ClaimVo"
@@ -115,7 +115,7 @@
 		    ) S, (SELECT @ROWNUM := 0) TMP
 		) A 
 		WHERE PAGE = #{pageIndex}
-		ORDER BY receipt_date DESC;
+		ORDER BY receipt_date ASC;
 	</select>
 
 	<select id="selectClaimWithStatus" parameterType="com.demo.proworks.claim.vo.ClaimVo"
@@ -152,7 +152,7 @@
 		    ) S, (SELECT @ROWNUM := 0) TMP
 		) A 
 		WHERE PAGE = #{pageIndex}
-		ORDER BY receipt_date DESC;
+		ORDER BY receipt_date ASC;
 	</select>
 	
 	<select id="selectClaimJoinClaimResult" parameterType="com.demo.proworks.claim.vo.ClaimUserVo"
