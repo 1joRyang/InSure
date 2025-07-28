@@ -36,19 +36,26 @@
         	<w2:workflowCollection />
         	<xf:submission id="sbm_insertApprovalReq" action="/InsWebApp/APPROVALREQIns.pwkjson" method="post" mediatype="application/json"
         		ref='data:json,{"id":"dm_approvalReq","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
-        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_insertApprovalReq_submitdone" ev:submiterror="" abortTrigger="">
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_insertApprovalReq_submitdone"
+        		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getManager" action="/InsWebApp/EmployeeForRule.pwkjson" method="post" mediatype="application/json" ref=""
         		target='data:json,{"id":"dl_manager","key":"employeeVoList"}' encoding="UTF-8" instance="" replace="" errorHandler=""
-        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getManager_submitdone" ev:submiterror="" abortTrigger="">
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getManager_submitdone" ev:submiterror=""
+        		abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_getDeptName" action="/InsWebApp/insdept0001UpdView.pwkjson" method="post" mediatype="application/json"
         		ref="" target='data:json,{"id":"dm_deptName","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler=""
         		customHandler="" mode="asynchronous" processMsg="로딩중.." ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_updateClaim" action="/InsWebApp/CLAIMUpd.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_claim","key":"elData"}' target="" encoding="UTF-8"
-        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
-        		ev:submitdone="scwin.sbm_updateClaim_submitdone" ev:submiterror="" abortTrigger="">
+        	<xf:submission id="sbm_updateClaim" action="/InsWebApp/CLAIMUpd.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,{"id":"dm_claim","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_updateClaim_submitdone" ev:submiterror=""
+        		abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_insertMemo" action="/InsWebApp/CLAIMRESULTIns" method="post" mediatype="application/json" ref="" target=""
+        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
@@ -91,6 +98,9 @@ scwin.sbm_insertApprovalReq_submitdone = function (e) {
     dm_claim.set("status", "결재중");
     // console.log(dm_claim.getJSON());
     $c.sbm.execute(sbm_updateClaim);
+
+    let memo = $p.parent().txt_examMemo.getValue();
+    $c.sbm.execute(sbm_insertMemo, {"elData" : {claim_memo: memo, claim_no: scwin.claim.claimNo}})
 };
 ]]></script>
     </head>

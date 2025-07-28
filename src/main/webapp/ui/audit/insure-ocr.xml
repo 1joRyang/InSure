@@ -395,31 +395,33 @@ scwin.btn_ocr_onclick = function (e) {
     loadingScreen.setStyle("display", "flex");
 
     // OCR 버튼 클릭 시 OCR 결과를 받아서 테이블을 동적으로 업데이트
-    let formData = new FormData();
-    formData.append("img_url", scwin.imgUrl);
-    console.log(scwin.imgUrl);
+    // let formData = new FormData();
+    // formData.append("img_url", scwin.imgUrl);
+    // console.log(scwin.imgUrl);
 
-    $.ajax({
-        url: 'http://localhost:5000/ocr', //'http://localhost:8000/api/v1/insurance/ocr',
-        type: 'POST',
-        data: formData,
-        contentType: false,  // multipart/form-data 자동 처리
-        processData: false,  // FormData 객체를 문자열로 변환하지 않음
-        success: function (response) {
-            console.log(response.data);
-            scwin.createTable(response.data);
-        },
-        error: function (xhr, status, error) {
-            loadingScreen.hide();
-            scwin.noBtnAlertWithTimer({
-                title: 'OCR 인식에 실패했습니다', 
-                icon: 'error'
-            });
-        },
-        complete: function() {
-            loadingScreen.hide();
-        }
-    }); 
+    scwin.createTable(scwin.data_garo3_imp);
+    loadingScreen.hide();
+    // $.ajax({
+    //     url: 'http://localhost:5000/ocr', //'http://localhost:8000/api/v1/insurance/ocr',
+    //     type: 'POST',
+    //     data: formData,
+    //     contentType: false,  // multipart/form-data 자동 처리
+    //     processData: false,  // FormData 객체를 문자열로 변환하지 않음
+    //     success: function (response) {
+    //         console.log(response.data);
+    //         scwin.createTable(response.data);
+    //     },
+    //     error: function (xhr, status, error) {
+    //         loadingScreen.hide();
+    //         scwin.noBtnAlertWithTimer({
+    //             title: 'OCR 인식에 실패했습니다', 
+    //             icon: 'error'
+    //         });
+    //     },
+    //     complete: function() {
+    //         loadingScreen.hide();
+    //     }
+    // }); 
 };
 
 scwin.btn_before_onclick = function (e) {
