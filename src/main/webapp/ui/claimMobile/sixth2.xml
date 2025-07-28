@@ -199,7 +199,7 @@ scwin.sbm_ClaimSaveDone_submitdone = function (e) {
 
 #progressBar {
     height: 100%;
-    background-color: #ffc107;
+    background-color: #4FACFE;
     transition: width 0.5s ease-in-out;
 }
 
@@ -223,15 +223,15 @@ scwin.sbm_ClaimSaveDone_submitdone = function (e) {
 }
 
 .progressBtn.completed {
-    background-color: #ffc107;
-    border-color: #ffc107;
+    background-color: #4FACFE;
+    border-color: #4FACFE;
     color: #fff;
 }
 
 .progressBtn.active {
     background-color: #fff;
-    border-color: #ffc107;
-    color: #ffc107;
+    border-color: #4FACFE;
+    color: #4FACFE;
 }
 
 /* Scrollable Main Content Wrapper */
@@ -306,7 +306,7 @@ scwin.sbm_ClaimSaveDone_submitdone = function (e) {
 }
 
 .selectionBtn.selected {
-    border-color: #ffc107;
+    border-color: #4FACFE;
     background-color: #fff8e1;
 }
 
@@ -321,7 +321,7 @@ scwin.sbm_ClaimSaveDone_submitdone = function (e) {
 .nextBtn {
     width: 100%;
     height: 65px;
-    background-color: #ffc107;
+    background-color: #4FACFE;
     border-radius: 35px;
     color: white;
     font-size: 22px;
@@ -333,7 +333,7 @@ scwin.sbm_ClaimSaveDone_submitdone = function (e) {
 }
 
 .nextBtn:hover {
-    background-color: #ffb300;
+    background-color: #4FACFE;
 }
 
 /* Scroll to Top button */
