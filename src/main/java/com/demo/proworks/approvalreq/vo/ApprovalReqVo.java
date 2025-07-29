@@ -37,6 +37,9 @@ public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "search_manager_no", physicalName = "SC_manager_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String SC_manager_no;
 
+    @ElDtoField(logicalName = "request_type", physicalName = "request_type", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String request_type;
+
     @ElVoField(physicalName = "approval_id")
     public String getApproval_id(){
         String ret = this.approval_id;
@@ -125,6 +128,17 @@ public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.SC_manager_no = SC_manager_no;
     }
 
+    @ElVoField(physicalName = "request_type")
+    public String getRequest_type(){
+        String ret = this.request_type;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "request_type")
+    public void setRequest_type(String request_type){
+        this.request_type = request_type;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -136,7 +150,8 @@ public class ApprovalReqVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("approval_memo").append("=").append(approval_memo).append(",");
         sb.append("SC_claim_no").append("=").append(SC_claim_no).append(",");
         sb.append("SC_emp_no").append("=").append(SC_emp_no).append(",");
-        sb.append("SC_manager_no").append("=").append(SC_manager_no);
+        sb.append("SC_manager_no").append("=").append(SC_manager_no).append(",");
+        sb.append("request_type").append("=").append(request_type);
         sb.append("]");
         return sb.toString();
 

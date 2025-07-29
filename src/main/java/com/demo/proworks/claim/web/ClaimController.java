@@ -287,6 +287,11 @@ public class ClaimController {
 		return claimFullJoinList;
 	}
 
+	
+	
+	
+
+
 	/**
 	 * 사용자의 CLAIM 상태별 갯수를 조회합니다.
 	 *
@@ -301,5 +306,6 @@ public class ClaimController {
 		ClaimStatusCountVo statusCount = claimService.selectClaimStatusCount(claimVo);
 		return statusCount;
 	}
+
   
 }
