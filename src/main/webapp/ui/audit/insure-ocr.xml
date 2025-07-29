@@ -761,6 +761,10 @@ function extractClaimItemData(treatmentId, claimNo) {
         									<xf:label><![CDATA[내과(입원의학)]]></xf:label>
         									<xf:value><![CDATA[내과(입원의학)]]></xf:value>
         								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[응급의학]]></xf:label>
+        									<xf:value><![CDATA[응급의학]]></xf:value>
+        								</xf:item>
         							</xf:choices>
         						</xf:select1>
         					</xf:group>
