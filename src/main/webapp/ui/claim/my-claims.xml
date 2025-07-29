@@ -209,7 +209,7 @@ scwin.grd_re_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     			</xf:group>
     		</xf:group>
     		<xf:group class="tbcbox" id="" meta_snippetCategory="04_탭" meta_snippetKeyComponent="true" meta_snippetName="4_02 서브탭"
-    			style="">
+    			style="margin-bottom: 100px;">
     			<w2:tabControl alwaysDraw="false" class="tbc_sub" id="tabControl1" style="margin-top: 40px;height: 100%;">
     				<w2:tabs disabled="false" id="tabs8" label="심사 대기" style="width: 100px;height:30px;"></w2:tabs>
     				<w2:tabs disabled="false" id="tabs9" label="심사 완료" style="width: 100px;height:30px;"></w2:tabs>
