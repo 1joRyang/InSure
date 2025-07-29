@@ -80,18 +80,6 @@
 var notificationDataStore = {};
 
 scwin.onpageload = function() {
-    const path = window.location.href;
-    console.log(path.includes("audit"))
-    let title = ""
-    if (path.includes("audit")) {
-        title = "보험 심사";
-    } else {
-        title = "담당 청구 내역";
-    }
-
-	
-    txt_title.setValue(title);
-
 
     // [수정] window 객체에 초기화 여부를 저장하는 플래그를 확인합니다.
     if (!window.isWebSocketInitialized) {
