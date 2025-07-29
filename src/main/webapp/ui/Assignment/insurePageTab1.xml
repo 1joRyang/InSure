@@ -240,7 +240,7 @@ scwin.onInsuranceCardClick = function(e) {
     //         console.log("선택된 보험:", insuranceData);
                 
     //     }
-              location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/terms.xml"
+              location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_terms.xml"
     // } catch (error) {
     //     console.error("보험 카드 클릭 이벤트 처리 중 오류:", error);
     // }

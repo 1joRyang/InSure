@@ -34,6 +34,10 @@ import com.demo.proworks.claim.vo.ClaimListwStatusVo;
 import com.demo.proworks.claim.vo.ClaimUserVo;
 import com.demo.proworks.claim.vo.ClaimVo;
 import com.demo.proworks.cmmn.ProworksUserHeader;
+
+import com.demo.proworks.claim.vo.ClaimStatusCountVo;
+
+
 import com.demo.proworks.insimagefile.dao.InsimagefileDAO;
 import com.demo.proworks.insimagefile.vo.InsimagefileVo;
 import com.demo.proworks.notification.service.NotificationService;
@@ -902,5 +906,19 @@ public class ClaimServiceImpl implements ClaimService {
 	        e.printStackTrace();
 	        throw e;
 	    }
+	}
+
+	/**
+	 * 사용자의 CLAIM 상태별 갯수를 조회한다.
+	 *
+	 * @process 1. 청구 상태별 갯수를 조회한다. 2. 결과 ClaimStatusCountVo을(를) 리턴한다.
+	 * 
+	 * @param claimVo 청구 정보 (ID 포함)
+	 * @return ClaimStatusCountVo 상태별 갯수 정보
+	 * @throws Exception
+	 */
+	public ClaimStatusCountVo selectClaimStatusCount(ClaimVo claimVo) throws Exception {
+		ClaimStatusCountVo resultVO = claimDAO.selectClaimStatusCount(claimVo);
+		return resultVO;
 	}
 }

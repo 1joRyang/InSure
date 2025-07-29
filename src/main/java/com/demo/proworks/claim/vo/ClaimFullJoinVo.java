@@ -49,8 +49,8 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
     @ElDtoField(logicalName = "rrn", physicalName = "rrn", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String rrn;
 
-    @ElDtoField(logicalName = "id", physicalName = "id", type = "int", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
-    private int id;
+    @ElDtoField(logicalName = "ID", physicalName = "ID", type = "int", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private int ID;
 
     @ElDtoField(logicalName = "emp_no", physicalName = "emp_no", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String emp_no;
@@ -187,14 +187,14 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.rrn = rrn;
     }
 
-    @ElVoField(physicalName = "id")
-    public int getId(){
-        return id;
+    @ElVoField(physicalName = "ID")
+    public int getID(){
+        return ID;
     }
 
-    @ElVoField(physicalName = "id")
-    public void setId(int id){
-        this.id = id;
+    @ElVoField(physicalName = "ID")
+    public void setID(int ID){
+        this.ID = ID;
     }
 
     @ElVoField(physicalName = "emp_no")
@@ -224,7 +224,7 @@ public class ClaimFullJoinVo extends com.demo.proworks.cmmn.ProworksCommVO {
         sb.append("SC_user_name").append("=").append(SC_user_name).append(",");
         sb.append("SC_search_text").append("=").append(SC_search_text).append(",");
         sb.append("rrn").append("=").append(rrn).append(",");
-        sb.append("id").append("=").append(id).append(",");
+        sb.append("ID").append("=").append(ID).append(",");
         sb.append("emp_no").append("=").append(emp_no);
         sb.append("]");
         return sb.toString();
