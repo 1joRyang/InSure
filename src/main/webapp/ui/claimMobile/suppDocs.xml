@@ -106,7 +106,7 @@ scwin.onpageload = function() {
         //2. JSON 문자열을 객체로 변환
         const claimData = JSON.parse(claimJson);
         // 3. dataMap에 claimNo설정
-        dma_request.set("claimNo", claimData.claimNo);
+        dma_request.set("claimNo", claimData.claim_no);
         // 4. 서브미션을 ID로만 호출
         $p.executeSubmission("sbm_getSupplementInfo");
         // 5. 사용한 데이터는 로컬 스토리지에서 삭제
