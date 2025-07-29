@@ -179,4 +179,20 @@ public interface ClaimService {
 	 */
 	public void updateClaimWithOcrResult(String claimNo, String analyzedClaimTypeKor, String claimContent) throws Exception;
 
+	/**
+	 * 청구의 기존 배정을 해제한다 (emp_no를 null로 설정)
+	 * 
+	 * @param claimNo 청구번호
+	 * @throws Exception
+	 */
+	public void clearClaimAssignment(String claimNo) throws Exception;
+
+	/**
+	 * 배정 해제를 별도 트랜잭션으로 수행 (강제 커밋)
+	 * 
+	 * @param claimNo 청구번호
+	 * @throws Exception
+	 */
+	public void clearClaimAssignmentForced(String claimNo) throws Exception;
+
 }

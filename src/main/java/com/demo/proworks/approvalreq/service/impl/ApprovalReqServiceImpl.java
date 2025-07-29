@@ -187,6 +187,7 @@ public class ApprovalReqServiceImpl implements ApprovalReqService {
 	 */
 	@Transactional
 	public void approveApprovalReq(ApprovalReqVo approvalReqVo) throws Exception {
+
 		System.out.println("[결재승인] 처리 시작: " + approvalReqVo.getClaim_no());
 		
         // 1. 청구 정보 조회
@@ -198,16 +199,38 @@ public class ApprovalReqServiceImpl implements ApprovalReqService {
             throw new Exception("해당 청구를 찾을 수 없습니다: " + approvalReqVo.getClaim_no());
         }
 
-        // 2. ✨ 청구 상태를 "결재완료"로 변경 (알림은 ClaimService에서 자동 처리)
-        claimInfo.setStatus("결재완료");
-        int updateResult = claimService.updateClaim(claimInfo);
-        
-        if (updateResult > 0) {
-            System.out.println("[결재승인] 청구 상태 변경 및 알림 전송 완료: " + approvalReqVo.getClaim_no());
-        } else {
-            System.err.println("[결재승인] 청구 상태 변경 실패: " + approvalReqVo.getClaim_no());
-        }
+		
+		 // 청구 상태를 "결재완료"로 변경 (알림은 ClaimService에서 자동 처리)
+         claimInfo.setStatus("결재완료");
+	    int updateResult = claimService.updateClaim(claimInfo);
+	    
+	    if (updateResult > 0) {
+	        System.out.println("[결재승인] 청구 상태 변경 및 알림 전송 완료: " + approvalReqVo.getClaim_no());
+	    } else {
+	        // 트랜잭션에 의해 롤백될 수 있지만, 명시적인 예외 처리가 더 안전합니다.
+	        throw new Exception("[결재승인] 청구 상태 변경 실패: " + approvalReqVo.getClaim_no());
+	    }
 	}
+	
+	
+	/**
+	 * claim_no로 approval_id가 가장 높은 결재요청의 메모를 조회한다.
+	 *
+	 * @process
+	 * 1. claim_no로 approval_id가 가장 높은 결재요청의 메모를 조회한다.
+	 * 2. 결과 ApprovalReqVo을(를) 리턴한다.
+	 * 
+	 * @param  approvalReqVo 결재요청 ApprovalReqVo
+	 * @return 결재요청 메모 조회 결과
+	 * @throws Exception
+	 */
+	public ApprovalReqVo selectLatestApprovalReqMemo(ApprovalReqVo approvalReqVo) throws Exception {
+	    ApprovalReqVo resultVO = approvalReqDAO.selectLatestApprovalReqMemo(approvalReqVo);			
+	    
+	    return resultVO;
+	}
+
+       
 	
 
 	

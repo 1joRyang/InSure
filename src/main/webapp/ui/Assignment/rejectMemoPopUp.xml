@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+        	<w2:dataCollection baseNode="map">
+        		<w2:dataMap baseNode="map" id="dma_claimNo">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_rejectMemo">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="approval_id" id="approval_id"></w2:key>
+        				<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
+        				<w2:key dataType="text" name="emp_no" id="emp_no"></w2:key>
+        				<w2:key dataType="text" name="manager_no" id="manager_no"></w2:key>
+        				<w2:key dataType="text" name="approval_memo" id="approval_memo"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        	</w2:dataCollection>
+        	<w2:workflowCollection />
+        	<xf:submission id="sbm_rejectMemo" action="/InsWebApp/APPROVALREQLatestMemo.pwkjson" method="post" 
+        		mediatype="application/json" ref='data:json,{"id":"dma_claimNo","key":"approvalReqVo"}' target='data:json,{"id":"dma_rejectMemo","key":"elData"}' 
+        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" 
+        		processMsg="조회중입니다..." ev:submit="" ev:submitdone="scwin.sbm_rejectMemo_submitdone" 
+        		ev:submiterror="scwin.sbm_rejectMemo_submiterror" abortTrigger="">
+        	</xf:submission>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        <script lazy="false" type="text/javascript"><![CDATA[scwin.onpageload = function() {
+    // localStorage에서 claim 정보 가져오기
+    scwin.claim = JSON.parse(localStorage.getItem("claim"));
+    
+    // claim_no 설정
+    if (scwin.claim && scwin.claim.claimNo) {
+        txt_claim_no.setValue(scwin.claim.claimNo);
+        dma_claimNo.set("claim_no", scwin.claim.claimNo);
+        
+        // 반려메모 조회
+        scwin.searchRejectMemo();
+    } else {
+        alert("청구번호 정보가 없습니다.");
+    }
+};
+
+scwin.searchRejectMemo = function() {
+    if (dma_claimNo.get("claim_no")) {
+        console.log("서브미션");
+        $p.executeSubmission(sbm_rejectMemo);
+    } else {
+        alert("청구번호가 설정되지 않았습니다.");
+    }
+};
+
+scwin.sbm_rejectMemo_submitdone = function(e) {
+    var approvalMemo = dma_rejectMemo.get("approval_memo");
+    console.log(e);
+    if (approvalMemo) {
+        txa_rejectMemo.setValue(approvalMemo);
+    } else {
+        txa_rejectMemo.setValue("등록된 반려메모가 없습니다.");
+    }
+};
+
+scwin.sbm_rejectMemo_submiterror = function(e) {
+    console.error("반려메모 조회 실패:", e);
+    alert("반려메모 조회 중 오류가 발생했습니다.");
+    txa_rejectMemo.setValue("반려메모를 조회할 수 없습니다.");
+};
+]]></script>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+    	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
+    		style="">
+    		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
+    			style="">
+    			<w2:textbox class="" id="txt_claim_no" label="" style="" tagname="h4"></w2:textbox>
+    			<w2:span id="" label="에 대한 반려메모 입니다." meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
+    				meta_snippetName="10_16 출력텍스트" style="">
+    			</w2:span>
+    		</xf:group>
+    		<xf:group class="tblbox" id="" style="margin-top: 20px;">
+    			<xf:textarea class="" id="txa_rejectMemo" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
+    				meta_snippetName="10_09 Textarea_100per" placeholder="반려메모를 조회중입니다..." 
+    				style="width:100%;height: 250px;" readOnly="true">
+    			</xf:textarea>
+    		</xf:group>
+    	</xf:group>
+    </body>
+</html>

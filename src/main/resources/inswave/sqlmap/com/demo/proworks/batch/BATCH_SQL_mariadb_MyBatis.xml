@@ -102,4 +102,22 @@
 	        UPDATED_AT = VALUES(UPDATED_AT);
 	    ]]>
 	</update>
+	
+	<update id="updateClaimTypeDistribution">
+	    /* QueryID : com.demo.proworks.batch.updateClaimTypeDistribution (데이터가 있으면 UPDATE, 없으면 INSERT) */
+	    INSERT INTO DASHBOARD_CLAIM_TYPE (LABEL, VALUE, UPDATED_AT)
+	    SELECT
+	        IFNULL(claim_type, '기타') AS label,
+	        COUNT(*) AS value,
+	        NOW() AS UPDATED_AT
+	    FROM
+	        CLAIM
+	    GROUP BY
+	        label
+	    ON DUPLICATE KEY UPDATE
+	        VALUE = VALUES(VALUE),
+	        UPDATED_AT = VALUES(UPDATED_AT);
+	</update>
+	
+
 </mapper>

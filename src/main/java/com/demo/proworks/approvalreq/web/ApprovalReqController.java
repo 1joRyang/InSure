@@ -147,6 +147,22 @@ public class ApprovalReqController {
    public void approveApprovalReq(ApprovalReqVo approvalReqVo) throws Exception {  
         approvalReqService.approveApprovalReq(approvalReqVo);                                            
     }
-    
+
+
+	/**
+	 * claim_no로 approval_id가 가장 높은 결재요청의 메모를 조회합니다.
+	 *
+	 * @param  approvalReqVo 결재요청
+	 * @return 메모 조회 결과
+	 * @throws Exception
+	 */
+	@ElService(key = "APPROVALREQLatestMemo")    
+	@RequestMapping(value="APPROVALREQLatestMemo") 
+	@ElDescription(sub = "최신 결재요청 메모 조회", desc = "claim_no로 가장 최근 결재요청의 메모를 조회한다.")    
+	public ApprovalReqVo selectLatestApprovalReqMemo(ApprovalReqVo approvalReqVo) throws Exception {
+	    ApprovalReqVo selectApprovalReqVo = approvalReqService.selectLatestApprovalReqMemo(approvalReqVo);    	    
+	
+	    return selectApprovalReqVo;
+	}
 
 }

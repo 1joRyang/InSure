@@ -53,6 +53,11 @@
 		UPDATE CLAIM SET EMP_NO = #{empNo} WHERE CLAIM_NO = #{claimNo}
 	</update>
 
+	<!-- 🔥 배정 해제용 SQL -->
+	<update id="clearClaimAssignment" parameterType="string">
+		UPDATE CLAIM SET EMP_NO = NULL WHERE CLAIM_NO = #{claimNo}
+	</update>
+
 	<select id="selectUnassignedClaims" resultType="com.demo.proworks.claim.vo.ClaimVo">
 		SELECT CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO
 		FROM CLAIM
@@ -88,9 +93,9 @@
 		SELECT
 		c.CLAIM_NO,
 		c.CLAIM_TYPE,
-		c.EMP_NO as CURRENT_EMP_NO,
+		CAST(c.EMP_NO AS CHAR) as CURRENT_EMP_NO,
 		ar.DEPT as ASSIGN_DEPT_NAME,
-		id.DEPT_ID as TARGET_DEPT_ID
+		CAST(id.DEPT_ID AS CHAR) as TARGET_DEPT_ID
 		FROM CLAIM c
 		LEFT JOIN ASSIGN_RULE ar
 		ON TRIM(LOWER(c.CLAIM_TYPE)) = TRIM(LOWER(ar.KEYWORD))

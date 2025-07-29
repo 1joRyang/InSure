@@ -139,6 +139,17 @@ public class AssignRuleDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbs
     }
     
     /**
+     * 청구의 기존 배정을 해제한다.
+     *  
+     * @param  claimNo 청구번호
+     * @return 업데이트 건수
+     * @throws ElException
+     */
+    public int clearClaimAssignment(String claimNo) throws ElException {
+        return update("com.demo.proworks.assignrule.clearClaimAssignment", claimNo);
+    }
+    
+    /**
      * 청구에 담당자를 배정한다.
      *  
      * @param  params 청구번호와 직원번호가 포함된 Map

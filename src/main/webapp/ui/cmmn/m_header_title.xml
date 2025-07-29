@@ -14,7 +14,24 @@
     	<w2:publicInfo method="" />
     	<script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
-	
+	const path = window.location.href;
+
+    let title = "홈";
+    if (path.includes("m_home.xml")) {
+        svg_before.hide();
+    } else if (path.includes("my-claims-m.xml")) {
+        title = "청구내역 조회";
+    } else if (path.includes("claim-detail.xml")) {
+        title = "청구세부 조회"
+    } else if (path.includes("first.xml")) {
+        title = "나의 보험";
+    } else if (path.includes("suppDocs.xml")) {
+        title = "제출서류 안내";
+    } else if (path.includes("insurePageTab1.xml")) {
+        title = "나의 보험";
+    }
+
+    m_htitle.setValue(title); 
 };
 
 scwin.svg_before_onclick = function () {
@@ -25,7 +42,7 @@ scwin.svg_before_onclick = function () {
     </head>
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
-    		style="background-color: white;padding: 15px;">
+    		style="background-color: white;padding: 15px;box-shadow: 0 2px 8px rgba(0,0,0,.1);">
     		<xf:group class="" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
     			style="margin: 0;justify-content: space-between;display: flex;">
     			<xf:group style="display: flex;" id="">
@@ -33,7 +50,7 @@ scwin.svg_before_onclick = function () {
     					<xf:label></xf:label>
     				</w2:anchor>
     				<xf:group style="display: flex;" id="">
-    					<w2:textbox style="font-size: 18px;font-weight: bold;text-align: center;margin-top: 8px;" id="" label="보험금 청구"></w2:textbox>
+    					<w2:textbox style="font-size: 18px;font-weight: bold;text-align: center;margin-top: 8px;" id="m_htitle" label="보험금 청구"></w2:textbox>
     				</xf:group>
     			</xf:group>
     			<xf:group class="" id="" style="display: flex;gap: 10px;">

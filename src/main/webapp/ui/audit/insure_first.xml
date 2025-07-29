@@ -28,9 +28,14 @@ scwin.onpageload = function () {
     dm_header.set("claimNo", scwin.claim.claimNo);
 
     // 담당자 아니면 readonly
-    if (scwin.emp.empNo != scwin.claim.empNo || scwin.claim.status == "완료" || scwin.claim.status == "반송") {
+    if (scwin.emp.empNo != scwin.claim.empNo || (
+        scwin.claim.status != "결재완료" &&
+        scwin.claim.status != "결재반려" &&
+        scwin.claim.status != "대기" &&
+        scwin.claim.status != "보완완료" )) {
         btn_reject.hide();
         btn_change.hide();
+        btn_sup.hide();
     }
 };
 
@@ -75,12 +80,13 @@ function openChangeAssigneePopup(link) {
 scwin.btn_reject_onclick = function (e) {
     openClaimReturnPopup("/InsWebApp/ui/Assignment/claimReturnPopup.xml");
 };
+
 function openClaimReturnPopup(link) {
     requires("uiplugin.popup");
     var winWid = $(window).width();
     var winHei = $(window).height();
-    var popWid = 600;  // 담당자 변경 팝업에 적합한 크기
-    var popHei = 250;
+    var popWid = 500;  // 담당자 변경 팝업에 적합한 크기
+    var popHei = 400;
     var sumLeft = (winWid - popWid) / 2;
     var sumTop = (winHei - popHei) / 2;
 
@@ -95,6 +101,38 @@ function openClaimReturnPopup(link) {
         "modal": true,
         "useIFrame": false,
         "title": "반송 요청",
+        "useATagBtn": false,
+        "frameMode": "wframe",
+    };
+
+    $p.openPopup(link, opts);
+}
+
+scwin.btn_sup_onclick = function (e) {
+     openClaimSupplyPopup("/InsWebApp/ui/Assignment/reqSupplePopup.xml");
+
+};
+
+function openClaimSupplyPopup(link) {
+    requires("uiplugin.popup");
+    var winWid = $(window).width();
+    var winHei = $(window).height();
+    var popWid = 500;  
+    var popHei = 400;
+    var sumLeft = (winWid - popWid) / 2;
+    var sumTop = (winHei - popHei) / 2;
+
+    var opts = {
+        "id": "claim_supply_popup",
+        "type": "litewindow",
+        "width": popWid + "px",
+        "height": popHei + "px",
+        "top": sumTop,
+        "left": sumLeft,
+        "popupName": "보완 요청",
+        "modal": true,
+        "useIFrame": false,
+        "title": "보완 요청",
         "useATagBtn": false,
         "frameMode": "wframe",
     };
@@ -120,6 +158,10 @@ function openClaimReturnPopup(link) {
     		<xf:group meta_snippetCategory="08_버튼" meta_snippetName="8_04 전체제어버튼" meta_snippetKeyComponent="true" style="margin-top: 40px;"
     			id="" class="btnbox">
     			<xf:group style="" id="" class="rt">
+    				<xf:trigger class="btn_cm" id="btn_sup" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true"
+    					meta_snippetName="8_01 기본버튼" style="" type="button" ev:onclick="scwin.btn_sup_onclick">
+    					<xf:label><![CDATA[보완]]></xf:label>
+    				</xf:trigger>
     				<xf:trigger style="" id="btn_reject" type="button" class="btn_cm" ev:onclick="scwin.btn_reject_onclick">
     					<xf:label><![CDATA[반송]]></xf:label>
     				</xf:trigger>

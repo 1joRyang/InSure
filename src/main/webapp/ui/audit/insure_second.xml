@@ -131,13 +131,18 @@
         	</xf:submission>
         	<xf:submission id="sbm_updateClaim" action="/InsWebApp/CLAIMUpd.pwkjson" method="post" mediatype="application/json"
         		ref='data:json,{"id":"dm_claim","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
-        		customHandler="" mode="asynchronous" processMsg="저장 중..." ev:submit="" ev:submitdone="scwin.sbm_updateClaim_submitdone" ev:submiterror="" abortTrigger="">
+        		customHandler="" mode="asynchronous" processMsg="저장 중..." ev:submit="" ev:submitdone="scwin.sbm_updateClaim_submitdone"
+        		ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getOffset" action="/InsWebApp/CLAIMOFFSETUpdView.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_claimoffset","key":"elData"}' target='data:json,{"id":"dm_claimoffset","key":"elData"}' encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
+        		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
-        <script lazy="false" type="text/javascript"><![CDATA[
+        <script lazy="false" type="text/javascript"><![CDATA[// TODO: 상계 있으면 조회
 scwin.onpageload = function() {
     scwin.index = 0;
     scwin.genList = [];
@@ -158,6 +163,9 @@ scwin.onpageload = function() {
     let request = {"claimVo": {"claim_no": scwin.claim.claimNo}};
     $c.sbm.execute(sbm_getClaim, request);
 
+    dm_claimoffset.set("claim_no", scwin.claim.claimNo); 
+    $c.sbm.execute(sbm_getOffset);
+
     var jsnOptions = {
         id: "img_popup",
         type: "browserPopup", //필수 고정
@@ -172,7 +180,11 @@ scwin.onpageload = function() {
 	gen_date.insertChild(scwin.index++);   
 
     // 담당자 아니면 + status 대기 아니면 readonly
-    if (scwin.emp.empNo != scwin.claim.empNo || scwin.claim.status == "완료" || scwin.claim.status == "반송") {
+    if (scwin.emp.empNo != scwin.claim.empNo ||(
+        scwin.claim.status != "결재반려" &&
+        scwin.claim.status != "대기" &&
+        scwin.claim.status != "보완완료" )) {
+
         gen_date.hide();
         ipt_claimNo.setReadOnly(true);
         ipt_reason.setReadOnly(true);
@@ -209,7 +221,6 @@ scwin.btn_next_onclick = function (e) {
 
     if (claimNo !== "" && reason !== "" && charge !== "") {
         // 상계 저장 처리
-        dm_claimoffset.set("claim_no", localStorage.getItem("claimNo")); 
         isClaimOffset = true;
         isSaveOffset = true;
     } 
@@ -277,7 +288,7 @@ scwin.btn_next_onclick = function (e) {
         console.log(scwin)
         scwin.noBtnAlertWithTimer({
             title:'다음 항목의 입력을 확인하세요', 
-            text: missingFields.join("<br>"), 
+            html: missingFields.join(`<br>`), 
             icon:'warning'
         })
     }
@@ -347,12 +358,12 @@ function openPopup(link, popupId, popupName, size = {}) {
 scwin.grd_befClaim_oncellclick = function (rowIndex, columnIndex, columnId) {
     let claimNo = dl_claimbefore.getRowJSON(rowIndex).claim_no;
     localStorage.setItem("claimBefore", claimNo);
-    openPopup("/InsWebApp/ui/audit/claimMemo-popup.xml", "bef_popup", claimNo, {width: 500});
+    openPopup("/InsWebApp/ui/audit/claimMemo-popup.xml", "term_popup", claimNo, {width: 500});
 };
 
 scwin.grd_insure_oncellclick = function (rowIndex, columnIndex, columnId) {
-    // TODO: 모달 띄우기
     // openPopup
+    openPopup("/InsWebApp/ui/Assignment/terms.xml", "term_popup", "보험 약관", {width: 700});
 };
 ]]></script>
     </head>
@@ -486,7 +497,7 @@ scwin.grd_insure_oncellclick = function (rowIndex, columnIndex, columnId) {
     						<xf:group class=" col_3" id="" style="">
     							<w2:textbox style="width: 150px;height: 23px;" id="" label="금액"></w2:textbox>
     							<xf:input class="" id="ipt_charge" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    								meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_claimoffset.charge">
+    								meta_snippetName="10_07 Inputbox_100per" placeholder="" style="width:100%;" ref="data:dm_claimoffset.charge" displayFormat="##,###,###,###">
     							</xf:input>
     						</xf:group>
     					</xf:group>
