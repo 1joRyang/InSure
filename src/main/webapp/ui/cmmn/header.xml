@@ -80,7 +80,7 @@
 var notificationDataStore = {};
 
 scwin.onpageload = function() {
-	
+
     // [수정] window 객체에 초기화 여부를 저장하는 플래그를 확인합니다.
     if (!window.isWebSocketInitialized) {
         if (typeof WebSocketService !== "undefined") {
@@ -520,42 +520,40 @@ scwin.sbm_getClaimInfo_submiterror = function(e) {
     </head>
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
-    		style="background-color: white;border-bottom: 1px solid #bfbfbf; font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+    		style="background-color: white;border-bottom: 1px solid #bfbfbf; font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;width: calc(100%- 230px);">
     		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
     			style="margin: 0">
-    			<xf:image src="/InsWebApp/images/insure/insureLogo.png" style="width:165px;height:60px;pointer: cursor;" id="img_logo"
-    				ev:onclick="scwin.img_logo_onclick">
-    			</xf:image>
-    			
+
     			<!-- 알림 패널 - 그리드뷰를 동적 컨테이너로 변경 -->
+    			<xf:image src="/InsWebApp/images/insure/insureLogo_no.png" ev:onclick="scwin.img_logo_onclick" style="width:130px;pointer: cursor;" id="img_logo">
+    			</xf:image>
     			<xf:group
     				style="position:absolute; right:50px; top:60px; width:350px; max-height:400px; background-color:white; border:1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display:none; z-index:1000; padding:0;"
     				id="notification_panel">
-    				
+
     				<!-- 패널 헤더 -->
-    				<xf:group style="padding: 15px; border-bottom: 1px solid #eee; background-color: #f8f9fa; border-radius: 8px 8px 0 0;">
+    				<xf:group
+    					style="padding: 15px; border-bottom: 1px solid #eee; background-color: #f8f9fa; border-radius: 8px 8px 0 0;">
     					<w2:textbox style="font-weight: bold; font-size: 16px; color: #333;" label="알림" id="panel_title"></w2:textbox>
     				</xf:group>
-    				
+
     				<!-- 알림 목록 컨테이너 -->
-    				<xf:group 
-    					style="padding: 10px; max-height: 320px; overflow-y: auto; overflow-x: hidden;"
-    					id="notification_list_area">
+    				<xf:group style="padding: 10px; max-height: 320px; overflow-y: auto; overflow-x: hidden;" id="notification_list_area">
     					<!-- 동적으로 생성되는 알림 카드들이 여기에 추가됩니다 -->
     				</xf:group>
-    				
+
     				<!-- 알림이 없을 때 표시할 메시지 -->
     				<xf:group style="padding: 40px; text-align: center; color: #999; display: none;" id="no_notification_message">
     					<w2:textbox label="새로운 알림이 없습니다." style="font-size: 14px;"></w2:textbox>
     				</xf:group>
     			</xf:group>
-    			
+
     			<xf:group class="breadcrumb" id="" style="">
     				<xf:group id="" style="" tagname="ul">
     					<xf:group id="" style="" tagname="li"></xf:group>
     				</xf:group>
     			</xf:group>
-    			
+
     			<!-- 알림 버튼 -->
     			<w2:button style="background: transparent; border: none; cursor: pointer; position: relative;" id="noti_btn"
     				ev:onclick="scwin.noti_btn_onclick">
@@ -564,18 +562,18 @@ scwin.sbm_getClaimInfo_submiterror = function(e) {
     					id="noti_badge">
     					<xf:label></xf:label>
     				</xf:output>
-    				<xf:image src="/InsWebApp/images/insure/noti.png" style="width:20px; height:20px; vertical-align: middle;"
-    					id="noti_icon">
+    				<xf:image src="/InsWebApp/images/insure/noti.png"
+    					style="width:20px; height:20px; vertical-align: middle; margin-right: 10px" id="noti_icon">
     				</xf:image>
     			</w2:button>
-    			
+
     			<w2:button ev:onclick="scwin.logout_btn_onclick"
     				style="width: 80px;height: 23px;background-color:#FFFFFF; font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"
     				id="logout_btn" label="로그아웃">
     			</w2:button>
     		</xf:group>
     	</xf:group>
-      
-      <script lazy="false" type="text/javascript" src="/InsWebApp/js/insure/websocket.js"></script>
+
+    	<script lazy="false" type="text/javascript" src="/InsWebApp/js/insure/websocket.js"></script>
     </body>
 </html>

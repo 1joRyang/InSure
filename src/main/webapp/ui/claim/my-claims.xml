@@ -183,277 +183,281 @@ scwin.grd_re_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     <body ev:onpageload="scwin.onpageload">
     	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
     		style="">
-    		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
-    			style="border-bottom: .2px solid #3674B5;padding-bottom: 20px;">
-    			<w2:textbox class="pgt_tit" id="" label="담당 청구 내역" style="" tagname=""></w2:textbox>
+    		<xf:group meta_snippetCategory="02_타이틀" meta_snippetName="2_01 페이지타이틀" meta_snippetKeyComponent="true"
+    			style="border-bottom: .2px solid #3674B5;padding-bottom: 20px;" id="" class="pgtbox">
+    			<w2:textbox tagname="" style="" id="" label="담당 청구 내역" class="pgt_tit"></w2:textbox>
     		</xf:group>
-    		<xf:group style="width: 100%;margin-top: 20px;" id="">
+    		<xf:group id="" style="width: 100%;margin-top: 15px;">
     			<xf:group class="lybox" id="" meta_snippetCategory="01_화면분할" meta_snippetKeyComponent="true"
     				meta_snippetName="1_01 가변 2단 분할" style="width: 40%;">
-    				<xf:group adaptiveThreshold="" class=" col_5" id="" style="display: flex;font-size: 15px;gap: 10px">
+    				<xf:group adaptiveThreshold="" class=" col_5" id="" style="display: flex;font-size: 15px;gap: 10px;">
     					<w2:textbox id="" label="사번:"
     						style="height:30px;text-align:center;line-height:28px;box-sizing:border-box;font-weight: 600">
     					</w2:textbox>
-    					<w2:textbox id="" label="" style="height:30px;line-height:28px;box-sizing:border-box;width: 70%;" ref="data:dm_empInfo.emp_no"></w2:textbox>
+    					<w2:textbox id="" label="" ref="data:dm_empInfo.emp_no"
+    						style="height:30px;line-height:28px;box-sizing:border-box;width: 70%;">
+    					</w2:textbox>
     				</xf:group>
-    				<xf:group adaptiveThreshold="" class=" col_5" id="" style="display: flex;font-size: 15px;gap: 10px">
+    				<xf:group adaptiveThreshold="" class=" col_5" id="" style="display: flex;font-size: 15px;gap: 10px;">
     					<w2:textbox id="" label="이름: "
     						style="height:30px;text-align:center;line-height:28px;box-sizing:border-box;font-weight: 600">
     					</w2:textbox>
-    					<w2:textbox id="" label="" style="height:30px;line-height:28px;box-sizing:border-box;width: 70%;" ref="data:dm_empInfo.emp_name"></w2:textbox>
+    					<w2:textbox id="" label="" ref="data:dm_empInfo.emp_name"
+    						style="height:30px;line-height:28px;box-sizing:border-box;width: 70%;">
+    					</w2:textbox>
     				</xf:group>
     			</xf:group>
     		</xf:group>
     		<xf:group class="tbcbox" id="" meta_snippetCategory="04_탭" meta_snippetKeyComponent="true" meta_snippetName="4_02 서브탭"
     			style="">
-    			<w2:tabControl alwaysDraw="false" style="margin-top: 40px;height: 100%;" id="tab" class="tbc_sub">
-    				<w2:tabs disabled="false" style="width: 100px;height:30px;" id="tab1" label="심사 대기"></w2:tabs>
-    				<w2:tabs disabled="false" style="width: 100px;height:30px;" id="tab3" label="심사 완료"></w2:tabs>
-    				<w2:tabs disabled="false" style="width: 100px;height:30px;" id="tabs6" label="결재 중"></w2:tabs>
-    				<w2:tabs disabled="false" style="width: 100px;height:30px;" id="tabs7" label="반송"></w2:tabs>
-    				<w2:content alwaysDraw="false" style="height: 100%;" id="content2">
+    			<w2:tabControl alwaysDraw="false" class="tbc_sub" id="tabControl1" style="margin-top: 40px;height: 100%;">
+    				<w2:tabs disabled="false" id="tabs8" label="심사 대기" style="width: 100px;height:30px;"></w2:tabs>
+    				<w2:tabs disabled="false" id="tabs9" label="심사 완료" style="width: 100px;height:30px;"></w2:tabs>
+    				<w2:tabs disabled="false" id="tabs10" label="결재 중" style="width: 100px;height:30px;"></w2:tabs>
+    				<w2:tabs disabled="false" id="tabs11" label="반송" style="width: 100px;height:30px;"></w2:tabs>
+    				<w2:content alwaysDraw="false" id="content8" style="height: 100%;">
     					<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
     						meta_snippetName="6_01 그리드" style="margin-top: 20px">
     						<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dl_claimWait"
-    							focusMode="row" id="grid_w" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 500px;"
-    							ev:oncelldblclick="scwin.grid_w_oncelldblclick" readOnly="true">
-    							<w2:caption id="caption9" style="" value="this is a grid caption."></w2:caption>
+    							ev:oncelldblclick="scwin.grid_w_oncelldblclick" focusMode="row" id="grid_w" readOnly="true" scrollByColumn="false"
+    							scrollByColumnAdaptive="false" style="height: 500px;">
+    							<w2:caption id="caption10" style="" value="this is a grid caption."></w2:caption>
     							<w2:header id="header2" style="">
     								<w2:row id="row3" style="">
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column12" value="청구번호"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column12" inputType="text"
+    										removeBorderStyle="false" value="청구번호" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column11" value="피보험자명"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column11" inputType="text"
+    										removeBorderStyle="false" value="피보험자명" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column10" value="청구일자"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column10" inputType="text"
+    										removeBorderStyle="false" value="청구일자" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column9" value="마감일"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column9" inputType="text"
+    										removeBorderStyle="false" value="마감일" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column8" value="담당자"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column8" inputType="text"
+    										removeBorderStyle="false" value="담당자" width="70">
     									</w2:column>
-    									<w2:column hidden="false" removeBorderStyle="false" width="70" inputType="text" id="column7"
-    										value="상태" blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" hidden="false" id="column7" inputType="text"
+    										removeBorderStyle="false" value="상태" width="70">
     									</w2:column>
-    									<w2:column hidden="true" width="70" inputType="text" style="" id="column6" value="ID"
-    										displayMode="label">
+    									<w2:column displayMode="label" hidden="true" id="column6" inputType="text" style="" value="ID"
+    										width="70">
     									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="column28" value="emp_no" displayMode="label"
-    										hidden="true">
+    									<w2:column displayMode="label" hidden="true" id="column28" inputType="text" style="" value="emp_no"
+    										width="70">
     									</w2:column>
     								</w2:row>
     							</w2:header>
     							<w2:gBody id="gBody2" style="">
     								<w2:row id="row4" style="">
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="claim_no" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="claim_no" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="user_name" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="user_name" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="receipt_date"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="receipt_date" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="deadline" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="deadline" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="emp_name" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="emp_name" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
-    										displayMode="label" customFormatter="scwin.statusFmt">
+    									<w2:column blockSelect="false" customFormatter="scwin.statusFmt" displayMode="label" id="status"
+    										inputType="text" removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
-    									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
+    									<w2:column displayMode="label" id="ID" inputType="text" style="" value="" width="70"></w2:column>
+    									<w2:column displayMode="label" id="emp_no" inputType="text" style="" value="" width="70"></w2:column>
     								</w2:row>
     							</w2:gBody>
     						</w2:gridView>
     					</xf:group>
     				</w2:content>
-    				<w2:content alwaysDraw="false" style="height: 100%;" id="content3">
+    				<w2:content alwaysDraw="false" id="content9" style="height: 100%;">
     					<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
     						meta_snippetName="6_01 그리드" style="margin-top: 20px">
     						<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dl_claimDone"
-    							focusMode="row" id="grid_d" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 500px;" readOnly="true"
-    							ev:oncelldblclick="scwin.grid_d_oncelldblclick">
-    							<w2:caption id="caption7" style="" value="this is a grid caption."></w2:caption>
+    							ev:oncelldblclick="scwin.grid_d_oncelldblclick" focusMode="row" id="grid_d" readOnly="true" scrollByColumn="false"
+    							scrollByColumnAdaptive="false" style="height: 500px;">
+    							<w2:caption id="caption11" style="" value="this is a grid caption."></w2:caption>
     							<w2:header id="header2" style="">
     								<w2:row id="row3" style="">
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column12" value="청구번호"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column12" inputType="text"
+    										removeBorderStyle="false" value="청구번호" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column11" value="피보험자명"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column11" inputType="text"
+    										removeBorderStyle="false" value="피보험자명" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column10" value="청구일자"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column10" inputType="text"
+    										removeBorderStyle="false" value="청구일자" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column9" value="마감일"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column9" inputType="text"
+    										removeBorderStyle="false" value="마감일" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column8" value="담당자"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column8" inputType="text"
+    										removeBorderStyle="false" value="담당자" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column7" value="상태"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column7" inputType="text"
+    										removeBorderStyle="false" value="상태" width="70">
     									</w2:column>
-    									<w2:column hidden="true" width="70" inputType="text" style="" id="column9" value="ID"
-    										displayMode="label">
+    									<w2:column displayMode="label" hidden="true" id="column9" inputType="text" style="" value="ID"
+    										width="70">
     									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="column10" value="emp_no" displayMode="label"
-    										hidden="true">
+    									<w2:column displayMode="label" hidden="true" id="column10" inputType="text" style="" value="emp_no"
+    										width="70">
     									</w2:column>
     								</w2:row>
     							</w2:header>
     							<w2:gBody id="gBody2" style="">
     								<w2:row id="row4" style="">
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="claim_no" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="claim_no" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="user_name" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="user_name" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="receipt_date"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="receipt_date" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="deadline" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="deadline" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="emp_name" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="emp_name" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
-    										displayMode="label" customFormatter="scwin.statusFmt">
+    									<w2:column blockSelect="false" customFormatter="scwin.statusFmt" displayMode="label" id="status"
+    										inputType="text" removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
-    									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
+    									<w2:column displayMode="label" id="ID" inputType="text" style="" value="" width="70"></w2:column>
+    									<w2:column displayMode="label" id="emp_no" inputType="text" style="" value="" width="70"></w2:column>
     								</w2:row>
     							</w2:gBody>
     						</w2:gridView>
     					</xf:group>
     				</w2:content>
-    				<w2:content alwaysDraw="false" style="height: 100%;" id="content6">
+    				<w2:content alwaysDraw="false" id="content10" style="height: 100%;">
     					<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
     						meta_snippetName="6_01 그리드" style="margin-top: 20px">
     						<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dl_approvalWait"
-    							focusMode="row" id="grid_ap" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 500px;" readOnly="true"
-    							ev:oncelldblclick="scwin.grid_ap_oncelldblclick">
-    							<w2:caption id="caption6" style="" value="this is a grid caption."></w2:caption>
+    							ev:oncelldblclick="scwin.grid_ap_oncelldblclick" focusMode="row" id="grid_ap" readOnly="true" scrollByColumn="false"
+    							scrollByColumnAdaptive="false" style="height: 500px;">
+    							<w2:caption id="caption12" style="" value="this is a grid caption."></w2:caption>
     							<w2:header id="header2" style="">
     								<w2:row id="row3" style="">
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column12" value="청구번호"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column12" inputType="text"
+    										removeBorderStyle="false" value="청구번호" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column11" value="피보험자명"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column11" inputType="text"
+    										removeBorderStyle="false" value="피보험자명" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column10" value="청구일자"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column10" inputType="text"
+    										removeBorderStyle="false" value="청구일자" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column9" value="마감일"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column9" inputType="text"
+    										removeBorderStyle="false" value="마감일" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column8" value="담당자"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column8" inputType="text"
+    										removeBorderStyle="false" value="담당자" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column7" value="상태"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column7" inputType="text"
+    										removeBorderStyle="false" value="상태" width="70">
     									</w2:column>
-    									<w2:column hidden="true" width="70" inputType="text" style="" id="column9" value="ID"
-    										displayMode="label">
+    									<w2:column displayMode="label" hidden="true" id="column9" inputType="text" style="" value="ID"
+    										width="70">
     									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="column10" value="emp_no" displayMode="label"
-    										hidden="true">
+    									<w2:column displayMode="label" hidden="true" id="column10" inputType="text" style="" value="emp_no"
+    										width="70">
     									</w2:column>
     								</w2:row>
     							</w2:header>
     							<w2:gBody id="gBody2" style="">
     								<w2:row id="row4" style="">
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="claim_no" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="claim_no" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="user_name" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="user_name" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="receipt_date"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="receipt_date" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="deadline" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="deadline" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="emp_name" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="emp_name" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
-    										displayMode="label" customFormatter="scwin.statusFmt">
+    									<w2:column blockSelect="false" customFormatter="scwin.statusFmt" displayMode="label" id="status"
+    										inputType="text" removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
-    									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
+    									<w2:column displayMode="label" id="ID" inputType="text" style="" value="" width="70"></w2:column>
+    									<w2:column displayMode="label" id="emp_no" inputType="text" style="" value="" width="70"></w2:column>
     								</w2:row>
     							</w2:gBody>
     						</w2:gridView>
     					</xf:group>
     				</w2:content>
-    				<w2:content alwaysDraw="false" style="height:100%;" id="content7">
+    				<w2:content alwaysDraw="false" id="content11" style="height:100%;">
     					<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
     						meta_snippetName="6_01 그리드" style="margin-top: 20px">
     						<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dl_claimReturn"
-    							focusMode="row" id="grd_re" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 500px;" readOnly="true"
-    							ev:oncelldblclick="scwin.grd_re_oncelldblclick">
-    							<w2:caption id="caption5" style="" value="this is a grid caption."></w2:caption>
+    							ev:oncelldblclick="scwin.grd_re_oncelldblclick" focusMode="row" id="grd_re" readOnly="true" scrollByColumn="false"
+    							scrollByColumnAdaptive="false" style="height: 500px;">
+    							<w2:caption id="caption13" style="" value="this is a grid caption."></w2:caption>
     							<w2:header id="header2" style="">
     								<w2:row id="row3" style="">
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column12" value="청구번호"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column12" inputType="text"
+    										removeBorderStyle="false" value="청구번호" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column11" value="피보험자명"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column11" inputType="text"
+    										removeBorderStyle="false" value="피보험자명" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column10" value="청구일자"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column10" inputType="text"
+    										removeBorderStyle="false" value="청구일자" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column9" value="마감일"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column9" inputType="text"
+    										removeBorderStyle="false" value="마감일" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column8" value="담당자"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column8" inputType="text"
+    										removeBorderStyle="false" value="담당자" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="column7" value="상태"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="column7" inputType="text"
+    										removeBorderStyle="false" value="상태" width="70">
     									</w2:column>
-    									<w2:column hidden="true" width="70" inputType="text" style="" id="column9" value="ID"
-    										displayMode="label">
+    									<w2:column displayMode="label" hidden="true" id="column9" inputType="text" style="" value="ID"
+    										width="70">
     									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="column10" value="emp_no" displayMode="label"
-    										hidden="true">
+    									<w2:column displayMode="label" hidden="true" id="column10" inputType="text" style="" value="emp_no"
+    										width="70">
     									</w2:column>
     								</w2:row>
     							</w2:header>
     							<w2:gBody id="gBody2" style="">
     								<w2:row id="row4" style="">
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="claim_no" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="claim_no" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="user_name" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="user_name" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="receipt_date"
-    										blockSelect="false" displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="receipt_date" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="deadline" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="deadline" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="emp_name" blockSelect="false"
-    										displayMode="label">
+    									<w2:column blockSelect="false" displayMode="label" id="emp_name" inputType="text"
+    										removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column removeBorderStyle="false" width="70" inputType="text" id="status" blockSelect="false"
-    										displayMode="label" customFormatter="scwin.statusFmt">
+    									<w2:column blockSelect="false" customFormatter="scwin.statusFmt" displayMode="label" id="status"
+    										inputType="text" removeBorderStyle="false" width="70">
     									</w2:column>
-    									<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
-    									<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
+    									<w2:column displayMode="label" id="ID" inputType="text" style="" value="" width="70"></w2:column>
+    									<w2:column displayMode="label" id="emp_no" inputType="text" style="" value="" width="70"></w2:column>
     								</w2:row>
     							</w2:gBody>
     						</w2:gridView>
