@@ -8,13 +8,29 @@
         <w2:type>DEFAULT</w2:type>
         <w2:buildDate />
         <xf:model>
-        	<xf:instance>
-        		<data xmlns="" />
-        	</xf:instance>
-        	<xf:submission id="sbm_userInfo" action="" method="post" mediatype="application/json" ref="" target="" encoding="UTF-8"
-        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
-        		ev:submiterror="" abortTrigger="">
-        	</xf:submission>
+            <w2:dataCollection baseNode="map">
+                <w2:dataMap baseNode="map" id="dm_statusRequest">
+                    <w2:keyInfo>
+                        <w2:key dataType="text" name="사용자ID" id="ID"></w2:key>
+                    </w2:keyInfo>
+                </w2:dataMap>
+                <w2:dataMap baseNode="map" id="dm_statusResult">
+                    <w2:keyInfo>
+                        <w2:key dataType="text" name="사용자ID" id="ID"></w2:key>
+                        <w2:key dataType="number" name="대기상태갯수" id="waitingCount"></w2:key>
+                        <w2:key dataType="number" name="보완상태갯수" id="supplementCount"></w2:key>
+                        <w2:key dataType="number" name="완료상태갯수" id="completedCount"></w2:key>
+                        <w2:key dataType="number" name="전체갯수" id="totalCount"></w2:key>
+                    </w2:keyInfo>
+                </w2:dataMap>
+            </w2:dataCollection>
+            <w2:workflowCollection />
+            <xf:submission id="sbm_statusCount" action="/InsWebApp/CLAIMStatusCount.pwkjson" method="post" mediatype="application/json" 
+                ref='data:json,{"id":"dm_statusRequest","key":"elData"}'
+                target='data:json,{"id":"dm_statusResult","key":"elData"}' encoding="UTF-8"
+                instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="상태별 갯수 조회 중.." 
+                ev:submit="" ev:submitdone="scwin.sbm_statusCount_submitdone" ev:submiterror="" abortTrigger="">
+            </xf:submission>
         </xf:model>
         <w2:leaf>true</w2:leaf>
         <w2:fileName>mobile_home.xml</w2:fileName>
@@ -23,6 +39,9 @@
         <w2:engine-version>5.0.0</w2:engine-version>
         <script lazy="false" type="text/javascript"><![CDATA[
 scwin.onpageload = function() {
+    // 페이지 로드 시 상태별 갯수 조회
+    scwin.loadStatusCount();
+    
     // 접수내역 조회 버튼 클릭 이벤트
     scwin.onInternalCallClick = function() {
         location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claim/my-claims-m.xml"
@@ -35,7 +54,7 @@ scwin.onpageload = function() {
                 location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/first.xml"
                 break;
             case 'claim':
-                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/terms.xml"
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/requestDoc.xml"
                 break;
             case 'consultation':
                 location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/insurePageTab1.xml"
@@ -44,7 +63,113 @@ scwin.onpageload = function() {
                 alert("메뉴 선택됨");
         }
     };
-    
+};
+
+// 상태별 갯수 조회 함수
+scwin.loadStatusCount = function() {
+    try {
+        // 사용자 ID 설정 (실제 환경에서는 세션이나 localStorage에서 가져와야 함)
+        var userId = "1"; // 임시로 ID=1 사용
+        
+        // localStorage에서 사용자 정보 가져오기 (있는 경우)
+        try {
+            var user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.id) {
+                userId = user.id;
+            }
+        } catch (storageError) {
+            console.log("localStorage에서 사용자 정보를 가져올 수 없음:", storageError.message);
+        }
+        
+        // 데이터맵에 요청 데이터 설정
+        dm_statusRequest.set("ID", userId);
+        
+        // WebSquare submission 실행
+        $c.sbm.execute(sbm_statusCount);
+        
+        console.log("상태별 갯수 조회 요청 - 사용자 ID:", userId);
+        
+    } catch (e) {
+        console.error("상태별 갯수 조회 중 오류 발생:", e);
+    }
+};
+
+// 상태별 갯수 조회 성공 콜백
+scwin.sbm_statusCount_submitdone = function(e) {
+    try {
+        console.log("상태별 갯수 조회 응답:", e);
+        
+        // 데이터맵에서 결과 값 가져오기
+        var waitingCount = dm_statusResult.get("waitingCount") || 0;
+        var supplementCount = dm_statusResult.get("supplementCount") || 0;
+        var completedCount = dm_statusResult.get("completedCount") || 0;
+        var totalCount = dm_statusResult.get("totalCount") || 0;
+        
+        console.log("조회된 상태별 갯수:", {
+            waiting: waitingCount,
+            supplement: supplementCount,
+            completed: completedCount,
+            total: totalCount
+        });
+        
+        // 화면에 값 설정
+        scwin.updateStatusCounts({
+            waitingCount: waitingCount,
+            supplementCount: supplementCount,
+            completedCount: completedCount,
+            totalCount: totalCount
+        });
+        
+    } catch (error) {
+        console.error("상태별 갯수 조회 결과 처리 중 오류:", error);
+    }
+};
+
+// 상태별 갯수를 화면에 업데이트하는 함수
+scwin.updateStatusCounts = function(result) {
+    try {
+        if (result) {
+            // WebSquare 컴포넌트로 접근하여 값 설정 시도
+            try {
+                if (typeof waitingCountValue !== 'undefined' && waitingCountValue.setValue) {
+                    waitingCountValue.setValue(result.waitingCount);
+                }
+                if (typeof supplementCountValue !== 'undefined' && supplementCountValue.setValue) {
+                    supplementCountValue.setValue(result.supplementCount);
+                }
+                if (typeof completedCountValue !== 'undefined' && completedCountValue.setValue) {
+                    completedCountValue.setValue(result.completedCount);
+                }
+                console.log("WebSquare 컴포넌트 방식으로 값 설정 완료");
+            } catch (wsError) {
+                console.log("WebSquare 컴포넌트 접근 실패, DOM 방식 사용:", wsError.message);
+                
+                // WebSquare 컴포넌트 접근이 실패하면 DOM 접근 시도
+                var waitingElement = document.getElementById('waitingCountValue');
+                var supplementElement = document.getElementById('supplementCountValue');
+                var completedElement = document.getElementById('completedCountValue');
+                
+                if (waitingElement) {
+                    waitingElement.textContent = result.waitingCount;
+                    console.log("대기 상태 갯수 설정:", result.waitingCount);
+                }
+                if (supplementElement) {
+                    supplementElement.textContent = result.supplementCount;
+                    console.log("보완 요청 갯수 설정:", result.supplementCount);
+                }
+                if (completedElement) {
+                    completedElement.textContent = result.completedCount;
+                    console.log("완료 갯수 설정:", result.completedCount);
+                }
+            }
+            
+            console.log("상태별 갯수 화면 업데이트 완료:", result);
+        } else {
+            console.warn("상태별 갯수 데이터가 없습니다.");
+        }
+    } catch (error) {
+        console.error("상태별 갯수 화면 업데이트 중 오류:", error);
+    }
 };
 
 scwin.suppDocs_onclick = function (e) {
@@ -306,17 +431,17 @@ scwin.suppDocs_onclick = function (e) {
                     
                     <xf:group class="number_item">
                         <w2:span class="number_label" label="진행 중"></w2:span>
-                        <w2:span class="number_value" label=""></w2:span>
+                        <w2:span id="waitingCountValue" class="number_value" label="0"></w2:span>
                     </xf:group>
                     
                     <xf:group class="number_item" id="suppDocs" ev:onclick="scwin.suppDocs_onclick">
                         <w2:span class="number_label" label="보완 요청"></w2:span>
-                        <w2:span class="number_value" label=""></w2:span>
+                        <w2:span id="supplementCountValue" class="number_value" label="0"></w2:span>
                     </xf:group>
                     
                     <xf:group class="number_item">
                         <w2:span class="number_label" label="완료"></w2:span>
-                        <w2:span class="number_value" label=""></w2:span>
+                        <w2:span id="completedCountValue" class="number_value" label="0"></w2:span>
                     </xf:group>
                     
                     <xf:trigger class="internal_call_btn" type="button" ev:onclick="scwin.onInternalCallClick">

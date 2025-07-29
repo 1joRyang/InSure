@@ -341,7 +341,8 @@
 		r.amount,
 		e.emp_name,
 		c.status,
-		e.emp_no
+		e.emp_no,
+		u.ID
 		FROM CLAIM c
 		LEFT JOIN USER u ON c.ID = u.ID
 		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
@@ -403,4 +404,17 @@
     </if>
     ORDER BY c.claim_no DESC
 </select>
+
+	<!-- 사용자의 CLAIM 상태별 갯수 조회 -->
+	<select id="selectClaimStatusCount" parameterType="com.demo.proworks.claim.vo.ClaimVo"
+		resultType="com.demo.proworks.claim.vo.ClaimStatusCountVo">
+		SELECT /* QueryID : com.demo.proworks.claim.selectClaimStatusCount */
+			#{ID} as ID,
+			CAST(COUNT(CASE WHEN status IN ('결재중', '대기', '결재완료') THEN 1 END) AS CHAR) as waitingCount,
+			CAST(COUNT(CASE WHEN status IN ('보완', '결재반려') THEN 1 END) AS CHAR) as supplementCount,
+			CAST(COUNT(CASE WHEN status IN ('완료', '반송') THEN 1 END) AS CHAR) as completedCount,
+			CAST(COUNT(*) AS CHAR) as allCount
+		FROM CLAIM
+		WHERE ID = #{ID}
+	</select>
 </mapper>

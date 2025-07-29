@@ -14,6 +14,7 @@ import com.demo.proworks.claim.vo.ClaimFullJoinVo;
 import com.demo.proworks.claim.vo.ClaimListwStatusVo;
 import com.demo.proworks.claim.vo.ClaimUserVo;
 import com.demo.proworks.claim.vo.ClaimVo;
+import com.demo.proworks.claim.vo.ClaimStatusCountVo;
 import com.demo.proworks.claim.dao.ClaimDAO;
 
 /**
@@ -187,6 +188,17 @@ public class ClaimDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstract
 	 */
 	public List<ClaimFullJoinVo> selectUserClaimsByRrn(ClaimFullJoinVo vo) throws ElException {
 		return (List<ClaimFullJoinVo>) list("com.demo.proworks.claim.selectUserClaimsByRrn", vo);
+	}
+
+	/**
+	 * 사용자의 CLAIM 상태별 갯수 조회
+	 * 
+	 * @param ClaimVo 청구 (ID 포함)
+	 * @return ClaimStatusCountVo 상태별 갯수
+	 * @throws ElException
+	 */
+	public ClaimStatusCountVo selectClaimStatusCount(ClaimVo vo) throws ElException {
+		return (ClaimStatusCountVo) selectByPk("com.demo.proworks.claim.selectClaimStatusCount", vo);
 	}
 
 }
