@@ -360,7 +360,7 @@ function moveNsave(rowData) {
     							displayMode="label" hidden="false">
     						</w2:column>
     						<w2:column width="100" inputType="text" style="" id="column5" value="담당자" displayMode="label"></w2:column>
-    						<w2:column width="80" inputType="text" style="" id="column6" value="status" displayMode="label"
+    						<w2:column width="80" inputType="text" style="" id="column6" value="상태" displayMode="label"
     							hidden="false">
     						</w2:column>
     						<w2:column hidden="true" width="70" inputType="text" style="" id="column12" value="emp_no"
