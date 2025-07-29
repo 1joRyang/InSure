@@ -27,7 +27,7 @@
         				<w2:key dataType="text" name="고객명" id="userName"></w2:key>
         				<w2:key dataType="text" name="주민번호" id="rrn"></w2:key>
         				<w2:key dataType="text" name="연락처" id="phone_number"></w2:key>
-        				<w2:key dataType="text" name="사용자아이디" id="id"></w2:key>
+        				<w2:key dataType="text" name="사용자아이디" id="ID"></w2:key>
         			</w2:keyInfo>
         		</w2:dataMap>
         	</w2:dataCollection>
@@ -131,7 +131,7 @@ scwin.sbm_searchUserInfo_submitdone = function(e) {
         dm_customer_info.setJSON(elData);
         
         // ID를 청구조회용으로 설정 (추가!)
-        dm_customer_info.set("id", elData.id);
+        dm_customer_info.set("ID", elData.id);
         
         console.log("User ID 설정:", elData.id);
         console.log("설정 후 DataMap:", dm_customer_info.getJSON());
@@ -261,7 +261,7 @@ scwin.grid_rnn_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     				</xf:group>
     			</xf:group>
     		</xf:group>
-    		<xf:group style="" id="grd_group" class="">
+    		<xf:group style="margin-bottom: 100px;" id="grd_group" class="">
     			<xf:group tagname="caption" text="고객 청구목록" class="results-title"></xf:group>
     			<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
     				meta_snippetName="6_01 그리드" style="">

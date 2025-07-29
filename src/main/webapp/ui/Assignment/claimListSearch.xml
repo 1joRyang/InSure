@@ -340,7 +340,7 @@ function moveNsave(rowData) {
     		</xf:group>
 
     		<!-- 전체 조인 그리드 -->
-    		<xf:group adaptiveThreshold="" class="gvwbox" id="" style="">
+    		<xf:group adaptiveThreshold="" class="gvwbox" id="" style="margin-bottom: 100px;">
     			<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dlt_claimFullJoinList"
     				focusMode="row" id="grd_claimEmployee" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 500px;"
     				ev:ondblclick="scwin.grd_claimEmployee_ondblclick" readOnly="true" ev:oncellclick="scwin.grd_claimEmployee_oncellclick">
