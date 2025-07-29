@@ -1409,6 +1409,7 @@ div.exup_wrap {width:100%;padding:19px;border:0;box-sizing:border-box}
 .btn_cm.search {padding-left:28px;background:var(--ws-btn-bg) url(../images/base/ico_search.svg) left 8px center no-repeat}
 .btn_cm.search:disabled {background-color:var(--ws-btn-disabled-bg);background-image:url(../images/base/ico_search_dis.svg)}
 .btn_cm.delete {padding-left:28px;background:var(--ws-btn-bg) url(../images/base/ico_delete.svg) left 8px center no-repeat}
+.btn_cm.toggle {padding-left:28px;background:var(--ws-btn-bg) url(../images/base/btn_ds_toggle_menu.png) left 8px center no-repeat}
 .btn_cm.delete:disabled {background-color:var(--ws-btn-disabled-bg);background-image:url(../images/base/ico_delete_dis.svg)}
 .btn_cm.calendar {padding-left:28px;background:var(--ws-btn-bg) url(../images/base/ico_calendar.svg) left 8px center no-repeat}
 .btn_cm.calendar:disabled {background-color:var(--ws-btn-disabled-bg);background-image:url(../images/base/ico_calendar_dis.svg)}
