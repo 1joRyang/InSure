@@ -158,10 +158,10 @@ public class ClaimServiceImpl implements ClaimService {
 	@Transactional
 	public int insertClaim(ClaimVo claimVo) throws Exception {
     int result = claimDAO.insertClaim(claimVo);
-
     System.out.println("[청구 등록 완료] 청구번호: " + claimVo.getClaim_no() + ", claim_type: " + claimVo.getClaim_type());
-
-    if (result > 0 && claimVo.getClaim_no() != null) {
+    
+    // ✅ claimType이 null인 경우 자동배정 시도하지 않음 (OCR 분석 대기 상태)
+    if (result > 0 && claimVo.getClaim_no() != null && claimVo.getClaim_type() != null) {
         try {
             String originalClaimType = claimVo.getClaim_type();
             System.out.println("[자동 배정 준비] 원본 claim_type: " + originalClaimType);
@@ -210,12 +210,14 @@ public class ClaimServiceImpl implements ClaimService {
             }
             
         }
+    } else if (claimVo.getClaim_type() == null) {
+        System.out.println("[자동 배정 건너뜀] claimType이 null (OCR 분석 대기 상태)");
     }
 
     return result;
 	}
 	private String convertEngToKoreanForAssignment(String engClaimType) {
-//	    if (engClaimType == null) return "질병";
+//	    if (engClaimType == null) return "실손";
 	    
 	    switch (engClaimType) {
 	        case "death":
@@ -225,11 +227,11 @@ public class ClaimServiceImpl implements ClaimService {
 	        case "surgery":
 	            return "수술";
 	        case "disease":
-	            return "질병";
+	            return "실손";  // ✅ "질병" → "실손"으로 변경
 	        case "injury":
 	            return "재해";  // 이제 "재해"로 변환되어 배정 규칙과 매칭됨
 	        case "other":
-	            return "질병";  // 기타는 질병으로 처리
+	            return "실손";  // ✅ 기타는 실손으로 처리
 	        default:
 	            return null;  // 기본값
 	    }
