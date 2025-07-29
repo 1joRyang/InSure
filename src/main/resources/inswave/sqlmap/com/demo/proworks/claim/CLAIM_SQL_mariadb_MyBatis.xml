@@ -410,8 +410,8 @@
 		resultType="com.demo.proworks.claim.vo.ClaimStatusCountVo">
 		SELECT /* QueryID : com.demo.proworks.claim.selectClaimStatusCount */
 			#{ID} as ID,
-			CAST(COUNT(CASE WHEN status IN ('결재중', '대기', '결재완료') THEN 1 END) AS CHAR) as waitingCount,
-			CAST(COUNT(CASE WHEN status IN ('보완', '결재반려') THEN 1 END) AS CHAR) as supplementCount,
+			CAST(COUNT(CASE WHEN status IN ('결재중', '대기', '결재완료','결재반려','보완완료') THEN 1 END) AS CHAR) as waitingCount,
+			CAST(COUNT(CASE WHEN status IN ('보완') THEN 1 END) AS CHAR) as supplementCount,
 			CAST(COUNT(CASE WHEN status IN ('완료', '반송') THEN 1 END) AS CHAR) as completedCount,
 			CAST(COUNT(*) AS CHAR) as allCount
 		FROM CLAIM
