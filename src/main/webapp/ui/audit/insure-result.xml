@@ -2521,11 +2521,9 @@ scwin.btn_approve_complete_onclick = function () {
             dma_approvalReq.set("request_type", "APPROVE");
             
             $p.executeSubmission("sbm_approveApprovalReq");
-<<<<<<< Updated upstream
-            
-=======
+
               //location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
->>>>>>> Stashed changes
+
         }
     });
 };
