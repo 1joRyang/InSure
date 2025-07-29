@@ -487,7 +487,7 @@ scwin.sbm_updateClaimItems_submitdone = function (e) {
         localStorage.removeItem("exc");
         localStorage.removeItem("treatmentId");
         
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-result.xml";
+        //location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-result.xml";
         return;
     }
 
