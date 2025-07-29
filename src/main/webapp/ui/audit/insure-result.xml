@@ -1382,6 +1382,7 @@ scwin.prepareClaimResultData = function () {
 
 // 최종 심사 완료 (수정된 함수)
 
+
 scwin.btn_complete_onclick = function () {
     // 기본 권한 체크
     if (!scwin.checkPermission("심사 완료")) return;
@@ -1396,47 +1397,46 @@ scwin.btn_complete_onclick = function () {
             icon: 'warning',
             title: '심사 메모를 먼저 입력해주세요.'
         });
-
         return;
     }
 
     if (!scwin.claim.claimNo) {
-
-
         scwin.noBtnAlertWithTimer({
             title: '오류',
             icon: 'error',
-            text: result.message || '청구번호가 없습니다.'
+            text: '청구번호가 없습니다.'
         });
-
         return;
     }
 
     // CLAIM_RESULT 데이터 준비
     var resultData = scwin.prepareClaimResultData();
 
-
-        scwin.twoBtnAlert({
-            title: '최종 심사 완료',
-            icon: 'question',
-            text: '청구번호가 없습니다.',
-            html: '<div style="text-align: left;">' +
-                '최종 심사를 완료하시겠습니까?<br><br>' +
-                '• 청구번호: ' + resultData.claim_no + '<br>' +
-                '• 지급금액: ' + resultData.amount + '원<br>' +
-                '• 처리일자: ' + resultData.date +
-                '</div>',
-        })
+    // Swal.fire를 직접 사용 (scwin.twoBtnAlert 대신)
+    Swal.fire({
+        title: '최종 심사 완료',
+        icon: 'question',
+        html: '<div style="text-align: left;">' +
+            '최종 심사를 완료하시겠습니까?<br><br>' +
+            '• 청구번호: ' + resultData.claim_no + '<br>' +
+            '• 지급금액: ' + resultData.amount + '원<br>' +
+            '• 처리일자: ' + resultData.date +
+            '</div>',
+        showCancelButton: true,
+        confirmButtonText: '완료',
+        cancelButtonText: '취소',
+        confirmButtonColor: '#4FACFE',
+        cancelButtonColor: '#d1d1d1'
+    })
     .then((result) => {
         if (result.isConfirmed) {
             scwin.showLoading(true);
             $p.executeSubmission("sbm_saveClaimResult");
             localStorage.removeItem("claim");
-            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
         }
     });
 };
-
 
 // CLAIM_RESULT 저장 성공 콜백
 scwin.sbm_saveClaimResult_submitdone = function (e) {
