@@ -16,12 +16,15 @@ scwin.onpageload = function() {
 	
 };
 ]]></script>
-		<style type="text/css"><![CDATA[]]></style>
+		<style type="text/css"><![CDATA[]]>
+		</style>
 	</head>
 	<body ev:onpageload="scwin.onpageload">
+		<w2:wframe src="/InsWebApp/ui/cmmn/m_header_title.xml" style="flex-shrink: 0;" id="" class="wfm_m_header"></w2:wframe>
 		<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
 			style="">
-			<w2:textbox class="" id="" label="실손의료보험금 청구서류 표준화 및 간소화 안내" style="margin-top: 10px; font-size:14px;margin-bottom: 10px;" tagname="h1">
+			<w2:textbox class="" id="" label="실손의료보험금 청구서류 표준화 및 간소화 안내" style="margin-top: 10px; font-size:14px;margin-bottom: 10px;"
+				tagname="h1">
 			</w2:textbox>
 
 			<w2:span id=""
@@ -172,11 +175,16 @@ scwin.onpageload = function() {
 				</w2:span>
 			</xf:group>
 			<xf:group id="">
-				<w2:span meta_snippetCategory="10_입력폼" meta_snippetName="10_16 출력텍스트" meta_snippetKeyComponent="true" style="color :orange;" id=""
-					label="※ 사고내용, 특성, 상품(보장내역)에 따라 추가 심사서류를 요구할 수 있습니다.">
+				<w2:span meta_snippetCategory="10_입력폼" meta_snippetName="10_16 출력텍스트" meta_snippetKeyComponent="true" style="color :orange;"
+					id="" label="※ 사고내용, 특성, 상품(보장내역)에 따라 추가 심사서류를 요구할 수 있습니다.">
 				</w2:span>
 			</xf:group>
-		<xf:group id=""><w2:span meta_snippetCategory="10_입력폼" meta_snippetName="10_16 출력텍스트" meta_snippetKeyComponent="true" style="color :orange;" id="" label="※ 진단서, 통원확인서, 처방전, 진료확인서, 소견서, 진료차트 등에는 진단명이 기재되어 있어야 합니다">
-			</w2:span></xf:group></xf:group>
+			<xf:group id="">
+				<w2:span meta_snippetCategory="10_입력폼" meta_snippetName="10_16 출력텍스트" meta_snippetKeyComponent="true" style="color :orange;"
+					id="" label="※ 진단서, 통원확인서, 처방전, 진료확인서, 소견서, 진료차트 등에는 진단명이 기재되어 있어야 합니다">
+				</w2:span>
+			</xf:group>
+		</xf:group>
+		<w2:wframe style="flex-shrink: 0;" id="" class="wfm_m_footer" src="/InsWebApp/ui/cmmn/m_footer.xml"></w2:wframe>
 	</body>
 </html>

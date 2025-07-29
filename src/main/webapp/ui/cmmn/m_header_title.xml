@@ -26,9 +26,13 @@ scwin.onpageload = function() {
     } else if (path.includes("first.xml")) {
         title = "나의 보험";
     } else if (path.includes("suppDocs.xml")) {
-        title = "제출서류 안내";
+        title = "청구보완 요청";
     } else if (path.includes("insurePageTab1.xml")) {
         title = "나의 보험";
+    }else if(path.includes("requestDoc.xml")){
+        title="제출 서류 안내";
+    }else if(path.includes("m_terms.xml")){
+        title="약관 안내";
     }
 
     m_htitle.setValue(title); 
