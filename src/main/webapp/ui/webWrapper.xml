@@ -12,9 +12,13 @@
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
-        <script lazy="false" type="text/javascript"><![CDATA[
+        <script lazy="false" type="text/javascript" src="/InsWebApp/js/insure/websocket.js"></script>
+
+        <script type="javascript">
+            <![CDATA[
 scwin.onpageload = function() {
-	scwin.initpub(); 
+   scwin.initpub(); 
+   WebSocketService.init();
 };
 
 scwin.initpub = function() {

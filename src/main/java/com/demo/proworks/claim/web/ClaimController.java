@@ -23,6 +23,7 @@ import com.demo.proworks.claim.vo.ClaimEmployeeVo;
 import com.demo.proworks.claim.vo.ClaimFullJoinVo;
 import com.demo.proworks.claim.vo.ClaimUserVo;
 import com.demo.proworks.claim.vo.ClaimVo;
+import com.demo.proworks.claim.vo.ClaimStatusCountVo;
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
 import com.inswave.elfw.annotation.ElValidator;
@@ -285,5 +286,26 @@ public class ClaimController {
 		
 		return claimFullJoinList;
 	}
+
+	
+	
+	
+
+
+	/**
+	 * 사용자의 CLAIM 상태별 갯수를 조회합니다.
+	 *
+	 * @param claimVo 청구 정보 (ID 포함)
+	 * @return 상태별 갯수 조회 결과
+	 * @throws Exception
+	 */
+	@ElService(key = "CLAIMStatusCount")
+	@RequestMapping(value = "CLAIMStatusCount")
+	@ElDescription(sub = "CLAIM 상태별 갯수 조회", desc = "사용자의 CLAIM 상태별 갯수를 조회한다.")
+	public ClaimStatusCountVo selectClaimStatusCount(ClaimVo claimVo) throws Exception {
+		ClaimStatusCountVo statusCount = claimService.selectClaimStatusCount(claimVo);
+		return statusCount;
+	}
+
   
 }

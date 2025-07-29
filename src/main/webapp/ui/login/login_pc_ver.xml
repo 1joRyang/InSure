@@ -134,9 +134,17 @@ scwin.sbm_EmployeeLogin_submitdone = function (e) {
             localStorage.removeItem("simple");
             localStorage.setItem("employee", JSON.stringify(employee));
             
+            if (typeof $p !== 'undefined' && $p.setSession) {
+                $p.setSession("empNo", employee.empNo); 
+                $p.setSession("empName", employee.empName); 
+                $p.setSession("deptId", employee.deptId); 
+                $p.setSession("role", employee.role); 
+                $p.setSession("empStatus", employee.status); 
+                console.log("($p.setSession) 웹스퀘어 세션에 저장된 empNo:", $p.getSession("empNo"));
+            } 
+
             console.log("Employee 로그인 완료, USER/SIMPLE 정보 삭제됨");
             console.log("로컬스토리지에 저장된 employee:", employee);
-            
 
             // 메인 페이지로 이동
             location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
