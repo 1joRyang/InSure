@@ -705,8 +705,8 @@ scwin.grp_noti_onclick = function (e) {
         ]]>
         </style>
     </head>
-    <body ev:onpageload="scwin.onpageload">
-        <xf:group class="sub_contents" id="">
+    <body ev:onpageload="scwin.onpageload" style="overflow-x: hidden;">
+        <xf:group class="sub_contents" id="" style="padding: 0;">
             <xf:group class="dashboard_wrap" id="grp_dashboard">
 
                 <xf:group class="notification_bar" id="grp_noti" ev:onclick="scwin.grp_noti_onclick">

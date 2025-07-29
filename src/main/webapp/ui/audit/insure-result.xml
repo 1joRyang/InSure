@@ -20,6 +20,7 @@
 						<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
 						<w2:key dataType="text" name="approval_memo" id="approval_memo"></w2:key>
 						<w2:key dataType="text" name="request_type" id="request_type"></w2:key>
+						<w2:key dataType="text" name="manager_no" id="manager_no"></w2:key>
 					</w2:keyInfo>
 				</w2:dataMap>
 				<!-- 정산 상세정보 데이터맵 추가 -->
@@ -1722,6 +1723,7 @@ scwin.btn_approval_onclick = function (e) {
                 }
 
                 dma_approvalReq.set("claim_no", scwin.claim.claimNo);
+                //dma_approvalReq.set("employee", scwin.employee.managerNo);
                 $p.executeSubmission("sbm_approveApprovalReq");
             }
         });
@@ -1776,7 +1778,11 @@ scwin.sbm_approveApprovalReq_submitdone = function (e) {
             showConfirmButton: false,
             timer: 1500
         }).then(() => {
+
             // 성공 시 페이지 이동
+
+            //location.reload();
+
             location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
         });
     } else {
@@ -2515,7 +2521,11 @@ scwin.btn_approve_complete_onclick = function () {
             dma_approvalReq.set("request_type", "APPROVE");
             
             $p.executeSubmission("sbm_approveApprovalReq");
+<<<<<<< Updated upstream
             
+=======
+              //location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
+>>>>>>> Stashed changes
         }
     });
 };

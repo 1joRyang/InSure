@@ -307,7 +307,7 @@ scwin.sbm_saveConsent_submitdone = function (e) {
 }
 
 .nextBtn:hover {
-    background-color: #ffb300;
+   background-color: #4FACFE;
 }
 
 /* Scroll to Top button */

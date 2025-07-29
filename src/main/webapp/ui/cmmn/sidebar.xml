@@ -17,7 +17,7 @@
 scwin.onpageload = function() {
     let now = localStorage.getItem("nowSelect");
     scwin.role = JSON.parse(localStorage.getItem("employee")).role;
-
+    // localStorage.removeItem("claimImg");
     if (now == "dash") {
         scwin.dashboard_onclick();
     } else if (now == "searchClaim") {
@@ -68,6 +68,7 @@ scwin.search_claimNum_onclick = function () {
     removeSClass();
     search_claimNum.addClass("selected");
     movePage("/InsWebApp/ui/Assignment/claimListSearch.xml", "searchClaim");
+
 };
 
 scwin.search_personNum_onclick = function () {
