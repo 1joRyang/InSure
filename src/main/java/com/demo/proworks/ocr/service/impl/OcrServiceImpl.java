@@ -44,8 +44,8 @@ public class OcrServiceImpl implements OcrService {
 	// S3 버킷명
 	private String bucketName = "insure-claim-docs-final-project";
 
-	// OCR 분석 실패시 기본값 (질병으로 설정)
-	private static final String DEFAULT_CLAIM_TYPE = "disease";
+	// OCR 분석 실패시 기본값 (실손으로 설정 - "disease" 코드 사용)
+	private static final String DEFAULT_CLAIM_TYPE = "disease"; // ✅ Controller에서 "disease" -> "실손"으로 변환
 
 	// 시간 포맷터
 	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
@@ -62,13 +62,13 @@ public class OcrServiceImpl implements OcrService {
 		DOCUMENT_PRIORITY.put("미분류", 999);
 	}
 
-	// OCR 결과를 claim_type으로 매핑 (영문 코드로 반환)
+	// OCR 결과를 claim_type으로 매핑 (영문 코드로 반환 - Controller에서 한글로 변환)
 	private static final Map<String, String> OCR_TO_CLAIM_TYPE = new HashMap<String, String>();
 	static {
 		OCR_TO_CLAIM_TYPE.put("사망진단서", "death");
 		OCR_TO_CLAIM_TYPE.put("장해진단서", "disability");
 		OCR_TO_CLAIM_TYPE.put("수술확인서", "surgery");
-		OCR_TO_CLAIM_TYPE.put("미분류", DEFAULT_CLAIM_TYPE); // 미분류시 질병으로 처리
+		OCR_TO_CLAIM_TYPE.put("미분류", DEFAULT_CLAIM_TYPE); // ✅ 미분류시 "disease" -> Controller에서 "실손"으로 변환
 	}
 
 	@Override
@@ -84,7 +84,8 @@ public class OcrServiceImpl implements OcrService {
 		System.out.println("==========================================");
 
 		if (s3ObjectKeys == null || s3ObjectKeys.isEmpty()) {
-			System.out.println("⚠️  S3 객체 키가 없어서 기본값 반환: " + DEFAULT_CLAIM_TYPE);
+			System.out.println("⚠️  S3 객체 키가 없어서 실손(기본값) 반환: " + DEFAULT_CLAIM_TYPE);
+			System.out.println("📝 청구 서류 없음 → 실손 청구로 자동 분류");
 			logProcessCompletion(totalStartTime, processStartTime, 0, 0, DEFAULT_CLAIM_TYPE);
 			return DEFAULT_CLAIM_TYPE;
 		}
@@ -137,7 +138,8 @@ public class OcrServiceImpl implements OcrService {
 
 		// 분석 결과가 없으면 기본값 반환
 		if (results.isEmpty()) {
-			System.out.println("⚠️  모든 OCR 분석이 실패하여 기본값 반환: " + DEFAULT_CLAIM_TYPE);
+			System.out.println("⚠️  모든 OCR 분석이 실패하여 실손(기본값) 반환: " + DEFAULT_CLAIM_TYPE);
+			System.out.println("📝 OCR 분석 실패 → 실손 청구로 자동 분류");
 			logProcessCompletion(totalStartTime, processStartTime, successCount, failCount, DEFAULT_CLAIM_TYPE);
 			return DEFAULT_CLAIM_TYPE;
 		}
@@ -171,7 +173,8 @@ public class OcrServiceImpl implements OcrService {
 
 		// 유효한 문서 유형이 없으면 기본값
 		if (highestPriorityType == null) {
-			System.out.println("⚠️  유효한 문서 유형이 없어 기본값 반환: " + DEFAULT_CLAIM_TYPE);
+			System.out.println("⚠️  유효한 문서 유형이 없어 실손(기본값) 반환: " + DEFAULT_CLAIM_TYPE);
+			System.out.println("📝 OCR 분석 결과: 모든 문서가 '미분류'로 처리됨 → 실손 청구로 자동 분류");
 			logProcessCompletion(totalStartTime, processStartTime, successCount, failCount, DEFAULT_CLAIM_TYPE);
 			return DEFAULT_CLAIM_TYPE;
 		}
@@ -213,7 +216,7 @@ public class OcrServiceImpl implements OcrService {
 		System.out.println("종료 시간: " + processEndTime.format(TIME_FORMATTER));
 		System.out.println("총 처리 시간: " + totalProcessTime + "ms (" + String.format("%.2f", totalProcessTime / 1000.0) + "초)");
 		System.out.println("처리 결과: 성공 " + successCount + "건, 실패 " + failCount + "건");
-		System.out.println("최종 반환값: " + finalResult);
+		System.out.println("최종 반환값: " + finalResult + " (Controller에서 한글로 변환됨)");
 		
 		if (successCount > 0) {
 			System.out.println("평균 파일당 처리 시간: " + String.format("%.2f", (double)totalProcessTime / successCount) + "ms");
