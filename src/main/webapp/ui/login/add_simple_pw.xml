@@ -27,18 +27,19 @@
         	<xf:submission id="sbm_Simplepw_register" action="/InsWebApp/SimplePwRegister.pwkjson" method="post" mediatype="application/json"
         		ref='data:json,[{"id":"dma_login_request","key":"elData"},{"id":"dma_login_response","key":"elData"}]' target="" encoding="UTF-8"
         		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
-        		ev:submitdone="scwin.sbm_Simplepw_register_submitdone" ev:submiterror="" abortTrigger="">
+        		ev:submitdone="scwin.sbm_Simplepw_register_submitdone" ev:submiterror="scwin.sbm_Simplepw_register_submiterror" abortTrigger="">
         	</xf:submission>
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
+
         <script lazy="false" type="text/javascript"><![CDATA[scwin.pinValue = ""; // 현재 입력된 PIN 값을 저장할 변수
 
 scwin.onpageload = function() {
     // user 객체에서 userId 가져오기
     const userString = localStorage.getItem("user");
     const user = userString ? JSON.parse(userString) : null;
-    const userId = user ? user.userId : null;
+    let userId = user ? user.userId : null;
     
     // 기존 방식도 fallback으로 시도
     if (!userId) {
@@ -58,6 +59,10 @@ scwin.onpageload = function() {
 
     // PIN 입력 상태 초기화
     scwin.updatePinDots();
+
+    if (typeof initSessionManagement === 'function') {
+    initSessionManagement();
+    }
 
 }; 
 
@@ -177,6 +182,13 @@ scwin.sbm_Simplepw_register_submitdone = function (e) {
 scwin.btn_clear_onclick = function (e) {
     scwin.pinValue = ""; // 저장된 PIN 값 전체 삭제
     scwin.updatePinDots(); // 원형 UI 초기화
+
+    // 텍스트 색상 원래대로 복원
+    if (typeof txt_info2 !== 'undefined') {
+        txt_info2.setValue("간편 비밀번호 6자리를 입력해주세요.");
+        txt_info2.setStyle("color", "#666666"); // 기본 색상
+        txt_info2.setStyle("font-weight", "normal");
+    }
 };
 
 
@@ -184,7 +196,37 @@ scwin.btn_delete_onclick = function (e) {
     if (scwin.pinValue.length > 0) {
         scwin.pinValue = scwin.pinValue.slice(0, -1);
         scwin.updatePinDots();
+
+         // 입력 시작하면 색상 원래대로 복원
+        if (typeof txt_info2 !== 'undefined') {
+            txt_info2.setValue("간편 비밀번호 6자리를 입력해주세요.");
+            txt_info2.setStyle("color", "#666666"); // 기본 색상
+            txt_info2.setStyle("font-weight", "normal");
+        }
     }
+};
+
+
+/**
+ * sbm_Simplepw_register 서브미션 에러 후 실행될 함수 (등록 실패 처리)
+ */
+scwin.sbm_Simplepw_register_submiterror = function (e) {
+    console.log("간편비밀번호 등록 에러 응답:", e);
+    
+    // 등록 실패 처리
+    alert("간편비밀번호 등록에 실패했습니다. 다시 시도해주세요.");
+    
+    if (typeof txt_info2 !== 'undefined') {
+        txt_info2.setValue("간편비밀번호 등록에 실패했습니다. 다시 시도해주세요.");
+        
+        // 직접 빨간색 스타일 적용
+        txt_info2.setStyle("color", "#ff0000");
+        txt_info2.setStyle("font-weight", "bold");
+    }
+    
+    // PIN 값 초기화 및 원형 UI 초기화
+    scwin.pinValue = "";
+    scwin.updatePinDots(); // 모든 원형을 회색으로 초기화
 };
 ]]></script>
     </head>
