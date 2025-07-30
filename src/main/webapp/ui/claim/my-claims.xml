@@ -231,7 +231,7 @@ scwin.grd_re_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     										removeBorderStyle="false" value="피보험자명" width="70">
     									</w2:column>
     									<w2:column blockSelect="false" displayMode="label" id="column10" inputType="text"
-    										removeBorderStyle="false" value="청구일자" width="70">
+    										removeBorderStyle="false" value="청구일자" width="70" useFilter="false" sortable="true">
     									</w2:column>
     									<w2:column blockSelect="false" displayMode="label" id="column9" inputType="text"
     										removeBorderStyle="false" value="마감일" width="70">
@@ -293,7 +293,7 @@ scwin.grd_re_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     										removeBorderStyle="false" value="피보험자명" width="70">
     									</w2:column>
     									<w2:column blockSelect="false" displayMode="label" id="column10" inputType="text"
-    										removeBorderStyle="false" value="청구일자" width="70">
+    										removeBorderStyle="false" value="청구일자" width="70" sortable="true">
     									</w2:column>
     									<w2:column blockSelect="false" displayMode="label" id="column9" inputType="text"
     										removeBorderStyle="false" value="마감일" width="70">
@@ -304,10 +304,10 @@ scwin.grd_re_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     									<w2:column blockSelect="false" displayMode="label" id="column7" inputType="text"
     										removeBorderStyle="false" value="상태" width="70">
     									</w2:column>
-    									<w2:column displayMode="label" hidden="true" id="column9" inputType="text" style="" value="ID"
+    									<w2:column displayMode="label" hidden="true" id="column6" inputType="text" style="" value="ID"
     										width="70">
     									</w2:column>
-    									<w2:column displayMode="label" hidden="true" id="column10" inputType="text" style="" value="emp_no"
+    									<w2:column displayMode="label" hidden="true" id="column5" inputType="text" style="" value="emp_no"
     										width="70">
     									</w2:column>
     								</w2:row>
@@ -355,7 +355,7 @@ scwin.grd_re_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     										removeBorderStyle="false" value="피보험자명" width="70">
     									</w2:column>
     									<w2:column blockSelect="false" displayMode="label" id="column10" inputType="text"
-    										removeBorderStyle="false" value="청구일자" width="70">
+    										removeBorderStyle="false" value="청구일자" width="70" sortable="true">
     									</w2:column>
     									<w2:column blockSelect="false" displayMode="label" id="column9" inputType="text"
     										removeBorderStyle="false" value="마감일" width="70">
@@ -366,10 +366,10 @@ scwin.grd_re_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     									<w2:column blockSelect="false" displayMode="label" id="column7" inputType="text"
     										removeBorderStyle="false" value="상태" width="70">
     									</w2:column>
-    									<w2:column displayMode="label" hidden="true" id="column9" inputType="text" style="" value="ID"
+    									<w2:column displayMode="label" hidden="true" id="column6" inputType="text" style="" value="ID"
     										width="70">
     									</w2:column>
-    									<w2:column displayMode="label" hidden="true" id="column10" inputType="text" style="" value="emp_no"
+    									<w2:column displayMode="label" hidden="true" id="column5" inputType="text" style="" value="emp_no"
     										width="70">
     									</w2:column>
     								</w2:row>
@@ -417,7 +417,7 @@ scwin.grd_re_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     										removeBorderStyle="false" value="피보험자명" width="70">
     									</w2:column>
     									<w2:column blockSelect="false" displayMode="label" id="column10" inputType="text"
-    										removeBorderStyle="false" value="청구일자" width="70">
+    										removeBorderStyle="false" value="청구일자" width="70" sortable="true">
     									</w2:column>
     									<w2:column blockSelect="false" displayMode="label" id="column9" inputType="text"
     										removeBorderStyle="false" value="마감일" width="70">
