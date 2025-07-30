@@ -14,9 +14,9 @@
         			<w2:columnInfo>
         				<w2:column dataType="text" name="청구번호" id="claim_no"></w2:column>
         				<w2:column dataType="text" name="청구유형" id="claim_type"></w2:column>
-        				<w2:column dataType="text" name="고객명" id="user_name"></w2:column>
+        				<w2:column dataType="text" name="피보험자" id="user_name"></w2:column>
         				<w2:column dataType="number" name="청구금액" id="amount"></w2:column>
-        				<w2:column dataType="text" name="처리자" id="emp_name"></w2:column>
+        				<w2:column dataType="text" name="담당자" id="emp_name"></w2:column>
         				<w2:column dataType="text" name="상태" id="status"></w2:column>
         				<w2:column dataType="text" name="ID" id="ID"></w2:column>
         				<w2:column dataType="text" name="emp_no" id="emp_no"></w2:column>
@@ -273,9 +273,9 @@ scwin.grid_rnn_oncelldblclick = function (rowIndex, columnIndex, columnId) {
     						<w2:row id="header-row" style="">
     							<w2:column width="70" inputType="text" style="" id="column1" value="청구번호" class="" displayMode="label"></w2:column>
     							<w2:column width="70" inputType="text" style="" id="column2" value="청구유형" class="" displayMode="label"></w2:column>
-    							<w2:column width="70" inputType="text" style="" id="column3" value="고객명" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column3" value="피보험자" class="" displayMode="label"></w2:column>
     							<w2:column width="70" inputType="text" style="" id="column4" value="청구금액" class="" displayMode="label"></w2:column>
-    							<w2:column width="70" inputType="text" style="" id="column5" value="처리자" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column5" value="담당자" class="" displayMode="label"></w2:column>
     							<w2:column width="70" inputType="text" style="" id="column7" value="상태" class="" displayMode="label"></w2:column>
     							<w2:column width="70" inputType="text" style="" id="column13" value="ID" displayMode="label"
     								hidden="true">
