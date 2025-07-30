@@ -61,8 +61,12 @@ public class SupplementServiceImpl implements SupplementService {
 	 }
 	 
 	@Override
-    public int updateSupplementCompleted(SuppVo vo) throws Exception {
-        return supplementDAO.updateSupplementCompleted(vo);
+    public void updateSupplementCompleted(SuppVo vo) throws Exception {
+		supplementDAO.updateSupplementCompleted(vo);
+		vo.setStatus("보완완료");
+		supplementDAO.updateClaimStatus(vo);
+                
+        System.out.println("청구번호 " + vo.getClaimNo() + "의 상태를 '보완완료'로 변경했습니다.");
     }
 	 
 	 

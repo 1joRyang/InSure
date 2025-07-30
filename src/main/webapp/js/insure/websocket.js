@@ -665,35 +665,8 @@ var WebSocketService = {
 	
 	// 메시지 표시 (가장 범용적인 알림 함수)
 	   showMessage: function(message, type) {
-	       // 1. $p.alert 사용 시도 (가장 일반적인 웹스퀘어 UI 알림)
-	       if (typeof $p !== 'undefined' && $p.alert) {
-	           if (type === 'success') {
-	               $p.alert(message, { title: '✅ 성공', titleIcon: 'information' });
-	           } else if (type === 'error') {
-	               $p.alert(message, { title: '❌ 오류', titleIcon: 'warning' });
-	           } else if (type === 'info') {
-	               $p.alert(message, { title: 'ℹ️ 정보', titleIcon: 'information' });
-	           } else if (type === 'warning') {
-	               $p.alert(message, { title: '⚠️ 경고', titleIcon: 'warning' });
-	           }
-	       } 
-	       // 2. WebSquare.uiplugin.alert 사용 시도 (다른 웹스퀘어 UI 플러그인 알림)
-	       else if (typeof WebSquare !== 'undefined' && WebSquare.uiplugin && WebSquare.uiplugin.alert) {
-	           if (type === 'success') {
-	               WebSquare.uiplugin.alert(message, { title: '✅ 성공', titleIcon: 'information' });
-	           } else if (type === 'error') {
-	               WebSquare.uiplugin.alert(message, { title: '❌ 오류', titleIcon: 'warning' });
-	           } else if (type === 'info') {
-	               WebSquare.uiplugin.alert(message, { title: 'ℹ️ 정보', titleIcon: 'information' });
-	           } else if (type === 'warning') {
-	               WebSquare.uiplugin.alert(message, { title: '⚠️ 경고', titleIcon: 'warning' });
-	           }
-	       } 
-	       // 3. 최후의 방법: 브라우저 기본 alert() 사용
-	       else {
-	           alert(message);
 	           console.warn("웹스퀘어 전용 alert 함수를 찾을 수 없어 브라우저 기본 alert()를 사용합니다.");
-	       }
+	       
 	   },
     
     // 연결 상태 업데이트

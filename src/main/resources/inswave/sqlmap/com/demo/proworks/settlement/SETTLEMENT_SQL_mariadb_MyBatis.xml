@@ -115,28 +115,55 @@
 		</if>
 	</select>
 
-	<select id="selectSettlementTreatment" parameterType="com.demo.proworks.settlement.vo.SettlementTreatmentVo"
+<!-- 	<select id="selectSettlementTreatment" parameterType="com.demo.proworks.settlement.vo.SettlementTreatmentVo"
 		resultType="com.demo.proworks.settlement.vo.SettlementTreatmentVo">
-		<!-- 정산정보와 치료정보를 조인하여 조회한다. -->
+		정산정보와 치료정보를 조인하여 조회한다. (TREATMENT 주 테이블로 수정)
 
 		SELECT /* QueryID : com.demo.proworks.settlement.selectSettlementTreatment */
-		s.claim_no,
-		s.treatment_id,
-		s.final_due,
-		s.refund_amt,
-		s.hospital_prepaid, -- 추가
-		s.deducation_amt, -- 추가
-		t.treatment_date
-		FROM SETTLEMENT s
-		LEFT JOIN TREATMENT t
-		ON s.claim_no = t.claim_no
-		AND
-		s.treatment_id = t.treatment_id
+		t.claim_no,
+		t.treatment_id,
+		COALESCE(s.final_due, 0) as final_due,
+		COALESCE(s.refund_amt, 0) as refund_amt,
+		COALESCE(s.hospital_prepaid, 0) as hospital_prepaid,
+		COALESCE(s.deducation_amt, 0) as deducation_amt,
+		t.treatment_date,
+		t.hospital_name,
+		t.hospital_grade
+		FROM TREATMENT t
+		LEFT JOIN SETTLEMENT s
+		ON t.claim_no = s.claim_no
+		AND t.treatment_id = s.treatment_id
 		WHERE 1=1
 		<if test="SC_claim_no != null and SC_claim_no != ''">
-			AND s.claim_no = #{SC_claim_no}
+			AND t.claim_no = #{SC_claim_no}
 		</if>
-	</select>
+		ORDER BY t.treatment_date DESC
+	</select> -->
+<select id="selectSettlementTreatment" parameterType="com.demo.proworks.settlement.vo.SettlementTreatmentVo"
+    resultType="com.demo.proworks.settlement.vo.SettlementTreatmentVo">
+    <!-- 정산정보와 치료정보를 조인하여 조회한다. (TREATMENT 주 테이블) -->
+    
+    SELECT /* QueryID : com.demo.proworks.settlement.selectSettlementTreatment */
+        t.claim_no,
+        t.treatment_id,
+        COALESCE(s.final_due, 0) as final_due,
+        COALESCE(s.refund_amt, 0) as refund_amt,
+        COALESCE(s.hospital_prepaid, 0) as hospital_prepaid,
+        COALESCE(s.deducation_amt, 0) as deducation_amt,
+        t.patient_type,
+        t.treatment_date,
+        t.hospital_name,
+        t.hospital_grade
+    FROM TREATMENT t
+    LEFT JOIN SETTLEMENT s
+        ON t.claim_no = s.claim_no
+        AND t.treatment_id = s.treatment_id
+    WHERE 1=1
+    <if test="SC_claim_no != null and SC_claim_no != ''">
+        AND t.claim_no = #{SC_claim_no}
+    </if>
+    ORDER BY t.treatment_date DESC
+</select>
 
 	<select id="selectSettlementSummary" parameterType="com.demo.proworks.settlement.vo.SettlementSummaryVo"
 		resultType="com.demo.proworks.settlement.vo.SettlementSummaryVo">
