@@ -65,7 +65,7 @@
         		ref='data:json,{"id":"dm_excitems","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
         		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
         	</xf:submission>
-        	<xf:submission id="sbm_getExc" action="/InsWebApp/EXCITEMUpdView.pwkjson" method="post" mediatype="application/json" ref=""
+        	<xf:submission id="sbm_getExc" action="/InsWebApp/EXCITEMUpdView.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_excitems","key":"elData"}'
         		target='data:json,{"id":"dm_excitems","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
         		mode="asynchronous" processMsg="로딩 중..." ev:submit="" ev:submitdone="scwin.sbm_getExc_submitdone" ev:submiterror=""
         		abortTrigger="">
@@ -83,7 +83,7 @@ scwin.onpageload = function() {
 	let itemId = localStorage.getItem('itemId');
     let excId = localStorage.getItem('excId');
     let treatmentId = localStorage.getItem("treatmentId");
-
+    // alert(treatmentId)
     let claim = JSON.parse(localStorage.getItem("claim"));
     let emp = JSON.parse(localStorage.getItem("employee"));
     if (claim.empNo != emp.empNo) {
@@ -96,7 +96,7 @@ scwin.onpageload = function() {
     dm_excitems.set("treatment_id", treatmentId);
     dm_excitems.set("claim_no", claim.claimNo);
 
-    $c.sbm.execute(sbm_getExc, {"elData": dm_excitems.getJSON()});
+    $c.sbm.execute(sbm_getExc);
 };
 
 scwin.sbm_getExc_submitdone = function (e) {
@@ -196,7 +196,7 @@ scwin.btn_close_onclick = function (e) {
     					<xf:label><![CDATA[저장]]></xf:label>
     				</xf:trigger>
     				<xf:trigger class="btn_cm pt" id="btn_edit" style="" type="button" ev:onclick="scwin.btn_edit_onclick">
-    					<xf:label><![CDATA[저장]]></xf:label>
+    					<xf:label><![CDATA[수정]]></xf:label>
     				</xf:trigger>
     			</xf:group>
     		</xf:group>
