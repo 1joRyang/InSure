@@ -158,7 +158,8 @@ scwin.btn_camera_onclick = function() {
         encodingType: $h.camera.EncodingType.JPEG,
         mediaType: $h.camera.MediaType.PICTURE,
         allowEdit: false,
-        saveToPhotoAlbum: true
+        saveToPhotoAlbum: true,
+        correctOrientation: true
     };
 
    $h.camera.capturePhoto(scwin.camera_callback,options);
@@ -173,7 +174,7 @@ scwin.btn_gallery_onclick = function() {
         encodingType: $h.camera.EncodingType.JPEG,
         mediaType: $h.camera.MediaType.PICTURE,
         allowEdit: false,
-        correctOrientation: false
+        correctOrientation: true
     };
 
     $h.camera.capturePhoto(scwin.camera_callback,options);
@@ -326,6 +327,7 @@ scwin.sbm_addSupplementDocs_submitdone = function (e) {
         icon: 'success',
         title: '보완 서류가 정상적으로 제출되었습니다.'
     });
+
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
 
 };
@@ -574,8 +576,6 @@ scwin.sbm_updateComplete_submitdone = function (e) {
             	</xf:group>
                 
             </xf:group>
-
-            <xf:group style="height: 50px;"></xf:group>
 
             <xf:group class="footer-section" id="footer" style="">
                 <w2:button class="next-button" id="btnNext" label="보완" ev:onclick="scwin.btnNext_onclick"></w2:button>
