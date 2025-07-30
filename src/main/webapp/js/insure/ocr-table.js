@@ -699,7 +699,7 @@ function openExclusionModal(rowIndex, colIndex, td) {
    requires("uiplugin.popup");
    var winWid = $(window).width();
    var winHei = $(window).height();
-   var popWid = 1000;
+   var popWid = 800;
    var popHei = 600;
    var sumLeft = (winWid - popWid) / 2;
    var sumTop = (winHei - popHei) / 2;
@@ -717,6 +717,7 @@ function openExclusionModal(rowIndex, colIndex, td) {
          let newValue = localStorage.getItem("exc");
          scwin.updateExclusionCell(rowIndex, colIndex, newValue);
          scwin.exclusionData[key] = newValue;
+		 console.log(newValue);
          localStorage.removeItem("exc");
          return true;
       }

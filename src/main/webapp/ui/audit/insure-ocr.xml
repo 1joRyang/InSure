@@ -449,6 +449,11 @@ const Toast = Swal.mixin({
 })
 
 function saveInsure(idx = -1) {
+    // todo: 날짜 onchange 하면 없애기
+    localStorage.removeItem("excTotal");
+    localStorage.removeItem("exc");
+    localStorage.removeItem("treatmentId");
+    
     if (!scwin.isEmp) {
         getInsure();
         return;
