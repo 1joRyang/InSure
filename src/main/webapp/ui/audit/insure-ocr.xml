@@ -464,8 +464,6 @@ function saveInsure(idx = -1) {
 
         scwin.imgUrl = scwin.claimImg[date_drop.getValue()-1].imgSrc;
 
-        // todo: 이미지 모달.. setSrc
-
         scwin.isEdit ? $c.sbm.execute(sbm_updateTreatment) : $c.sbm.execute(sbm_insertTreatment);
     }
     else {
@@ -657,28 +655,12 @@ function extractClaimItemData(treatmentId, claimNo) {
         							style="width:150px;" submenuSize="auto">
         							<xf:choices>
         								<xf:item>
-        									<xf:label><![CDATA[고려대학교 안암병원]]></xf:label>
-        									<xf:value><![CDATA[고려대학교 안암병원]]></xf:value>
-        								</xf:item>
-        								<xf:item>
-        									<xf:label><![CDATA[코코이비인후과의원]]></xf:label>
-        									<xf:value><![CDATA[코코이비인후과의원]]></xf:value>
-        								</xf:item>
-        								<xf:item>
-        									<xf:label><![CDATA[경희대학교병원]]></xf:label>
-        									<xf:value><![CDATA[경희대학교병원]]></xf:value>
-        								</xf:item>
-        								<xf:item>
-        									<xf:label><![CDATA[정의원]]></xf:label>
-        									<xf:value><![CDATA[정의원]]></xf:value>
-        								</xf:item>
-        								<xf:item>
-        									<xf:label><![CDATA[빈센트치과의원]]></xf:label>
-        									<xf:value><![CDATA[빈센트치과의원]]></xf:value>
-        								</xf:item>
-        								<xf:item>
         									<xf:label><![CDATA[서울대학교병원]]></xf:label>
         									<xf:value><![CDATA[서울대학교병원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[홍성의료원]]></xf:label>
+        									<xf:value><![CDATA[홍성의료원]]></xf:value>
         								</xf:item>
         								<xf:item>
         									<xf:label><![CDATA[서울대학교어린이병원]]></xf:label>
@@ -693,6 +675,26 @@ function extractClaimItemData(treatmentId, claimNo) {
         									<xf:value><![CDATA[서울대학교치과병원]]></xf:value>
         								</xf:item>
         								<xf:item>
+        									<xf:label><![CDATA[정의원]]></xf:label>
+        									<xf:value><![CDATA[정의원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[고려대학교 안암병원]]></xf:label>
+        									<xf:value><![CDATA[고려대학교 안암병원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[코코이비인후과의원]]></xf:label>
+        									<xf:value><![CDATA[코코이비인후과의원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[경희대학교병원]]></xf:label>
+        									<xf:value><![CDATA[경희대학교병원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[빈센트치과의원]]></xf:label>
+        									<xf:value><![CDATA[빈센트치과의원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
         									<xf:label><![CDATA[연세소아청년과의원]]></xf:label>
         									<xf:value><![CDATA[연세소아청년과의원]]></xf:value>
         								</xf:item>
@@ -704,16 +706,20 @@ function extractClaimItemData(treatmentId, claimNo) {
         									<xf:label><![CDATA[포레스트병원]]></xf:label>
         									<xf:value><![CDATA[포레스트병원]]></xf:value>
         								</xf:item>
-        								<xf:item>
-        									<xf:label><![CDATA[홍성의료원]]></xf:label>
-        									<xf:value><![CDATA[홍성의료원]]></xf:value>
-        								</xf:item>
         							</xf:choices>
         						</xf:select1>
         						<xf:select1 allOption="" appearance="minimal" chooseOption="true" chooseOptionLabel="선택" direction="auto"
         							disabled="false" disabledClass="w2selectbox_disabled" id="sel_department" ref="data:dm_treatment.department"
         							style="width:150px;" submenuSize="auto">
         							<xf:choices>
+        								<xf:item>
+        									<xf:label><![CDATA[응급의학]]></xf:label>
+        									<xf:value><![CDATA[응급의학]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[치과]]></xf:label>
+        									<xf:value><![CDATA[치과]]></xf:value>
+        								</xf:item>
         								<xf:item>
         									<xf:label><![CDATA[순환기내과]]></xf:label>
         									<xf:value><![CDATA[순환기내과]]></xf:value>
@@ -765,14 +771,6 @@ function extractClaimItemData(treatmentId, claimNo) {
         								<xf:item>
         									<xf:label><![CDATA[내과(입원의학)]]></xf:label>
         									<xf:value><![CDATA[내과(입원의학)]]></xf:value>
-        								</xf:item>
-        								<xf:item>
-        									<xf:label><![CDATA[응급의학]]></xf:label>
-        									<xf:value><![CDATA[응급의학]]></xf:value>
-        								</xf:item>
-        								<xf:item>
-        									<xf:label><![CDATA[치과]]></xf:label>
-        									<xf:value><![CDATA[치과]]></xf:value>
         								</xf:item>
         							</xf:choices>
         						</xf:select1>
