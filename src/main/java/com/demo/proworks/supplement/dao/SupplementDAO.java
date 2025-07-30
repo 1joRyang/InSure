@@ -15,4 +15,8 @@ public class SupplementDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbs
 	public int updateSupplementCompleted(SuppVo vo) throws ElException {
     return update("com.demo.proworks.supplement.updateSupplementCompleted", vo);
 }
+
+	public int updateClaimStatus(SuppVo vo) throws ElException {
+        return update("com.demo.proworks.supplement.updateClaimStatus", vo);
+    }
 }

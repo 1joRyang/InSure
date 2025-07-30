@@ -8,5 +8,5 @@ public interface SupplementService {
 	
 	public void  addSupplementDocs(SuppVo vo) throws Exception;
 	
-	public int updateSupplementCompleted(SuppVo vo) throws Exception;
+	public void updateSupplementCompleted(SuppVo vo) throws Exception;
 }
