@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 알림 관련 처리를 담당하는 Sql Mapper
+	@description : 알림 관련 처리를 담당하는 Sql Mapper
+	@author      : 임소희
+	@since       : 2025/07/21
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/07/21              임소희             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.notification">
+    <insert id="insertNotification" parameterType="com.demo.proworks.notification.vo.NotificationVo">
+    	<!-- 알림를 등록한다. -->	
+    	<!-- 웹소켓 알림용으로 수정: noti_id 자동 생성 추가 -->
+    	<selectKey keyProperty="noti_id" resultType="String" order="BEFORE">
+            SELECT CONCAT('NOTI_', DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'), '_', LPAD(FLOOR(RAND() * 1000), 3, '0')) as noti_id
+        </selectKey>
+    		
+        INSERT INTO notification   /* QueryID : com.demo.proworks.notification.insertNotification */
+        ( 
+            NOTI_ID
+            <if test="noti_content != null"> , NOTI_CONTENT </if>
+            <if test="noti_type    != null"> , NOTI_TYPE    </if>
+            <if test="emp_no       != null"> , EMP_NO       </if>
+            <if test="is_read      != null"> , IS_READ      </if>
+            , CREATED_DATE
+        )
+        VALUES  
+        ( 
+            #{noti_id}
+            <if test="noti_content != null"> , #{noti_content} </if>
+            <if test="noti_type    != null"> , #{noti_type}    </if>
+            <if test="emp_no       != null"> , #{emp_no}       </if>
+            <if test="is_read      != null"> , #{is_read}      </if>
+            , NOW()
+        )          
+    </insert>		
+	
+    <update id="updateNotification" parameterType="com.demo.proworks.notification.vo.NotificationVo">
+    	<!-- 알림를 갱신한다. -->
+    	
+        UPDATE notification    /* QueryID : com.demo.proworks.notification.updateNotification */      
+      	  SET  
+                NOTI_ID      = #{noti_id}     
+        	                       
+            <if test="noti_content != null"> , NOTI_CONTENT = #{noti_content} </if>
+            <if test="noti_type    != null"> , NOTI_TYPE    = #{noti_type}    </if>
+            <if test="emp_no       != null"> , EMP_NO       = #{emp_no}       </if>
+            <if test="is_read      != null"> , IS_READ      = #{is_read}      </if>
+                 
+        WHERE   
+                NOTI_ID      = #{noti_id}     
+    </update>
+	
+     <delete id="deleteNotification" parameterType="com.demo.proworks.notification.vo.NotificationVo">
+    	<!-- 알림를 삭제한다. -->
+    	
+        DELETE FROM notification   /* QueryID : com.demo.proworks.notification.deleteNotification */ 
+        WHERE   
+                NOTI_ID      = #{noti_id}     
+        
+    </delete>
+    
+    
+    <select id="selectNotification" parameterType="com.demo.proworks.notification.vo.NotificationVo" resultType="com.demo.proworks.notification.vo.NotificationVo">
+    	<!-- 알림를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.notification.selectNotification */
+            NOTI_ID as noti_id, 
+            NOTI_CONTENT as noti_content, 
+            NOTI_TYPE as noti_type, 
+            EMP_NO as emp_no, 
+            IS_READ as is_read, 
+            DATE_FORMAT(CREATED_DATE, '%Y-%m-%d %H:%i:%s') as created_date
+        FROM notification 
+        WHERE 
+                NOTI_ID = #{noti_id}     
+			
+    </select>
+	
+    <select id="selectListNotification" parameterType="com.demo.proworks.notification.vo.NotificationVo" resultType="com.demo.proworks.notification.vo.NotificationVo">
+    	<!-- 알림 목록을 조회한다. -->
+           SELECT    /* QueryID : com.demo.proworks.notification.selectListNotification */
+               NOTI_ID as noti_id, 
+               NOTI_CONTENT as noti_content, 
+               NOTI_TYPE as noti_type, 
+               EMP_NO as emp_no, 
+               IS_READ as is_read, 
+               DATE_FORMAT(CREATED_DATE, '%Y-%m-%d %H:%i:%s') as created_date		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM notification
+                   WHERE  1=1    		
+	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountNotification" parameterType="com.demo.proworks.notification.vo.NotificationVo" resultType="long">
+    <!-- 알림 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.notification.selectListCountNotification */
+             COUNT(*) totcnt  		                  
+         FROM notification
+         WHERE  1=1    		
+
+    </select>
+    
+    <!-- 직원별 알림 목록 조회 (웹소켓용) -->
+    <select id="selectNotificationList" parameterType="com.demo.proworks.notification.vo.NotificationVo" 
+            resultType="com.demo.proworks.notification.vo.NotificationVo">
+        SELECT /* QueryID : com.demo.proworks.notification.selectNotificationList */
+            NOTI_ID as noti_id,
+            NOTI_CONTENT as noti_content,
+            NOTI_TYPE as noti_type,
+            EMP_NO as emp_no,
+            IS_READ as is_read,
+            DATE_FORMAT(CREATED_DATE, '%Y-%m-%d %H:%i:%s') as created_date
+        FROM notification
+        WHERE EMP_NO = #{emp_no}
+        <if test="noti_type != null and noti_type != ''">
+            AND NOTI_TYPE = #{noti_type}
+        </if>
+        <if test="is_read != null and is_read != ''">
+            AND IS_READ = #{is_read}
+        </if>
+        ORDER BY CREATED_DATE DESC
+        LIMIT 50  <!-- 고정 제한: 최대 50개 -->
+    </select>
+    
+    <!-- 직원별 읽지 않은 알림 개수 조회 -->
+    <select id="selectUnreadNotificationCount" parameterType="String" resultType="int">
+        SELECT /* QueryID : com.demo.proworks.notification.selectUnreadNotificationCount */
+            COUNT(*) as unread_count
+        FROM notification
+        WHERE EMP_NO = #{emp_no}
+          AND IS_READ = 'N'
+    </select>
+    
+    <!-- 알림 읽음 처리 -->
+    <update id="updateNotificationAsRead" parameterType="com.demo.proworks.notification.vo.NotificationVo">
+        UPDATE notification /* QueryID : com.demo.proworks.notification.updateNotificationAsRead */
+        SET IS_READ = 'Y'
+        WHERE NOTI_ID = #{noti_id}
+          AND EMP_NO = #{emp_no}
+    </update>
+    
+    <!-- 직원의 모든 알림 읽음 처리 -->
+    <update id="updateAllNotificationAsRead" parameterType="String">
+        UPDATE notification /* QueryID : com.demo.proworks.notification.updateAllNotificationAsRead */
+        SET IS_READ = 'Y'
+        WHERE EMP_NO = #{emp_no}
+          AND IS_READ = 'N'
+    </update>
+    
+    <!-- 직원의 모든 알림 삭제 -->
+    <delete id="deleteAllNotificationByEmpNo" parameterType="String">
+        DELETE FROM notification /* QueryID : com.demo.proworks.notification.deleteAllNotificationByEmpNo */
+        WHERE EMP_NO = #{emp_no}
+    </delete>
+    
+    <!-- 오래된 알림 정리 (30일 이상) -->
+    <delete id="deleteOldNotifications">
+        DELETE FROM notification /* QueryID : com.demo.proworks.notification.deleteOldNotifications */
+        WHERE CREATED_DATE &lt; DATE_SUB(NOW(), INTERVAL 30 DAY)
+    </delete>
+    
+    <!-- 최근 알림 조회 (20개 제한) -->
+    <select id="selectRecentNotificationList" parameterType="String" 
+            resultType="com.demo.proworks.notification.vo.NotificationVo">
+        SELECT /* QueryID : com.demo.proworks.notification.selectRecentNotificationList */
+            NOTI_ID as noti_id,
+            NOTI_CONTENT as noti_content,
+            NOTI_TYPE as noti_type,
+            EMP_NO as emp_no,
+            IS_READ as is_read,
+            DATE_FORMAT(CREATED_DATE, '%Y-%m-%d %H:%i:%s') as created_date
+        FROM notification
+        WHERE EMP_NO = #{emp_no}
+        ORDER BY CREATED_DATE DESC
+        LIMIT 20
+    </select>
+    
+    
+    <!-- 부서별 미읽음 알림 통계 -->
+    <select id="selectDeptNotificationStats" parameterType="String" resultType="java.util.Map">
+        SELECT /* QueryID : com.demo.proworks.notification.selectDeptNotificationStats */
+            e.DEPT_ID as deptId,
+            COUNT(*) as unreadCount
+        FROM notification n
+        INNER JOIN EMPLOYEE e ON n.EMP_NO = e.EMP_NO
+        WHERE n.IS_READ = 'N'
+        <if test="deptId != null and deptId != ''">
+            AND e.DEPT_ID = #{deptId}
+        </if>
+        GROUP BY e.DEPT_ID
+    </select>
+
+
+</mapper>

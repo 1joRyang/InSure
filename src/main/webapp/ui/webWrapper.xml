@@ -12,9 +12,13 @@
         </xf:model>
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
-        <script lazy="false" type="text/javascript"><![CDATA[
+        <script lazy="false" type="text/javascript" src="/InsWebApp/js/insure/websocket.js"></script>
+
+        <script type="javascript">
+            <![CDATA[
 scwin.onpageload = function() {
-	scwin.initpub(); 
+   scwin.initpub(); 
+   WebSocketService.init();
 };
 
 scwin.initpub = function() {
@@ -23,11 +27,11 @@ scwin.initpub = function() {
 };
 ]]></script>
     </head>
-    <body ev:onpageload="scwin.onpageload" class="mobile">
+    <body ev:onpageload="scwin.onpageload" class="" style="overflow: hidden;">
     	<xf:group style="display: flex;flex-direction: column;" id="m_wrap" class="m_wrap">
-    		<w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/header.xml"></w2:wframe>
-    		<xf:group style="display: flex;height: 100%;flex-direction: row;flex: 1;height: calc(100% - 90px);" id="">
-    			<w2:wframe src="/InsWebApp/ui/cmmn/sidebar.xml" style="z-index: 20;height: 100%;" id="sidebar" class="wfm_sidebar"></w2:wframe>
+            <w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/header.xml"></w2:wframe>
+    		<xf:group style="display: flex;height: 100%;flex-direction: row;flex: 1;width: 100%;" id="">
+                <w2:wframe src="/InsWebApp/ui/cmmn/sidebar.xml" style="z-index: 20;" id="sidebar" class="wfm_sidebar"></w2:wframe>
     			<w2:wframe src="" id="web_container" class="" style="height: 100%;flex: 1;overflow-x: hidden;"></w2:wframe>
     		</xf:group>
     	</xf:group>

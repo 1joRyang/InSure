@@ -20,6 +20,7 @@
 						<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
 						<w2:key dataType="text" name="approval_memo" id="approval_memo"></w2:key>
 						<w2:key dataType="text" name="request_type" id="request_type"></w2:key>
+						<w2:key dataType="text" name="manager_no" id="manager_no"></w2:key>
 					</w2:keyInfo>
 				</w2:dataMap>
 				<!-- 정산 상세정보 데이터맵 추가 -->
@@ -194,13 +195,17 @@
 				<w2:dataList baseNode="list" repeatNode="map" id="dlt_settlementTreatmentList" saveRemovedData="true">
 					<w2:columnInfo>
 						<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
-						<w2:column defaultValue="" dataType="text" name="treatment_id" length="" id="treatment_id" encYN="" ignoreStatus="">
+						<w2:column defaultValue="" dataType="text" name="treatment_id" length="" id="treatment_id" encYN=""
+							ignoreStatus="">
 						</w2:column>
 						<w2:column defaultValue="" dataType="text" name="final_due" length="" id="final_due" encYN="" ignoreStatus=""></w2:column>
 						<w2:column defaultValue="" dataType="text" name="refund_amt" length="" id="refund_amt" encYN="" ignoreStatus=""></w2:column>
 						<w2:column dataType="text" name="treatment_date" id="treatment_date"></w2:column>
 						<w2:column dataType="text" name="hospital_prepaid" id="hospital_prepaid"></w2:column>
 						<w2:column dataType="text" name="deducation_amt" id="deducation_amt"></w2:column>
+						<w2:column dataType="text" name="hospital_name" id="hospital_name"></w2:column>
+						<w2:column dataType="text" name="hospital_grade" id="hospital_grade"></w2:column>
+						<w2:column dataType="text" name="patient_type" id="patient_type"></w2:column>
 					</w2:columnInfo>
 				</w2:dataList>
 				<w2:dataMap baseNode="map" id="dma_ID">
@@ -1126,14 +1131,18 @@ scwin.prepareFastAPIRequestData = function () {
 
         if (settlementRowCount > 0) {
             console.log("settlementTreatmentList에서 데이터 추출, 행 수:", settlementRowCount);
+            console.log("settlementTreatmentList:", dlt_settlementTreatmentList);
+
             for (var i = 0; i < settlementRowCount; i++) {
                 var settlement = {
                     settlement_id: parseInt(dlt_settlementTreatmentList.getCellData(i, "settlement_id") || (i + 1)),
-                    final_due: parseInt(dlt_settlementTreatmentList.getCellData(i, "final_due") || "0"),
-                    hospital_prepaid: parseInt(dlt_settlementTreatmentList.getCellData(i, "hospital_prepaid") || "0"),
-                    deducation_amt: parseInt(dlt_settlementTreatmentList.getCellData(i, "deducation_amt") || "0"),
-                    refund_amt: parseInt(dlt_settlementTreatmentList.getCellData(i, "refund_amt") || "0"),
+                    final_due: parseInt(dlt_settlementTreatmentList.getCellData(i, "final_due") ),
+                    hospital_prepaid: parseInt(dlt_settlementTreatmentList.getCellData(i, "hospital_prepaid") ),
+                    deducation_amt: parseInt(dlt_settlementTreatmentList.getCellData(i, "deducation_amt") ),
+                    refund_amt: parseInt(dlt_settlementTreatmentList.getCellData(i, "refund_amt")),
                     treatment_id: parseInt(dlt_settlementTreatmentList.getCellData(i, "treatment_id")),
+                    hospital_name :  dlt_settlementTreatmentList.getCellData(i, "hospital_name"),
+                     hospital_grade: dlt_settlementTreatmentList.getCellData(i, "hospital_grade") ,
                     claim_no: scwin.claim.claimNo
                 };
                 settlements.push(settlement);
@@ -1141,15 +1150,15 @@ scwin.prepareFastAPIRequestData = function () {
             }
         } else {
             console.log("settlementTreatmentList가 비어있음, 기본 데이터 생성");
-            settlements.push({
-                settlement_id: 1,
-                final_due: parseInt(dma_settlementInfo.get("final_due") || "100000"),
-                hospital_prepaid: parseInt(dma_settlementInfo.get("hospital_prepaid") || "15000"),
-                deducation_amt: parseInt(dma_settlementInfo.get("deducation_amt") || "10000"),
-                refund_amt: parseInt(dma_settlementInfo.get("refund_amt") || "75000"),
-                treatment_id: 1,
-                claim_no: scwin.claim.claimNo
-            });
+            // settlements.push({
+            //     settlement_id: 1,
+            //     final_due: parseInt(dma_settlementInfo.get("final_due") || "100000"),
+            //     hospital_prepaid: parseInt(dma_settlementInfo.get("hospital_prepaid") || "15000"),
+            //     deducation_amt: parseInt(dma_settlementInfo.get("deducation_amt") || "10000"),
+            //     refund_amt: parseInt(dma_settlementInfo.get("refund_amt") || "75000"),
+            //     treatment_id: 1,
+            //     claim_no: scwin.claim.claimNo
+            // });
         }
 
         // 2. Treatments 데이터 준비 (실제 데이터 사용)
@@ -1160,25 +1169,25 @@ scwin.prepareFastAPIRequestData = function () {
                 var treatment = {
                     treatment_id: parseInt(dlt_settlementTreatmentList.getCellData(j, "treatment_id")),
                     claim_no: scwin.claim.claimNo,
-                    department: dlt_settlementTreatmentList.getCellData(j, "department") || "일반",
+                    department: dlt_settlementTreatmentList.getCellData(j, "department"),
                     treatment_date: dlt_settlementTreatmentList.getCellData(j, "treatment_date") || new Date().toISOString().split('T')[0],
-                    patient_type: "일반",
-                    hospital_name: dma_settlementInfo.get("hospital_name") || "서울대학교병원",
-                    hospital_grade: dma_settlementInfo.get("hospital_grade") || "병원급"
+                    patient_type: dlt_settlementTreatmentList.getCellData(j, "patient_type"),
+                    hospital_name: dlt_settlementTreatmentList.getCellData(j, "hospital_name"),
+                    hospital_grade: dlt_settlementTreatmentList.getCellData(j, "hospital_grade")
                 };
                 treatments.push(treatment);
                 console.log("치료[" + j + "]:", treatment);
             }
         } else {
-            treatments.push({
-                treatment_id: 1,
-                claim_no: scwin.claim.claimNo,
-                department: "내과",
-                treatment_date: new Date().toISOString().split('T')[0],
-                patient_type: "일반",
-                hospital_name: "서울대학교병원",
-                hospital_grade: "병원급"
-            });
+            // treatments.push({
+            //     treatment_id: 1,
+            //     claim_no: scwin.claim.claimNo,
+            //     department: "내과",
+            //     treatment_date: new Date().toISOString().split('T')[0],
+            //     patient_type: "일반",
+            //     hospital_name: dlt_settlementTreatmentList.getVa,
+            //     hospital_grade: "병원급"
+            // });
         }
 
         // 3. Excluded Items 데이터 준비 (실제 데이터 사용)
@@ -1381,6 +1390,7 @@ scwin.prepareClaimResultData = function () {
 
 // 최종 심사 완료 (수정된 함수)
 
+
 scwin.btn_complete_onclick = function () {
     // 기본 권한 체크
     if (!scwin.checkPermission("심사 완료")) return;
@@ -1395,47 +1405,46 @@ scwin.btn_complete_onclick = function () {
             icon: 'warning',
             title: '심사 메모를 먼저 입력해주세요.'
         });
-
         return;
     }
 
     if (!scwin.claim.claimNo) {
-
-
         scwin.noBtnAlertWithTimer({
             title: '오류',
             icon: 'error',
-            text: result.message || '청구번호가 없습니다.'
+            text: '청구번호가 없습니다.'
         });
-
         return;
     }
 
     // CLAIM_RESULT 데이터 준비
     var resultData = scwin.prepareClaimResultData();
 
-
-        scwin.twoBtnAlert({
-            title: '최종 심사 완료',
-            icon: 'question',
-            text: '청구번호가 없습니다.',
-            html: '<div style="text-align: left;">' +
-                '최종 심사를 완료하시겠습니까?<br><br>' +
-                '• 청구번호: ' + resultData.claim_no + '<br>' +
-                '• 지급금액: ' + resultData.amount + '원<br>' +
-                '• 처리일자: ' + resultData.date +
-                '</div>',
-        })
+    // Swal.fire를 직접 사용 (scwin.twoBtnAlert 대신)
+    Swal.fire({
+        title: '최종 심사 완료',
+        icon: 'question',
+        html: '<div style="text-align: left;">' +
+            '최종 심사를 완료하시겠습니까?<br><br>' +
+            '• 청구번호: ' + resultData.claim_no + '<br>' +
+            '• 지급금액: ' + resultData.amount + '원<br>' +
+            '• 처리일자: ' + resultData.date +
+            '</div>',
+        showCancelButton: true,
+        confirmButtonText: '완료',
+        cancelButtonText: '취소',
+        confirmButtonColor: '#4FACFE',
+        cancelButtonColor: '#d1d1d1'
+    })
     .then((result) => {
         if (result.isConfirmed) {
             scwin.showLoading(true);
             $p.executeSubmission("sbm_saveClaimResult");
             localStorage.removeItem("claim");
-            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
         }
     });
 };
-
 
 // CLAIM_RESULT 저장 성공 콜백
 scwin.sbm_saveClaimResult_submitdone = function (e) {
@@ -1722,6 +1731,7 @@ scwin.btn_approval_onclick = function (e) {
                 }
 
                 dma_approvalReq.set("claim_no", scwin.claim.claimNo);
+                //dma_approvalReq.set("employee", scwin.employee.managerNo);
                 $p.executeSubmission("sbm_approveApprovalReq");
             }
         });
@@ -1776,7 +1786,11 @@ scwin.sbm_approveApprovalReq_submitdone = function (e) {
             showConfirmButton: false,
             timer: 1500
         }).then(() => {
+
             // 성공 시 페이지 이동
+
+            //location.reload();
+
             location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
         });
     } else {
@@ -2515,7 +2529,9 @@ scwin.btn_approve_complete_onclick = function () {
             dma_approvalReq.set("request_type", "APPROVE");
             
             $p.executeSubmission("sbm_approveApprovalReq");
-            
+
+              //location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
+
         }
     });
 };

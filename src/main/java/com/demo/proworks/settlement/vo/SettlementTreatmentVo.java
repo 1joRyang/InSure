@@ -37,6 +37,15 @@ public class SettlementTreatmentVo extends com.demo.proworks.cmmn.ProworksCommVO
     @ElDtoField(logicalName = "deducation_amt", physicalName = "deducation_amt", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String deducation_amt;
 
+    @ElDtoField(logicalName = "hospital_name", physicalName = "hospital_name", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String hospital_name;
+
+    @ElDtoField(logicalName = "hospital_grade", physicalName = "hospital_grade", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String hospital_grade;
+
+    @ElDtoField(logicalName = "patient_type", physicalName = "patient_type", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private String patient_type;
+
     @ElVoField(physicalName = "claim_no")
     public String getClaim_no(){
         String ret = this.claim_no;
@@ -125,6 +134,39 @@ public class SettlementTreatmentVo extends com.demo.proworks.cmmn.ProworksCommVO
         this.deducation_amt = deducation_amt;
     }
 
+    @ElVoField(physicalName = "hospital_name")
+    public String getHospital_name(){
+        String ret = this.hospital_name;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "hospital_name")
+    public void setHospital_name(String hospital_name){
+        this.hospital_name = hospital_name;
+    }
+
+    @ElVoField(physicalName = "hospital_grade")
+    public String getHospital_grade(){
+        String ret = this.hospital_grade;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "hospital_grade")
+    public void setHospital_grade(String hospital_grade){
+        this.hospital_grade = hospital_grade;
+    }
+
+    @ElVoField(physicalName = "patient_type")
+    public String getPatient_type(){
+        String ret = this.patient_type;
+        return ret;
+    }
+
+    @ElVoField(physicalName = "patient_type")
+    public void setPatient_type(String patient_type){
+        this.patient_type = patient_type;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -136,7 +178,10 @@ public class SettlementTreatmentVo extends com.demo.proworks.cmmn.ProworksCommVO
         sb.append("treatment_date").append("=").append(treatment_date).append(",");
         sb.append("SC_claim_no").append("=").append(SC_claim_no).append(",");
         sb.append("hospital_prepaid").append("=").append(hospital_prepaid).append(",");
-        sb.append("deducation_amt").append("=").append(deducation_amt);
+        sb.append("deducation_amt").append("=").append(deducation_amt).append(",");
+        sb.append("hospital_name").append("=").append(hospital_name).append(",");
+        sb.append("hospital_grade").append("=").append(hospital_grade).append(",");
+        sb.append("patient_type").append("=").append(patient_type);
         sb.append("]");
         return sb.toString();
 

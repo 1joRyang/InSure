@@ -16034,7 +16034,7 @@ scwin.onpageload = function() {
 };
 
 function searchHcode() {
-    keyword = ipt_hcode1.getValue().trim().toUpperCase();
+    let keyword = ipt_hcode1.getValue().trim().toUpperCase();
 
     dl_hcode1.setColumnFilter(
         {

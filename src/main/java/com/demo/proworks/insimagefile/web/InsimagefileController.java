@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.demo.proworks.assignrule.service.AssignRuleService;
 import com.demo.proworks.claim.service.ClaimService;
 import com.demo.proworks.insimagefile.service.InsimagefileService;
 import com.demo.proworks.insimagefile.vo.ConsentVo;
@@ -63,6 +64,10 @@ public class InsimagefileController {
 	/** OcrService 주입 */
 	@Resource(name = "ocrService")
 	private OcrService ocrService;
+	
+	/** AssignRuleService 주입 */
+	@Resource(name = "assignRuleServiceImpl")
+	private AssignRuleService assignRuleService;
     
     /**
      * 이미지파일테이블 목록을 조회합니다.
@@ -393,7 +398,7 @@ public class InsimagefileController {
 	@RequestMapping(value = "submitFinalClaim")
 	@ElDescription(sub = "최종 보험금 청구 제출", desc = "세션의 모든 정보를 취합하여 최종 청구를 접수한다.")
 	public void submitFinalClaim(HttpServletRequest request) throws Exception {
-  System.out.println("================최종 청구 제출 컨트롤러 진입=======================");
+    System.out.println("================최종 청구 제출 컨트롤러 진입=======================");
     HttpSession session = request.getSession();
     Map<String, Object> claimData = (Map<String, Object>) session.getAttribute("claim_data");
 
@@ -418,17 +423,22 @@ public class InsimagefileController {
     // 3. 사용자 ID 설정 (임시)
     claimData.put("userId", 1L);
 
-    //  4. 영문 claimType을 한글로 변환하여 DB 저장용으로 설정
+    // 4. ✅ OCR 분석 완료 전까지 claimType을 null로 설정
     String originalClaimTypeEng = (String) claimData.get("claimType");
-    String claimTypeKor = convertEngToKoreanClaimType(originalClaimTypeEng);
-    claimData.put("claimType", claimTypeKor); // 한글로 변경
+    System.out.println("[DEBUG] submitFinalClaim - 세션에서 가져온 claimType: " + originalClaimTypeEng);
+    System.out.println("[DEBUG] submitFinalClaim - 전체 세션 데이터: " + claimData);
     
-    System.out.println("DB 저장용 claimType 변환: " + originalClaimTypeEng + " -> " + claimTypeKor);
-
-    // 5. DB 저장 (한글 claimType으로 저장)
+    // ✅ 원본 claimType을 별도 키로 보관
+    claimData.put("originalClaimType", originalClaimTypeEng);
+    claimData.put("claimType", null); // ✅ OCR 완료 전까지 null
+    
+    System.out.println("[DEBUG] submitFinalClaim - originalClaimType 저장: " + originalClaimTypeEng);
+    
+    // 5. DB 저장 (claimType이 null인 상태로 저장)
     claimService.saveFinalClaim(claimData);
     
-    System.out.println("청구 저장 완료 - claim_no: " + claimNo + ", claim_type: " + claimTypeKor);
+    System.out.println("청구 저장 완료 - claim_no: " + claimNo + ", claim_type: null (OCR 분석 대기)");
+    System.out.println("원본 claimType 보관됨: " + originalClaimTypeEng);
 
 	}
 	
@@ -436,36 +446,46 @@ public class InsimagefileController {
     @RequestMapping(value = "ClaimSaveDone")
     @ElDescription(sub = "OCR 과 자동배정 ", desc = "OCR로 분류하고 자동배정 한다.")
     public void ClaimSaveDone(HttpServletRequest request) throws Exception {
-    
+ 
     System.out.println("================청구 후속처리 (OCR 분석 및 자동배정) 컨트롤러 진입=======================");
     HttpSession session = request.getSession();
     Map<String, Object> claimData = (Map<String, Object>) session.getAttribute("claim_data");
     
-    // claimNo만 확인 (submitFinalClaim에서 생성되어 세션에 저장됨)
-    if (claimData == null || claimData.get("claimNo") == null) {
-        throw new ElException("ERROR.BIZ.001", new String[] { "청구번호를 찾을 수 없습니다. submitFinalClaim이 먼저 실행되어야 합니다." });
+    // claimNo와 originalClaimType 확인
+    if (claimData == null || 
+        claimData.get("claimNo") == null || 
+        claimData.get("originalClaimType") == null) {
+        throw new ElException("ERROR.BIZ.001", new String[] { "청구번호 또는 원본 청구타입을 찾을 수 없습니다. submitFinalClaim이 먼저 실행되어야 합니다." });
     }
     
     String claimNo = (String) claimData.get("claimNo");
     System.out.println("========후속처리 대상 청구번호: " + claimNo + " =====================");
     
-    // ===== DB 조회 제거, 세션 데이터만 사용 =====
-    
-    // 2. OCR 처리에 필요한 데이터는 모두 세션에서 가져오기
-    // 사용자가 처음 입력한 claimType (세션에서)
-    String originalClaimTypeEng = (String) claimData.get("claimType");
-    String originalClaimTypeKor = convertClaimTypeToKorean(originalClaimTypeEng);
-
-    // symptom과 s3fileKeys는 세션에서
+    // 1. OCR 처리에 필요한 데이터 준비
+    String originalClaimTypeEng = (String) claimData.get("originalClaimType"); // ✅ 원본 claimType 사용
     String symptom = (String) claimData.get("symptom");
     String s3KeysAsString = (String) claimData.get("s3fileKeys");
     
-    // 3. claim_content 생성 (사용자 입력값 기준)
-    String claimContent = String.format("[%s] %s", originalClaimTypeKor, symptom);
-    System.out.println("사용자 입력 기준 claim_content 생성: " + claimContent);
+    System.out.println("[DEBUG] ClaimSaveDone - 세션에서 가져온 originalClaimType: " + originalClaimTypeEng);
+    System.out.println("[DEBUG] ClaimSaveDone - 전체 세션 데이터: " + claimData);
+    
+    // ✅ null 체크 추가
+    if (originalClaimTypeEng == null) {
+        System.out.println("[ERROR] originalClaimType이 null입니다! 세션에서 데이터를 찾을 수 없습니다.");
+        originalClaimTypeEng = "disease"; // 기본값 설정
+        System.out.println("원본 claimType이 null이므로 기본값 설정: " + originalClaimTypeEng);
+    }
+    
+    // 2. claim_content 생성 (사용자 입력값 기준 - 원본 보관용)
+    String originalClaimTypeKor = convertClaimTypeToKorean(originalClaimTypeEng);
+    String originalClaimContent = String.format("[%s] %s", originalClaimTypeKor, symptom);
+    System.out.println("사용자 입력 기준 claim_content 생성: " + originalClaimContent);
+    
+    // ✅ 사용자 입력 기준 claimContent를 별도 키로 보관
+    claimData.put("originalClaimContent", originalClaimContent);
 
-    // 4. OCR 분석을 통한 자동 claim_type 결정
-    String analyzedClaimTypeEng = "disease"; // 기본값 (영문 코드)
+    // 3. OCR 분석을 통한 자동 claim_type 결정
+    String analyzedClaimTypeEng = "disease"; // ✅ 기본값: disease -> "실손"으로 변환됨
 
     if (s3KeysAsString != null && !s3KeysAsString.isEmpty()) {
         try {
@@ -484,38 +504,71 @@ public class InsimagefileController {
 
             // 유효한 claim_type인지 검증
             if (!isValidClaimType(analyzedClaimTypeEng)) {
-                System.out.println("유효하지 않은 문서 타입, 기본값 사용: " + analyzedClaimTypeEng);
-                analyzedClaimTypeEng = "disease";
+                System.out.println("유효하지 않은 문서 타입, 실손으로 기본값 설정: " + analyzedClaimTypeEng);
+                analyzedClaimTypeEng = "disease"; // ✅ "disease" -> "실손"으로 변환됨
+            }
+            
+            // ✅ OCR 분석 결과에 따른 명확한 로그
+            if ("disease".equals(analyzedClaimTypeEng)) {
+                System.out.println("📋 OCR 분석 결과: 특정 문서 유형 매칭 실패 → 실손 청구로 자동 분류");
             }
 
         } catch (Exception e) {
             System.err.println("OCR 분석 실패: " + e.getMessage());
-            System.out.println("OCR 실패로 기본값 사용: " + analyzedClaimTypeEng);
+            System.out.println("📋 OCR 분석 실패 → 실손 청구로 기본 분류: " + analyzedClaimTypeEng);
             e.printStackTrace();
             // OCR 실패시에도 처리는 계속 진행 (기본값 사용)
         }
+    } else {
+        System.out.println("📋 업로드된 파일이 없음 → 실손 청구로 기본 분류");
     }
 
-    // 5. DB 저장용으로 한글 코드로 변환
+    // 4. DB 저장용으로 한글 코드로 변환
     String analyzedClaimTypeKor = convertEngToKoreanClaimType(analyzedClaimTypeEng);
     System.out.println("OCR 분석 결과 - 한글 코드: " + analyzedClaimTypeKor);
+    
+    // ✅ OCR 분석 결과 기준으로 새로운 claimContent 생성
+    // ❗ 주의: claimType은 OCR 결과로 업데이트하지만, claimContent의 [ ] 안은 사용자 선택 유지
+    String finalClaimContent = String.format("[%s] %s", originalClaimTypeKor, symptom);
+    System.out.println("최종 DB 저장 claim_content (사용자 선택 유지): " + finalClaimContent);
 
     System.out.println("=== OCR 분석 및 자동배정 결과 요약 ===");
     System.out.println("사용자 입력 claimType (원본): " + originalClaimTypeEng + " -> " + originalClaimTypeKor);
     System.out.println("OCR 분석 결과: " + analyzedClaimTypeEng + " -> " + analyzedClaimTypeKor);
-    System.out.println("claim_content (사용자 입력 기준): " + claimContent);
+    System.out.println("사용자 입력 claim_content: " + originalClaimContent);
+    System.out.println("최종 DB 저장 claim_content: " + finalClaimContent);
     System.out.println("최종 자동배정 claimType: " + analyzedClaimTypeKor);
     System.out.println("==================");
 
-    // 6. 기존 저장된 청구건에 OCR 분석 결과를 업데이트
-    claimService.updateClaimWithOcrResult(claimNo, analyzedClaimTypeKor, claimContent);
+    // 5. ✅ OCR 분석 결과를 DB에 업데이트 (null에서 실제 값으로)
+    claimService.updateClaimWithOcrResult(claimNo, analyzedClaimTypeKor, finalClaimContent);
+    System.out.println("[OCR 결과 DB 업데이트 완료] 청구번호: " + claimNo + ", 최종 타입: " + analyzedClaimTypeKor);
+    
+    // 6. ✅ OCR 완료 후 자동 배정 수행 (배정 해제 로직 불필요 - 애초에 배정되지 않음)
+    try {
+        System.out.println("[자동 배정 시작] 청구번호: " + claimNo + ", 청구타입: " + analyzedClaimTypeKor);
+        
+        // null 체크 추가
+        if (assignRuleService == null) {
+            System.err.println("[오류] assignRuleService가 null입니다!");
+            throw new Exception("assignRuleService가 주입되지 않았습니다.");
+        }
+        
+        String assignResult = assignRuleService.assignEmployeeToClaim(claimNo);
+        System.out.println("[자동 배정 완료] " + assignResult);
+        
+    } catch (Exception e) {
+        System.err.println("[자동 배정 실패] 청구번호: " + claimNo + ", 오류: " + e.getMessage());
+        e.printStackTrace();
+        // 자동 배정 실패해도 전체 프로세스는 계속 진행
+    }
     
     System.out.println("청구 후속처리 완료 - claim_no: " + claimNo + ", 최종 claim_type: " + analyzedClaimTypeKor);
     
     // 7. 후속처리 완료 후 세션 정리
-    session.removeAttribute("claim_data");    
-    
-    }
+    session.removeAttribute("claim_data");
+    System.out.println("세션 정리 완료 - claim_data 제거");
+   }
 	/**
 	 * 유효한 claim_type인지 검증
 	 */
@@ -537,7 +590,7 @@ public class InsimagefileController {
 	}
 
 	/**
-	 * claim_type을 한글로 변환 (화면 표시용)
+	 * claim_type을 한글로 변환 (화면 표시용 - 사용자 선택 보존용)
 	 */
 	private String convertClaimTypeToKorean(String claimType) {
 		switch (claimType) {
@@ -548,36 +601,36 @@ public class InsimagefileController {
 			case "surgery":
 				return "수술";
 			case "disease":
-				return "질병";
+				return "실손";
 			case "injury":
-				return "재해";
+				return "재해"; // ✅ "실손" → "재해"로 수정
 			case "other":
 				return "기타";
 			default:
-				return "질병"; // 기본값은 질병
+				return "실손"; // 기본값은 실손
 		}
 	}
 
-	private String convertEngToKoreanClaimType(String engClaimType) {
-		if (engClaimType == null)
-			return "질병";
-		switch (engClaimType) {
-			case "death":
-				return "사망";
-			case "disability":
-				return "장해";
-			case "surgery":
-				return "수술";
-			case "disease":
-				return "질병";
-			case "injury":
-				return "재해";
-			case "other":
-				return "기타";
-			default:
-				return "질병"; // 기본값은 질병
-		}
-	}
+private String convertEngToKoreanClaimType(String engClaimType) {
+    if (engClaimType == null)
+        return "실손"; // ✅ 기본값을 "실손"으로 변경
+    switch (engClaimType) {
+        case "death":
+            return "사망";
+        case "disability":
+            return "장해";
+        case "surgery":
+            return "수술";
+        case "disease":
+            return "실손"; // ✅ "질병" → "실손"으로 변경
+        case "injury":
+            return "재해"; // 이건 그대로 두거나 실손으로 변경 (요구사항에 따라)
+        case "other":
+            return "기타";
+        default:
+            return "실손"; // ✅ 기본값을 "실손"으로 변경
+    }
+}
 
 
 	/**

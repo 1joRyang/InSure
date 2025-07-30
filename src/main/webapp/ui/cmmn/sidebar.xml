@@ -17,7 +17,7 @@
 scwin.onpageload = function() {
     let now = localStorage.getItem("nowSelect");
     scwin.role = JSON.parse(localStorage.getItem("employee")).role;
-
+    // localStorage.removeItem("claimImg");
     if (now == "dash") {
         scwin.dashboard_onclick();
     } else if (now == "searchClaim") {
@@ -31,7 +31,7 @@ scwin.onpageload = function() {
     }
 
     if (scwin.role === "실무자") {
-        go_assignRule.hide();
+        grp_manager.hide();
     }
 };
 
@@ -44,6 +44,7 @@ function removeSClass() {
 
 function movePage(link, now) {
     parent.WebSquare.util.getComponentById("web_container").setSrc(link);
+    console.log("link", link)
     localStorage.setItem("nowSelect", now);
 }
 
@@ -68,6 +69,7 @@ scwin.search_claimNum_onclick = function () {
     removeSClass();
     search_claimNum.addClass("selected");
     movePage("/InsWebApp/ui/Assignment/claimListSearch.xml", "searchClaim");
+
 };
 
 scwin.search_personNum_onclick = function () {
@@ -81,32 +83,56 @@ scwin.go_assignRule_onclick = function () {
     go_assignRule.addClass("selected");
     movePage("/InsWebApp/ui/Assignment/assignment.xml", "goAssign");
 };
+
+scwin.img_logo_onclick = function (e) {
+    localStorage.setItem("nowSelect", "myClaim");
+    location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
+};
+
+scwin.btn_side_onclick = function (e) {
+    //menuContainer.setStyle(property, value)
+};
 ]]></script>
     </head>
-    <body ev:onpageload="scwin.onpageload">
+    <body ev:onpageload="scwin.onpageload" style="display: flex;flex-direction: row;">
     	<xf:group class="sub_contents" id="menuContainer" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true"
     		meta_snippetName="0_01 페이지시작"
-    		style="height: 100%;background-color: white;display: flex;flex-direction:column;width: 230px;border-right: 1px solid #D9D9D9;">
-    		<w2:anchor outerDiv="false" id="my_claim" style="width: 100%;height: 23px;padding: 10px;" class="menu-item"
-    			ev:onclick="scwin.my_claim_onclick">
-    			<xf:label><![CDATA[담당 청구 내역]]></xf:label>
-    		</w2:anchor>
-    		<w2:anchor outerDiv="false" id="search_claimNum" style="width: 100%;height: 23px;padding: 10px;" class="menu-item"
-    			ev:onclick="scwin.search_claimNum_onclick">
-    			<xf:label><![CDATA[청구번호 조회]]></xf:label>
-    		</w2:anchor>
-    		<w2:anchor outerDiv="false" id="search_personNum" style="width: 100%;height: 23px;padding: 10px;" class="menu-item"
-    			ev:onclick="scwin.search_personNum_onclick">
-    			<xf:label><![CDATA[주민번호 조회]]></xf:label>
-    		</w2:anchor>
-    		<w2:anchor outerDiv="false" ev:onclick="scwin.dashboard_onclick" style="width: 100%;height: 23px;padding: 10px;" id="dashboard"
-    			class="menu-item">
-    			<xf:label><![CDATA[대시보드]]></xf:label>
-    		</w2:anchor>
-    		<w2:anchor class="menu-item" id="go_assignRule" outerDiv="false" style="width: 100%;height: 23px;padding: 10px;"
-    			ev:onclick="scwin.go_assignRule_onclick">
-    			<xf:label><![CDATA[자동배정 규칙]]></xf:label>
-    		</w2:anchor>
+    		style="height: 100%;background-color: white;display: flex;flex-direction:column;width: 200px;border-right: 1px solid #D9D9D9;">
+    		<xf:group style="" id=""></xf:group>
+    		<xf:group style="gap: 20px;display: flex;flex-direction: column;" id="">
+    			<xf:group style="width:200px;gap: 5px;display: flex;flex-direction: column;" id="">
+    				<w2:textbox style="width: 150px;height: 23px;color: #707070;" id="" label="보험 심사"></w2:textbox>
+    				<w2:anchor outerDiv="false" ev:onclick="scwin.my_claim_onclick" style="width: 100%;height: 23px;padding: 10px;"
+    					id="my_claim" class="menu-item">
+    					<xf:label><![CDATA[담당 청구 내역]]></xf:label>
+    				</w2:anchor>
+    			</xf:group>
+    			<xf:group style="width:200px;gap: 5px;display: flex;flex-direction: column;" id="">
+    				<w2:textbox style="width: 150px;height: 23px;color: #707070;" id="" label="조회"></w2:textbox>
+    				<w2:anchor outerDiv="false" ev:onclick="scwin.search_claimNum_onclick" style="width: 100%;height: 23px;padding: 10px;"
+    					id="search_claimNum" class="menu-item">
+    					<xf:label><![CDATA[청구번호 조회]]></xf:label>
+    				</w2:anchor>
+    				<w2:anchor outerDiv="false" ev:onclick="scwin.search_personNum_onclick" style="width: 100%;height: 23px;padding: 10px;"
+    					id="search_personNum" class="menu-item">
+    					<xf:label><![CDATA[주민번호 조회]]></xf:label>
+    				</w2:anchor>
+    			</xf:group>
+    			<xf:group style="width:200px;gap: 5px;display: flex;flex-direction: column;" id="">
+    				<w2:textbox style="width: 150px;height: 23px;color: #707070;" id="" label="대시보드"></w2:textbox>
+    				<w2:anchor outerDiv="false" ev:onclick="scwin.dashboard_onclick" style="width: 100%;height: 23px;padding: 10px;"
+    					id="dashboard" class="menu-item">
+    					<xf:label><![CDATA[대시보드]]></xf:label>
+    				</w2:anchor>
+    			</xf:group>
+    			<xf:group style="width:200px;gap: 5px;display: flex;flex-direction: column;" id="grp_manager">
+    				<w2:textbox style="width: 150px;height: 23px;color: #707070;" id="" label="관리자"></w2:textbox>
+    				<w2:anchor outerDiv="false" ev:onclick="scwin.go_assignRule_onclick" style="width: 100%;height: 23px;padding: 10px;"
+    					id="go_assignRule" class="menu-item">
+    					<xf:label><![CDATA[자동배정 규칙]]></xf:label>
+    				</w2:anchor>
+    			</xf:group>
+    		</xf:group>
     	</xf:group>
     </body>
 </html>

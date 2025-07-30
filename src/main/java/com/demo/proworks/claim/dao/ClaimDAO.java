@@ -14,6 +14,7 @@ import com.demo.proworks.claim.vo.ClaimFullJoinVo;
 import com.demo.proworks.claim.vo.ClaimListwStatusVo;
 import com.demo.proworks.claim.vo.ClaimUserVo;
 import com.demo.proworks.claim.vo.ClaimVo;
+import com.demo.proworks.claim.vo.ClaimStatusCountVo;
 import com.demo.proworks.claim.dao.ClaimDAO;
 
 /**
@@ -187,6 +188,45 @@ public class ClaimDAO extends com.demo.proworks.cmmn.dao.ProworksDefaultAbstract
 	 */
 	public List<ClaimFullJoinVo> selectUserClaimsByRrn(ClaimFullJoinVo vo) throws ElException {
 		return (List<ClaimFullJoinVo>) list("com.demo.proworks.claim.selectUserClaimsByRrn", vo);
+	}
+	
+	
+    /**
+     * 청구번호로 관리자 번호 조회
+     * @param claimNo 청구 번호
+     * @return 관리자 번호
+     */
+    public String selectManagerNo(String claimNo) throws ElException {
+    	 return (String) selectByPk("com.demo.proworks.claim.selectManagerNo", claimNo);
+    }
+    
+    /**
+	 * 고객ID로 고객명 조회
+	 * @param customerId 고객 ID
+	 * @return 고객명
+	 */
+	public String selectCustomerNameById(String customerId) throws ElException {
+	    return (String) selectByPk("com.demo.proworks.claim.selectCustomerNameById", customerId);
+	}
+	
+	/**
+	 * 직원번호로 직원명 조회  
+	 * @param empNo 직원번호
+	 * @return 직원명
+	 */
+	public String selectEmployeeNameById(String empNo) throws ElException {
+	    return (String) selectByPk("com.demo.proworks.claim.selectEmployeeNameById", empNo);
+	}
+
+	/**
+	 * 사용자의 CLAIM 상태별 갯수 조회
+	 * 
+	 * @param ClaimVo 청구 (ID 포함)
+	 * @return ClaimStatusCountVo 상태별 갯수
+	 * @throws ElException
+	 */
+	public ClaimStatusCountVo selectClaimStatusCount(ClaimVo vo) throws ElException {
+		return (ClaimStatusCountVo) selectByPk("com.demo.proworks.claim.selectClaimStatusCount", vo);
 	}
 
 }

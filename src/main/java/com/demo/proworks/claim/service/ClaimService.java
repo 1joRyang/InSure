@@ -12,6 +12,7 @@ import com.demo.proworks.claim.vo.ClaimFullJoinVo;
 import com.demo.proworks.claim.vo.ClaimListwStatusVo;
 import com.demo.proworks.claim.vo.ClaimUserVo;
 import com.demo.proworks.claim.vo.ClaimVo;
+import com.demo.proworks.claim.vo.ClaimStatusCountVo;
 
 /**
  * @subject : 청구 관련 처리를 담당하는 인터페이스
@@ -178,5 +179,30 @@ public interface ClaimService {
 	 * @throws Exception
 	 */
 	public void updateClaimWithOcrResult(String claimNo, String analyzedClaimTypeKor, String claimContent) throws Exception;
+
+	/**
+	 * 청구의 기존 배정을 해제한다 (emp_no를 null로 설정)
+	 * 
+	 * @param claimNo 청구번호
+	 * @throws Exception
+	 */
+	public void clearClaimAssignment(String claimNo) throws Exception;
+
+	/**
+	 * 배정 해제를 별도 트랜잭션으로 수행 (강제 커밋)
+	 * 
+	 * @param claimNo 청구번호
+	 * @throws Exception
+	 */
+	public void clearClaimAssignmentForced(String claimNo) throws Exception;
+
+	/**
+	 * 사용자의 CLAIM 상태별 갯수를 조회한다.
+	 *
+	 * @param claimVo 청구 정보 (ID 포함)
+	 * @return ClaimStatusCountVo 상태별 갯수 정보
+	 * @throws Exception
+	 */
+	public ClaimStatusCountVo selectClaimStatusCount(ClaimVo claimVo) throws Exception;
 
 }

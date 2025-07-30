@@ -240,7 +240,7 @@ scwin.onInsuranceCardClick = function(e) {
     //         console.log("선택된 보험:", insuranceData);
                 
     //     }
-              location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/terms.xml"
+              location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_terms.xml"
     // } catch (error) {
     //     console.error("보험 카드 클릭 이벤트 처리 중 오류:", error);
     // }
@@ -359,14 +359,14 @@ scwin.refreshInsurance = function() {
 	<body ev:onpageload="scwin.onpageload">
          <w2:wframe src="/InsWebApp/ui/cmmn/m_header_title.xml" style="flex-shrink: 0;" id="" class="wfm_m_header"></w2:wframe>
 		<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
-			style="background-color: #f8f9fa">
+			style="">
 			<xf:group class="number_item" id="header_info"
 				style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
 				<w2:span class="number_label" label="월 보험료"></w2:span>
 				<w2:span style="font-size: 14px; color: #999;" id="spn_currentDate" label="2024.12.17" class="date_info"></w2:span>
 			</xf:group>
 
-			<xf:group id="" style="font-size: 35px; margin-bottom: 20px;">
+			<xf:group id="" style="font-size: 29px; margin-bottom: 30px;margin-top: 58px;">
 				<w2:span style="font-weight: 800;" id="spn_totalAmount" label="0"></w2:span>
 				<w2:span style="" id="" label="원 "></w2:span>
 				<w2:span class="arrow_icon" label="〉" style="cursor: pointer;" ev:onclick="scwin.refreshInsurance"></w2:span>
