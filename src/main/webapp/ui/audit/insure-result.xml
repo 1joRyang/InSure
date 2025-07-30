@@ -195,13 +195,17 @@
 				<w2:dataList baseNode="list" repeatNode="map" id="dlt_settlementTreatmentList" saveRemovedData="true">
 					<w2:columnInfo>
 						<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
-						<w2:column defaultValue="" dataType="text" name="treatment_id" length="" id="treatment_id" encYN="" ignoreStatus="">
+						<w2:column defaultValue="" dataType="text" name="treatment_id" length="" id="treatment_id" encYN=""
+							ignoreStatus="">
 						</w2:column>
 						<w2:column defaultValue="" dataType="text" name="final_due" length="" id="final_due" encYN="" ignoreStatus=""></w2:column>
 						<w2:column defaultValue="" dataType="text" name="refund_amt" length="" id="refund_amt" encYN="" ignoreStatus=""></w2:column>
 						<w2:column dataType="text" name="treatment_date" id="treatment_date"></w2:column>
 						<w2:column dataType="text" name="hospital_prepaid" id="hospital_prepaid"></w2:column>
 						<w2:column dataType="text" name="deducation_amt" id="deducation_amt"></w2:column>
+						<w2:column dataType="text" name="hospital_name" id="hospital_name"></w2:column>
+						<w2:column dataType="text" name="hospital_grade" id="hospital_grade"></w2:column>
+						<w2:column dataType="text" name="patient_type" id="patient_type"></w2:column>
 					</w2:columnInfo>
 				</w2:dataList>
 				<w2:dataMap baseNode="map" id="dma_ID">
@@ -1127,14 +1131,18 @@ scwin.prepareFastAPIRequestData = function () {
 
         if (settlementRowCount > 0) {
             console.log("settlementTreatmentList에서 데이터 추출, 행 수:", settlementRowCount);
+            console.log("settlementTreatmentList:", dlt_settlementTreatmentList);
+
             for (var i = 0; i < settlementRowCount; i++) {
                 var settlement = {
                     settlement_id: parseInt(dlt_settlementTreatmentList.getCellData(i, "settlement_id") || (i + 1)),
-                    final_due: parseInt(dlt_settlementTreatmentList.getCellData(i, "final_due") || "0"),
-                    hospital_prepaid: parseInt(dlt_settlementTreatmentList.getCellData(i, "hospital_prepaid") || "0"),
-                    deducation_amt: parseInt(dlt_settlementTreatmentList.getCellData(i, "deducation_amt") || "0"),
-                    refund_amt: parseInt(dlt_settlementTreatmentList.getCellData(i, "refund_amt") || "0"),
+                    final_due: parseInt(dlt_settlementTreatmentList.getCellData(i, "final_due") ),
+                    hospital_prepaid: parseInt(dlt_settlementTreatmentList.getCellData(i, "hospital_prepaid") ),
+                    deducation_amt: parseInt(dlt_settlementTreatmentList.getCellData(i, "deducation_amt") ),
+                    refund_amt: parseInt(dlt_settlementTreatmentList.getCellData(i, "refund_amt")),
                     treatment_id: parseInt(dlt_settlementTreatmentList.getCellData(i, "treatment_id")),
+                    hospital_name :  dlt_settlementTreatmentList.getCellData(i, "hospital_name"),
+                     hospital_grade: dlt_settlementTreatmentList.getCellData(i, "hospital_grade") ,
                     claim_no: scwin.claim.claimNo
                 };
                 settlements.push(settlement);
@@ -1142,15 +1150,15 @@ scwin.prepareFastAPIRequestData = function () {
             }
         } else {
             console.log("settlementTreatmentList가 비어있음, 기본 데이터 생성");
-            settlements.push({
-                settlement_id: 1,
-                final_due: parseInt(dma_settlementInfo.get("final_due") || "100000"),
-                hospital_prepaid: parseInt(dma_settlementInfo.get("hospital_prepaid") || "15000"),
-                deducation_amt: parseInt(dma_settlementInfo.get("deducation_amt") || "10000"),
-                refund_amt: parseInt(dma_settlementInfo.get("refund_amt") || "75000"),
-                treatment_id: 1,
-                claim_no: scwin.claim.claimNo
-            });
+            // settlements.push({
+            //     settlement_id: 1,
+            //     final_due: parseInt(dma_settlementInfo.get("final_due") || "100000"),
+            //     hospital_prepaid: parseInt(dma_settlementInfo.get("hospital_prepaid") || "15000"),
+            //     deducation_amt: parseInt(dma_settlementInfo.get("deducation_amt") || "10000"),
+            //     refund_amt: parseInt(dma_settlementInfo.get("refund_amt") || "75000"),
+            //     treatment_id: 1,
+            //     claim_no: scwin.claim.claimNo
+            // });
         }
 
         // 2. Treatments 데이터 준비 (실제 데이터 사용)
@@ -1161,25 +1169,25 @@ scwin.prepareFastAPIRequestData = function () {
                 var treatment = {
                     treatment_id: parseInt(dlt_settlementTreatmentList.getCellData(j, "treatment_id")),
                     claim_no: scwin.claim.claimNo,
-                    department: dlt_settlementTreatmentList.getCellData(j, "department") || "일반",
+                    department: dlt_settlementTreatmentList.getCellData(j, "department"),
                     treatment_date: dlt_settlementTreatmentList.getCellData(j, "treatment_date") || new Date().toISOString().split('T')[0],
-                    patient_type: "일반",
-                    hospital_name: dma_settlementInfo.get("hospital_name") || "서울대학교병원",
-                    hospital_grade: dma_settlementInfo.get("hospital_grade") || "병원급"
+                    patient_type: dlt_settlementTreatmentList.getCellData(j, "patient_type"),
+                    hospital_name: dlt_settlementTreatmentList.getCellData(j, "hospital_name"),
+                    hospital_grade: dlt_settlementTreatmentList.getCellData(j, "hospital_grade")
                 };
                 treatments.push(treatment);
                 console.log("치료[" + j + "]:", treatment);
             }
         } else {
-            treatments.push({
-                treatment_id: 1,
-                claim_no: scwin.claim.claimNo,
-                department: "내과",
-                treatment_date: new Date().toISOString().split('T')[0],
-                patient_type: "일반",
-                hospital_name: "서울대학교병원",
-                hospital_grade: "병원급"
-            });
+            // treatments.push({
+            //     treatment_id: 1,
+            //     claim_no: scwin.claim.claimNo,
+            //     department: "내과",
+            //     treatment_date: new Date().toISOString().split('T')[0],
+            //     patient_type: "일반",
+            //     hospital_name: dlt_settlementTreatmentList.getVa,
+            //     hospital_grade: "병원급"
+            // });
         }
 
         // 3. Excluded Items 데이터 준비 (실제 데이터 사용)

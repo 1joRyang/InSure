@@ -353,7 +353,7 @@ function moveNsave(rowData) {
     						<w2:column removeBorderStyle="false" width="120" inputType="text" id="column8" value="청구유형" blockSelect="false"
     							displayMode="label" hidden="false">
     						</w2:column>
-    						<w2:column removeBorderStyle="false" width="100" inputType="text" id="column9" value="고객명" blockSelect="false"
+    						<w2:column removeBorderStyle="false" width="100" inputType="text" id="column9" value="피보험자" blockSelect="false"
     							displayMode="label">
     						</w2:column>
     						<w2:column removeBorderStyle="false" width="100" inputType="text" id="column10" value="지급금액" blockSelect="false"

@@ -418,7 +418,7 @@ html, body {
 /* "예" / "아니오" 버튼 공통 스타일 */
 .yn-button {
     flex: 1; /* 가로 공간 균등 분배 */
-    height: 50px;
+    /*height: 50px;*/
     border: 1px solid #ddd;
     border-radius: 8px;
     background-color: #fff;

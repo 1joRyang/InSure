@@ -29,5 +29,14 @@
 	    WHERE
 	        claim_no = #{claimNo}
 	</update>
+	
+	<update id="updateClaimStatus" parameterType="com.demo.proworks.supplement.vo.SuppVo">
+        /* QueryID: com.demo.proworks.supplement.updateClaimStatus */
+        UPDATE CLAIM
+        SET
+            status = #{status}
+        WHERE
+            claim_no = #{claimNo}
+    </update>
 
 </mapper>
