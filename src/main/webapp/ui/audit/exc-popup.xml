@@ -83,7 +83,7 @@ scwin.onpageload = function() {
 	let itemId = localStorage.getItem('itemId');
     let excId = localStorage.getItem('excId');
     let treatmentId = localStorage.getItem("treatmentId");
-
+    // alert(treatmentId)
     let claim = JSON.parse(localStorage.getItem("claim"));
     let emp = JSON.parse(localStorage.getItem("employee"));
     if (claim.empNo != emp.empNo) {
