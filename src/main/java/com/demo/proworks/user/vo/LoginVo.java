@@ -13,11 +13,14 @@ public class LoginVo extends com.demo.proworks.cmmn.ProworksCommVO {
     public LoginVo(){
     }
 
-    @ElDtoField(logicalName = "아이디", physicalName = "userId", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    @ElDtoField(logicalName = "사용자아이디", physicalName = "userId", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String userId;
 
     @ElDtoField(logicalName = "비밀번호", physicalName = "pw", type = "String", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
     private String pw;
+
+    @ElDtoField(logicalName = "아이디", physicalName = "id", type = "int", typeKind = "", fldYn = "", delimeterYn = "", cryptoGbn = "", cryptoKind = "", length = 0, dotLen = 0, baseValue = "", desc = "", attr = "")
+    private int id;
 
     @ElVoField(physicalName = "userId")
     public String getUserId(){
@@ -41,12 +44,23 @@ public class LoginVo extends com.demo.proworks.cmmn.ProworksCommVO {
         this.pw = pw;
     }
 
+    @ElVoField(physicalName = "id")
+    public int getId(){
+        return id;
+    }
+
+    @ElVoField(physicalName = "id")
+    public void setId(int id){
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("LoginVo [");
         sb.append("userId").append("=").append(userId).append(",");
-        sb.append("pw").append("=").append(pw);
+        sb.append("pw").append("=").append(pw).append(",");
+        sb.append("id").append("=").append(id);
         sb.append("]");
         return sb.toString();
 

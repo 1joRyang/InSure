@@ -11,21 +11,106 @@
     		<xf:instance>
     			<data xmlns="" />
     		</xf:instance>
+    		<w2:dataCollection baseNode="map">
+    			<w2:dataMap baseNode="map" id="dma_step2">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="name1" id="accidentDate"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    			<w2:dataMap baseNode="map" id="dma_claimData">
+    				<w2:keyInfo></w2:keyInfo>
+    			</w2:dataMap>
+    		</w2:dataCollection>
+    		<xf:submission id="sbm_saveStep2" action="/InsWebApp/saveStep2.pwkjson" method="post" mediatype="application/json"
+    			ref='data:json,{"id":"dma_step2","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+    			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.submission1_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
+    		<xf:submission id="sbm_getClaimData" action="/InsWebApp/getClaimData.pwkjson" method="post" mediatype="application/json" ref=""
+    			target='data:json,{"id":"dma_claimData","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+    			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getClaimData_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
     	</xf:model>
     	<w2:leaf>true</w2:leaf>
     	<w2:fileName>final_check.xml</w2:fileName>
     	<w2:css src="/css/custom.css"></w2:css>
     	<w2:js src="/js/final_check.js"></w2:js>
     	<w2:engine-version>5.0.0</w2:engine-version>
-        <script lazy="false" type="text/javascript"><![CDATA[
+        <script lazy="false" type="text/javascript"><![CDATA[scwin.isEditMode = false;
 scwin.onpageload = function() {
-	
+	var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'edit') {
+        scwin.isEditMode = true;
+        //수정 모드일 경우 서버에서 기존 데이터 불러오기
+        $p.executeSubmission("sbm_getClaimData");
+    }
+};
+
+scwin.sbm_getClaimData_submitdone = function (e) {
+    var claimData = e.responseJSON.elData;
+    if (claimData && claimData.accidentDate) {
+        scwin.setAccidentDate(claimData.accidentDate);
+    }
+    btnNext.setLabel("수정");
+};
+
+scwin.dateDisplayBox_onclick = function (e) {
+    var popupUrl="/InsWebApp/ui/claimMobile/popupDatePicker.xml";
+    var popupWidth = 300;
+    var popupHeight = 380;
+    var windowWidth = window.innerWidth;
+    var windowHeight = window.innerHeight;
+    var leftPosition = (windowWidth / 2) - (popupWidth / 2);
+    var topPosition = (windowHeight / 2) - (popupHeight / 2);
+    var popupOptions = {
+        id:"datePickerPopup",
+        type:"iframePopup",
+        width: "300px",
+        height: "380px",
+        width: popupWidth + "px",
+        height: popupHeight + "px",
+        left: leftPosition + "px",
+        top: topPosition + "px",
+        popupName: " 년 / 월 / 일 ",
+        modal: true
+        //useFixPosition: true,
+        //bottom: "0px"    
+    }
+
+    $p.openPopup(popupUrl, popupOptions);
+};
+
+scwin.setAccidentDate = function(date) {
+    if(date){
+        var formattedDate = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
+        txt_accidentDate.setValue(formattedDate);
+
+        dma_step2.set("accidentDate", date);
+    }
 };
 
 
 scwin.btnNext_onclick = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/third.xml"
+    var accidentDate = dma_step2.get("accidentDate");
+    if(!accidentDate || accidentDate === "날짜를 선택해 주세요"){
+        alert("사고(발병)일을 선택해주세요.");
+        return;
+    }
+
+    $p.executeSubmission("sbm_saveStep2");
 };
+
+
+
+scwin.submission1_submitdone = function (e) {
+    if (scwin.isEditMode) {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/sixth2.xml";
+    } else {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/third.xml"
+    }
+    
+};
+
+
 ]]></script>
     	<style type="text/css"><![CDATA[/* custom.css */
 
@@ -47,7 +132,7 @@ scwin.btnNext_onclick = function (e) {
 
 #progressBar {
     height: 100%;
-    background-color: #ffc107;
+    background-color: #4FACFE;
     transition: width 0.5s ease-in-out;
 }
 
@@ -71,15 +156,15 @@ scwin.btnNext_onclick = function (e) {
 }
 
 .progressBtn.completed {
-    background-color: #ffc107;
-    border-color: #ffc107;
+    background-color: #4FACFE;
+    border-color: #4FACFE;
     color: #fff;
 }
 
 .progressBtn.active {
     background-color: #fff;
-    border-color: #ffc107;
-    color: #ffc107;
+    border-color: #4FACFE;
+    color: #4FACFE;
 }
 
 /* Scrollable Main Content Wrapper */
@@ -154,7 +239,7 @@ scwin.btnNext_onclick = function (e) {
 }
 
 .selectionBtn.selected {
-    border-color: #ffc107;
+    border-color: #4FACFE;
     background-color: #fff8e1;
 }
 
@@ -169,7 +254,7 @@ scwin.btnNext_onclick = function (e) {
 .nextBtn {
     width: 100%;
     height: 65px;
-    background-color: #ffc107;
+    background-color: #4FACFE;
     border-radius: 35px;
     color: white;
     font-size: 22px;
@@ -181,7 +266,7 @@ scwin.btnNext_onclick = function (e) {
 }
 
 .nextBtn:hover {
-    background-color: #ffb300;
+    background-color: #4FACFE;
 }
 
 /* Scroll to Top button */
@@ -200,6 +285,7 @@ scwin.btnNext_onclick = function (e) {
 .arrowUpIcon { background-image: url('/images/arrow_up_icon.png'); }]]></style>
     </head>
     <body ev:onpageload="scwin.onpageload">
+        <w2:wframe src="/InsWebApp/ui/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
         <xf:group class="sub_contents2" id="wrapper" style="">
             <xf:group class="header-section" id="header" style="">
                 <w2:textbox class="step_tit" id="" label="사고일" style="" tagname=""></w2:textbox>
@@ -235,7 +321,11 @@ scwin.btnNext_onclick = function (e) {
 
             <xf:group class="content-section" id="mainContent" style="margin:0 auto;">
             	<w2:textbox class="question-text" id="" label="사고(발병)일은 언제인가요?" style=""></w2:textbox>
-            	<w2:inputCalendar id="" style="width: 100%;height:40px;" calendarValueType="yearMonthDate"></w2:inputCalendar>
+            	<xf:group id="dateDisplayBox" class="date-input-box" ev:onclick="scwin.dateDisplayBox_onclick">
+            		<w2:textbox id="txt_accidentDate" class="date-text" label="날짜를 선택해 주세요"></w2:textbox>
+            		<xf:image src="/InsWebApp/images/insure/calendar.png" class="calendar-icon"></xf:image>
+            	</xf:group>
+
 
             	<xf:group style="flex: 1;" id=""></xf:group>
             </xf:group>

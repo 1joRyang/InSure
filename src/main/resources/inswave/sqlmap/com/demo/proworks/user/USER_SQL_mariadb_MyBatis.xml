@@ -4,17 +4,32 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--
-	@subject     : 사용자정보 관련 처리를 담당하는 Sql Mapper
+	@subject : 사용자정보 관련 처리를 담당하는 Sql Mapper
 	@description : 사용자정보 관련 처리를 담당하는 Sql Mapper
-	@author      : 임소희
-	@since       : 2025/07/01
+	@author : 임소희
+	@since : 2025/07/01
 	@modification
 	===========================================================
-	DATE              AUTHOR             DESC
+	DATE AUTHOR DESC
 	===========================================================
-	2025/07/01              임소희             최초 생성
- -->
+	2025/07/01 임소희 최초 생성
+-->
 <mapper namespace="com.demo.proworks.user">
+
+	<select id="selectPasswordByUserId" parameterType="String" resultType="String">
+		SELECT
+		PW as pw
+		FROM USER
+		WHERE USER_ID = #{userId}
+	</select>
+
+	<update id="updateSimplePassword" parameterType="com.demo.proworks.user.vo.UserVo">
+		UPDATE USER
+		SET simple_pw = #{simplePw}
+		WHERE user_id = #{userId}
+	</update>
+
+
     <insert id="insertUser" parameterType="com.demo.proworks.user.vo.UserVo">
     	<!-- 사용자정보를 등록한다. -->	
     		
@@ -25,8 +40,9 @@
             <if test="pw       != null"> , PW        </if>
             <if test="simplePw!= null"> , SIMPLE_PW </if>
             <if test="rrn      != null"> , RRN       </if>
-            <if test="userName!= null"> , USER_NAME </if>
+            <if test="userName != null"> , USER_NAME </if>
             <if test="account  != null"> , ACCOUNT   </if>
+            <if test="phone_number  != null"> , PHONE_NUMBER   </if>
         )
         VALUES  
         ( 
@@ -36,47 +52,56 @@
             <if test="simplePw!= null"> , #{simplePw} </if>
             <if test="rrn      != null"> , #{rrn}       </if>
             <if test="userName!= null"> , #{userName} </if>
-            <if test="account  != null"> , #{account}   </if> 
+            <if test="account  != null"> , #{account}   </if>
+            <if test="phone_number  != null"> , #{phone_number}   </if>
+ 
         )          
     </insert>	
+	
+	
+
 	
     <update id="updateUser" parameterType="com.demo.proworks.user.vo.UserVo">
     	<!-- 사용자정보를 갱신한다. -->
     	
         UPDATE USER    /* QueryID : com.demo.proworks.user.updateUser */      
       	  SET  
-                ID        = #{id}               	                       
+                ID        = #{id}       
             <if test="userId  != null"> , USER_ID   = #{userId}   </if>
             <if test="pw       != null"> , PW        = #{pw}        </if>
             <if test="simplePw!= null"> , SIMPLE_PW = #{simplePw} </if>
             <if test="rrn      != null"> , RRN       = #{rrn}       </if>
             <if test="userName!= null"> , USER_NAME = #{userName} </if>
-            <if test="account  != null"> , ACCOUNT   = #{account}   </if>                 
+            <if test="account  != null"> , ACCOUNT   = #{account}   </if>
+            <if test="phone_number  != null"> , PHONE_NUMBER = #{phone_number}   </if>                
         WHERE   
                 ID        = #{id}       
     </update>
+    
 	
     <delete id="deleteUser" parameterType="com.demo.proworks.user.vo.UserVo">
     	<!-- 사용자정보를 삭제한다. -->
     	
         DELETE FROM USER   /* QueryID : com.demo.proworks.user.deleteUser */ 
         WHERE   
-                ID        = #{id}               
+                ID        = #{id}       
+        
     </delete>
 	
     <select id="selectUser" parameterType="com.demo.proworks.user.vo.UserVo" resultType="com.demo.proworks.user.vo.UserVo">
-<!-- 사용자정보를 상세 조회한다. -->	
+	<!-- 사용자정보를 상세 조회한다. -->	
         SELECT     /* QueryID : com.demo.proworks.user.selectUser */
-            ID as id, USER_ID as userId, PW as pw, SIMPLE_PW as simplePw, RRN as rrn, USER_NAME as userName, ACCOUNT as account
+
+            ID as id, USER_ID as userId, PW as pw, SIMPLE_PW as simplePw, RRN as rrn, USER_NAME as userName, ACCOUNT as account, DEFAULT_BANK_CODE as default_bank_code, DEFAULT_BANK_NAME as default_bank_name, PHONE_NUMBER as phone_number
         FROM USER 
         WHERE 
                 USER_ID        = #{userId}
-</select>
+	</select>
 	
     <select id="selectListUser" parameterType="com.demo.proworks.user.vo.UserVo" resultType="com.demo.proworks.user.vo.UserVo">
     	<!-- 사용자정보 목록을 조회한다. -->
            SELECT    /* QueryID : com.demo.proworks.user.selectListUser */
-               ID as id, USER_ID as userId, PW as pw, SIMPLE_PW as simplePw, RRN as rrn, USER_NAME as userName, ACCOUNT as account		       
+               ID as id, USER_ID as userId, PW as pw, SIMPLE_PW as simplePw, RRN as rrn, USER_NAME as userName, ACCOUNT as account, PHONE_NUMBER as phone_number		       
            FROM (
                SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
                FROM (				
@@ -99,5 +124,36 @@
          WHERE  1=1    		
 
     </select>
+    
+
+    <select id="selectUserById" parameterType="com.demo.proworks.user.vo.UserVo" resultType="com.demo.proworks.user.vo.UserVo">
+	<!-- 계좌조회를 위해 채번된 id로 사용자정보를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.user.selectUserById */
+        ID as id,
+        user_id as userId,
+        user_name as userName,
+        account,
+        default_bank_code,
+        default_bank_name
+    FROM
+        USER
+    WHERE
+        ID = #{id}
+
+    </select>
+    	
+
+	<!-- 주민번호로 사용자 기본정보 조회 -->
+	<select id="selectUserByRrn" parameterType="String" resultType="com.demo.proworks.user.vo.UserVo">
+		SELECT /* QueryID : com.demo.proworks.user.selectUserByRrn */
+		ID as id,
+		USER_NAME as userName,
+		RRN as rrn,
+		PHONE_NUMBER as phone_number
+		FROM USER
+		WHERE rrn = #{rrn}
+
+	</select>
 
 </mapper>
+

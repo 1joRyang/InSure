@@ -9,7 +9,7 @@
 .step li span {color: inherit}
 .step + .btn_fav {margin-left:16px}
 .step li.checked {color: #888}
-.step li.current {background: #ffe066; color: #222; font-weight: bold}
+.step li.current {background: #4FACFE; color: #222; font-weight: bold}
 
 /* custom.css */
 
@@ -57,15 +57,15 @@
 }
 
 .progressBtn.completed {
-    background-color: #ffc107;
-    border-color: #ffc107;
+    background-color: #4FACFE;
+    border-color: #4FACFE;
     color: #fff;
 }
 
 .progressBtn.active {
     background-color: #fff;
-    border-color: #ffc107;
-    color: #ffc107;
+    border-color: #4FACFE;
+    color: #4FACFE;
 }
 
 /* 메인 컨텐츠 영역 */
@@ -96,8 +96,8 @@
 }
 
 .selectionBtn.selected {
-    border-color: #ffc107;
-    background-color: #fff8e1;
+    border-color: #4FACFE;
+    background-color: #4FACFE;
 }
 
 /* 아이콘 스타일 */
@@ -123,7 +123,7 @@
 .nextBtn {
     width: 100%;
     height: 65px;
-    background-color: #ffc107;
+    background-color: #4FACFE;
     border-radius: 35px;
     color: white;
     font-size: 22px;
@@ -134,7 +134,7 @@
 }
 
 .nextBtn:hover {
-    background-color: #ffb300;
+    background-color: #4FACFE;
 }
 
 /*==========================================================================*/
@@ -155,9 +155,10 @@ html, body {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 50px);
     position:relative;
-    margin:0;
+	margin-top: 50px;
+
 }
 
 /* 헤더 - 청구유형 */
@@ -173,7 +174,7 @@ html, body {
 }
 
 .step_tit {
-    font-size: 18px; /* 청구유형 텍스트 크기 */
+    font-size: 15px; /* 청구유형 텍스트 크기 */
     font-weight: bold;
     color: #333;
 }
@@ -191,13 +192,13 @@ html, body {
 }
 
 .step li {
-    width: 28px; /* 단계 원의 너비 */
-    height: 28px; /* 단계 원의 높이 */
+    width: 25px; /* 단계 원의 너비 */
+    height: 25px; /* 단계 원의 높이 */
     border-radius: 50%; /* 완전한 원 */
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: bold;
     margin-left: 8px; /* 단계 원 사이 간격 */
     transition: all 0.2s ease-in-out; /* 부드러운 전환 효과 */
@@ -236,6 +237,9 @@ html, body {
     overflow-y: auto; /* 내용이 넘치면 스크롤 */
     padding-bottom: 80px; /* 푸터와 겹치지 않도록 하단 패딩 충분히 확보 */
     padding-top: 40px;
+    width: 100%;
+    max-width:350px;
+    box-sizing: border-box;
 }
 
 .infoSection {
@@ -280,7 +284,7 @@ html, body {
 
 .selection-box-container:active,
 .selection-box-container.selected {
-    border-color: #ffc107; /* 선택 시 노란색 테두리 */
+    border-color: #4FACFE; /* 선택 시 노란색 테두리 */
 }
 
 .selection-box-icon {
@@ -319,7 +323,43 @@ html, body {
 }
 
 .next-button:active {
-    background-color: #e6a700; /* 클릭 시 약간 어둡게 */
+    background-color: #4FACFE; /* 클릭 시 약간 어둡게 */
+}
+
+/*===========================claimDate=====================================*/
+.date-input-box {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	height: 48px;
+	padding: 0 15px;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	background-color: #fff;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+
+.date-text {
+	font-size: 16px;
+	color: #333;
+}
+
+.calendar-icon {
+	width: 24px;
+	height: 24px;
+}
+
+/*===========================claimSymptom========================================*/
+.text-input {
+	width: 100%;
+	height: 100px;
+	padding: 0 15px;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	font-size: 16px;
+	box-sizing: border-box;
 }
 
 /*===========================claimAccount======================================*/
@@ -378,7 +418,7 @@ html, body {
 /* "예" / "아니오" 버튼 공통 스타일 */
 .yn-button {
     flex: 1; /* 가로 공간 균등 분배 */
-    height: 50px;
+    /*height: 50px;*/
     border: 1px solid #ddd;
     border-radius: 8px;
     background-color: #fff;
@@ -394,17 +434,17 @@ html, body {
 
 /* "예" / "아니오" 버튼 선택 시 스타일 */
 .yn-button.selected {
-    border-color: #ffc107; /* 노란색 테두리 */
-    background-color: #fff8e1; /* 연한 노란색 배경 */
-    color: #ffc107; /* 노란색 텍스트 */
+    border-color: #4FACFE; /* 노란색 테두리 */
+    background-color: #4FACFE; /* 연한 노란색 배경 */
+    color: #4FACFE; /* 노란색 텍스트 */
 }
 
 /*===========================claimEnter======================================*/
 /* '맞춤 서류 안내' 버튼 */
 .guide-button {
-    background-color: #fff8e1; /* 연한 노란색 배경 */
+    background-color: #4FACFE; /* 연한 노란색 배경 */
     color: #ffc107; /* 노란색 글씨 */
-    border: 1px solid #ffc107; /* 노란색 테두리 */
+    border: 1px solid #4FACFE; /* 노란색 테두리 */
     border-radius: 20px; /* 둥근 모서리 */
     padding: 8px 15px;
     font-size: 14px;
@@ -706,13 +746,13 @@ html, body {
 }
 
 .agreement_section {
-	border: 2px solid #ffc107; /* 이미지의 노란색 테두리 */
+	border: 2px solid #4FACFE;
     border-radius: 8px;
     padding: 0 16px; /* 내부 좌우 여백 */
 }
 
 .agreement_section .item1 {
-	padding: 0 40px; /* 내부 좌우 여백 */
+	 /* 내부 좌우 여백padding: 0 40px; */
 }
 
 /* select_agreement: '필수 항목 전체 동의' 체크박스 그룹 */
@@ -721,8 +761,8 @@ html, body {
     display: flex;
     align-items: center;
     background-color: #fff;
-    padding: 0 16px; /* 내부 좌우 여백 */
-    margin-bottom: 20px;
+    /*padding: 0 16px; 내부 좌우 여백 margin-bottom: 20px; */
+    
 }
 
 /* agreement_select: xf:select (체크박스 역할) 스타일 */
@@ -745,8 +785,8 @@ html, body {
 
 /* 선택되었을 때의 체크박스 스타일 (JavaScript로 'checked' 클래스 추가 필요) */
 .select_agreement.checked .w2select_select_area {
-    background-color: #ffc107;
-    border-color: #ffc107;
+    background-color: #4FACFE;
+    border-color: #4FACFE;
 }
 .select_agreement.checked .w2select_select_area::after {
     content: '';
@@ -763,7 +803,7 @@ html, body {
 
 /* required_label: [필수] 텍스트 스타일 */
 .select_agreement #required_label {
-    color: #ffc107;
+    color: #4FACFE;
     font-weight: bold;
     font-size: 16px;
     height: auto !important; /* 높이 고정 해제 */
@@ -825,8 +865,8 @@ html, body {
 .consent_group .consent_checkbox {
     width: 100%;
     height: 56px;
-    background-color: #ffc107;
-    color: #000;
+    background-color: #4FACFE;
+    color: #fff;
     font-size: 18px;
     font-weight: bold;
     border-radius: 12px;
@@ -843,4 +883,43 @@ html, body {
     background-color: #f0f0f0;
     color: #ccc;
     cursor: not-allowed;
+}
+
+/* 모바일 보완 페이지*/
+.notification-box {
+   	background-color: #fffbeb;
+    border: 1px solid #ffe58f;
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 14px;
+    color: #5c3a00;
+}
+
+/* Claim Info Section */
+.claim-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #1d1d1d;
+    margin-bottom: 16px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    color: #555;
+    }
+
+.info-value {
+    color: #1d1d1d;
+    font-weight: 500;
 }

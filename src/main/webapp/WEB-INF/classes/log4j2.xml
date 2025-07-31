@@ -33,6 +33,10 @@
         <Logger name="elfw.appLogger" level="DEBUG" additivity="false">
             <AppenderRef ref="console" />
         </Logger>
+        
+        <Logger name="com.demo" level="DEBUG" additivity="false">
+            <AppenderRef ref="console" />
+        </Logger>
                 
         <Root level="ON">
             <AppenderRef ref="console" />

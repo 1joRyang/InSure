@@ -8,7 +8,7 @@ _webpack_
 ### Java ###
 # Compiled class file
 *.class
-
+*.classpath
 # Log file
 *.log
 
@@ -31,10 +31,15 @@ _webpack_
 .settings/
 _wpack_/
 /target/
+elfw.properties
 
-
+node_modules/
+/node_modules/
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
 
 # End of https://www.toptal.com/developers/gitignore/api/java
+
+# 직접 추가한 파일
+src/main/resources/inswave/properties/elfw.properties

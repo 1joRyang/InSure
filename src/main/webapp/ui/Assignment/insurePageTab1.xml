@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare"
+	xmlns:xf="http://www.w3.org/2002/xforms">
+	<head>
+		<w2:type>COMPONENT</w2:type>
+		<w2:buildDate />
+		<w2:MSA />
+		<xf:model>
+			<w2:dataCollection baseNode="map">
+				<!-- 사용자 보험 정보를 가져올 DataMap -->
+				<w2:dataMap baseNode="map" id="dm_getUserInsurance">
+					<w2:keyInfo>
+						<w2:key id="ID" name="ID"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+
+				<!-- 보험 리스트를 담을 DataList -->
+				<w2:dataList baseNode="list" id="dl_insuranceList" repeatNode="map">
+					<w2:columnInfo>
+						<w2:column id="insu_id" name="insu_id" dataType="text"></w2:column>
+						<w2:column id="ID" name="ID" dataType="text"></w2:column>
+						<w2:column id="user_name" name="user_name" dataType="text"></w2:column>
+						<w2:column id="start_date" name="start_date" dataType="text"></w2:column>
+						<w2:column id="end_date" name="end_date" dataType="text"></w2:column>
+						<w2:column id="insu_amt" name="insu_amt" dataType="text"></w2:column>
+						<w2:column id="insu_type" name="insu_type" dataType="text"></w2:column>
+						<w2:column id="insu_name" name="insu_name" dataType="text"></w2:column>
+					</w2:columnInfo>
+				</w2:dataList>
+			</w2:dataCollection>
+
+			<w2:workflowCollection>
+				<!-- 사용자 보험 정보를 가져오는 submission -->
+			</w2:workflowCollection>
+			<!-- <xf:submission id="sbm_getMyInsurance" action="/InsWebApp/USERINSURANCEList.pwkjson" method="post" mediatype="application/json"
+				ref='data:json,{"id":"dm_getUserInsurance","key":"userInsuranceVo"}' target='data:json,{"id":"dl_insuranceList","key":"elData"}'
+				encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
+				ev:submiterror="" abortTrigger="">
+				</xf:submission> -->
+			<xf:submission id="sbm_getMyInsurance" action="/InsWebApp/USERINSURANCEList.pwkjson" method="post"
+				mediatype="application/json" ref='data:json,{"id":"dm_getUserInsurance","key":"userInsuranceVo"}'
+				target='data:json,{"id":"dl_insuranceList","key":"userInsuranceVoList"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+				customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getMyInsurance_submitdone"
+				ev:submiterror="scwin.sbm_getMyInsurance_submiterror" abortTrigger="">
+			</xf:submission>
+		</xf:model>
+		<w2:layoutInfo />
+		<w2:publicInfo method="" />
+		<script lazy="false" type="text/javascript"><![CDATA[
+
+scwin.onpageload = function() {
+    scwin.user = JSON.parse(localStorage.getItem("user"));
+    // 사용자명으로 보험 정보 조회
+    dm_getUserInsurance.set("ID", scwin.user.id);
+    $c.sbm.execute(sbm_getMyInsurance);
+    
+    // 현재 날짜 설정
+    scwin.setCurrentDate();
+};
+
+scwin.sbm_getMyInsurance_submitdone = function(e) {
+    console.log("=== 보험 조회 완료 ===");
+    
+    let insuranceList = null;
+    
+    // submission target이 정상 작동했는지 먼저 확인
+    try {
+        insuranceList = dl_insuranceList.getAllJSON();
+        console.log("DataList에서 가져온 데이터:", insuranceList);
+    } catch (error) {
+        console.error("DataList 접근 오류:", error);
+    }
+    
+    // DataList가 비어있다면 서버 응답에서 직접 가져오기
+    if (!insuranceList || insuranceList.length === 0) {
+        console.log("DataList가 비어있어서 서버 응답에서 직접 가져옵니다.");
+        
+        if (e && e.responseJSON && e.responseJSON.userInsuranceVoList) {
+            insuranceList = e.responseJSON.userInsuranceVoList;
+            console.log("서버 응답에서 가져온 데이터:", insuranceList);
+            
+            // 수동으로 DataList에 데이터 설정
+            try {
+                dl_insuranceList.setJSON(insuranceList);
+                console.log("DataList에 수동으로 데이터 설정 완료");
+            } catch (error) {
+                console.error("DataList 수동 설정 오류:", error);
+            }
+        }
+    }
+    
+    if (insuranceList && insuranceList.length > 0) {
+        console.log("유효한 보험 리스트 발견:", insuranceList.length + "건");
+        
+        // 각 보험 데이터에 누락된 필드 추가 (기본값 설정)
+        insuranceList = insuranceList.map(function(insurance) {
+            return {
+                insu_id: insurance.insu_id,
+                ID: insurance.ID,
+                user_name: insurance.user_name,
+                start_date: insurance.start_date,
+                end_date: insurance.end_date,
+                insu_amt: insurance.insu_amt || 50000, // 기본 보험료 (서버에서 null로 옴)
+                insu_type: insurance.insu_type || "종합", // 기본 보험 타입
+                insu_name: insurance.insu_name || (insurance.insu_id + " 보험") // 기본 보험명
+            };
+        });
+        
+        console.log("필드 보완된 보험 리스트:", insuranceList);
+        
+        // 총 보험료 계산
+        let totalAmount = scwin.calculateTotalAmount(insuranceList);
+        
+        // 총 보험료 표시
+        let amountSpan = $p.getComponentById("spn_totalAmount");
+        amountSpan.setValue(scwin.formatNumber(totalAmount));
+        
+        // 보험 카드들 동적 생성
+        scwin.createInsuranceCards(insuranceList);
+    } else {
+        console.log("조회된 보험 정보가 없습니다.");
+        // 기본값 설정
+        let amountSpan = $p.getComponentById("spn_totalAmount");
+        amountSpan.setValue("0");
+        
+        // 메시지 표시
+        scwin.showNoDataMessage();
+    }
+};
+scwin.sbm_getMyInsurance_submiterror = function(e) {
+    console.error("보험 정보 조회 실패:", e);
+    alert("보험 정보를 조회하는 중 오류가 발생했습니다.");
+};
+
+/**
+ * 보험 카드들을 동적으로 생성
+ */
+scwin.createInsuranceCards = function(insuranceList) {
+    let parentGroup = $p.getComponentById("grp_cardContainer");
+    
+    // 기존 동적 생성된 카드들 제거
+    let existingCards = parentGroup.getChildren().filter(child => 
+        child.getId().startsWith("grp_insurance_card_")
+    );
+    existingCards.forEach(card => parentGroup.removeChild(card));
+    
+    // 각 보험에 대해 카드 생성
+    for (let i = 0; i < insuranceList.length; i++) {
+        let insuranceData = insuranceList[i];
+        scwin.createInsuranceCard(parentGroup, insuranceData, i);
+    }
+};
+
+/**
+ * 개별 보험 카드 생성 (dynamic create 사용)
+ */
+scwin.createInsuranceCard = function(container, insuranceData, index) {
+    let cardId = "grp_insurance_card_" + index;
+    
+    // 카드 그룹 생성
+    let card = $p.dynamicCreate(cardId, "group", {
+        style: "background-color: #ffffff; border-radius: 12px; padding: 18px 20px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 8px;",
+        "ev:onclick": "scwin.onInsuranceCardClick"
+    }, container);
+    
+    // 헤더 그룹 (보험 타입과 상태 표시)
+    let headerGroup = $p.dynamicCreate(cardId + "_header", "group", {
+        style: "display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"
+    }, card);
+    
+    // 보험 타입 (종합, 의료, 생명 등)
+    let typeSpan = $p.dynamicCreate(cardId + "_type", "span", {
+        style: "font-size: 20px; font-weight: 800; color: #333;"
+    }, headerGroup);
+    typeSpan.setValue((insuranceData.insu_type || "기타") + " 보험");
+    
+    // 상태 버튼 (활성/만료 등)
+    let statusGroup = $p.dynamicCreate(cardId + "_status", "group", {
+        style: "padding: 4px 8px; border-radius: 6px; background-color: " + scwin.getStatusBackgroundColor(insuranceData) + ";"
+    }, headerGroup);
+    
+    let statusSpan = $p.dynamicCreate(cardId + "_statusText", "span", {
+        style: "font-size: 12px; font-weight: 600; color: " + scwin.getStatusColor(insuranceData) + ";"
+    }, statusGroup);
+    statusSpan.setValue(scwin.getStatusText(insuranceData));
+    
+    // 보험 이름
+    let nameSpan = $p.dynamicCreate(cardId + "_name", "span", {
+        style: "font-size: 16px; color: #666; margin-bottom: 8px;"
+    }, card);
+    nameSpan.setValue(insuranceData.insu_name || "보험명 없음");
+    
+    // 보험료 정보 그룹
+    let amountGroup = $p.dynamicCreate(cardId + "_amountGroup", "group", {
+        style: "display: flex; justify-content: space-between; align-items: center; margin-top: 8px;"
+    }, card);
+    
+    // 월 보험료 라벨
+    let amountLabel = $p.dynamicCreate(cardId + "_amountLabel", "span", {
+        style: "font-size: 14px; color: #888;"
+    }, amountGroup);
+    amountLabel.setValue("월 보험료");
+    
+    // 보험료 금액
+    let amountValue = $p.dynamicCreate(cardId + "_amountValue", "span", {
+        style: "font-size: 16px; font-weight: 700; color: #333;"
+    }, amountGroup);
+    amountValue.setValue(scwin.formatNumber(insuranceData.insu_amt || 0) + "원");
+    
+    // 보험 기간 정보 그룹
+    let periodGroup = $p.dynamicCreate(cardId + "_periodGroup", "group", {
+        style: "display: flex; justify-content: space-between; align-items: center; margin-top: 4px;"
+    }, card);
+    
+    // 보험 기간 라벨
+    let periodLabel = $p.dynamicCreate(cardId + "_periodLabel", "span", {
+        style: "font-size: 14px; color: #888;"
+    }, periodGroup);
+    periodLabel.setValue("보험기간");
+    
+    // 보험 기간 값
+    let periodValue = $p.dynamicCreate(cardId + "_periodValue", "span", {
+        style: "font-size: 14px; color: #666;"
+    }, periodGroup);
+    periodValue.setValue(scwin.formatDate(insuranceData.start_date) + " ~ " + scwin.formatDate(insuranceData.end_date));
+    
+    // 카드에 보험 데이터 바인딩 (클릭 이벤트용)
+    card.setUserData("insuranceData", insuranceData);
+};
+/**
+ * 보험 카드 클릭 이벤트
+ */
+scwin.onInsuranceCardClick = function(e) {
+    console.log("보험 클릭");
+    // try {
+    //     let clickedCard = e.target;
+    //     let insuranceData = clickedCard.getUserData("insuranceData");
+        
+    //     if (insuranceData) {
+    //         console.log("선택된 보험:", insuranceData);
+                
+    //     }
+              location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_terms.xml"
+    // } catch (error) {
+    //     console.error("보험 카드 클릭 이벤트 처리 중 오류:", error);
+    // }
+};
+
+/**
+ * 데이터가 없을 때 메시지 표시
+ */
+scwin.showNoDataMessage = function() {
+    let parentGroup = $p.getComponentById("grp_cardContainer");
+    
+    // 메시지 그룹 생성
+    let messageGroup = $p.dynamicCreate("grp_no_data", "group", {
+        style: "text-align: center; padding: 40px; color: #888;"
+    }, parentGroup);
+    
+    let messageSpan = $p.dynamicCreate("spn_no_data", "span", {
+        style: "font-size: 16px;"
+    }, messageGroup);
+    messageSpan.setValue("가입된 보험이 없습니다.");
+};
+
+/**
+ * 상태 텍스트 반환
+ */
+scwin.getStatusText = function(insuranceData) {
+    return scwin.isInsuranceActive(insuranceData) ? "활성" : "만료";
+};
+
+/**
+ * 상태 색상 반환
+ */
+scwin.getStatusColor = function(insuranceData) {
+    return scwin.isInsuranceActive(insuranceData) ? "#22C55E" : "#FF7E7E";
+};
+
+/**
+ * 상태 배경 색상 반환
+ */
+scwin.getStatusBackgroundColor = function(insuranceData) {
+    return scwin.isInsuranceActive(insuranceData) ? 
+        "rgba(34, 197, 94, 0.1)" : "rgba(255, 126, 126, 0.1)";
+};
+
+/**
+ * 총 보험료 계산
+ */
+scwin.calculateTotalAmount = function(insuranceList) {
+    let total = 0;
+    let activeCount = 0;
+    let expiredCount = 0;
+    let today = new Date();
+    
+    for (let i = 0; i < insuranceList.length; i++) {
+        let insurance = insuranceList[i];
+        let endDate = new Date(insurance.end_date);
+        
+        // 보험이 아직 유효한 경우만 합계에 포함
+        if (endDate >= today) {
+            total += parseInt(insurance.insu_amt || 0);
+            activeCount++;
+        } else {
+            expiredCount++;
+            console.log("만료된 보험 제외:", insurance.insu_id, "만료일:", insurance.end_date);
+        }
+    }
+    
+    console.log("활성 보험:", activeCount + "건, 만료 보험:", expiredCount + "건");
+    console.log("총 월 보험료 (활성 보험만):", scwin.formatNumber(total) + "원");
+    
+    return total;
+};
+
+scwin.isInsuranceActive = function(insuranceData) {
+    let today = new Date();
+    let endDate = new Date(insuranceData.end_date);
+    return endDate >= today;
+};
+
+/**
+ * 숫자 포맷팅 (천단위 콤마)
+ */
+scwin.formatNumber = function(number) {
+    return parseInt(number).toLocaleString();
+};
+
+/**
+ * 날짜 포맷팅 (YYYY-MM-DD -> YYYY.MM.DD)
+ */
+scwin.formatDate = function(dateString) {
+    if (!dateString) return "";
+    return dateString.replace(/-/g, ".");
+};
+
+/**
+ * 현재 날짜 설정
+ */
+scwin.setCurrentDate = function() {
+    let today = new Date();
+    let year = today.getFullYear();
+    let month = String(today.getMonth() + 1).padStart(2, '0');
+    let day = String(today.getDate()).padStart(2, '0');
+    
+    let currentDateSpan = $p.getComponentById("spn_currentDate");
+    currentDateSpan.setValue(year + "." + month + "." + day);
+};
+
+/**
+ * 보험 새로고침
+ */
+scwin.refreshInsurance = function() {
+    $c.sbm.execute(sbm_getMyInsurance);
+};
+]]></script>
+	</head>
+	<body ev:onpageload="scwin.onpageload">
+         <w2:wframe src="/InsWebApp/ui/cmmn/m_header_title.xml" style="flex-shrink: 0;" id="" class="wfm_m_header"></w2:wframe>
+		<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
+			style="">
+			<xf:group class="number_item" id="header_info"
+				style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+				<w2:span class="number_label" label="월 보험료"></w2:span>
+				<w2:span style="font-size: 14px; color: #999;" id="spn_currentDate" label="2024.12.17" class="date_info"></w2:span>
+			</xf:group>
+
+			<xf:group id="" style="font-size: 29px; margin-bottom: 30px;margin-top: 58px;">
+				<w2:span style="font-weight: 800;" id="spn_totalAmount" label="0"></w2:span>
+				<w2:span style="" id="" label="원 "></w2:span>
+				<w2:span class="arrow_icon" label="〉" style="cursor: pointer;" ev:onclick="scwin.refreshInsurance"></w2:span>
+			</xf:group>
+
+			<xf:group id="" style="margin-bottom: 15px;">
+				<w2:span style="font-size: 18px; font-weight: 600;" id="" label="내 보험"></w2:span>
+			</xf:group>
+
+			<!-- 동적으로 생성될 카드들의 컨테이너 -->
+			<xf:group id="grp_cardContainer" style="display: flex; flex-direction: column;">
+				<!-- 카드들이 여기에 동적으로 생성됩니다 -->
+			</xf:group>
+		</xf:group>
+        <w2:wframe style="flex-shrink: 0;" id="" class="wfm_m_footer" src="/InsWebApp/ui/cmmn/m_footer.xml"></w2:wframe>
+	</body>
+</html>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 진료정보 관련 처리를 담당하는 Sql Mapper
+	@description : 진료정보 관련 처리를 담당하는 Sql Mapper
+	@author      : Inswave
+	@since       : 2025/07/08
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/07/08              Inswave             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.treatment">
+    <insert id="insertTreatment" parameterType="com.demo.proworks.treatment.vo.TreatmentVo">
+    	<!-- 진료정보를 등록한다. -->	
+    		
+        INSERT INTO TREATMENT   /* QueryID : com.demo.proworks.treatment.insertTreatment */
+        ( 
+            CLAIM_NO
+            <if test="department    != null"> , DEPARTMENT     </if>
+            <if test="treatment_date!= null"> , TREATMENT_DATE </if>
+            <if test="patient_type  != null"> , PATIENT_TYPE   </if>
+            <if test="hospital_name != null"> , HOSPITAL_NAME  </if>
+            <if test="hospital_grade!= null"> , HOSPITAL_GRADE </if>
+        )
+        VALUES  
+        ( 
+             #{claim_no}
+            <if test="department    != null"> , #{department}     </if>
+            <if test="treatment_date!= null"> , #{treatment_date} </if>
+            <if test="patient_type  != null"> , #{patient_type}   </if>
+            <if test="hospital_name != null"> , #{hospital_name}  </if>
+            <if test="hospital_grade!= null"> , #{hospital_grade} </if> 
+        )          
+    </insert>	
+	
+    <update id="updateTreatment" parameterType="com.demo.proworks.treatment.vo.TreatmentVo">
+    	<!-- 진료정보를 갱신한다. -->
+    	
+        UPDATE TREATMENT    /* QueryID : com.demo.proworks.treatment.updateTreatment */      
+      	  SET  
+                TREATMENT_ID   = #{treatment_id}  
+         ,  CLAIM_NO       = #{claim_no}              	                       
+            <if test="department    != null"> , DEPARTMENT     = #{department}     </if>
+            <if test="treatment_date!= null"> , TREATMENT_DATE = #{treatment_date} </if>
+            <if test="patient_type  != null"> , PATIENT_TYPE   = #{patient_type}   </if>
+            <if test="hospital_name != null"> , HOSPITAL_NAME  = #{hospital_name}  </if>
+            <if test="hospital_grade!= null"> , HOSPITAL_GRADE = #{hospital_grade} </if>                 
+        WHERE   
+                TREATMENT_ID   = #{treatment_id}  
+         AND CLAIM_NO       = #{claim_no}      
+    </update>
+	
+    <delete id="deleteTreatment" parameterType="com.demo.proworks.treatment.vo.TreatmentVo">
+    	<!-- 진료정보를 삭제한다. -->
+    	
+        DELETE FROM TREATMENT   /* QueryID : com.demo.proworks.treatment.deleteTreatment */ 
+        WHERE   
+                TREATMENT_ID   = #{treatment_id}  
+         AND CLAIM_NO       = #{claim_no}              
+    </delete>
+	
+    <select id="selectTreatment" parameterType="com.demo.proworks.treatment.vo.TreatmentVo" resultType="com.demo.proworks.treatment.vo.TreatmentVo">
+    	<!-- 진료정보를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.treatment.selectTreatment */
+            TREATMENT_ID, CLAIM_NO, DEPARTMENT, TREATMENT_DATE, PATIENT_TYPE, HOSPITAL_NAME, HOSPITAL_GRADE
+        FROM TREATMENT 
+        WHERE 
+                TREATMENT_DATE   = #{treatment_date}  
+         AND CLAIM_NO       = #{claim_no}      			
+    </select>
+	
+    <select id="selectListTreatment" parameterType="com.demo.proworks.treatment.vo.TreatmentVo" resultType="com.demo.proworks.treatment.vo.TreatmentVo">
+    	<!-- 진료정보 목록을 조회한다. -->
+           SELECT    /* QueryID : com.demo.proworks.treatment.selectListTreatment */
+               TREATMENT_ID, CLAIM_NO, DEPARTMENT, TREATMENT_DATE, PATIENT_TYPE, HOSPITAL_NAME, HOSPITAL_GRADE		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM TREATMENT
+                   WHERE  1=1    		
+                        <if test="SC_treatment_id != null and SC_treatment_id != ''">
+                             AND TREATMENT_ID like '%${SC_treatment_id}%'
+                        </if>
+                        <if test="SC_claim_no != null and SC_claim_no != ''">
+                             AND CLAIM_NO like '%${SC_claim_no}%'
+                        </if>
+                        <if test="SC_treatment_date != null and SC_treatment_date != ''">
+                             AND TREATMENT_DATE like '%${SC_treatment_date}%'
+                        </if>	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountTreatment" parameterType="com.demo.proworks.treatment.vo.TreatmentVo" resultType="long">
+    <!-- 진료정보 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.treatment.selectListCountTreatment */
+             COUNT(*) totcnt  		                  
+         FROM TREATMENT
+         WHERE  1=1    		
+            <if test="SC_treatment_id != null and SC_treatment_id != ''">
+                 AND TREATMENT_ID like '%${SC_treatment_id}%'
+            </if>
+            <if test="SC_claim_no != null and SC_claim_no != ''">
+                 AND CLAIM_NO like '%${SC_claim_no}%'
+            </if>
+            <if test="SC_treatment_date != null and SC_treatment_date != ''">
+                 AND TREATMENT_DATE like '%${SC_treatment_date}%'
+            </if>
+    </select>
+
+</mapper>

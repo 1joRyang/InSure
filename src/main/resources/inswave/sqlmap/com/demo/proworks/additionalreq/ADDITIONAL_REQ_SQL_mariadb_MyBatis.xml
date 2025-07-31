@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject : 추가요청 정보 관련 처리를 담당하는 Sql Mapper
+	@description : 추가요청 정보 관련 처리를 담당하는 Sql Mapper
+	@author : hyunwoo
+	@since : 2025/07/16
+	@modification
+	===========================================================
+	DATE AUTHOR DESC
+	===========================================================
+	2025/07/16 hyunwoo 최초 생성
+-->
+<mapper namespace="com.demo.proworks.additionalreq">
+	<insert id="insertAdditionalReq" parameterType="com.demo.proworks.additionalreq.vo.AdditionalReqVo">
+		<!-- 추가요청 정보를 등록한다. -->
+
+		INSERT INTO ADDITIONAL_REQ /* QueryID : com.demo.proworks.additionalreq.insertAdditionalReq */
+		(
+		CLAIM_NO
+		<if test="additional_memo!= null"> , ADDITIONAL_MEMO </if>
+		)
+		VALUES
+		(
+		#{claim_no}
+		<if test="additional_memo!= null"> , #{additional_memo} </if>
+		)
+	</insert>
+
+	<update id="updateAdditionalReq" parameterType="com.demo.proworks.additionalreq.vo.AdditionalReqVo">
+		<!-- 추가요청 정보를 갱신한다. -->
+
+		UPDATE ADDITIONAL_REQ /* QueryID : com.demo.proworks.additionalreq.updateAdditionalReq */
+		SET
+		CLAIM_NO = #{claim_no}
+		<if test="additional_memo!= null"> , ADDITIONAL_MEMO = #{additional_memo} </if>
+		WHERE
+		CLAIM_NO = #{claim_no}
+	</update>
+
+	<delete id="deleteAdditionalReq" parameterType="com.demo.proworks.additionalreq.vo.AdditionalReqVo">
+		<!-- 추가요청 정보를 삭제한다. -->
+
+		DELETE FROM ADDITIONAL_REQ /* QueryID : com.demo.proworks.additionalreq.deleteAdditionalReq */
+		WHERE
+		CLAIM_NO = #{claim_no}
+	</delete>
+
+	<select id="selectAdditionalReq" parameterType="com.demo.proworks.additionalreq.vo.AdditionalReqVo"
+		resultType="com.demo.proworks.additionalreq.vo.AdditionalReqVo">
+		<!-- 추가요청 정보를 상세 조회한다. -->
+		SELECT /* QueryID : com.demo.proworks.additionalreq.selectAdditionalReq */
+		ADDITIONAL_MEMO, CLAIM_NO
+		FROM ADDITIONAL_REQ
+		WHERE
+		CLAIM_NO = #{claim_no}
+	</select>
+
+	<select id="selectListAdditionalReq" parameterType="com.demo.proworks.additionalreq.vo.AdditionalReqVo"
+		resultType="com.demo.proworks.additionalreq.vo.AdditionalReqVo">
+		<!-- 추가요청 정보 목록을 조회한다. -->
+		SELECT /* QueryID : com.demo.proworks.additionalreq.selectListAdditionalReq */
+		ADDITIONAL_MEMO, CLAIM_NO
+		FROM (
+		SELECT S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+		FROM (
+		SELECT
+		*
+		FROM ADDITIONAL_REQ
+		WHERE 1=1
+
+		) S, (SELECT @ROWNUM := 0) TMP
+		) A
+		WHERE PAGE = #{pageIndex}
+	</select>
+
+	<select id="selectListCountAdditionalReq" parameterType="com.demo.proworks.additionalreq.vo.AdditionalReqVo" resultType="long">
+		<!-- 추가요청 정보 목록의 카운트를 조회한다. -->
+
+		SELECT /* QueryID : com.demo.proworks.additionalreq.selectListCountAdditionalReq */
+		COUNT(*) totcnt
+		FROM ADDITIONAL_REQ
+		WHERE 1=1
+
+	</select>
+
+	<insert id="insertAdditionalReqOnly" parameterType="com.demo.proworks.additionalreq.vo.AdditionalReqVo">
+		<!-- 추가요청 정보만 등록한다. -->
+
+		INSERT INTO ADDITIONAL_REQ /* QueryID : com.demo.proworks.additionalreq.insertAdditionalReqOnly */
+		(
+		CLAIM_NO,
+		ADDITIONAL_MEMO
+		)
+		VALUES
+		(
+		#{claim_no},
+		#{additional_memo}
+		)
+	</insert>
+
+	<insert id="upsertAdditionalReqOnly" parameterType="com.demo.proworks.additionalreq.vo.AdditionalReqVo">
+		<!-- MySQL/MariaDB UPSERT 구문 -->
+		INSERT INTO ADDITIONAL_REQ
+		(CLAIM_NO, ADDITIONAL_MEMO)
+		VALUES
+		(#{claim_no}, #{additional_memo})
+		ON DUPLICATE KEY UPDATE
+		ADDITIONAL_MEMO = VALUES(ADDITIONAL_MEMO)
+	</insert>
+
+	<update id="updateClaimStatus" parameterType="com.demo.proworks.additionalreq.vo.AdditionalReqCusVo">
+	
+	    UPDATE CLAIM 
+	    SET STATUS = '보완' 
+	    WHERE CLAIM_NO = #{claim_no}
+    </update>
+	<select id="countAdditionalReq" parameterType="com.demo.proworks.additionalreq.vo.AdditionalReqVo" resultType="int">
+	    SELECT COUNT(*)   /* QueryID : com.demo.proworks.additionalreq.countAdditionalReq */
+	    FROM ADDITIONAL_REQ
+	    WHERE CLAIM_NO = #{claim_no}
+	</select>
+</mapper>

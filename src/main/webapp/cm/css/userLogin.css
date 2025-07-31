@@ -1,0 +1,144 @@
+
+
+        body {
+            background-color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .container {
+            background-color: white;
+            width: min(400px, 90vw);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: min(60px, 5vh) min(40px, 5vw) min(40px, 4vh);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .logo {
+            width: min(200px, 50vw);
+            height: min(80px, 12vh);
+            margin-bottom: min(60px, 6vh);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            color: #9aa0a6;
+            font-size: clamp(12px, 2vw, 14px);
+            font-weight: 400;
+        }
+
+        .pin-wrapper {
+            font-family: 'Pretendard Variable', sans-serif;
+            width: 100%;
+        }
+
+        .pin-wrapper.textTitle {
+            text-align: center;
+            padding-bottom: min(20px, 3vh);
+            font-size: clamp(18px, 4vw, 25px);
+            font-weight: bold;
+            color: #202124;
+            line-height: 1.3;
+            white-space: nowrap;
+        }
+
+        .pin-wrapper.text {
+            text-align: center;
+            font-size: clamp(12px, 3vw, 15px);
+            color: #808080;
+            margin: 0 0 min(40px, 5vh);
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+        .input-group {
+            width: 100%;
+        }
+
+        .input-label {
+            display: block;
+            font-size: clamp(14px, 3vw, 16px);
+            font-weight: 500;
+            color: #202124;
+            margin-bottom: min(8px, 1vh);
+        }
+
+        .input-field {
+            width: 100%;
+            height: min(50px, 7vh);
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 0 16px;
+            font-size: clamp(14px, 3vw, 16px);
+            font-family: 'Pretendard Variable', sans-serif;
+            transition: border-color 0.2s ease;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .input-field:focus {
+            border-color: #4285f4;
+        }
+
+        .input-field::placeholder {
+            color: #9aa0a6;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 20px 0 30px;
+            width: 100%;
+        }
+
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            accent-color: #4285f4;
+            border: 2px solid #e0e0e0;
+            border-radius: 3px;
+        }
+
+        .checkbox-label {
+            font-size: 14px;
+            color: #5f6368;
+            cursor: pointer;
+        }
+
+        .sign-in-btn {
+            width: 100%;
+            height: 50px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            font-family: 'Pretendard Variable', sans-serif;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin: 30px 0;
+            box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
+        }
+
+        .sign-in-btn:hover {
+            background-color: #3367d6;
+        }
+
+        .sign-in-btn:active {
+            background-color: #2b5ce6;
+        }

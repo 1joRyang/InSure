@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+        	<w2:dataCollection baseNode="map">
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_claimList" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+        				<w2:column dataType="text" name="receipt_date" id="receipt_date"></w2:column>
+        				<w2:column dataType="text" name="status" id="status"></w2:column>
+        				<w2:column dataType="text" name="claim_type" id="claim_type"></w2:column>
+        				<w2:column dataType="text" name="amount" id="amount"></w2:column>
+        				<w2:column dataType="text" name="emp_no" id="emp_no"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dm_data">
+        			<w2:keyInfo>
+        				<w2:key dataType="number" name="총 청구건수" id="total_count"></w2:key>
+        				<w2:key dataType="number" name="총지급금액" id="total_payment"></w2:key>
+        				<w2:key dataType="number" name="승인완료" id="completed_count"></w2:key>
+        				<w2:key dataType="text" name="승인율" id="approval_rate"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dm_getClaim">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="SC_ID" id="SC_ID"></w2:key>
+        				<w2:key dataType="text" name="pageSize" id="pageSize" defaultValue="100"></w2:key>
+        				<w2:key dataType="text" name="pageIndex" id="pageIndex" defaultValue="1"></w2:key>
+        				<w2:key dataType="text" name="SC_receipt_date_start" id="SC_receipt_date_start"></w2:key>
+        				<w2:key dataType="text" name="SC_receipt_date_end" id="SC_receipt_date_end"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dm_getCalc">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="ID" id="ID"></w2:key>
+        				<w2:key dataType="text" name="pageSize" id="pageSize" defaultValue="100"></w2:key>
+        				<w2:key dataType="text" name="pageIndex" id="pageIndex" defaultValue="1"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        	</w2:dataCollection>
+        	<w2:workflowCollection />
+        	<xf:submission id="sbm_getMyClaim" action="/InsWebApp/CLAIMList.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,{"id":"dm_getClaim","key":"elData"}'
+        		target='data:json,{"id":"dl_claimList","key":"elData.claimVoList"}' encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getMyClaim_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getClaimCalc" action="/InsWebApp/CLAIMUserCalc.pwkjson" method="post" mediatype="application/json" ref='data:json,{"id":"dm_getCalc","key":"elData"}'
+        		target='data:json,{"id":"dm_data","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="로딩 중.." ev:submit=""
+        		ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        <script lazy="false" type="text/javascript"><![CDATA[scwin.onpageload = function() {
+	// ID가 현재와 같은 claim list 들고오기
+    let user = JSON.parse(localStorage.getItem("user"));
+    dm_getClaim.set("SC_ID", user.id);
+    $c.sbm.execute(sbm_getMyClaim);
+
+    // 계산한거 들고오기
+    dm_getCalc.set("ID", user.id);
+    // console.log(dm_getCalc.getJSON())
+    $c.sbm.execute(sbm_getClaimCalc);
+};
+
+scwin.sbm_getMyClaim_submitdone = function (e) {
+    var claimContainer = $p.getComponentById("claimContainer");
+
+    var claimListData = dl_claimList.getAllJSON();
+
+    // 각 청구 항목에 대해 카드 생성
+    for (var i = 0; i < claimListData.length; i++) {
+        var claimData = claimListData[i]; 
+        scwin.createClaimCard(claimContainer, claimData, i);
+    }
+};
+
+function hexToRgba(hex, alpha) {
+    let r = parseInt(hex.slice(1, 3), 16); 
+    let g = parseInt(hex.slice(3, 5), 16); 
+    let b = parseInt(hex.slice(5, 7), 16); 
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+scwin.createClaimCard = function(container, claimData, index) {
+    var cardId = "claimCard_" + index;
+    let statusColor = scwin.getStatusColor(claimData.status);
+    let statusBackColor = hexToRgba(statusColor, 0.22);
+
+    let statusText = scwin.getStatusText(claimData.status);
+
+    // 카드 그룹
+    var cardGroup = $p.dynamicCreate(cardId, "group", {
+        style: "margin-top: 10px; border: 1px solid #D9D9D9; border-radius: 20px; padding: 15px; box-sizing: border-box; box-shadow: 1px 4px 4px rgba(0,0,0,0.05); cursor: pointer;"
+    }, container);
+
+    cardGroup.setUserData("claimData", claimData);
+    cardGroup.bind("onclick", function() {
+        localStorage.setItem("userClaim", JSON.stringify(claimData));
+        if (claimData.status != "보완") {
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claim/claim-detail.xml";
+        } else {
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/suppDocs.xml";
+        }
+        
+    });
+
+    // 헤더 그룹
+    var headerGroup = $p.dynamicCreate(cardId + "_header", "group", {
+        style: "width: 100%; height: 50px; display: flex; justify-content: space-between; margin-bottom: 10px;"
+    }, cardGroup);
+
+    // 제목 영역 그룹
+    var titleAreaGroup = $p.dynamicCreate(cardId + "_titleArea", "group", {
+        style: "display: flex; flex-direction: column; gap: 5px; width: 100%;"
+    }, headerGroup);
+
+    // 제목 행 그룹
+    var titleRowGroup = $p.dynamicCreate(cardId + "_titleRow", "group", {
+        style: "display: flex;"
+    }, titleAreaGroup);
+
+    // 청구 타입 텍스트 
+    var claimTypeText = $p.dynamicCreate(cardId + "_claimType", "output", {
+        style: "font-size: 18px; font-weight: bold; padding: 0; display: inline-block;"
+    }, titleRowGroup);
+    claimTypeText.setValue(claimData?.claim_type || "");
+
+    // "의료보험 청구" 텍스트 
+    var staticText = $p.dynamicCreate(cardId + "_staticText", "output", {
+        style: "font-size: 18px; font-weight: bold; border: none; background: transparent; padding: 0; display: inline-block;"
+    }, titleRowGroup);
+    staticText.setValue("의료보험 청구");
+
+    // 청구번호 행 그룹
+    var claimNoRowGroup = $p.dynamicCreate(cardId + "_claimNoRow", "group", {
+        style: "display: flex; gap: 5px;"
+    }, titleAreaGroup);
+
+    // 청구번호 라벨 
+    var claimNoLabel = $p.dynamicCreate(cardId + "_claimNoLabel", "output", {
+        style: "font-size: 13px; color: #888; padding: 0; display: inline-block;"
+    }, claimNoRowGroup);
+    claimNoLabel.setValue("청구번호 ");
+
+    // 청구번호 값 
+    var claimNoValue = $p.dynamicCreate(cardId + "_claimNoValue", "output", {
+        style: "font-size: 13px; color: #888; padding: 0; display: inline-block;"
+    }, claimNoRowGroup);
+    claimNoValue.setValue(claimData?.claim_no || "");
+
+
+    var securityBtn = $p.dynamicCreate(cardId + "_securityBtn", "group", {
+        style: "width: 70px; height: 30px; background: "+statusBackColor+"; border-radius: 8px; display: flex; justify-content: center; align-items: center;"
+    }, headerGroup);
+
+    var securitySpan = $p.dynamicCreate(cardId + "_securitySpan", "span", {
+        style: "color: "+ statusColor +"; font-size: 13px; font-weight: 700;"
+    }, securityBtn);
+    securitySpan.setValue(statusText);
+    
+
+    // 금액 영역 그룹
+    var amountAreaGroup = $p.dynamicCreate(cardId + "_amountArea", "group", {
+        style: "width: 100%; display: flex; flex-direction: column; gap: 8px; margin-top: 15px;"
+    }, cardGroup);
+
+    // 금액 텍스트 
+    var amountText = $p.dynamicCreate(cardId + "_amount", "output", {
+        style: "width: 100%; font-size: 16px; font-weight: bold; padding: 0; display: inline-block;"
+    }, amountAreaGroup);
+    amountText.setValue(claimData?.amount || "");
+
+    // 신청일 행 그룹
+    var dateRowGroup = $p.dynamicCreate(cardId + "_dateRow", "group", {
+        style: "display: flex; gap: 5px;"
+    }, amountAreaGroup);
+
+    // 신청일 라벨 
+    var dateLabel = $p.dynamicCreate(cardId + "_dateLabel", "output", {
+        style: "font-size: 14px; color: #888; padding: 0; display: inline-block;"
+    }, dateRowGroup);
+    dateLabel.setValue("신청일 ");
+
+    // 신청일 값 
+    var dateValue = $p.dynamicCreate(cardId + "_dateValue", "output", {
+        style: "font-size: 14px; color: #888; padding: 0; display: inline-block;"
+    }, dateRowGroup);
+    dateValue.setValue(claimData?.receipt_date || "");
+};
+
+scwin.getStatusText = function(status) {
+    let statusText = "";  
+
+    switch (status) {
+        case "대기":
+        case "결재반려":
+        case "결재중":
+        case "결재완료":
+            statusText = "심사중";
+            break;
+        case "완료":
+            statusText = "지급완료";
+            break;
+        case "반송":
+            statusText = "반송";
+            break;
+        case "보완":
+            statusText = "보완필요";
+            break;
+        default:
+            statusText = status; 
+            break;
+    }
+    return statusText
+}
+
+scwin.getStatusColor = function(status) {
+    switch(status) {
+        case "완료":
+            return "#22C55E"; 
+        case "대기":
+        case "결재완료":
+        case "결재중":
+        case "결재반려":
+        case "보완완료":
+            return "#578FCA"; 
+        case "반송":
+            return "#FF7E7E"; 
+        case "보완":
+            return "#FF930E"; 
+        default:
+            return "#333"; // 기본 색상
+    }
+};]]></script>
+    </head>
+    <body ev:onpageload="scwin.onpageload" class="mobile-page-body">
+        <w2:wframe src="/InsWebApp/ui/cmmn/m_header_title.xml" style="flex-shrink: 0;" id="" class="wfm_m_header"></w2:wframe>
+    	<xf:group class="mobile-page-contain" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
+    		style="display: flex;flex-direction: column;gap: 15px;">
+    		<xf:group id=""
+    			style="border: 1px solid #D9D9D9;border-radius: 15px;display: grid;grid-template-columns: repeat(2, 1fr);padding: 10px;">
+    			<xf:group id="" style="text-align: center;">
+    				<w2:textbox id="" label="0" ref="data:dm_data.total_count" style="font-size: 24px;height: 30px;" displayFormat="##,###,###,###"></w2:textbox>
+    				<w2:textbox id="" label="총 청구건수" style="width: 100%;height: 23px;"></w2:textbox>
+    			</xf:group>
+    			<xf:group id="" style="text-align: center;">
+    				<w2:textbox id="" label="0" ref="data:dm_data.total_payment" style="font-size: 24px;height: 30px;" displayFormat="##,###,###,###"></w2:textbox>
+    				<w2:textbox id="" label="총 지급금액(원)" style="width: 100%;height: 23px;"></w2:textbox>
+    			</xf:group>
+    			<xf:group id="" style="text-align: center;">
+    				<w2:textbox id="" label="0" ref="data:dm_data.completed_count" style="font-size: 24px;height: 30px;" displayFormat="##,###,###,###"></w2:textbox>
+    				<w2:textbox id="" label="승인완료" style="width: 100%;height: 23px;"></w2:textbox>
+    			</xf:group>
+    			<xf:group id="" style="text-align: center;">
+    				<w2:textbox id="" label="0" ref="data:dm_data.approval_rate" style="font-size: 24px;height: 30px;"></w2:textbox>
+    				<w2:textbox id="" label="승인율(%)" style="width: 100%;height: 23px;"></w2:textbox>
+    			</xf:group>
+    		</xf:group>
+            <xf:group style="width: 100%;margin-top: 10px" id="">
+    			<w2:textbox style="font-size: 17px;font-weight: 700;" id="" label="청구내역"></w2:textbox>
+    			<xf:group style="width: 100%; height: 100%; box-sizing: border-box;" id="claimContainer" class="claimContainer"></xf:group>
+    		</xf:group>
+    	</xf:group>
+        <w2:wframe style="flex-shrink: 0;" id="" class="wfm_m_footer" src="/InsWebApp/ui/cmmn/m_footer.xml"></w2:wframe>
+    </body>
+</html>

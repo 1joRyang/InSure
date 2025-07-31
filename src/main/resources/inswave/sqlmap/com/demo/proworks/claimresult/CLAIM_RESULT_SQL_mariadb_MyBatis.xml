@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 심사결과 관련 처리를 담당하는 Sql Mapper
+	@description : 심사결과 관련 처리를 담당하는 Sql Mapper
+	@author      : hyunwoo
+	@since       : 2025/07/13
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/07/13              hyunwoo             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.claimresult">
+    <insert id="insertClaimResult" parameterType="com.demo.proworks.claimresult.vo.ClaimResultVo">
+    <!-- 심사결과를 등록한다. -->	
+    
+    INSERT INTO CLAIM_RESULT   /* QueryID : com.demo.proworks.claimresult.insertClaimResult */
+    ( 
+    claim_no,
+    claim_memo,
+    amount,
+    date
+    )
+    VALUES  
+    ( 
+    #{claim_no},
+    #{claim_memo},
+    #{amount},
+    CURDATE()
+    )          
+    </insert>
+	
+    <update id="updateClaimResult" parameterType="com.demo.proworks.claimresult.vo.ClaimResultVo">
+    <!-- 심사결과를 갱신한다. -->
+    
+    UPDATE CLAIM_RESULT    /* QueryID : com.demo.proworks.claimresult.updateClaimResult */      
+    SET  
+    claim_memo = #{claim_memo},
+        amount = #{amount},
+        date = CURDATE()
+    WHERE   
+            claim_no = #{claim_no}  
+    </update>
+	<update id="updateClaimStatus" parameterType="com.demo.proworks.claimresult.vo.ClaimResultVo">
+	<!-- 청구 상태를 업데이트한다. -->
+	
+	UPDATE CLAIM 
+	SET STATUS = '완료'
+        WHERE CLAIM_NO = #{claim_no}
+    </update>
+    <delete id="deleteClaimResult" parameterType="com.demo.proworks.claimresult.vo.ClaimResultVo">
+    <!-- 심사결과를 삭제한다. -->
+    
+    DELETE FROM CLAIM_RESULT   /* QueryID : com.demo.proworks.claimresult.deleteClaimResult */ 
+    WHERE   
+    claim_no = #{claim_no}          
+    </delete>
+	
+    <select id="selectClaimResult" parameterType="com.demo.proworks.claimresult.vo.ClaimResultVo" resultType="com.demo.proworks.claimresult.vo.ClaimResultVo">
+    <!-- 심사결과를 상세 조회한다. -->	
+    SELECT     /* QueryID : com.demo.proworks.claimresult.selectClaimResult */
+    claim_no as claim_no, 
+        claim_memo as claim_memo, 
+        amount as amount, 
+    date as date
+        FROM CLAIM_RESULT 
+        WHERE 
+                claim_no = #{claim_no}  			
+    </select>
+	
+    <select id="selectListClaimResult" parameterType="com.demo.proworks.claimresult.vo.ClaimResultVo" resultType="com.demo.proworks.claimresult.vo.ClaimResultVo">
+    <!-- 심사결과 목록을 조회한다. -->
+    SELECT    /* QueryID : com.demo.proworks.claimresult.selectListClaimResult */
+    claim_no as claim_no, 
+        claim_memo as claim_memo, 
+    amount as amount, 
+    date as date		       
+    FROM (
+    SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+    FROM (				
+    SELECT 
+    claim_no, claim_memo, amount, date
+        FROM CLAIM_RESULT
+            WHERE  1=1
+           <if test="claim_no != null and claim_no != ''"> 
+                       AND claim_no LIKE CONCAT('%', #{claim_no}, '%')
+                   </if>
+                   ORDER BY date DESC, claim_no DESC
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountClaimResult" parameterType="com.demo.proworks.claimresult.vo.ClaimResultVo" resultType="long">
+    <!-- 심사결과 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.claimresult.selectListCountClaimResult */
+             COUNT(*) totcnt  		                  
+         FROM CLAIM_RESULT
+         WHERE  1=1
+           <if test="claim_no != null and claim_no != ''">
+                       AND claim_no LIKE CONCAT('%', #{claim_no}, '%')
+                   </if>
+
+    </select>
+
+</mapper>

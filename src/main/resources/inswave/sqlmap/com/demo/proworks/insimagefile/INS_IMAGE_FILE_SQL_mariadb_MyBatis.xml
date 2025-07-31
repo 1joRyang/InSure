@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 이미지파일테이블 관련 처리를 담당하는 Sql Mapper
+	@description : 이미지파일테이블 관련 처리를 담당하는 Sql Mapper
+	@author      : 이지현
+	@since       : 2025/07/04
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/07/04              이지현             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.insimagefile">
+    <insert id="insertInsimagefile" parameterType="com.demo.proworks.insimagefile.vo.InsimagefileVo">
+    	<!-- 이미지파일테이블를 등록한다. -->	
+    		
+        INSERT INTO INS_IMAGE_FILE   /* QueryID : com.demo.proworks.insimagefile.insertInsimagefile */
+        ( 
+            claim_no,
+        	s3_object_key
+        )
+        VALUES  
+        ( 
+            #{claim_no},
+        	#{file_path}
+        )          
+    </insert>	
+	
+    <update id="updateInsimagefile" parameterType="com.demo.proworks.insimagefile.vo.InsimagefileVo">
+    	<!-- 이미지파일테이블를 갱신한다. -->
+    	
+        UPDATE INS_IMAGE_FILE    /* QueryID : com.demo.proworks.insimagefile.updateInsimagefile */      
+      	  SET  
+                FILE_ID            = #{file_id}                   	                       
+            <if test="claim_no          != null"> , CLAIM_NO           = #{claim_no}           </if>
+            <if test="original_file_name!= null"> , ORIGINAL_FILE_NAME = #{original_file_name} </if>
+            <if test="stored_file_name  != null"> , STORED_FILE_NAME   = #{stored_file_name}   </if>
+            <if test="file_path         != null"> , FILE_PATH          = #{file_path}          </if>
+            <if test="file_size         != null"> , FILE_SIZE          = #{file_size}          </if>
+            <if test="file_type         != null"> , FILE_TYPE          = #{file_type}          </if>
+            <if test="created_at        != null"> , CREATED_AT         = #{created_at}         </if>                 
+        WHERE   
+                FILE_ID            = #{file_id}           
+    </update>
+	
+    <delete id="deleteInsimagefile" parameterType="com.demo.proworks.insimagefile.vo.InsimagefileVo">
+    	<!-- 이미지파일테이블를 삭제한다. -->
+    	
+        DELETE FROM INS_IMAGE_FILE   /* QueryID : com.demo.proworks.insimagefile.deleteInsimagefile */ 
+        WHERE   
+                FILE_ID            = #{file_id}                   
+    </delete>
+	
+    <select id="selectInsimagefile" parameterType="com.demo.proworks.insimagefile.vo.InsimagefileVo" resultType="com.demo.proworks.insimagefile.vo.InsimagefileVo">
+    	<!-- 이미지파일테이블를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.insimagefile.selectInsimagefile */
+            FILE_ID, CLAIM_NO, S3_OBJECT_KEY as file_path, CREATED_AT
+        FROM INS_IMAGE_FILE 
+        WHERE 
+                CLAIM_NO            = #{claim_no}           			
+    </select>
+	
+    <select id="selectListInsimagefile" parameterType="com.demo.proworks.insimagefile.vo.InsimagefileVo" resultType="com.demo.proworks.insimagefile.vo.InsimagefileVo">
+    	<!-- 이미지파일테이블 목록을 조회한다. -->
+           SELECT    /* QueryID : com.demo.proworks.insimagefile.selectListInsimagefile */
+               FILE_ID, CLAIM_NO, S3_OBJECT_KEY as file_path, CREATED_AT		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM INS_IMAGE_FILE
+                   WHERE  1=1    		
+                   	AND  CLAIM_NO   = #{claim_no} 
+	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountInsimagefile" parameterType="com.demo.proworks.insimagefile.vo.InsimagefileVo" resultType="long">
+    <!-- 이미지파일테이블 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.insimagefile.selectListCountInsimagefile */
+             COUNT(*) totcnt  		                  
+         FROM INS_IMAGE_FILE
+         WHERE  1=1    		
+
+    </select>
+
+</mapper>

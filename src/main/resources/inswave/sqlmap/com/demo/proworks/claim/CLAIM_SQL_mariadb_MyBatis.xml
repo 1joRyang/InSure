@@ -4,33 +4,173 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--
-	@subject     : 청구 관련 처리를 담당하는 Sql Mapper
+	@subject : 청구 관련 처리를 담당하는 Sql Mapper
 	@description : 청구 관련 처리를 담당하는 Sql Mapper
-	@author      : Inswave
-	@since       : 2025/07/01
+	@author : Inswave
+	@since : 2025/07/01
 	@modification
 	===========================================================
-	DATE              AUTHOR             DESC
+	DATE AUTHOR DESC
 	===========================================================
-	2025/07/01              Inswave             최초 생성
- -->
+	2025/07/01 Inswave 최초 생성
+-->
 <mapper namespace="com.demo.proworks.claim">
-	<select id="selectClaimJoinClaimResult" parameterType="com.demo.proworks.claim.vo.ClaimUserVo" resultType="com.demo.proworks.claim.vo.ClaimNClaimResultVo">
-	    <!-- 기지급이력 조회 (insure-second.xml에서 사용) todo: 고객id 넘기기-->
-	    SELECT 
-	        CR.CLAIM_NO, 
-	        C.RECEIPT_DATE, 
-	        CR.AMOUNT, 
-	        C.STATUS
-	    FROM 
-	        CLAIM_RESULT CR
-	    JOIN 
-	        CLAIM C ON CR.CLAIM_NO = C.CLAIM_NO
-	    WHERE 
-	        C.STATUS = '완료' 
-	        AND C.ID = #{ID}
+	<select id="selectUserClaimCalc" parameterType="com.demo.proworks.claim.vo.ClaimVo"
+		resultType="com.demo.proworks.claim.vo.ClaimUserCalcVo">
+		<!-- 고객 청구 CALC -->
+		SELECT 
+		    COUNT(CASE WHEN S.status = '완료' THEN 1 END) AS completed_count,  
+		    COUNT(*) AS total_count,  
+		    SUM(S.amount) AS total_payment, 
+		    FLOOR((COUNT(CASE WHEN S.status = '완료' THEN 1 END) / COUNT(*)) * 100) AS approval_rate  
+		FROM (
+		    SELECT c.claim_no, 
+		           c.status, 
+		           c.ID,
+		           cr.amount,
+		           CEIL((@ROWNUM := @ROWNUM + 1) / 100) AS PAGE
+		    FROM CLAIM c
+		    LEFT JOIN CLAIM_RESULT cr ON c.claim_no = cr.claim_no
+		    WHERE c.ID = 1
+		) AS S 
+		WHERE 
+		   PAGE = #{pageIndex};
+
+	</select>
+	
+	<select id="selectClaimWithStatusManager" parameterType="com.demo.proworks.claim.vo.ClaimVo"
+		resultType="com.demo.proworks.claim.vo.ClaimListwStatusVo">
+		<!-- 관리자 청구내역 조회 (status, emp_no를 기준으로...) -->
+		SELECT 
+		    claim_no,
+		    user_name,
+		    receipt_date,
+		    deadline,
+		    emp_name,
+		    status,
+		    emp_no,
+		    ID
+		FROM (
+		    SELECT S.*, CEIL((@ROWNUM := @ROWNUM + 1) / #{pageSize}) AS PAGE
+		    FROM (
+		        SELECT 
+		            c.claim_no, 
+		            u.user_name, 
+		            c.receipt_date, 
+		            DATE_ADD(c.receipt_date, INTERVAL 3 DAY) AS deadline, 
+		            reg.emp_name, 
+		            c.status,
+		            c.emp_no,
+		            c.ID
+		        FROM 
+		            CLAIM c
+		        JOIN USER u ON c.ID = u.ID
+		        JOIN EMPLOYEE reg ON c.emp_no = reg.emp_no
+		        JOIN APPROVAL_REQ ar ON c.claim_no = ar.claim_no
+		        WHERE 
+		            ar.manager_no = #{emp_no}
+		            <if test="status == '결재중'">
+		            	AND c.status = #{status}
+		            </if>
+		            <if test="status != '결재중'">
+		            	AND c.status != '결재중'
+		            </if>
+		    ) S, (SELECT @ROWNUM := 0) TMP
+		) A 
+		WHERE PAGE = #{pageIndex}
+		ORDER BY receipt_date DESC;
+	</select>
+	
+	<select id="selectClaimWithStatusWait" parameterType="com.demo.proworks.claim.vo.ClaimVo"
+		resultType="com.demo.proworks.claim.vo.ClaimListwStatusVo">
+		<!-- 내 청구내역 조회 (대기, emp_no를 기준으로...) -->
+		SELECT 
+		    claim_no,
+		    user_name,
+		    receipt_date,
+		    deadline,
+		    emp_name,
+		    status,
+		    emp_no,
+		    ID
+		FROM (
+		    SELECT S.*, CEIL((@ROWNUM := @ROWNUM + 1) / #{pageSize}) AS PAGE
+		    FROM (
+		        SELECT 
+		            c.claim_no, 
+		            u.user_name, 
+		            c.receipt_date, 
+		            DATE_ADD(c.receipt_date, INTERVAL 3 DAY) AS deadline, 
+		            e.emp_name, 
+		            c.status,
+		            c.emp_no,
+		            c.ID
+		        FROM 
+		            CLAIM c
+		        JOIN USER u ON c.ID = u.ID
+		        JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+		        WHERE 
+		            c.emp_no = #{emp_no}
+		            AND c.status IN ('대기', '보완', '결재완료', '결재반려', '보완완료')
+		    ) S, (SELECT @ROWNUM := 0) TMP
+		) A 
+		WHERE PAGE = #{pageIndex}
+		ORDER BY receipt_date DESC;
 	</select>
 
+	<select id="selectClaimWithStatus" parameterType="com.demo.proworks.claim.vo.ClaimVo"
+		resultType="com.demo.proworks.claim.vo.ClaimListwStatusVo">
+		<!-- 내 청구내역 조회 (status, emp_no를 기준으로...) -->
+		SELECT 
+		    claim_no,
+		    user_name,
+		    receipt_date,
+		    deadline,
+		    emp_name,
+		    status,
+		    emp_no,
+		    ID
+		FROM (
+		    SELECT S.*, CEIL((@ROWNUM := @ROWNUM + 1) / #{pageSize}) AS PAGE
+		    FROM (
+		        SELECT 
+		            c.claim_no, 
+		            u.user_name, 
+		            c.receipt_date, 
+		            DATE_ADD(c.receipt_date, INTERVAL 3 DAY) AS deadline, 
+		            e.emp_name, 
+		            c.status,
+		            c.emp_no,
+		            c.ID
+		        FROM 
+		            CLAIM c
+		        JOIN USER u ON c.ID = u.ID
+		        JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+		        WHERE 
+		            c.emp_no = #{emp_no}
+		            AND c.status = #{status}
+		    ) S, (SELECT @ROWNUM := 0) TMP
+		) A 
+		WHERE PAGE = #{pageIndex}
+		ORDER BY receipt_date DESC;
+	</select>
+	
+	<select id="selectClaimJoinClaimResult" parameterType="com.demo.proworks.claim.vo.ClaimUserVo"
+		resultType="com.demo.proworks.claim.vo.ClaimNClaimResultVo">
+		<!-- 기지급이력 조회 (insure-second.xml에서 사용) todo: 고객id 넘기기 -->
+		SELECT
+			CR.CLAIM_NO,
+			C.RECEIPT_DATE,
+			CR.AMOUNT,
+			C.STATUS
+		FROM
+			CLAIM_RESULT CR
+		JOIN
+			CLAIM C ON CR.CLAIM_NO = C.CLAIM_NO
+		WHERE
+			C.STATUS = '완료'
+			AND C.ID = #{ID}
+	</select>
 	
     <insert id="insertClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo">
     	<!-- 청구를 등록한다. -->	
@@ -57,7 +197,8 @@
             <if test="ID              != null"> , #{ID}               </if>
             <if test="claim_content   != null"> , #{claim_content}    </if>
             <if test="disease_code    != null"> , #{disease_code}     </if>
-            <if test="date_of_accident!= null"> , #{date_of_accident} </if> 
+            <if test="date_of_accident!= null"> , #{date_of_accident} </if>
+ 
         )          
     </insert>	
 	
@@ -66,7 +207,8 @@
     	
         UPDATE CLAIM    /* QueryID : com.demo.proworks.claim.updateClaim */      
       	  SET  
-                CLAIM_NO         = #{claim_no}                	                       
+                CLAIM_NO         = #{claim_no}        
+        	                       
             <if test="claim_type      != null"> , CLAIM_TYPE       = #{claim_type}       </if>
             <if test="receipt_date    != null"> , RECEIPT_DATE     = #{receipt_date}     </if>
             <if test="status          != null"> , STATUS           = #{status}           </if>
@@ -74,7 +216,9 @@
             <if test="ID              != null"> , ID               = #{ID}               </if>
             <if test="claim_content   != null"> , CLAIM_CONTENT    = #{claim_content}    </if>
             <if test="disease_code    != null"> , DISEASE_CODE     = #{disease_code}     </if>
-            <if test="date_of_accident!= null"> , DATE_OF_ACCIDENT = #{date_of_accident} </if>                 
+            <if test="date_of_accident!= null"> , DATE_OF_ACCIDENT = #{date_of_accident} </if>
+            <if test="disaster_code    != null"> , DISASTER_CODE     = #{disaster_code}     </if>
+                 
         WHERE   
                 CLAIM_NO         = #{claim_no}        
     </update>
@@ -84,37 +228,41 @@
     	
         DELETE FROM CLAIM   /* QueryID : com.demo.proworks.claim.deleteClaim */ 
         WHERE   
-                CLAIM_NO         = #{claim_no}                
+                CLAIM_NO         = #{claim_no}        
+        
     </delete>
 	
     <select id="selectClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo" resultType="com.demo.proworks.claim.vo.ClaimVo">
     	<!-- 청구를 상세 조회한다. -->	
         SELECT     /* QueryID : com.demo.proworks.claim.selectClaim */
-            CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT
+            CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT, DISASTER_CODE
         FROM CLAIM 
         WHERE 
-                CLAIM_NO         = #{claim_no}        			
+                CLAIM_NO         = #{claim_no}        
+			
     </select>
 	
     <select id="selectListClaim" parameterType="com.demo.proworks.claim.vo.ClaimVo" resultType="com.demo.proworks.claim.vo.ClaimVo">
-    	<!-- 청구 목록을 조회한다. -->
-           SELECT    /* QueryID : com.demo.proworks.claim.selectListClaim */
-               CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT		       
-           FROM (
-               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
-               FROM (				
-                   SELECT 
-                       *  		                  
-                   FROM CLAIM
-                   WHERE  1=1    		
-                        <if test="SC_receipt_date != null and SC_receipt_date != ''">
-                             AND RECEIPT_DATE like '%${SC_receipt_date}%'
-                        </if>
-                        <if test="SC_ID != null and SC_ID != ''">
-                             AND ID like '%${SC_ID}%'
-                        </if>	     																														
-               ) S, (SELECT @ROWNUM := 0) TMP
-           ) A
+    <!-- 청구 목록을 조회한다. 🔥 캐시 우회를 위한 임시 수정 -->
+    SELECT    /* QueryID : com.demo.proworks.claim.selectListClaim NOCACHE */
+    CLAIM_NO, CLAIM_TYPE, RECEIPT_DATE, STATUS, EMP_NO, ID, CLAIM_CONTENT, DISEASE_CODE, DATE_OF_ACCIDENT, DISASTER_CODE,
+        NOW() as CACHE_BUSTER		       
+    FROM (
+    SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+    FROM (				
+    SELECT 
+        *  		                  
+    FROM CLAIM
+    WHERE  1=1    		
+    <if test="SC_receipt_date != null and SC_receipt_date != ''">
+         AND RECEIPT_DATE like '%${SC_receipt_date}%'
+    </if>
+    <if test="SC_ID != null and SC_ID != ''">
+         AND ID like '%${SC_ID}%'
+             </if>	     																																																							
+        ) S, (SELECT @ROWNUM := 0) TMP
+        ORDER BY RECEIPT_DATE DESC
+    ) A
             WHERE PAGE = #{pageIndex}
     </select>
 	
@@ -132,5 +280,180 @@
                  AND ID like '%${SC_ID}%'
             </if>
     </select>
+
+
+	<select id="findUsernameAndEmpNameByClaimNo" parameterType="com.demo.proworks.claim.vo.ClaimNoVo"
+		resultType="com.demo.proworks.claim.vo.ClaimUserEmpVo">
+		SELECT
+		c.claim_no,
+		u.user_name,
+		e.emp_name
+		FROM CLAIM c
+		LEFT JOIN USER u ON c.ID = u.ID
+		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+		WHERE c.claim_no = #{claim_no}
+	</select>
+
+	<!-- 청구와 직원 정보 조인 조회 -->
+	<select id="selectClaimEmployeeList" parameterType="com.demo.proworks.claim.vo.ClaimEmployeeVo"
+		resultType="com.demo.proworks.claim.vo.ClaimEmployeeVo">
+		SELECT /* QueryID : com.demo.proworks.claim.selectClaimEmployeeList */
+		c.claim_no,
+		c.claim_type,
+		e.emp_name,
+		c.status
+		FROM CLAIM c
+		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+		WHERE 1=1
+		<if test="SC_claim_type != null and SC_claim_type != ''">
+			AND c.claim_type = #{SC_claim_type}
+		</if>
+		<if test="SC_status != null and SC_status != ''">
+			AND c.status = #{SC_status}
+		</if>
+		<if test="SC_emp_name != null and SC_emp_name != ''">
+			AND e.emp_name LIKE CONCAT('%', #{SC_emp_name}, '%')
+		</if>
+		ORDER BY c.claim_no DESC
+	</select>
+
+	<!-- 청구와 직원 정보 조인 조회 카운트 -->
+	<select id="selectClaimEmployeeListCount" parameterType="com.demo.proworks.claim.vo.ClaimEmployeeVo"
+		resultType="long">
+		SELECT /* QueryID : com.demo.proworks.claim.selectClaimEmployeeListCount */
+		COUNT(*) as totcnt
+		FROM CLAIM c
+		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+		WHERE 1=1
+		<if test="SC_claim_type != null and SC_claim_type != ''">
+			AND c.claim_type = #{SC_claim_type}
+		</if>
+		<if test="SC_status != null and SC_status != ''">
+			AND c.status = #{SC_status}
+		</if>
+		<if test="SC_emp_name != null and SC_emp_name != ''">
+			AND e.emp_name LIKE CONCAT('%', #{SC_emp_name}, '%')
+		</if>
+	</select>
+
+	<!-- 청구와 사용자, 직원, 결과 정보 전체 조인 조회 -->
+	<select id="selectClaimFullJoinList" parameterType="com.demo.proworks.claim.vo.ClaimFullJoinVo"
+		resultType="com.demo.proworks.claim.vo.ClaimFullJoinVo">
+		SELECT /* QueryID : com.demo.proworks.claim.selectClaimFullJoinList */
+		c.claim_no,
+		c.claim_type,
+		u.user_name,
+		r.amount,
+		e.emp_name,
+		c.status,
+		e.emp_no,
+		u.ID
+		FROM CLAIM c
+		LEFT JOIN USER u ON c.ID = u.ID
+		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+		LEFT JOIN CLAIM_RESULT r ON c.claim_no = r.claim_no
+		WHERE 1=1
+		<if test="claim_no != null and claim_no != ''">
+		    AND c.claim_no LIKE CONCAT('%', #{claim_no}, '%')
+		</if>
+		ORDER BY c.claim_no DESC
+	</select>
+
+	<!-- 청구와 사용자, 직원, 결과 정보 전체 조인 조회 카운트 -->
+	<select id="selectClaimFullJoinListCount" parameterType="com.demo.proworks.claim.vo.ClaimFullJoinVo"
+		resultType="long">
+		SELECT /* QueryID : com.demo.proworks.claim.selectClaimFullJoinListCount */
+		COUNT(*) as totcnt
+		FROM CLAIM c
+		LEFT JOIN USER u ON c.ID = u.ID
+		LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+		LEFT JOIN CLAIM_RESULT r ON c.claim_no = r.claim_no
+		WHERE 1=1
+		<if test="SC_claim_type != null and SC_claim_type != ''">
+			AND c.claim_type = #{SC_claim_type}
+		</if>
+		<if test="SC_status != null and SC_status != ''">
+			AND c.status = #{SC_status}
+		</if>
+		<if test="SC_emp_name != null and SC_emp_name != ''">
+			AND e.emp_name LIKE CONCAT('%', #{SC_emp_name}, '%')
+		</if>
+		<if test="SC_user_name != null and SC_user_name != ''">
+			AND u.user_name LIKE CONCAT('%', #{SC_user_name}, '%')
+		</if>
+	</select>
+
+
+	<!-- 주민번호로 사용자의 청구내역 조회 -->
+	<select id="selectUserClaimsByRrn" parameterType="com.demo.proworks.claim.vo.ClaimFullJoinVo"
+        resultType="com.demo.proworks.claim.vo.ClaimFullJoinVo">
+    SELECT /* QueryID : com.demo.proworks.claim.selectUserClaimsByRrn */
+        c.claim_no,
+        c.claim_type,
+        u.user_name,
+        r.amount,
+        e.emp_name,
+        c.status,
+        c.emp_no,
+        c.ID
+    FROM CLAIM c
+    LEFT JOIN USER u ON c.ID = u.ID
+    LEFT JOIN EMPLOYEE e ON c.emp_no = e.emp_no
+    LEFT JOIN CLAIM_RESULT r ON c.claim_no = r.claim_no
+    WHERE 1=1
+    <if test="id != null and id != ''">
+        AND c.ID = #{ID}
+    </if>
+    <if test="SC_claim_type != null and SC_claim_type != ''">
+        AND c.claim_type = #{SC_claim_type}
+    </if>
+    ORDER BY c.claim_no DESC
+</select>
+
+
+
+	<!-- 청구번호로 관리자 번호조회 -->
+	 <select id="selectManagerNo" parameterType="String" resultType="String">
+      SELECT
+          ar.manager_no
+      FROM
+          APPROVAL_REQ ar
+      JOIN
+          CLAIM c ON c.claim_no = ar.claim_no
+      WHERE
+          c.claim_no = #{claimNo}
+      ORDER BY
+	      approval_id DESC
+	  LIMIT 1
+    </select>
+    
+    
+    <!-- 고객명 조회 -->
+	<select id="selectCustomerNameById" parameterType="String" resultType="String">
+	    SELECT user_name 
+	    FROM USER 
+	    WHERE ID = #{customerId}
+	</select>
+	
+	<!-- 직원명 조회 -->
+	<select id="selectEmployeeNameById" parameterType="String" resultType="String">
+	    SELECT emp_name 
+	    FROM EMPLOYEE 
+	    WHERE emp_no = #{empNo}
+	</select>
+	
+
+	<!-- 사용자의 CLAIM 상태별 갯수 조회 -->
+	<select id="selectClaimStatusCount" parameterType="com.demo.proworks.claim.vo.ClaimVo"
+		resultType="com.demo.proworks.claim.vo.ClaimStatusCountVo">
+		SELECT /* QueryID : com.demo.proworks.claim.selectClaimStatusCount */
+			#{ID} as ID,
+			CAST(COUNT(CASE WHEN status IN ('결재중', '대기', '결재완료','결재반려','보완완료') THEN 1 END) AS CHAR) as waitingCount,
+			CAST(COUNT(CASE WHEN status IN ('보완') THEN 1 END) AS CHAR) as supplementCount,
+			CAST(COUNT(CASE WHEN status IN ('완료', '반송') THEN 1 END) AS CHAR) as completedCount,
+			CAST(COUNT(*) AS CHAR) as allCount
+		FROM CLAIM
+		WHERE ID = #{ID}
+	</select>
 
 </mapper>

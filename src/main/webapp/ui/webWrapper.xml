@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+            <w2:dataCollection baseNode="map"/>
+            <w2:workflowCollection/>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        <script lazy="false" type="text/javascript" src="/InsWebApp/js/insure/websocket.js"></script>
+
+        <script type="javascript">
+            <![CDATA[
+scwin.onpageload = function() {
+   scwin.initpub(); 
+   WebSocketService.init();
+};
+
+scwin.initpub = function() {
+    var link = WebSquare.net.getParameter( "link" );
+    web_container.setSrc(link);
+};
+]]></script>
+    </head>
+    <body ev:onpageload="scwin.onpageload" class="" style="overflow: hidden;">
+    	<xf:group style="display: flex;flex-direction: column;" id="m_wrap" class="m_wrap">
+            <w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/header.xml"></w2:wframe>
+    		<xf:group style="display: flex;height: 100%;flex-direction: row;flex: 1;width: 100%;" id="">
+                <w2:wframe src="/InsWebApp/ui/cmmn/sidebar.xml" style="z-index: 20;" id="sidebar" class="wfm_sidebar"></w2:wframe>
+    			<w2:wframe src="" id="web_container" class="" style="height: 100%;flex: 1;overflow-x: hidden;"></w2:wframe>
+    		</xf:group>
+    	</xf:group>
+    </body>
+</html>

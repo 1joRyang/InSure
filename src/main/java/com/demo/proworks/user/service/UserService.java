@@ -2,6 +2,8 @@ package com.demo.proworks.user.service;
 
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import com.demo.proworks.user.vo.UserVo;
 
 /**  
@@ -51,9 +53,51 @@ public interface UserService {
      * @param userId   로그인할 사용자 ID
      * @param inputPin 화면에서 사용자가 입력한 비밀번호 6자리
      * @return 성공하면 true, 실패하면 false
+	 * @throws Exception
      */
     public boolean checkSimplePassword(String userId, String inputPin) throws Exception;
 		
+	/**
+     * 간편비밀번호 등록 여부를 확인한다.
+	 *
+     * @param userId 사용자 ID
+     * @return 간편비밀번호 등록 여부
+	 * @throws Exception
+     */
+	public boolean hasSimplePassword(String userId) throws Exception;
+		
+	 /**
+     * 간편비밀번호 등록한다.(1단계)
+	 *
+	 * @param userId 사용자 ID
+	 * @param rawSimplePw 사용자가 입력한 원본 PIN
+	 * @param session 현재 HttpSession
+     * @return 간편비밀번호 등록 여부
+	 * @throws Exception
+     */   
+	public void temporarilyStorePin(String userId, String rawSimplePw, HttpSession session) throws Exception;
+	
+	
+	/**
+	 * 간편비밀번호 등록한다.(2단계)
+	 *
+	 * @param userId 사용자 ID
+	 * @param confirmationPin 사용자가 확인을 위해 입력한 PIN
+	 * @param session 현재 HttpSession
+	 * @return 성공 시 true, 실패 시 false
+	 * @throws Exception
+	 */
+	public boolean confirmAndSavePin(String userId, String confirmationPin, HttpSession session) throws Exception;
+		
+	/**
+	 * 주민번호로 사용자 기본정보를 조회한다.
+	 *
+	 * @param rrn 주민등록번호
+	 * @return 사용자 기본정보
+	 * @throws Exception
+	 */
+	public UserVo selectUserByRrn(String rrn) throws Exception;
+			
     /**
      * 사용자정보를 등록 처리 한다.
      *
@@ -80,5 +124,16 @@ public interface UserService {
      * @throws Exception
      */
 	public int deleteUser(UserVo userVo) throws Exception;
+	
+	/**
+     * 숫자 ID로 사용자의 상세 정보를 조회합니다.
+     * 생성자 : J
+     * @param  userId 사용자의 숫자 ID (Primary Key)
+     * @return 조회된 사용자 정보
+     * @throws Exception
+     */
+	public UserVo getUserInfo(long userId) throws Exception;
+	
+	
 	
 }

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="/InsWebApp/cm/css/userLogin.css" type="text/css"?>
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:ev="http://www.w3.org/2001/xml-events"
     xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
@@ -16,92 +17,140 @@
     				</w2:keyInfo>
     			</w2:dataMap>
     			<w2:dataMap baseNode="map" id="dma_login_response">
-    				<w2:keyInfo></w2:keyInfo>
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="아이디" id="id"></w2:key>
+    					<w2:key dataType="text" name="사용자아이디" id="userId"></w2:key>
+    					<w2:key dataType="text" name="간편비밀번호등록여부" id="hasSimplePassword"></w2:key>
+    				</w2:keyInfo>
     			</w2:dataMap>
     		</w2:dataCollection>
     		<w2:workflowCollection />
-    		<xf:submission id="sbm_UserLogin" action="/InsWebApp/UserLogin.pwkjson" method="post" mediatype="application/json" ref="" target='data:json,[{"id":"dma_login_request","key":"elData"},{"id":"dma_login_response","key":"elData"}]' encoding="UTF-8"
-    			instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_UserLogin_submitdone"
+    		<xf:submission id="sbm_UserLogin" action="/InsWebApp/UserLogin.pwkjson" method="post" mediatype="application/json" ref='data:json,[{"id":"dma_login_request","key":"elData"},{"id":"dma_login_response","key":"elData"}]' target='' encoding="UTF-8"
+    			instance="" replace="" errorHandler="scwin.sbm_UserLogin_submiterror" customHandler="" mode="asynchronous" processMsg="로그인 중.." ev:submit="" ev:submitdone="scwin.sbm_UserLogin_submitdone"
     			ev:submiterror="" abortTrigger="">
     		</xf:submission>
     	</xf:model>
     	<w2:layoutInfo />
     	<w2:publicInfo method="" />
-    	<script lazy="false" type="text/javascript"><![CDATA[
-scwin.onpageload = function() {
-	
+    	<script lazy="false" type="text/javascript"><![CDATA[scwin.onpageload = function() {
+    
 };
 
 scwin.sbm_UserLogin_submitdone = function (e) {
-    let elHeader = e.responseJSON.elHeader;
-    if(elHeader != "" && elHeader != null && elHeader != "undefined") {	
-        if(elHeader.resSuc == true) {
-            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/main/mainWrapper.xml"
-        }else{
-            dma_login_request.setEmptyValue();
-            alert("로그인 정보를 확인하세요");
+    var customerId = null;
+    var userIdString = null;
+    var hasSimplePassword = false;
+    
+    try {
+        // 응답 전체 구조 확인을 위한 로그
+        console.log("전체 응답 데이터:", e);
+        
+        if (e && e.responseJSON && e.responseJSON.dma_login_response) {
+            customerId = e.responseJSON.dma_login_response.id;
+            userIdString = e.responseJSON.dma_login_response.userId;
+            hasSimplePassword = e.responseJSON.dma_login_response.hasSimplePassword || false;
         }
+        
+        if (customerId && userIdString) {
+            // User 객체 생성
+            const user = {
+                id: customerId,
+                userId: userIdString,
+                hasSimplePassword: hasSimplePassword
+            };
+            
+            // User 로그인 시: Employee 정보 삭제, User 정보 저장
+            localStorage.removeItem("employee");
+            localStorage.removeItem("simple");  // 새로운 User 로그인이므로 기존 Simple도 삭제
+            localStorage.setItem("user", JSON.stringify(user));
+            
+            console.log("User 로그인 완료, Employee/Simple 정보 삭제됨");
+            console.log("저장된 user:", user);
+            
+            if (hasSimplePassword) {
+                // 간편비밀번호가 있으면 -> 간편비밀번호 로그인 페이지
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/simple_pw_login.xml&userId=" + customerId;
+            } else {
+                // 간편비밀번호가 없으면 -> 간편비밀번호 등록 페이지
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/add_simple_pw.xml&userId=" + customerId;
+            }
+        } else {
+            // 로그인 실패 - 아이디/비밀번호 불일치 또는 응답 데이터 없음
+            alert("아이디 또는 비밀번호가 올바르지 않습니다. 다시 확인해주세요.");
+            return;
+        }
+        
+    } catch (error) {
+        console.error("로그인 처리 중 오류:", error);
+        alert("로그인 처리 중 오류가 발생했습니다.");
+        return;
     }
 };
 
 scwin.login_btn_onclick = function (e) {
+    // 데이터 설정 전에 로그 출력
+    console.log("로그인 버튼 클릭");
+    console.log("입력된 userId:", ibx_userid.getValue());
+    console.log("입력된 pw:", ibx_userpw.getValue());
+    
+    // 기존 데이터 초기화 후 새로 설정
+    dma_login_request.set("userId", ibx_userid.getValue());
+    dma_login_request.set("pw", ibx_userpw.getValue());
     dma_login_request.set("loginType", "USER");
     
-    var reqData = {"elData":dma_login_request.getJSON()};
+    // 설정 후 확인
+    console.log("설정된 데이터맵:", dma_login_request.getJSON());
+    
+    var reqData = {"elData": dma_login_request.getJSON()};
+    console.log("최종 전송 데이터:", reqData);
+    
     $c.sbm.execute(sbm_UserLogin, reqData);
 };
-]]></script>
+
+scwin.ibx_userpw_onkeydown = function (e) {
+    // 엔터 키(keyCode 13)가 눌렸을 때 로그인 버튼 클릭
+    if (e.keyCode === 13) {
+        scwin.login_btn_onclick(e);
+    }
+};
+
+scwin.ibx_userid_onkeydown = function (e) {
+    // 엔터 키(keyCode 13)가 눌렸을 때 비밀번호 필드로 포커스 이동
+    if (e.keyCode === 13) {
+        ibx_userpw.focus();
+    }
+};]]></script>
     	<w2:require as="udc_notification" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/notification.xml"></w2:require>
     </head>
-    <body ev:onpageload="scwin.onpageload">
-    	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
-    		style="">
-    		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
-    			style="border-bottom:;border-bottom-style:solid;border-bottom-color:#BFBFBF;color:#578FCA;border-bottom-width:0em;width:100%;">
-    			<xf:image src="/InsWebApp/images/ws5/logo/insureLogo.png" style="width:131px;height:50px;" id=""></xf:image>
-    			<xf:group class="breadcrumb" id="" style="">
-    				<xf:group id="" style="" tagname="ul">
-    					<xf:group id="" style="" tagname="li"></xf:group>
-    				</xf:group>
-    			</xf:group>
-    			<w2:udc_notification style="width: 30px;height: 30px;" title="" message=""></w2:udc_notification>
-    			<w2:button style="width: 80px;height: 23px;border-color:#FFFFFF;background-color:#FFFFFF;" id="" class="" label="로그아웃"></w2:button>
-    		</xf:group>
-    	</xf:group>
-    	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
-    		style="display: flex;  justify-content: center;  align-items: center;">
-
-
-    		<xf:image id="" src="/InsWebApp/images/ws5/logo/insureLogo.png" style="width:131px;height:50px;"></xf:image>
-    	</xf:group>
-    	<xf:group class="tblbox" id="" meta_snippetCategory="05_입출력테이블" meta_snippetKeyComponent="true" meta_snippetName="5_01 1단테이블"
-    		style="">
-    		<xf:group adaptive="layout" adaptiveThreshold="768" class="w2tb tbl" id="" style="" tagname="table">
-    			<w2:attributes>
-    				<w2:summary></w2:summary>
-    			</w2:attributes>
-    			<xf:group tagname="colgroup">
-    				<xf:group style="" tagname="col"></xf:group>
-    			</xf:group>
-    			<xf:group style="" tagname="tr">
-    				<xf:group class="w2tb_td" style=";text-align:center;" tagname="td">
-    					<w2:span id="" label="아이디" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    						meta_snippetName="10_16 출력텍스트" style="">
-    					</w2:span>
-
-    					<xf:input id="" style="width:144px; height:21px; " ref="data:dma_UserLogin.userId"></xf:input>
-    				</xf:group>
-    			</xf:group>
-    			<xf:group tagname="tr">
-    				<xf:group tagname="td" class="w2tb_td" style=";text-align:center;">
-    					<w2:attributes></w2:attributes>
-    					<w2:span id="" label="비밀번호" meta_snippetCategory="10_입력폼" meta_snippetKeyComponent="true"
-    						meta_snippetName="10_16 출력텍스트" style="">
-    					</w2:span>
-    					<xf:secret id="" style="width:144px; height:21px; " ref="data:dma_UserLogin.pw"></xf:secret>
-    				</xf:group>
+    <body ev:onpageload="scwin.onpageload" class="body">
+    	<xf:group
+    		style="width: 100%;height: 100%;display: flex;flex-direction: column;  align-items: center;            box-sizing: border-box;            overflow-y: auto;            background-color: white;"
+    		id="" class="sub_content">
+    		<xf:group
+    			style="width: 100%;  align-items: center;justify-content:center;display: flex;flex-direction: column;margin-top: 65px;" id="">
+    			<xf:image src="/InsWebApp/images/ws5/logo/insureLogo.png" style="width:131px;height:50px;" id="" class="logo"></xf:image>
+    			<xf:group style="height: 120px;" id="" class="pin-wrapper">
+    				<w2:textbox style="" id="" label="간편하게 청구하고 더 빠르게 돌려받으세요." class="pin-wrapper textTitle"></w2:textbox>
+    				<w2:textbox style="" id="" label="최초 1회 등록 후 간편 비밀번호로 로그인하세요." class="pin-wrapper text"></w2:textbox>
     			</xf:group>
     		</xf:group>
+    		<xf:group style="width: 100%;align-items: center;justify-content:center;display: flex;flex-direction: column;" id="">
+    			<xf:group meta_snippetCategory="00_화면시작" meta_snippetName="0_01 페이지시작" meta_snippetKeyComponent="true" style="margin-bottom: 20px;" id=""
+    				class="input-group">
+    				<w2:textbox style="" id="" label="아이디" class="input-group input-label"></w2:textbox>
+    				<xf:input ref="data:dma_login_request.userId" ev:onkeydown="scwin.ibx_userid_onkeydown" style="" id="ibx_userid"
+    					placeholder="아이디를 입력하세요" class="input-group input-field">
+    				</xf:input>
+    			</xf:group>
+    			<xf:group meta_snippetCategory="00_화면시작" meta_snippetName="0_01 페이지시작" meta_snippetKeyComponent="true" style="" id=""
+    				class="input-group">
+    				<w2:textbox style="" id="" label="비밀번호" class="input-group input-label"></w2:textbox>
+    				<xf:secret ref="data:dma_login_request.pw" ev:onkeydown="scwin.ibx_userpw_onkeydown" style="" id="ibx_userpw"
+    					placeholder="비밀번호를 입력하세요" class="input-group input-field">
+    				</xf:secret>
+    			</xf:group>
+    			<w2:button ev:onclick="scwin.login_btn_onclick" style="" id="login_btn" label="로그인" class="sign-in-btn"></w2:button>
+    		</xf:group>
     	</xf:group>
-    <xf:group id="" style="display: flex;justify-content: right;  align-items: right;"><w2:button style="width:80px; height:23px; " id="login_btn" label="로그인" ev:onclick="scwin.login_btn_onclick"></w2:button></xf:group></body>
+    </body>
 </html>

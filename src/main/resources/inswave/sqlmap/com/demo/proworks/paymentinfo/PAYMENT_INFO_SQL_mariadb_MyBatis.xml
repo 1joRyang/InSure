@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	@subject     : 지불정보 관련 처리를 담당하는 Sql Mapper
+	@description : 지불정보 관련 처리를 담당하는 Sql Mapper
+	@author      : Inswave
+	@since       : 2025/07/08
+	@modification
+	===========================================================
+	DATE              AUTHOR             DESC
+	===========================================================
+	2025/07/08              Inswave             최초 생성
+ -->
+<mapper namespace="com.demo.proworks.paymentinfo">
+    <insert id="insertPaymentInfo" parameterType="com.demo.proworks.paymentinfo.vo.PaymentInfoVo">
+    	<!-- 지불정보를 등록한다. -->	
+    		
+        INSERT INTO PAYMENT_INFO   /* QueryID : com.demo.proworks.paymentinfo.insertPaymentInfo */
+        ( 
+            TREATMENT_ID
+            , CLAIM_NO
+            <if test="total_medical_fee    != null"> , TOTAL_MEDICAL_FEE     </if>
+            <if test="total_patient_payment!= null"> , TOTAL_PATIENT_PAYMENT </if>
+            <if test="amount_paid          != null"> , AMOUNT_PAID           </if>
+            <if test="due_amt              != null"> , DUE_AMT               </if>
+            <if test="due_pay              != null"> , DUE_PAY               </if>
+        )
+        VALUES  
+        ( 
+            #{treatment_id}
+            , #{claim_no}
+            <if test="total_medical_fee    != null"> , #{total_medical_fee}     </if>
+            <if test="total_patient_payment!= null"> , #{total_patient_payment} </if>
+            <if test="amount_paid          != null"> , #{amount_paid}           </if>
+            <if test="due_amt              != null"> , #{due_amt}               </if>
+            <if test="due_pay              != null"> , #{due_pay}               </if> 
+        )          
+    </insert>	
+	
+    <update id="updatePaymentInfo" parameterType="com.demo.proworks.paymentinfo.vo.PaymentInfoVo">
+    	<!-- 지불정보를 갱신한다. -->
+    	
+        UPDATE PAYMENT_INFO    /* QueryID : com.demo.proworks.paymentinfo.updatePaymentInfo */      
+      	  SET  
+                TREATMENT_ID          = #{treatment_id}         
+         ,  CLAIM_NO              = #{claim_no}                     	                       
+            <if test="total_medical_fee    != null"> , TOTAL_MEDICAL_FEE     = #{total_medical_fee}     </if>
+            <if test="total_patient_payment!= null"> , TOTAL_PATIENT_PAYMENT = #{total_patient_payment} </if>
+            <if test="amount_paid          != null"> , AMOUNT_PAID           = #{amount_paid}           </if>
+            <if test="due_amt              != null"> , DUE_AMT               = #{due_amt}               </if>
+            <if test="due_pay              != null"> , DUE_PAY               = #{due_pay}               </if>                 
+        WHERE   
+                TREATMENT_ID          = #{treatment_id}         
+         AND CLAIM_NO              = #{claim_no}             
+    </update>
+	
+    <delete id="deletePaymentInfo" parameterType="com.demo.proworks.paymentinfo.vo.PaymentInfoVo">
+    	<!-- 지불정보를 삭제한다. -->
+    	
+        DELETE FROM PAYMENT_INFO   /* QueryID : com.demo.proworks.paymentinfo.deletePaymentInfo */ 
+        WHERE   
+                TREATMENT_ID          = #{treatment_id}         
+         AND CLAIM_NO              = #{claim_no}                     
+    </delete>
+	
+    <select id="selectPaymentInfo" parameterType="com.demo.proworks.paymentinfo.vo.PaymentInfoVo" resultType="com.demo.proworks.paymentinfo.vo.PaymentInfoVo">
+    	<!-- 지불정보를 상세 조회한다. -->	
+        SELECT     /* QueryID : com.demo.proworks.paymentinfo.selectPaymentInfo */
+            TOTAL_MEDICAL_FEE, TOTAL_PATIENT_PAYMENT, AMOUNT_PAID, DUE_AMT, DUE_PAY, TREATMENT_ID, CLAIM_NO
+        FROM PAYMENT_INFO 
+        WHERE 
+                TREATMENT_ID          = #{treatment_id}         
+         AND CLAIM_NO              = #{claim_no}             			
+    </select>
+	
+    <select id="selectListPaymentInfo" parameterType="com.demo.proworks.paymentinfo.vo.PaymentInfoVo" resultType="com.demo.proworks.paymentinfo.vo.PaymentInfoVo">
+    	<!-- 지불정보 목록을 조회한다. -->
+           SELECT    /* QueryID : com.demo.proworks.paymentinfo.selectListPaymentInfo */
+               TOTAL_MEDICAL_FEE, TOTAL_PATIENT_PAYMENT, AMOUNT_PAID, DUE_AMT, DUE_PAY, TREATMENT_ID, CLAIM_NO		       
+           FROM (
+               SELECT  S.*, CEIL( (@ROWNUM:=@ROWNUM+1) / #{pageSize} ) AS PAGE
+               FROM (				
+                   SELECT 
+                       *  		                  
+                   FROM PAYMENT_INFO
+                   WHERE  1=1    		
+                        <if test="SC_treatment_id != null and SC_treatment_id != ''">
+                             AND TREATMENT_ID like '%${SC_treatment_id}%'
+                        </if>
+                        <if test="SC_claim_no != null and SC_claim_no != ''">
+                             AND CLAIM_NO like '%${SC_claim_no}%'
+                        </if>	     																														
+               ) S, (SELECT @ROWNUM := 0) TMP
+           ) A
+            WHERE PAGE = #{pageIndex}
+    </select>
+	
+    <select id="selectListCountPaymentInfo" parameterType="com.demo.proworks.paymentinfo.vo.PaymentInfoVo" resultType="long">
+    <!-- 지불정보 목록의 카운트를 조회한다. -->
+    
+         SELECT    /* QueryID : com.demo.proworks.paymentinfo.selectListCountPaymentInfo */
+             COUNT(*) totcnt  		                  
+         FROM PAYMENT_INFO
+         WHERE  1=1    		
+            <if test="SC_treatment_id != null and SC_treatment_id != ''">
+                 AND TREATMENT_ID like '%${SC_treatment_id}%'
+            </if>
+            <if test="SC_claim_no != null and SC_claim_no != ''">
+                 AND CLAIM_NO like '%${SC_claim_no}%'
+            </if>
+    </select>
+
+</mapper>

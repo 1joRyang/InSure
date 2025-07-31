@@ -17,6 +17,8 @@ import com.demo.proworks.employee.vo.EmployeeVo;
  * 
  */
 public interface EmployeeService {
+
+	public List<EmployeeVo> selectListEmployeeForRule(EmployeeVo employeeVo) throws Exception;
 	
     /**
      * 실무자,관리자정보 페이징 처리하여 목록을 조회한다.
@@ -71,5 +73,27 @@ public interface EmployeeService {
      * @throws Exception
      */
 	public int deleteEmployee(EmployeeVo employeeVo) throws Exception;
+	
+	/**
+     * 사원 번호로 이름을 조회한다.
+     * 생성자 : J
+     */
+	public String getEmpNameByNo(String empNo) throws Exception;
+	
+	/**
+	 * 부서별 직원 목록을 조회한다.
+	 * @param employeeVo 직원정보 (deptId 필수)
+	 * @return 부서별 직원 목록
+	 * @throws Exception
+	 */
+	public List<EmployeeVo> selectListEmployeeByDept(EmployeeVo employeeVo) throws Exception;
+
+	/**
+	 * 부서별 직원 수를 조회한다.
+	 * @param employeeVo 직원정보 (deptId 필수)
+	 * @return 부서별 직원 수
+	 * @throws Exception
+	 */
+	public long selectListCountEmployeeByDept(EmployeeVo employeeVo) throws Exception;
 	
 }

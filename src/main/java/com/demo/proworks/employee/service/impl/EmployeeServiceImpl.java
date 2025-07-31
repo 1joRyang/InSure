@@ -31,6 +31,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 	
 	@Resource(name = "messageSource")
 	private MessageSource messageSource;
+	
+	public List<EmployeeVo> selectListEmployeeForRule(EmployeeVo employeeVo) throws Exception {
+		List<EmployeeVo> list = employeeDAO.selectListEmployeeForRule(employeeVo);	
+	
+		return list;
+	}
 
     /**
      * 실무자,관리자정보 목록을 조회합니다.
@@ -122,4 +128,20 @@ public class EmployeeServiceImpl implements EmployeeService {
 		return employeeDAO.deleteEmployee(employeeVo);
 	}
 	
+	/**
+     * 사원 번호로 이름을 조회한다.
+     * 생성자 : J
+     */
+	public String getEmpNameByNo(String empNo) throws Exception {
+		return employeeDAO.selectEmpNameByNo(empNo);
+	}
+	@Override
+	public List<EmployeeVo> selectListEmployeeByDept(EmployeeVo employeeVo) throws Exception {
+	    return employeeDAO.selectListEmployeeByDept(employeeVo);
+	}
+
+	@Override
+	public long selectListCountEmployeeByDept(EmployeeVo employeeVo) throws Exception {
+	    return employeeDAO.selectListCountEmployeeByDept(employeeVo);
+	}	
 }
