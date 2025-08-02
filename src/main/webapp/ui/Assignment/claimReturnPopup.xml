@@ -183,10 +183,6 @@ scwin.btn_submit_onclick = function (e) {
     }
 
     dma_returnReq.set("return_memo", returnMemo.trim());
-
-    console.log("존재 여부 확인 중...");
-    console.log("CLAIM_NO:", dma_claimNo.get("claim_no"));
-
     $p.executeSubmission("sbm_checkReturnReq");
 };
 
@@ -200,16 +196,11 @@ scwin.btn_close_onclick = function (e) {
 scwin.sbm_checkReturnReq_submitdone = function (e) {
     var result = e.responseJSON;
 
-    console.log("확인 결과:", result);
 
     if (result && result.success) {
         if (result.exists) {
-            // 기존 데이터가 있으면 UPDATE
-            console.log("기존 데이터 존재 - UPDATE 실행");
             $p.executeSubmission("sbm_updateReturnReq");
         } else {
-            // 기존 데이터가 없으면 INSERT
-            console.log("신규 데이터 - INSERT 실행");
             $p.executeSubmission("sbm_insertReturnReq");
         }
     } else {
@@ -231,19 +222,14 @@ scwin.sbm_checkReturnReq_submiterror = function (e) {
 };
 
 // INSERT 완료
-
-// INSERT 완료
 scwin.sbm_insertReturnReq_submitdone = function (e) {
     var result = e.responseJSON;
-    console.log("INSERT 결과:", result);
 
     if (result && result.success) {
         Swal.fire({
             icon: 'success',
             title: result.message,
             showConfirmButton: false,
-            // allowOutsideClick: false,
-            // allowEscapeKey: false,
             customClass: {
                 container: 'high-z-index-alert'
             },
@@ -274,7 +260,6 @@ scwin.sbm_insertReturnReq_submitdone = function (e) {
 
 // INSERT 에러
 scwin.sbm_insertReturnReq_submiterror = function (e) {
-    console.log("등록 중 에러:", e);
     scwin.toastAlert({
         icon: 'error',
         title: '등록 중 오류가 발생했습니다.'
@@ -285,15 +270,12 @@ scwin.sbm_insertReturnReq_submiterror = function (e) {
 // UPDATE 완료
 scwin.sbm_updateReturnReq_submitdone = function (e) {
     var result = e.responseJSON;
-    console.log("UPDATE 결과:", result);
 
     if (result && result.success) {
         Swal.fire({
             icon: 'success',
             title: result.message,
             showConfirmButton: false,
-            // allowOutsideClick: false,
-            // allowEscapeKey: false,
             customClass: {
                 container: 'high-z-index-alert'
             },
@@ -322,7 +304,6 @@ scwin.sbm_updateReturnReq_submitdone = function (e) {
 
 // UPDATE 에러
 scwin.sbm_updateReturnReq_submiterror = function (e) {
-    console.log("수정 중 에러:", e);
     scwin.toastAlert({
         icon: 'error',
         title: '수정 중 오류가 발생했습니다.'
