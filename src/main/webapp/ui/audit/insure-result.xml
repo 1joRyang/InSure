@@ -659,7 +659,6 @@ function initializeAuditSystem() {
     // 데이터 조회 실행
     executeDataLoading();
     
-    console.log("심사 시스템 초기화 완료");
 }
 
 /**
@@ -669,8 +668,6 @@ function loadStorageData() {
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
     scwin.employee = JSON.parse(localStorage.getItem("employee"));
     
-    console.log("로드된 청구 정보:", scwin.claim);
-    console.log("로드된 직원 정보:", scwin.employee);
 }
 
 /**
@@ -738,7 +735,6 @@ scwin.setUIPermissions = function () {
     const isOwnClaim = scwin.claim.empNo === scwin.employee.empNo;
     const claimStatus = scwin.claim.status;
 
-    console.log("권한 설정:", { userRole, isOwnClaim, claimStatus });
 
     // 기본 버튼 숨김 처리
     hideDefaultButtons();
@@ -957,7 +953,6 @@ function removeAllStatusClasses() {
  * @param {string} status - 청구 상태
  */
 scwin.setStatusBasedPermissions = function (status) {
-    console.log("상태별 권한 설정:", status);
     
     const permissionConfig = getStatusPermissionConfig(status);
     applyPermissionConfig(permissionConfig);
@@ -1081,9 +1076,6 @@ function reapplyManagerPermissions(status) {
 scwin.updateStatusInfo = function (status) {
     const config = getStatusPermissionConfig(status);
     
-    if (config.message) {
-        console.log("상태 메시지:", config.message);
-    }
 };
 
 // =============================================================================
@@ -1271,7 +1263,6 @@ scwin.sbm_selectSettlementTreatment = function () {
     try {
         $p.executeSubmission("sbm_selectSettlementTreatment");
     } catch (error) {
-        console.error("정산치료 조회 오류:", error);
         scwin.toastAlert({
             icon: 'error',
             title: '정산치료 조회 중 오류가 발생했습니다.'
@@ -1327,7 +1318,6 @@ function extractTreatmentData(elData) {
  * 치료 데이터 처리
  */
 function processTreatmentData(treatmentData) {
-    console.log("정산치료 데이터 설정:", treatmentData.length + "건");
     
     // DataList에 설정
     dlt_settlementTreatmentList.setJSON(treatmentData);
@@ -1350,14 +1340,12 @@ function updateSettlementInfo(firstRow) {
         }
     });
     
-    console.log("settlementInfo 업데이트 완료");
 }
 
 /**
  * 정산 치료 조회 에러 처리
  */
 function handleSettlementTreatmentError(elHeader) {
-    console.error("settlementTreatment 조회 실패:", elHeader);
     scwin.toastAlert({
         icon: 'warning', 
         title: '정산치료 조회에 실패했습니다'
@@ -1379,7 +1367,6 @@ scwin.sbm_selectSettlementSummary = function () {
     try {
         $p.executeSubmission("sbm_selectSettlementSummary");
     } catch (error) {
-        console.error("정산집계 조회 오류:", error);
         scwin.noBtnAlertWithTimer({
             title: '오류',
             text: '정산집계 조회 중 오류가 발생했습니다: ' + error.message,
@@ -1412,7 +1399,6 @@ function processSettlementSummary(elData) {
         if (summaryData.total_final_due && summaryData.total_final_due !== "") {
             console.log("정산집계 데이터 정상 수신");
         } else {
-            console.log("정산집계 데이터가 비어있음, 개별 치료 데이터로 계산");
             scwin.calculateSummaryFromTreatmentList();
         }
     }
@@ -1422,7 +1408,6 @@ function processSettlementSummary(elData) {
  * 정산 집계 에러 처리
  */
 function handleSettlementSummaryError(elHeader) {
-    console.error("정산집계 조회 실패:", elHeader);
     Swal.fire({
         title: '조회 실패',
         text: '정산집계 조회에 실패했습니다: ' + (elHeader ? elHeader.resMsg : "응답 없음"),
@@ -1436,10 +1421,8 @@ function handleSettlementSummaryError(elHeader) {
  * 정산 집계 조회 에러 콜백
  */
 scwin.sbm_selectSettlementSummary_submiterror = function (e) {
-    console.error("정산집계 조회 서버 오류:", e);
     
     const errorMsg = getErrorMessage(e, "정산집계 조회 중 오류가 발생했습니다.");
-    console.log(errorMsg);
 };
 
 // =============================================================================
@@ -1462,7 +1445,6 @@ scwin.searchExcludedItems = function () {
     try {
         $p.executeSubmission("sbm_selectExcludedItems");
     } catch (error) {
-        console.error("제외항목 조회 오류:", error);
         handleExcludedItemsError();
     }
 };
@@ -1577,18 +1559,12 @@ function getCategoryName(excCategory) {
 function logExcludedItemsVerification() {
     const verifyCount = dlt_excludedItems.getRowCount();
     
-    for (let i = 0; i < Math.min(verifyCount, 3); i++) {
-        console.log("검증: 제외항목[" + i + "]:",
-            dlt_excludedItems.getCellData(i, "exc_reason"),
-            dlt_excludedItems.getCellData(i, "exc_cost") + "원");
-    }
 }
 
 /**
  * 제외항목 조회 실패 콜백
  */
 scwin.sbm_selectExcludedItems_submiterror = function (e) {
-    console.error("제외항목 조회 오류:", e);
     handleExcludedItemsError();
 };
 
@@ -1599,18 +1575,12 @@ scwin.calculateTotalExcludedAmount = function () {
     let totalExcluded = 0;
     const rowCount = dlt_excludedItems.getRowCount();
 
-    console.log("제외항목 총액 계산 - 항목 수:", rowCount);
 
     for (let i = 0; i < rowCount; i++) {
         const excCost = dlt_excludedItems.getCellData(i, "exc_cost");
         const cost = parseInt(excCost) || 0;
         totalExcluded += cost;
-
-        console.log("제외항목[" + i + "] 금액:", cost, 
-                   "사유:", dlt_excludedItems.getCellData(i, "exc_reason"));
     }
-
-    console.log("총 제외 금액:", totalExcluded);
 
     // 정산 정보에도 반영
     updateDeductionAmount(totalExcluded);
@@ -1637,7 +1607,6 @@ scwin.searchInsuranceProducts = function () {
     const userId = scwin.claim?.ID;
 
     if (!userId) {
-        console.warn("사용자 ID가 없어 보험상품 조회를 스킵합니다.");
         scwin.showLoading(false);
         return;
     }
@@ -1647,7 +1616,6 @@ scwin.searchInsuranceProducts = function () {
     try {
         $p.executeSubmission("sbm_selectInsuranceProducts");
     } catch (error) {
-        console.error("보험상품 조회 오류:", error);
         scwin.showLoading(false);
     }
 };
@@ -1673,10 +1641,8 @@ scwin.sbm_selectInsuranceProducts_submitdone = function (e) {
  */
 function processInsuranceProducts(productData) {
     if (productData && Array.isArray(productData) && productData.length > 0) {
-        console.log("보험상품 데이터 수신:", productData.length + "건");
         logInsuranceProductsVerification();
     } else {
-        console.log("보험상품 데이터가 비어있습니다.");
         dlt_insuranceProducts.setJSON([]);
     }
 }
@@ -1700,7 +1666,6 @@ function logInsuranceProductsVerification() {
  * 보험상품 에러 처리
  */
 function handleInsuranceProductsError(elHeader) {
-    console.error("보험상품 조회 실패:", elHeader);
     dlt_insuranceProducts.setJSON([]);
 }
 
@@ -1708,7 +1673,6 @@ function handleInsuranceProductsError(elHeader) {
  * 보험상품 조회 실패 콜백
  */
 scwin.sbm_selectInsuranceProducts_submiterror = function (e) {
-    console.error("보험상품 조회 서버 오류:", e);
     dlt_insuranceProducts.setJSON([]);
     scwin.showLoading(false);
 };
@@ -1744,7 +1708,6 @@ scwin.generateMemoFromAPI = function () {
         return;
     }
 
-    console.log("FastAPI 요청 데이터:", JSON.stringify(requestData, null, 2));
     
     // API 호출 실행
     executeAIMemoGeneration(requestData);
@@ -1782,7 +1745,6 @@ function handleAIMemoResponse(xhr) {
     if (xhr.status === 200) {
         try {
             const responseData = JSON.parse(xhr.responseText);
-            console.log("API 응답:", responseData);
             
             if (isSuccessfulMemoResponse(responseData)) {
                 processMemoSuccess(responseData.results[0]);
@@ -1790,11 +1752,9 @@ function handleAIMemoResponse(xhr) {
                 showMemoGenerationError("메모 생성에 실패했습니다. 응답 데이터가 없습니다.");
             }
         } catch (error) {
-            console.error("응답 파싱 오류:", error);
             showMemoGenerationError("응답 처리 중 오류가 발생했습니다.");
         }
     } else {
-        console.error("API 호출 실패:", xhr.status);
         showMemoGenerationError(`API 호출에 실패했습니다. (상태: ${xhr.status})`);
     }
 }
@@ -1866,7 +1826,6 @@ function showMemoGenerationError(message) {
  * 네트워크 에러 처리
  */
 function handleAIMemoNetworkError() {
-    console.error("네트워크 오류");
     Swal.fire({
         title: '네트워크 오류',
         text: '네트워크 오류가 발생했습니다. FastAPI 서버를 확인해주세요.',
@@ -1895,7 +1854,6 @@ scwin.prepareFastAPIRequestData = function () {
         return requestData;
 
     } catch (error) {
-        console.error("요청 데이터 준비 오류:", error);
         return null;
     }
 };
@@ -1908,12 +1866,10 @@ function prepareSettlementsData() {
     const rowCount = dlt_settlementTreatmentList ? dlt_settlementTreatmentList.getRowCount() : 0;
 
     if (rowCount > 0) {
-        console.log("settlementTreatmentList에서 데이터 추출, 행 수:", rowCount);
         
         for (let i = 0; i < rowCount; i++) {
             const settlement = createSettlementObject(i);
             settlements.push(settlement);
-            console.log("정산[" + i + "]:", settlement);
         }
     }
 
@@ -1948,7 +1904,6 @@ function prepareTreatmentsData() {
         for (let i = 0; i < rowCount; i++) {
             const treatment = createTreatmentObject(i);
             treatments.push(treatment);
-            console.log("치료[" + i + "]:", treatment);
         }
     }
 
@@ -1976,7 +1931,6 @@ function createTreatmentObject(index) {
  */
 function prepareExcludedItemsData() {
     if (typeof dlt_excludedItems === 'undefined') {
-        console.error("dlt_excludedItems가 정의되지 않음!");
         return [];
     }
 
@@ -2016,18 +1970,12 @@ function createExcludedItemObject(index) {
  * 요청 데이터 통계 로그
  */
 function logRequestDataStatistics(requestData) {
-    console.log("=== 준비된 요청 데이터 최종 통계 ===");
-    console.log("- claim_no: " + scwin.claim.claimNo);
-    console.log("- settlements: " + requestData.settlements.length + "건");
-    console.log("- treatments: " + requestData.treatments.length + "건");
-    console.log("- excluded_items: " + requestData.excluded_items.length + "건");
 
     if (requestData.excluded_items.length > 0) {
         requestData.excluded_items.forEach(function (item, index) {
-            console.log("  [" + index + "] " + item.exc_reason + ": " + item.exc_cost + "원");
         });
     } else {
-        console.warn("⚠️  제외항목이 없습니다!");
+        console.warn("제외항목이 없습니다!");
     }
 }
 
@@ -2036,14 +1984,12 @@ function logRequestDataStatistics(requestData) {
  */
 scwin.validateExcludedItemsBeforeMemo = function () {
     if (typeof dlt_excludedItems === 'undefined') {
-        console.error("dlt_excludedItems가 정의되지 않음");
         return false;
     }
 
     const rowCount = dlt_excludedItems.getRowCount();
 
     if (rowCount === 0) {
-        console.warn("제외항목이 0건입니다. 제외항목 조회가 완료되었는지 확인하세요.");
         scwin.calculateTotalExcludedAmount();
         return dlt_excludedItems.getRowCount() > 0;
     }
@@ -2441,7 +2387,6 @@ function handleApprovalError(message) {
 scwin.sbm_approveApprovalReq_submiterror = function (e) {
     scwin.showLoading(false);
     
-    console.error("결재승인 오류:", e);
     
     const errorMsg = getErrorMessage(e, "결재승인 처리 중 오류가 발생했습니다.");
     
@@ -2472,7 +2417,6 @@ function handleClaimResultSaveError(elHeader) {
     scwin.showLoading(false);
     
     const errorMsg = elHeader?.resMsg || "저장에 실패했습니다.";
-    console.error("CLAIM_RESULT 저장 실패:", errorMsg);
     
     scwin.noBtnAlertWithTimer({
         title: '오류',
@@ -2515,7 +2459,6 @@ scwin.sbm_selectClaimResult_submitdone = function (e) {
             
             if (firstResult.claim_memo) {
                 txt_examMemo.setValue(firstResult.claim_memo);
-                console.log("기존 메모 로드 완료:", firstResult.claim_memo);
                 
                 // 다른 데이터도 설정
                 setClaimResultData(firstResult);
@@ -2536,12 +2479,6 @@ function setClaimResultData(result) {
     }
 }
 
-/**
- * 기존 메모 조회 실패 콜백
- */
-scwin.sbm_selectClaimResult_submiterror = function (e) {
-    console.log("메모 불러오기 오류:", e);
-};
 
 /**
  * 청구 사용자 정보 조회 성공 콜백
@@ -2554,13 +2491,6 @@ scwin.sbm_selectClaimUserEmpInfo_submitdone = function (e) {
     } else {
         console.log("유저 정보가 없습니다.");
     }
-};
-
-/**
- * 청구 사용자 정보 조회 실패 콜백
- */
-scwin.sbm_selectClaimUserEmpInfo_submiterror = function (e) {
-    console.error("유저 정보 불러오기 오류:", e);
 };
 
 // =============================================================================
