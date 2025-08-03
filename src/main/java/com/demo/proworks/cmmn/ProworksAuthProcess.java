@@ -71,7 +71,7 @@ public class ProworksAuthProcess {
         "websocket0004SendTestNotification"
 
 
-        // 필요에 따라 추가...
+    
     );
 
     public ProworksAuthProcess() {
@@ -83,13 +83,13 @@ public class ProworksAuthProcess {
         
         try {
         
-            // 1. 로그인 불필요 서비스인지 체크
+            // 로그인 불필요 서비스인지 체크
             if (isPublicService(svcId)) {
                 AppLog.debug("[ProworksAuthProcess] 공개 서비스 - 권한 체크 생략: " + svcId);
                 return;
             }
             
-            // 2. 세션에서 사용자 헤더 정보 가져오기
+            // 세션에서 사용자 헤더 정보 가져오기
             UserHeader userHeader = ControllerContextUtil.getUserHeader();
             
             if (userHeader == null) {
@@ -108,7 +108,7 @@ public class ProworksAuthProcess {
             
             AppLog.debug("[ProworksAuthProcess] 사용자 정보 - ID: " + userId + ", Role: " + userRole);
             
-            // 3. 역할별 서비스 접근 권한 체크
+            // 역할별 서비스 접근 권한 체크
             if (!hasServiceAccess(svcId, userRole)) {
                 AppLog.warn("[ProworksAuthProcess] 서비스 접근 권한 없음 - User: " + userId + 
                            ", Role: " + userRole + ", Service: " + svcId);
@@ -153,16 +153,15 @@ public class ProworksAuthProcess {
             if (EMPLOYEE_ONLY_SERVICES.contains(svcId)) {
                 return false;
             }
-            // 그 외 서비스는 기본적으로 접근 가능 (필요시 수정)
+            // 그 외 서비스는 기본적으로 접근 가능
             return true;
         }
         
 
-        // EMPLOYEE 역할 체크 (ADMIN, MANAGER 등 포함)
-
+        // EMPLOYEE 역할 체크
         if ("ADMIN".equals(userRole) || "MANAGER".equals(userRole) || "EMPLOYEE".equals(userRole)||
         "실무자".equals(userRole) || "관리자".equals(userRole)) {
-            // EMPLOYEE는 USER 전용 서비스 제외하고 모든 서비스 접근 가능
+            
             if (USER_ONLY_SERVICES.contains(svcId)) {
                 return false;
             }

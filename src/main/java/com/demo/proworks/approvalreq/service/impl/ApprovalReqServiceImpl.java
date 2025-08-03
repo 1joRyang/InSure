@@ -152,11 +152,11 @@ public class ApprovalReqServiceImpl implements ApprovalReqService {
 		
 		System.out.println("[결재반려] 처리 시작: " + approvalReqVo.getClaim_no());
 		
-	    // 1. 결재요청 테이블의 메모 업데이트
+	    // 결재요청 테이블의 메모 업데이트
 	    approvalReqDAO.updateApprovalReqMemo(approvalReqVo);
 	    System.out.println("[결재반려] 메모 업데이트 완료");
 	    
-	    // 2. 청구 정보 조회
+	    // 청구 정보 조회
 	    ClaimVo claimToFind = new ClaimVo();
 	    claimToFind.setClaim_no(approvalReqVo.getClaim_no());
 	    ClaimVo claimToUpdate = claimService.selectClaim(claimToFind);
@@ -165,7 +165,7 @@ public class ApprovalReqServiceImpl implements ApprovalReqService {
 	        throw new Exception("해당 청구를 찾을 수 없습니다: " + approvalReqVo.getClaim_no());
 	    }
 	
-	    // 3. ✨ 청구 상태를 '결재반려'로 변경 (알림은 ClaimService에서 자동 처리)
+	    // 청구 상태를 '결재반려'로 변경
 	    claimToUpdate.setStatus("결재반려");
         int updateResult = claimService.updateClaim(claimToUpdate);
         
@@ -190,7 +190,7 @@ public class ApprovalReqServiceImpl implements ApprovalReqService {
 
 		System.out.println("[결재승인] 처리 시작: " + approvalReqVo.getClaim_no());
 		
-        // 1. 청구 정보 조회
+        // 청구 정보 조회
         ClaimVo claimToFind = new ClaimVo();
         claimToFind.setClaim_no(approvalReqVo.getClaim_no());
         ClaimVo claimInfo = claimService.selectClaim(claimToFind);
@@ -200,14 +200,13 @@ public class ApprovalReqServiceImpl implements ApprovalReqService {
         }
 
 		
-		 // 청구 상태를 "결재완료"로 변경 (알림은 ClaimService에서 자동 처리)
+		 // 청구 상태를 "결재완료"로 변경 
          claimInfo.setStatus("결재완료");
 	    int updateResult = claimService.updateClaim(claimInfo);
 	    
 	    if (updateResult > 0) {
 	        System.out.println("[결재승인] 청구 상태 변경 및 알림 전송 완료: " + approvalReqVo.getClaim_no());
 	    } else {
-	        // 트랜잭션에 의해 롤백될 수 있지만, 명시적인 예외 처리가 더 안전합니다.
 	        throw new Exception("[결재승인] 청구 상태 변경 실패: " + approvalReqVo.getClaim_no());
 	    }
 	}
