@@ -86,14 +86,12 @@ scwin.btn_submit_onclick = function (e) {
         return false;
     }
 
-    // dataMap에 값 설정
     dma_additionalReq.set("additional_memo", additionalMemo.trim());
     dma_additionalReq.set("request_type", "SUPPLEMENT"); // 보완요청 타입 설정
 
     console.log("존재 여부 확인 중...");
     console.log("CLAIM_NO:", dma_claimNo.get("claim_no"));
 
-    // 1단계: 존재 여부 확인
     $p.executeSubmission("sbm_checkAdditionalReq");
 };
 
@@ -112,11 +110,9 @@ scwin.sbm_checkAdditionalReq_submitdone = function (e) {
     if (result && result.success) {
         if (result.exists) {
             // 기존 데이터가 있으면 UPDATE
-            console.log("기존 데이터 존재 - UPDATE 실행");
             $p.executeSubmission("sbm_updateAdditionalReq");
         } else {
             // 기존 데이터가 없으면 INSERT
-            console.log("신규 데이터 - INSERT 실행");
             $p.executeSubmission("sbm_insertAdditionalReq");
         }
     } else {
@@ -148,7 +144,7 @@ scwin.sbm_insertAdditionalReq_submitdone = function (e) {
             title: '보완 요청이 등록되었습니다.'
         });
         setTimeout(function () {
-            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/webWrapper.xml";
         }, 2000);
     } else {
         scwin.toastAlert({
@@ -193,7 +189,6 @@ scwin.sbm_updateAdditionalReq_submitdone = function (e) {
 };
 
 scwin.sbm_updateAdditionalReq_submiterror = function (e) {
-    console.log("수정 중 에러:", e);
     scwin.toastAlert({
         icon: 'error',
         title: '수정 중 오류가 발생했습니다.'
@@ -203,7 +198,6 @@ scwin.sbm_updateAdditionalReq_submiterror = function (e) {
 
 
 scwin.sbm_insertAdditionalReqOld_submitdone = function (e) {
-    console.log("보완요청 처리 성공:", e);
     $p.closePopup();
     scwin.noBtnAlertWithTimer({
         icon: 'success',
@@ -216,7 +210,6 @@ scwin.sbm_insertAdditionalReqOld_submitdone = function (e) {
 };
 
 scwin.sbm_insertAdditionalReqOld_submiterror = function (e) {
-    console.log("보완요청 처리 실패:", e);
 
     var errorMsg = "보완요청 전송 중 오류가 발생했습니다.";
     if (e.responseJSON && e.responseJSON.elHeader && e.responseJSON.elHeader.resMsg) {
@@ -273,15 +266,6 @@ scwin.noBtnAlertWithTimer = (param) => {
     });
 }
 
-/** 부르는 형태 예시
-scwin.twoBtnAlert({
-     title: "로그아웃 하시겠습니까?",
- }, (result) => {
-     if (result.isConfirmed) {
-         $c.sbm.execute(sbm_EmployeeLogout);
-     }
- });
- */
 scwin.twoBtnAlert = (param, func) => {
     Swal.fire({
         ...param,

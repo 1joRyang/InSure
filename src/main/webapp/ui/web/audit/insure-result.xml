@@ -2089,7 +2089,7 @@ function handleWorkerApproval() {
     if (!scwin.checkPermission("결재 신청")) return;
     if (!scwin.checkApprovalPermission()) return;
     
-    openClaimApprovalPopup("/InsWebApp/ui/approval/approval-modal.xml");
+    openClaimApprovalPopup("/InsWebApp/ui/web/audit/approval-modal.xml");
 }
 
 /**
@@ -2230,14 +2230,14 @@ scwin.btn_reject_onclick = function (e) {
  * 반려 메모 버튼 클릭
  */
 scwin.btn_reject_memo_onclick = function (e) {
-    openClaimReturnPopup("/InsWebApp/ui/Assignment/rejectMemoPopUp.xml");
+    openClaimReturnPopup("/InsWebApp/ui/web/assign/rejectMemoPopUp.xml");
 };
 
 /**
  * 이전 버튼 클릭
  */
 scwin.btn_before_onclick = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-ocr.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure-ocr.xml";
 };
 
 // =============================================================================

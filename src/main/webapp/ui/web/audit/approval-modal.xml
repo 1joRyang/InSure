@@ -113,9 +113,6 @@ scwin.sbm_insertApprovalReq_submitdone = function (e) {
 		showConfirmButton: false,
 	});
 
-    // setTimeout(function() {
-    //     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
-    // }, 2000);
 };
 ]]></script>
     </head>
