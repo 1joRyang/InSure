@@ -85,7 +85,6 @@ scwin.sbm_getMyInsurance_submitdone = function(e) {
     
     if (insuranceList && insuranceList.length > 0) {
         
-        // 각 보험 데이터에 누락된 필드 추가 (기본값 설정)
         insuranceList = insuranceList.map(function(insurance) {
             return {
                 insu_id: insurance.insu_id,

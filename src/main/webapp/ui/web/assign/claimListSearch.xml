@@ -254,7 +254,6 @@ scwin.grd_claimEmployee_oncellclick = function (rowIndex, columnIndex, columnId)
 };
 
 function moveNsave(rowData) {
-    // claimNo, ID, user_name, status, empName
     localStorage.removeItem("claimImg");
     
     const claim = {
