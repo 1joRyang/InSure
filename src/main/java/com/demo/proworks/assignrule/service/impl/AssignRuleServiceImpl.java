@@ -419,8 +419,7 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 	
 	
 	/**
-	 * 자동 배정 웹소켓 알림을 비동기로 전송합니다.
-	 * 배정 로직의 성능에 영향을 주지 않기 위해 비동기로 처리합니다.
+	 * 자동 배정 웹소켓 알림을 비동기로 전송
 	 * @param claimNo 청구 번호
 	 * @param assignedEmpNo 배정된 직원 번호
 	 * @param assignResult 배정 결과 메시지
@@ -430,47 +429,46 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 	private void sendWebSocketAutoAssignNotification(String claimNo, String assignedEmpNo, String assignResult, String claimType, String assignDeptName) {
 	    CompletableFuture.runAsync(() -> {
 	        try {
-	            System.out.println("[WEBSOCKET] 자동 배정 알림 전송 시작: " + claimNo + " -> " + assignedEmpNo);
+	            System.out.println("자동 배정 알림 전송 시작: " + claimNo + " -> " + assignedEmpNo);
 	
 	            RestTemplate restTemplate = new RestTemplate();
 	            HttpHeaders headers = new HttpHeaders();
 	            headers.setContentType(MediaType.APPLICATION_JSON);
 	
-	            // Node.js 서버로 보낼 데이터 구성 (server.js의 /api/notify-auto-assign API와 일치)
 	            Map<String, Object> notificationData = new HashMap<>();
 	            notificationData.put("claimNo", claimNo);
 	            notificationData.put("claimType", claimType);
 	            notificationData.put("assignedEmpNo", assignedEmpNo);
 	            notificationData.put("assignDept", assignDeptName);
-	            // 필요에 따라 추가 정보 전송
+
 	            notificationData.put("claimContent", "새로운 실손보험 청구가 배정되었습니다.");
 	            notificationData.put("priority", "NORMAL");
 	
 	            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(notificationData, headers);
 	
-	            // 웹소켓 서버 API 호출 (server.js가 실행 중인 포트)
+	            // 웹소켓 서버 API 호출
 	            String webSocketApiUrl = "http://localhost:3000/api/notify-auto-assign";
 	            Map<String, Object> response = restTemplate.postForObject(webSocketApiUrl, entity, Map.class);
 	
 	            if (response != null && Boolean.TRUE.equals(response.get("success"))) {
-	                System.out.println("[WEBSOCKET] ✅ 자동 배정 알림 전송 성공: " + claimNo + " -> " + assignedEmpNo);
+	                System.out.println("자동 배정 알림 전송 성공: " + claimNo + " -> " + assignedEmpNo);
 	            } else {
-	                System.err.println("[WEBSOCKET] ⚠️ 자동 배정 알림 전송 실패: " + (response != null ? response.get("message") : "응답 없음"));
+	                System.err.println("자동 배정 알림 전송 실패: " + (response != null ? response.get("message") : "응답 없음"));
 	            }
 	
 	        } catch (Exception e) {
-	            System.err.println("[WEBSOCKET] ⚠️ 자동 배정 알림 전송 중 오류 (배정은 정상 완료됨): " + e.getMessage());
+	            System.err.println("자동 배정 알림 전송 중 오류 (배정은 정상 완료됨): " + e.getMessage());
 	        }
 	    });
 	}
 
 	/**
-	 * 🔔 웹소켓 일괄 배정 완료 알림 전송
+	 * 웹소켓 일괄 배정 완료 알림 전송
 	 */
 	private void sendWebSocketBatchCompleteNotification(int totalProcessed, int successCount, int failCount) {
 	    CompletableFuture.runAsync(() -> {
 	        try {
-	            System.out.println("[WEBSOCKET] 일괄 배정 완료 알림 전송 시작: 총 " + totalProcessed + "건");
+	            System.out.println("일괄 배정 완료 알림 전송 시작: 총 " + totalProcessed + "건");
 	            
 	            RestTemplate restTemplate = new RestTemplate();
 	            HttpHeaders headers = new HttpHeaders();
@@ -480,7 +478,7 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 	            batchData.put("totalProcessed", totalProcessed);
 	            batchData.put("successCount", successCount);
 	            batchData.put("failCount", failCount);
-	            batchData.put("processedClaims", new ArrayList<>()); // 필요시 실제 처리 목록 추가
+	            batchData.put("processedClaims", new ArrayList<>()); 
 	            
 	            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(batchData, headers);
 	            
@@ -490,10 +488,10 @@ public class AssignRuleServiceImpl implements AssignRuleService {
 	                Map.class
 	            );
 	            
-	            System.out.println("[WEBSOCKET] ✅ 일괄 배정 완료 알림 전송: " + totalProcessed + "건 처리 완료");
+	            System.out.println("일괄 배정 완료 알림 전송: " + totalProcessed + "건 처리 완료");
 	            
 	        } catch (Exception e) {
-	            System.out.println("[WEBSOCKET] ⚠️ 일괄 배정 알림 전송 실패: " + e.getMessage());
+	            System.out.println("일괄 배정 알림 전송 실패: " + e.getMessage());
 	        }
 	    });
 	}

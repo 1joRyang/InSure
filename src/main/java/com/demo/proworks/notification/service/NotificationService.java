@@ -125,28 +125,6 @@ public interface NotificationService {
      * 부서 알림 생성 및 저장
      */
     int insertDeptNotification(String empNo, String deptName, int assignCount) throws Exception;
-    
-    // ==================== 조회 편의 메서드들 ====================
-    
-    /**
-     * 특정 직원의 최근 알림 목록 조회
-     */
-    List<NotificationVo> selectRecentNotifications(String empNo) throws Exception;
-    
-    /**
-     * 특정 직원의 읽지 않은 알림 목록 조회
-     */
-    List<NotificationVo> selectUnreadNotifications(String empNo) throws Exception;
-    
-    /**
-     * 특정 타입의 알림 목록 조회
-     */
-    List<NotificationVo> selectNotificationsByType(String empNo, String notiType) throws Exception;
-    
-    /**
-     * 알림 ID로 읽음 처리
-     */
-    int markAsReadById(String notiId, String empNo) throws Exception;
-    
+
 }
 

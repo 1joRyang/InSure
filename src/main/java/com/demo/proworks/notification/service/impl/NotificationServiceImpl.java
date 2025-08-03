@@ -33,7 +33,7 @@ public class NotificationServiceImpl implements NotificationService {
 	private MessageSource messageSource;
 
     /**
-     * 알림 목록을 조회합니다.
+     * 알림 목록을 조회한다.
      *
      * @process
      * 1. 알림 페이징 처리하여 목록을 조회한다.
@@ -127,7 +127,7 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * 직원별 알림 목록 조회 (웹소켓용)
      * 
-     * @param NotificationVo searchVo 검색조건 (emp_no 필수)
+     * @param NotificationVo searchVo 검색조건 
      * @return List<NotificationVo> 알림 목록
      * @throws Exception
      */
@@ -149,7 +149,7 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * 알림 읽음 처리
      * 
-     * @param NotificationVo vo (noti_id, emp_no 필요)
+     * @param NotificationVo vo 
      * @return int 처리 결과
      * @throws Exception
      */
@@ -244,51 +244,5 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationDAO.insertDeptNotification(empNo, deptName, assignCount);
     }
     
-    // ==================== 조회 편의 메서드들 ====================
     
-    /**
-     * 특정 직원의 최근 알림 목록 조회
-     * 
-     * @param String empNo 직원번호
-     * @return List<NotificationVo> 알림 목록
-     * @throws Exception
-     */
-    public List<NotificationVo> selectRecentNotifications(String empNo) throws Exception {
-        return notificationDAO.selectRecentNotifications(empNo);
-    }
-    
-    /**
-     * 특정 직원의 읽지 않은 알림 목록 조회
-     * 
-     * @param String empNo 직원번호
-     * @return List<NotificationVo> 읽지 않은 알림 목록
-     * @throws Exception
-     */
-    public List<NotificationVo> selectUnreadNotifications(String empNo) throws Exception {
-        return notificationDAO.selectUnreadNotifications(empNo);
-    }
-    
-    /**
-     * 특정 타입의 알림 목록 조회
-     * 
-     * @param String empNo 직원번호
-     * @param String notiType 알림 타입
-     * @return List<NotificationVo> 알림 목록
-     * @throws Exception
-     */
-    public List<NotificationVo> selectNotificationsByType(String empNo, String notiType) throws Exception {
-        return notificationDAO.selectNotificationsByType(empNo, notiType);
-    }
-    
-    /**
-     * 알림 ID로 읽음 처리
-     * 
-     * @param String notiId 알림 ID
-     * @param String empNo 직원번호
-     * @return int 처리 결과
-     * @throws Exception
-     */
-    public int markAsReadById(String notiId, String empNo) throws Exception {
-        return notificationDAO.markAsReadById(notiId, empNo);
-    }
 }

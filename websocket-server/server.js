@@ -10,40 +10,31 @@ app.use(express.json());
 const wss = new WebSocket.Server({ port: 8081 });
 const connectedEmployees = new Map(); // empNo를 키로 사용
 
-console.log('🚀 실손보험 배정 시스템 웹소켓 서버 시작 (포트: 8081)');
-console.log('📋 연동 가능한 VO: AssignRuleVo, EmployeeVo, ClaimVo, UserVo');
+console.log('실손보험 배정 시스템 웹소켓 서버 시작 (포트: 8081)');
 
 wss.on('connection', function connection(ws) {
-    console.log('👤 새 연결 수립');
-	
-
-	// --- ▼ 디버깅용 로그 1번 추가 ▼ ---
-	console.log('✅ "message" 이벤트 핸들러를 이 연결에 추가합니다.');
+    console.log('새 연결 수립');
 
 	ws.on('message', function incoming(message) {
 	    
-	    // --- ▼ 디버깅용 로그 2번 추가 ▼ ---
-	    // Buffer 형태로 올 수 있으므로 toString()으로 변환하여 확인합니다.
-	    console.log('📩 메시지 수신 완료! 내용:', message.toString());
-
         try {
             const data = JSON.parse(message);
             
-            // 직원 등록 (EmployeeVo 기반)
+            // 직원 등록
             if (data.type === 'register') {
                 connectedEmployees.set(data.empNo, {
                     ws: ws,
-                    empNo: data.empNo,           // EmployeeVo.empNo
-                    empName: data.empName,       // EmployeeVo.empName  
-                    deptId: data.deptId,         // EmployeeVo.deptId
-                    role: data.role,             // EmployeeVo.role (실무자, 관리자)
-                    status: data.status,         // EmployeeVo.status (재직중, 퇴사)
-                    userRole: data.userRole,     // ProworksUserHeader.userRole (USER, EMPLOYEE)
+                    empNo: data.empNo,          
+                    empName: data.empName,       
+                    deptId: data.deptId,         
+                    role: data.role,             
+                    status: data.status,         
+                    userRole: data.userRole,     
                     connectTime: new Date(),
                     lastHeartbeat: new Date()
                 });
                 
-                console.log(`✅ 직원 등록 완료:`);
+                console.log(` 직원 등록 완료:`);
                 console.log(`   - 직원번호: ${data.empNo}`);
                 console.log(`   - 직원명: ${data.empName}`);
                 console.log(`   - 부서ID: ${data.deptId}`);
@@ -51,20 +42,10 @@ wss.on('connection', function connection(ws) {
                 console.log(`   - 상태: ${data.status}`);
                 console.log(`   - 사용자유형: ${data.userRole}`);
                 
-               /* ws.send(JSON.stringify({
-                    type: 'register_success',
-                    message: `${data.empName}님이 실손보험 알림 서비스에 연결되었습니다.`,
-                    empInfo: {
-                        empNo: data.empNo,
-                        empName: data.empName,
-                        deptId: data.deptId,
-                        role: data.role,
-                        status: data.status
-                    }
-                }));*/
+
             }
             
-            // 자동 배정 완료 알림 (AssignRuleServiceImpl.assignEmployeeToClaim 결과)
+            // 자동 배정 완료 알림 
             if (data.type === 'auto_assign_complete') {
                 const targetEmployee = connectedEmployees.get(data.assignedEmpNo);
                 
@@ -72,26 +53,26 @@ wss.on('connection', function connection(ws) {
                     const notification = {
                         type: 'auto_assigned_task',
                         taskId: data.claimNo,
-                        message: '🤖 자동 배정으로 새로운 실손보험 심사 작업이 배정되었습니다!',
+                        message: '자동 배정으로 새로운 실손보험 심사 작업이 배정되었습니다!',
                         taskData: {
-                            // ClaimVo 필드 기반
-                            claimNo: data.claimNo,               // ClaimVo.claim_no
-                            claimType: data.claimType,           // ClaimVo.claim_type
-                            claimContent: data.claimContent,     // ClaimVo.claim_content
-                            receiptDate: data.receiptDate,       // ClaimVo.receipt_date
-                            diseaseCode: data.diseaseCode,       // ClaimVo.disease_code
-                            dateOfAccident: data.dateOfAccident, // ClaimVo.date_of_accident
+                            // ClaimVo 
+                            claimNo: data.claimNo,             
+                            claimType: data.claimType,          
+                            claimContent: data.claimContent,    
+                            receiptDate: data.receiptDate,       
+                            diseaseCode: data.diseaseCode,      
+                            dateOfAccident: data.dateOfAccident, 
                             
                             // 배정 정보
-                            assignedEmpNo: data.assignedEmpNo,   // 배정된 직원번호
+                            assignedEmpNo: data.assignedEmpNo,   
                             assignedEmpName: targetEmployee.empName,
                             assignedDeptId: targetEmployee.deptId,
                             assignedRole: targetEmployee.role,
                             
-                            // 배정규칙 정보 (AssignRuleVo 기반)
-                            ruleId: data.ruleId,                 // AssignRuleVo.rule_id
-                            keyword: data.keyword,               // AssignRuleVo.keyword
-                            assignDept: data.assignDept,         // AssignRuleVo.dept
+                            // 배정규칙 정보
+                            ruleId: data.ruleId,                 
+                            keyword: data.keyword,               
+                            assignDept: data.assignDept,         
                             
                             assignTime: new Date().toLocaleString(),
                             assignType: 'AUTO',
@@ -101,7 +82,7 @@ wss.on('connection', function connection(ws) {
                     
                     targetEmployee.ws.send(JSON.stringify(notification));
                     
-                    console.log(`🤖 자동 배정 알림 전송:`);
+                    console.log(` 자동 배정 알림 전송:`);
                     console.log(`   - 청구번호: ${data.claimNo}`);
                     console.log(`   - 청구유형: ${data.claimType}`);
                     console.log(`   - 담당자: ${targetEmployee.empName}(${data.assignedEmpNo})`);
@@ -114,7 +95,7 @@ wss.on('connection', function connection(ws) {
                         message: `자동 배정 완료 - ${targetEmployee.empName}(${data.assignedEmpNo})에게 청구 ${data.claimNo} 배정됨`
                     }));
                 } else {
-                    console.warn(`⚠️  배정된 직원이 접속하지 않음: ${data.assignedEmpNo}`);
+                    console.warn(` 배정된 직원이 접속하지 않음: ${data.assignedEmpNo}`);
                     ws.send(JSON.stringify({
                         type: 'assign_failed',
                         message: `배정된 직원(${data.assignedEmpNo})이 현재 접속하지 않았습니다.`
@@ -130,7 +111,7 @@ wss.on('connection', function connection(ws) {
                     targetEmployee.ws.send(JSON.stringify({
                         type: 'manual_assigned_task',
                         taskId: data.claimNo,
-                        message: '👨‍💼 관리자가 새로운 심사 작업을 배정했습니다.',
+                        message: ' 관리자가 새로운 심사 작업을 배정했습니다.',
                         taskData: {
                             claimNo: data.claimNo,
                             claimType: data.claimType,
@@ -145,7 +126,7 @@ wss.on('connection', function connection(ws) {
                         }
                     }));
                     
-                    console.log(`👨‍💼 수동 배정: ${data.claimNo} → ${targetEmployee.empName}`);
+                    console.log(` 수동 배정: ${data.claimNo} → ${targetEmployee.empName}`);
                     
                     ws.send(JSON.stringify({
                         type: 'assign_success',
@@ -159,21 +140,21 @@ wss.on('connection', function connection(ws) {
                 }
             }
             
-            // 일괄 배정 완료 알림 (AssignRuleServiceImpl.assignAllUnassignedClaims 결과)
+            // 일괄 배정 완료 알림
             if (data.type === 'batch_assign_complete') {
                 const batchNotification = {
                     type: 'batch_assign_notification',
-                    message: `📊 일괄 자동 배정이 완료되었습니다!`,
+                    message: `일괄 자동 배정이 완료되었습니다!`,
                     batchData: {
                         totalProcessed: data.totalProcessed,
                         successCount: data.successCount,
                         failCount: data.failCount,
                         processTime: new Date().toLocaleString(),
-                        processedClaims: data.processedClaims || [] // 처리된 청구 목록
+                        processedClaims: data.processedClaims || [] 
                     }
                 };
                 
-                // 관리자급 직원들에게만 알림 (role이 '관리자'인 경우)
+                // 관리자급 직원들에게만 알림
                 let notifiedCount = 0;
                 connectedEmployees.forEach((employee) => {
                     if (employee.ws.readyState === WebSocket.OPEN && 
@@ -183,7 +164,7 @@ wss.on('connection', function connection(ws) {
                     }
                 });
                 
-                console.log(`📊 일괄 배정 완료 알림:`);
+                console.log(`일괄 배정 완료 알림:`);
                 console.log(`   - 총 처리: ${data.totalProcessed}건`);
                 console.log(`   - 성공: ${data.successCount}건`);
                 console.log(`   - 실패: ${data.failCount}건`);
@@ -197,7 +178,7 @@ wss.on('connection', function connection(ws) {
                     if (employee.deptId === data.deptId && employee.ws.readyState === WebSocket.OPEN) {
                         employee.ws.send(JSON.stringify({
                             type: 'dept_notification',
-                            message: `🏢 ${data.deptName} 부서에 새로운 업무가 배정되었습니다.`,
+                            message: ` ${data.deptName} 부서에 새로운 업무가 배정되었습니다.`,
                             deptData: {
                                 deptId: data.deptId,
                                 deptName: data.deptName,
@@ -209,7 +190,7 @@ wss.on('connection', function connection(ws) {
                     }
                 });
                 
-                console.log(`🏢 부서 알림: ${data.deptName}(${data.deptId}) - ${notifiedCount}명에게 전송`);
+                console.log(`부서 알림: ${data.deptName}(${data.deptId}) - ${notifiedCount}명에게 전송`);
             }
             
             // 접속 중인 직원 목록 요청
@@ -279,7 +260,7 @@ wss.on('connection', function connection(ws) {
                 }));
             }
             
-            // 하트비트 (연결 유지)
+            // 하트비트 
             if (data.type === 'ping') {
                 // 하트비트 시간 업데이트
                 connectedEmployees.forEach((emp) => {
@@ -315,7 +296,7 @@ wss.on('connection', function connection(ws) {
 
 // ==================== HTTP API 엔드포인트 ====================
 
-// 자동 배정 완료 알림 API (AssignRuleServiceImpl에서 호출)
+// 자동 배정 완료 알림 API
 app.post('/api/notify-auto-assign', (req, res) => {
     try {
         const { 
@@ -332,7 +313,7 @@ app.post('/api/notify-auto-assign', (req, res) => {
             priority 
         } = req.body;
         
-        console.log(`📨 자동 배정 알림 API 호출:`);
+        console.log(`자동 배정 알림 API 호출:`);
         console.log(`   - 청구번호: ${claimNo}`);
         console.log(`   - 청구유형: ${claimType}`);
         console.log(`   - 배정직원: ${assignedEmpNo}`);
@@ -344,7 +325,7 @@ app.post('/api/notify-auto-assign', (req, res) => {
             const notification = {
                 type: 'auto_assigned_task',
                 taskId: claimNo,
-                message: '🤖 자동 배정으로 새로운 실손보험 심사 작업이 배정되었습니다!',
+                message: ' 자동 배정으로 새로운 실손보험 심사 작업이 배정되었습니다!',
                 taskData: {
                     claimNo,
                     claimType,
@@ -400,7 +381,7 @@ app.post('/api/notify-batch-complete', (req, res) => {
         
         const batchNotification = {
             type: 'batch_assign_notification',
-            message: `📊 일괄 자동 배정이 완료되었습니다!`,
+            message: ` 일괄 자동 배정이 완료되었습니다!`,
             batchData: {
                 totalProcessed,
                 successCount,
@@ -420,7 +401,7 @@ app.post('/api/notify-batch-complete', (req, res) => {
             }
         });
         
-        console.log(`📊 일괄 배정 완료 알림: ${totalProcessed}건 처리, ${notifiedCount}명에게 알림`);
+        console.log(`일괄 배정 완료 알림: ${totalProcessed}건 처리, ${notifiedCount}명에게 알림`);
         res.json({ 
             success: true, 
             message: `${notifiedCount}명의 관리자에게 알림 전송`,
@@ -454,7 +435,7 @@ app.post('/api/notify-manual-assign', (req, res) => {
             targetEmployee.ws.send(JSON.stringify({
                 type: 'manual_assigned_task',
                 taskId: claimNo,
-                message: '👨‍💼 관리자가 새로운 심사 작업을 배정했습니다.',
+                message: '관리자가 새로운 심사 작업을 배정했습니다.',
                 taskData: {
                     claimNo,
                     claimType,
@@ -548,10 +529,10 @@ app.get('/api/connection-status', (req, res) => {
 
 
 
-// ▼ [신규 추가] 결재 요청 알림 API ▼
+// 결재 요청 알림 API
 app.post('/api/notify-approval-request', (req, res) => {
     const { claimNo, targetEmpNo, requesterName } = req.body;
-    console.log(`📨 결재 요청 API 수신: ${claimNo}, 대상: ${targetEmpNo}, 요청자: ${requesterName}`);
+    console.log(` 결재 요청 API 수신: ${claimNo}, 대상: ${targetEmpNo}, 요청자: ${requesterName}`);
 
     const targetEmployee = connectedEmployees.get(targetEmpNo);
 
@@ -562,17 +543,17 @@ app.post('/api/notify-approval-request', (req, res) => {
         }));
         res.json({ success: true, message: '결재 요청 알림 전송 완료' });
     } else {
-        console.warn(`⚠️  결재 요청 실패: 관리자(${targetEmpNo})가 접속하지 않았습니다.`);
+        console.warn(` 결재 요청 실패: 관리자(${targetEmpNo})가 접속하지 않았습니다.`);
         res.json({ success: false, message: '관리자가 접속하지 않았습니다.' });
     }
 });
 
 
 
-// ▼ [신규 추가] 결재 결과 알림 API ▼
+// 결재 결과 알림 API
 app.post('/api/notify-approval-result', (req, res) => {
     const { claimNo, targetEmpNo, approvalResult, approverName } = req.body;
-    console.log(`📨 결재 결과 API 수신: ${claimNo}, 대상: ${targetEmpNo}, 결과: ${approvalResult}`);
+    console.log(` 결재 결과 API 수신: ${claimNo}, 대상: ${targetEmpNo}, 결과: ${approvalResult}`);
 
     const targetEmployee = connectedEmployees.get(targetEmpNo);
 
@@ -583,16 +564,16 @@ app.post('/api/notify-approval-result', (req, res) => {
         }));
         res.json({ success: true, message: '결재 결과 알림 전송 완료' });
     } else {
-        console.warn(`⚠️ 결재 결과 알림 실패: 실무자(${targetEmpNo})가 접속하지 않았습니다.`);
+        console.warn(`결재 결과 알림 실패: 실무자(${targetEmpNo})가 접속하지 않았습니다.`);
         res.json({ success: false, message: '해당 실무자가 접속하지 않았습니다.' });
     }
 });
 
 
-// ▼ [신규 추가] 보완완료 알림 API ▼
+// 보완완료 알림 API
 app.post('/api/notify-supplement-complete', (req, res) => {
     const { claimNo, targetEmpNo, message } = req.body;
-    console.log(`📨 보완완료 API 수신: ${claimNo}, 대상: ${targetEmpNo}`);
+    console.log(`보완완료 API 수신: ${claimNo}, 대상: ${targetEmpNo}`);
 
     const targetEmployee = connectedEmployees.get(targetEmpNo);
 
@@ -608,15 +589,15 @@ app.post('/api/notify-supplement-complete', (req, res) => {
         }));
         res.json({ success: true, message: '보완완료 알림 전송 완료' });
     } else {
-        console.warn(`⚠️ 보완완료 알림 실패: 담당자(${targetEmpNo})가 접속하지 않았습니다.`);
+        console.warn(`보완완료 알림 실패: 담당자(${targetEmpNo})가 접속하지 않았습니다.`);
         res.json({ success: false, message: '담당자가 접속하지 않았습니다.' });
     }
 });
 
-// ▼ [신규 추가] 고객 알림 API (고객이 청구 등록 시 사용) ▼
+// 고객 알림 API (고객이 청구 등록 시)
 app.post('/api/notify-customer-action', (req, res) => {
     const { claimNo, targetEmpNo, actionType, customerName } = req.body;
-    console.log(`📨 고객 액션 API 수신: ${claimNo}, 액션: ${actionType}, 대상: ${targetEmpNo}`);
+    console.log(`고객 액션 API 수신: ${claimNo}, 액션: ${actionType}, 대상: ${targetEmpNo}`);
 
     const targetEmployee = connectedEmployees.get(targetEmpNo);
 
@@ -651,7 +632,7 @@ app.post('/api/notify-customer-action', (req, res) => {
         
         res.json({ success: true, message: '고객 액션 알림 전송 완료' });
     } else {
-        console.warn(`⚠️ 고객 액션 알림 실패: 담당자(${targetEmpNo})가 접속하지 않았습니다.`);
+        console.warn(`고객 액션 알림 실패: 담당자(${targetEmpNo})가 접속하지 않았습니다.`);
         res.json({ success: false, message: '담당자가 접속하지 않았습니다.' });
     }
 });
@@ -662,9 +643,9 @@ app.post('/api/notify-customer-action', (req, res) => {
 
 // HTTP 서버 시작
 app.listen(3000, () => {
-    console.log('📡 HTTP API 서버 실행 (포트: 3000)');
+    console.log('HTTP API 서버 실행 (포트: 3000)');
     console.log('');
-    console.log('🔗 사용 가능한 API:');
+    console.log(' 사용 가능한 API:');
     console.log('   ├─ POST /api/notify-auto-assign        : 자동 배정 알림');
     console.log('   ├─ POST /api/notify-manual-assign      : 수동 배정 알림');
     console.log('   ├─ POST /api/notify-batch-complete     : 일괄 배정 완료 알림');
@@ -674,13 +655,13 @@ app.listen(3000, () => {
     console.log('   ├─ POST /api/notify-customer-action    : 고객 액션 알림');
     console.log('   └─ GET  /api/connection-status         : 접속 상태 조회');
     console.log('');
-    console.log('📊 연동 테이블: claim, employee, assign_rule, ins_dept, approval_req');
-    console.log('🎯 지원 기능: 자동배정, 수동배정, 일괄배정, 결재처리, 보완완료, 실시간알림');
+    console.log('연동 테이블: claim, employee, assign_rule, ins_dept, approval_req');
+    console.log('지원 기능: 자동배정, 수동배정, 일괄배정, 결재처리, 보완완료, 실시간알림');
 });
 
 // 정리 작업
 process.on('SIGINT', () => {
-    console.log('\n🛑 실손보험 배정 시스템 웹소켓 서버 종료 중...');
+    console.log('\n실손보험 배정 시스템 웹소켓 서버 종료 중...');
     
     // 모든 웹소켓 연결에 종료 알림
     connectedEmployees.forEach((emp) => {
@@ -693,7 +674,7 @@ process.on('SIGINT', () => {
         }
     });
     
-    console.log('👋 모든 연결이 정리되었습니다.');
+    console.log('모든 연결이 정리되었습니다.');
     process.exit(0);
 });
 
@@ -704,13 +685,13 @@ setInterval(() => {
     
     connectedEmployees.forEach((emp, empNo) => {
         if (emp.ws.readyState !== WebSocket.OPEN || emp.lastHeartbeat < fiveMinutesAgo) {
-            console.log(`🧹 비활성 연결 제거: ${emp.empName}(${empNo})`);
+            console.log(`비활성 연결 제거: ${emp.empName}(${empNo})`);
             connectedEmployees.delete(empNo);
             removedCount++;
         }
     });
     
     if (removedCount > 0) {
-        console.log(`🧹 정리 완료: ${removedCount}개 연결 제거, 현재 ${connectedEmployees.size}개 연결 활성`);
+        console.log(`정리 완료: ${removedCount}개 연결 제거, 현재 ${connectedEmployees.size}개 연결 활성`);
     }
 }, 5 * 60 * 1000); // 5분

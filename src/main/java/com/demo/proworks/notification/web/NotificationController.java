@@ -79,20 +79,7 @@ public class NotificationController {
 	    
 	    return retNotificationList;            
 	}
-/*public NotificationListVo selectListNotification(NotificationVo notificationVo) throws Exception {    	   	
 
-        List<NotificationVo> notificationList = notificationService.selectListNotification(notificationVo);                  
-        long totCnt = notificationService.selectListCountNotification(notificationVo);
-	
-		NotificationListVo retNotificationList = new NotificationListVo();
-		retNotificationList.setNotificationVoList(notificationList); 
-		retNotificationList.setTotalCount(totCnt);
-		retNotificationList.setPageSize(notificationVo.getPageSize());
-		retNotificationList.setPageIndex(notificationVo.getPageIndex());
-
-        return retNotificationList;            
-    } */ 
-        
     /**
      * 알림을 단건 조회 처리 한다.
      *
@@ -153,7 +140,7 @@ public class NotificationController {
 // ==================== 웹소켓 알림용 추가 메서드들 ====================
     
     /**
-     * 🔔 직원별 알림 목록 조회 (웹소켓용)
+     *  직원별 알림 목록 조회 (웹소켓용)
      */
     @ElService(key="notification0001GetNotificationList")
     @RequestMapping(value="notification0001GetNotificationList")
@@ -188,7 +175,7 @@ public class NotificationController {
     }
     
     /**
-     * 🔔 읽지 않은 알림 개수 조회
+     * 읽지 않은 알림 개수 조회
      */
     @ElService(key="notification0002GetUnreadCount")
     @RequestMapping(value="notification0002GetUnreadCount")
@@ -215,7 +202,7 @@ public class NotificationController {
     }
     
     /**
-     * 🔔 알림 읽음 처리
+     * 알림 읽음 처리
      */
     @ElService(key="notification0003MarkAsRead")
     @RequestMapping(value="notification0003MarkAsRead")
@@ -252,7 +239,7 @@ public class NotificationController {
     }
     
     /**
-     * 🔔 모든 알림 읽음 처리
+     * 모든 알림 읽음 처리
      */
     @ElService(key="notification0004MarkAllAsRead")
     @RequestMapping(value="notification0004MarkAllAsRead")
@@ -282,7 +269,7 @@ public class NotificationController {
     }
     
     /**
-     * 🔔 모든 알림 삭제
+     * 모든 알림 삭제
      */
     @ElService(key="notification0006DeleteAllNotifications")
     @RequestMapping(value="notification0006DeleteAllNotifications")
@@ -312,41 +299,5 @@ public class NotificationController {
     }
     
     
-    /**
-	 * 🧪 NotificationService 테스트
-	 */
-	@ElService(key="NotificationServiceTest")
-	@RequestMapping(value="NotificationServiceTest")
-	@ElDescription(sub="알림 서비스 테스트", desc="NotificationService가 정상 작동하는지 테스트한다.")
-	public Map<String, Object> testNotificationService() throws Exception {
-	    Map<String, Object> result = new HashMap<String, Object>();
-	    
-	    try {
-	        // NotificationService 주입 확인
-	        if (notificationService == null) {
-	            result.put("success", false);
-	            result.put("message", "NotificationService가 주입되지 않았습니다.");
-	            return result;
-	        }
-	        
-	        // 간단한 카운트 테스트 (가장 안전)
-	        NotificationVo testVo = new NotificationVo();
-	        testVo.setEmp_no("101001");
-	        
-	        long count = notificationService.selectListCountNotification(testVo);
-	        
-	        result.put("success", true);
-	        result.put("message", "NotificationService 정상 작동");
-	        result.put("serviceInjected", true);
-	        result.put("testCount", count);
-	        
-	    } catch (Exception e) {
-	        result.put("success", false);
-	        result.put("message", "NotificationService 오류: " + e.getMessage());
-	        result.put("error", e.getClass().getSimpleName());
-	    }
-	    
-	    return result;
-	}
     
 }
