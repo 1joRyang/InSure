@@ -142,29 +142,4 @@ public class AdditionalReqServiceImpl implements AdditionalReqService {
 		return additionalReqDAO.deleteAdditionalReq(additionalReqVo);
 	}
 
-	/**
-	 * 추가요청 정보를 등록하고 청구 상태를 업데이트 한다. (기존 호환성 유지)
-	 *
-	 * @process 1. 추가요청 정보를 등록 처리 한다. 2. 청구 상태를 업데이트 한다.
-	 * 
-	 * @param additionalReqVo 추가요청 정보 AdditionalReqVo
-	 * @return 번호
-	 * @throws Exception
-	 */
-	@Transactional
-	public int insertAdditionalReqAndUpdateClaimStatus(AdditionalReqVo additionalReqVo) throws Exception {
-		return additionalReqDAO.insertAdditionalReqAndUpdateClaimStatus(additionalReqVo);
-	}
-
-	/**
-	 * 추가요청 정보를 Upsert하고 청구 상태를 업데이트 한다. (기존 호환성 유지)
-	 *
-	 * @param vo 추가요청 정보 AdditionalReqCusVo
-	 * @return 번호
-	 * @throws Exception
-	 */
-	@Transactional
-	public int upsertAdditionalReqAndUpdateClaimStatus(AdditionalReqCusVo vo) throws Exception {
-		return additionalReqDAO.upsertAdditionalReqAndUpdateClaimStatus(vo);
-	}
 }

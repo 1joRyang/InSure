@@ -130,12 +130,10 @@ scwin.onpageload = async function() {
 
 // 청구번호로 검색하는 함수 (수정됨)
 scwin.searchClaimByNo = function() {
-    console.log("청구번호 검색 시작");
     
     // input_search 값 가져오기
     var claimNo = input_search.getValue();
     
-    console.log("검색할 청구번호:", claimNo);
     
     // 청구번호가 있으면 설정, 없으면 전체 조회
     if (claimNo && claimNo.trim() !== "") {
@@ -189,7 +187,6 @@ scwin.sbm_claimFullJoinList_submitdone = function(e) {
 // 전체 조인 조회 실패 콜백
 scwin.sbm_claimFullJoinList_submiterror = function(e) {
     console.error("조회 실패:", e);
-    alert("데이터 조회 중 오류가 발생했습니다.");
 };
 
 // 검색 버튼 이벤트 (수정됨)
@@ -200,7 +197,6 @@ scwin.btn_search_onclick = function() {
 
 // 초기화 버튼 이벤트 (수정됨)
 scwin.btn_reset_onclick = function() {
-    console.log("검색 초기화");
     
     // 입력 필드 초기화
     input_search.setValue("");
@@ -221,7 +217,6 @@ scwin.sbm_claimList_submitdone = function(e) {
 scwin.grd_claimFullJoin_ondblclick = function(row, col) {
     try {
         var selectedData = dlt_claimFullJoinList.getRowJSON(row);
-        console.log("선택된 전체 청구 정보:", selectedData);
         
         if (selectedData && selectedData.claim_no) {
             var detailMsg = "청구번호: " + (selectedData.claim_no || "없음") + "\n" +
@@ -243,7 +238,6 @@ scwin.grd_claimFullJoin_ondblclick = function(row, col) {
 scwin.grd_claimEmployee_ondblclick = function(row, col) {
     try {
         var selectedData = dlt_claimFullJoinList.getRowJSON(row);
-        console.log("선택된 청구 정보:", selectedData);
         
         if (selectedData && selectedData.claim_no) {
             var detailMsg = "청구번호: " + (selectedData.claim_no || "없음") + "\n" +
@@ -261,20 +255,9 @@ scwin.grd_claimEmployee_ondblclick = function(row, col) {
     }
 };
 
-// 디버깅용 함수 - 수동 호출 가능
-scwin.debugData = function() {
-    console.log("=== 디버깅 정보 ===");
-    console.log("dmp_claimFullJoinVo:", dmp_claimFullJoinVo.getJSON());
-    console.log("dlt_claimFullJoinList 행 수:", dlt_claimFullJoinList.getRowCount());
-    console.log("dlt_claimFullJoinList 데이터:", dlt_claimFullJoinList.getJSON());
-};
 
 scwin.checkSearchCondition = function() {
-    console.log("=== 현재 검색 조건 ===");
-    console.log("input_search 값:", input_search.getValue());
-    console.log("claim_no:", dmp_claimFullJoinVo.get("claim_no"));
     
-    console.log("\n=== SQL에서 실행될 검색 로직 ===");
     var claimNo = dmp_claimFullJoinVo.get("claim_no");
     if (claimNo && claimNo !== "") {
         console.log("청구번호 검색 모드:");
