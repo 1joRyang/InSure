@@ -175,15 +175,7 @@ public class ClaimResultController {
     @ElDescription(sub = "심사결과 저장처리", desc = "심사결과를 저장 처리한다.")
     public ClaimResultVo saveClaimResult(ClaimResultVo claimResultVo) throws Exception {
         
-        // 디버깅: 받은 데이터 로깅
-        System.out.println("=== ClaimResult 저장 요청 디버깅 ===");
-        System.out.println("받은 claimResultVo: " + claimResultVo);
-        System.out.println("claimNo: '" + claimResultVo.getClaim_no() + "'");
-        System.out.println("claimMemo: '" + claimResultVo.getClaim_memo() + "'");
-        System.out.println("amount: '" + claimResultVo.getAmount() + "'");
-        System.out.println("date: '" + claimResultVo.getDate() + "'");
-        System.out.println("==============================");
-        
+
         // 입력값 검증
         if (claimResultVo.getClaim_no() == null || claimResultVo.getClaim_no().trim().isEmpty()) {
             System.err.println("[ERROR] 청구번호가 null 또는 빈 문자열입니다.");
@@ -218,7 +210,7 @@ public class ClaimResultController {
     }
     
     /**
-     * CLAIM_RESULT 조회 (개발/테스트용)
+     * CLAIM_RESULT 조회
      *
      * @param  claimResultVo 심사결과    
      * @return 조회 결과
