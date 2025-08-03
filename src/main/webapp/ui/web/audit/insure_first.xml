@@ -54,7 +54,7 @@ function openChangeAssigneePopup(link) {
     requires("uiplugin.popup");
     var winWid = $(window).width();
     var winHei = $(window).height();
-    var popWid = 600;  // 담당자 변경 팝업에 적합한 크기
+    var popWid = 600;  
     var popHei = 350;
     var sumLeft = (winWid - popWid) / 2;
     var sumTop = (winHei - popHei) / 2;
@@ -85,7 +85,7 @@ function openClaimReturnPopup(link) {
     requires("uiplugin.popup");
     var winWid = $(window).width();
     var winHei = $(window).height();
-    var popWid = 500;  // 담당자 변경 팝업에 적합한 크기
+    var popWid = 500;  
     var popHei = 400;
     var sumLeft = (winWid - popWid) / 2;
     var sumTop = (winHei - popHei) / 2;

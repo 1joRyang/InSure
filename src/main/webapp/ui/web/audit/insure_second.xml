@@ -142,8 +142,7 @@
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
-        <script lazy="false" type="text/javascript"><![CDATA[// TODO: 상계 있으면 조회
-scwin.onpageload = function() {
+        <script lazy="false" type="text/javascript"><![CDATA[scwin.onpageload = function() {
     scwin.index = 0;
     scwin.genList = [];
     scwin.isEmp = true;
@@ -362,8 +361,7 @@ scwin.grd_befClaim_oncellclick = function (rowIndex, columnIndex, columnId) {
 };
 
 scwin.grd_insure_oncellclick = function (rowIndex, columnIndex, columnId) {
-    // openPopup
-    openPopup("/InsWebApp/ui/Assignment/terms.xml", "term_popup", "보험 약관", {width: 700});
+    openPopup("/InsWebApp/ui/web/audit/terms.xml", "term_popup", "보험 약관", {width: 700});
 };
 ]]></script>
     </head>
