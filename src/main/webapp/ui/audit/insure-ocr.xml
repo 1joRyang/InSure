@@ -158,7 +158,7 @@
         	</xf:submission>
         	<xf:submission id="sbm_updateTreatment" action="/InsWebApp/TREATMENTUpd.pwkjson" method="post" mediatype="application/json"
         		ref='data:json,{"id":"dm_treatment","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
-        		customHandler="" mode="asynchronous" processMsg="저장 중..." ev:submit="" ev:submitdone="scwin.sbm_insertTreatment_submitdone"
+        		customHandler="" mode="asynchronous" processMsg="저장 중..." ev:submit="" ev:submitdone="scwin.sbm_updateTreatment_submitdone"
         		ev:submiterror="" abortTrigger="">
         	</xf:submission>
         	<xf:submission id="sbm_updatePaymentInfo" action="/InsWebApp/PAYMENTINFOUpd.pwkjson" method="post" mediatype="application/json"
@@ -184,12 +184,12 @@
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/ocr-tableStruc.js" scopeVariable="" type="text/javascript"></script>
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/dummy-table.js" scopeVariable="" type="text/javascript"></script>
         <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
-        <script lazy="false" type="text/javascript"><![CDATA[
-scwin.onpageload = function() {
+        <script lazy="false" type="text/javascript"><![CDATA[scwin.onpageload = function() {
     scwin.emp = JSON.parse(localStorage.getItem("employee"));
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
     scwin.isEmp = true;
     loadingScreen.hide();
+    dm_treatment.set("claim_no", scwin.claim.claimNo);
 
     // 담당자 아니면 readonly
     if (scwin.emp.empNo != scwin.claim.empNo ||(
@@ -228,21 +228,23 @@ scwin.onpageload = function() {
 
     scwin.exclusionData = {};
     scwin.treatmentId = 0;
+    scwin.isInitTreatmentInsert = false;
     scwin.isEdit = false; // false > insert | true > update
     scwin.nextClick = false;
     scwin.isGetTreatId = false; // insert 끝내고 treatmentId 가져오기.......
+    scwin.isInsertOnceDone = false;
 
-
-    if (scwin.isEmp && scwin.claim.status != "결재반려") {
+    if (scwin.isEmp && scwin.claim.status != "결재반려") { // 담당자면
         let savedData = JSON.parse(localStorage.getItem('dateList') || '[]');
         savedData.forEach(item => {
             date_drop.addItem(item.imgIdx, item.dateRange);
         });
         date_drop.setSelectedIndex(0);
+        // todo: insert 하고........... update 치기
 
         getTreatmentWithDate();
 
-    } else { // 담당자 아니면
+    } else { // 담당자 아니면 이미 있으니까
         dm_getTreatOnlyCno.set("SC_claim_no", scwin.claim.claimNo);
         $c.sbm.execute(sbm_getTreatmentOnlyCNo);
     }
@@ -250,6 +252,7 @@ scwin.onpageload = function() {
 };
 
 function getTreatmentWithDate() {
+    dm_treatment.set("claim_no", scwin.claim.claimNo);
     dm_treatment.set("treatment_date", date_drop.getText());
     
     if (scwin.isEmp && scwin.claim.status != "결재반려") { // 담당자
@@ -283,29 +286,18 @@ function getInsure() {
     // 가져오고
     dm_getTreatReq.set("claim_no", scwin.claim.claimNo);
     dm_getTreatReq.set("treatment_date", date_drop.getText());
+    dm_treatment.set("claim_no", scwin.claim.claimNo);
     dm_treatment.set("treatment_date", date_drop.getText());
     $c.sbm.execute(sbm_getTreatment);
 }
 
 scwin.sbm_getTreatment_submitdone = function (e) {
+    // todo: insert면 localStorage에 treatmentId 저장
+    console.log("scwin.isGetTreatId", scwin.isGetTreatId, "sel_department.getValue()",sel_department.getValue())
 
     if (scwin.isGetTreatId) {
         localStorage.setItem("treatmentId", dm_treatment.getJSON().treatment_id)
         scwin.treatmentId = localStorage.getItem("treatmentId");
-
-        dm_result.set("claim_no", scwin.claim.claimNo);
-        dm_result.set("treatment_id", scwin.treatmentId);
-        scwin.isEdit ? $c.sbm.execute(sbm_updateSettlement) : $c.sbm.execute(sbm_insertSettlement);
-
-        dm_sub.set("claim_no", scwin.claim.claimNo);
-        dm_sub.set("treatment_id", scwin.treatmentId);
-        scwin.isEdit ? $c.sbm.execute(sbm_updatePaymentInfo) : $c.sbm.execute(sbm_insertPaymentInfo);
-
-        let requestData = extractClaimItemData(scwin.treatmentId, scwin.claim.claimNo);
-        requestData.forEach(item => {
-            // item마다 저장 요청 실행
-            scwin.isEdit ? $c.sbm.execute(sbm_updateClaimItems, {"elData": item}) : $c.sbm.execute(sbm_insertClaimItems, {"elData": item});
-        });
         scwin.isGetTreatId = false;
         return;
     }
@@ -331,6 +323,14 @@ scwin.sbm_getTreatment_submitdone = function (e) {
         // 제외항목
         $c.sbm.execute(sbm_getExcList);
     } else {
+        if (scwin.isInsertOnceDone) {
+            console.log("⚠️ insertTreatment 한 번 했으므로 다시 안함");
+            return;
+        }
+        // todo: treatment 값이 없음 > insert하고 get하기
+        // or treatementId 설정하기 (지금 있는 거중 가장 큰 거 + 1)
+        scwin.isInsertOnceDone = true;
+        $c.sbm.execute(sbm_insertTreatment);
         scwin.isEdit = false;
     }
 };
@@ -449,19 +449,21 @@ const Toast = Swal.mixin({
 })
 
 function saveInsure(idx = -1) {
-    if (!scwin.isEmp) {
+    // todo: 날짜 onchange 하면 없애기
+    localStorage.removeItem("excTotal");
+    localStorage.removeItem("exc");
+    localStorage.removeItem("treatmentId");
+    
+    if (!scwin.isEmp) { // 담당자 아니면
         getInsure();
         return;
     }
 
     if (sel_hospital.getValue() && sel_department.getValue()&& sel_hospitalName.getValue() && sel_patient.getValue()) {
-        dm_treatment.set("claim_no", scwin.claim.claimNo);
-
         scwin.imgUrl = scwin.claimImg[date_drop.getValue()-1].imgSrc;
 
-        // todo: 이미지 모달.. setSrc
-
-        scwin.isEdit ? $c.sbm.execute(sbm_updateTreatment) : $c.sbm.execute(sbm_insertTreatment);
+        $c.sbm.execute(sbm_updateTreatment);
+        scwin.isInsertOnceDone = false;
     }
     else {
         date_drop.setEventPause("onchange", true);
@@ -476,8 +478,25 @@ function saveInsure(idx = -1) {
 }
 
 scwin.sbm_insertTreatment_submitdone = function (e) {
-    scwin.isGetTreatId = true;
+    // todo: insert만 하는 로직 없으니까 여기서 처리
     $c.sbm.execute(sbm_getTreatment);
+    scwin.isGetTreatId = true;
+};
+
+scwin.sbm_updateTreatment_submitdone = function (e) {
+    dm_result.set("claim_no", scwin.claim.claimNo);
+    dm_result.set("treatment_id", scwin.treatmentId);
+    scwin.isEdit ? $c.sbm.execute(sbm_updateSettlement) : $c.sbm.execute(sbm_insertSettlement);
+
+    dm_sub.set("claim_no", scwin.claim.claimNo);
+    dm_sub.set("treatment_id", scwin.treatmentId);
+    scwin.isEdit ? $c.sbm.execute(sbm_updatePaymentInfo) : $c.sbm.execute(sbm_insertPaymentInfo);
+
+    let requestData = extractClaimItemData(scwin.treatmentId, scwin.claim.claimNo);
+    requestData.forEach(item => {
+        // item마다 저장 요청 실행
+        scwin.isEdit ? $c.sbm.execute(sbm_updateClaimItems, {"elData": item}) : $c.sbm.execute(sbm_insertClaimItems, {"elData": item});
+    });
 };
 
 scwin.sbm_updateClaimItems_submitdone = function (e) {
@@ -599,7 +618,6 @@ function extractClaimItemData(treatmentId, claimNo) {
 
     return data;
 }
-
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
@@ -652,28 +670,12 @@ function extractClaimItemData(treatmentId, claimNo) {
         							style="width:150px;" submenuSize="auto">
         							<xf:choices>
         								<xf:item>
-        									<xf:label><![CDATA[고려대학교 안암병원]]></xf:label>
-        									<xf:value><![CDATA[고려대학교 안암병원]]></xf:value>
-        								</xf:item>
-        								<xf:item>
-        									<xf:label><![CDATA[코코이비인후과의원]]></xf:label>
-        									<xf:value><![CDATA[코코이비인후과의원]]></xf:value>
-        								</xf:item>
-        								<xf:item>
-        									<xf:label><![CDATA[경희대학교병원]]></xf:label>
-        									<xf:value><![CDATA[경희대학교병원]]></xf:value>
-        								</xf:item>
-        								<xf:item>
-        									<xf:label><![CDATA[정의원]]></xf:label>
-        									<xf:value><![CDATA[정의원]]></xf:value>
-        								</xf:item>
-        								<xf:item>
-        									<xf:label><![CDATA[빈센트치과의원]]></xf:label>
-        									<xf:value><![CDATA[빈센트치과의원]]></xf:value>
-        								</xf:item>
-        								<xf:item>
         									<xf:label><![CDATA[서울대학교병원]]></xf:label>
         									<xf:value><![CDATA[서울대학교병원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[홍성의료원]]></xf:label>
+        									<xf:value><![CDATA[홍성의료원]]></xf:value>
         								</xf:item>
         								<xf:item>
         									<xf:label><![CDATA[서울대학교어린이병원]]></xf:label>
@@ -688,6 +690,26 @@ function extractClaimItemData(treatmentId, claimNo) {
         									<xf:value><![CDATA[서울대학교치과병원]]></xf:value>
         								</xf:item>
         								<xf:item>
+        									<xf:label><![CDATA[정의원]]></xf:label>
+        									<xf:value><![CDATA[정의원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[고려대학교 안암병원]]></xf:label>
+        									<xf:value><![CDATA[고려대학교 안암병원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[코코이비인후과의원]]></xf:label>
+        									<xf:value><![CDATA[코코이비인후과의원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[경희대학교병원]]></xf:label>
+        									<xf:value><![CDATA[경희대학교병원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[빈센트치과의원]]></xf:label>
+        									<xf:value><![CDATA[빈센트치과의원]]></xf:value>
+        								</xf:item>
+        								<xf:item>
         									<xf:label><![CDATA[연세소아청년과의원]]></xf:label>
         									<xf:value><![CDATA[연세소아청년과의원]]></xf:value>
         								</xf:item>
@@ -699,16 +721,20 @@ function extractClaimItemData(treatmentId, claimNo) {
         									<xf:label><![CDATA[포레스트병원]]></xf:label>
         									<xf:value><![CDATA[포레스트병원]]></xf:value>
         								</xf:item>
-        								<xf:item>
-        									<xf:label><![CDATA[홍성의료원]]></xf:label>
-        									<xf:value><![CDATA[홍성의료원]]></xf:value>
-        								</xf:item>
         							</xf:choices>
         						</xf:select1>
         						<xf:select1 allOption="" appearance="minimal" chooseOption="true" chooseOptionLabel="선택" direction="auto"
         							disabled="false" disabledClass="w2selectbox_disabled" id="sel_department" ref="data:dm_treatment.department"
         							style="width:150px;" submenuSize="auto">
         							<xf:choices>
+        								<xf:item>
+        									<xf:label><![CDATA[응급의학]]></xf:label>
+        									<xf:value><![CDATA[응급의학]]></xf:value>
+        								</xf:item>
+        								<xf:item>
+        									<xf:label><![CDATA[치과]]></xf:label>
+        									<xf:value><![CDATA[치과]]></xf:value>
+        								</xf:item>
         								<xf:item>
         									<xf:label><![CDATA[순환기내과]]></xf:label>
         									<xf:value><![CDATA[순환기내과]]></xf:value>
@@ -760,14 +786,6 @@ function extractClaimItemData(treatmentId, claimNo) {
         								<xf:item>
         									<xf:label><![CDATA[내과(입원의학)]]></xf:label>
         									<xf:value><![CDATA[내과(입원의학)]]></xf:value>
-        								</xf:item>
-        								<xf:item>
-        									<xf:label><![CDATA[응급의학]]></xf:label>
-        									<xf:value><![CDATA[응급의학]]></xf:value>
-        								</xf:item>
-        								<xf:item>
-        									<xf:label><![CDATA[치과]]></xf:label>
-        									<xf:value><![CDATA[치과]]></xf:value>
         								</xf:item>
         							</xf:choices>
         						</xf:select1>

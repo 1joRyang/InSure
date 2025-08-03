@@ -201,7 +201,7 @@ public class AssignRuleController {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            String claimNo = assignRuleVo.getKeyword(); // keyword 필드를 claimNo로 활용
+            String claimNo = assignRuleVo.getKeyword();
             if (claimNo == null || claimNo.trim().isEmpty()) {
                 result.put("success", false);
                 result.put("message", "청구 번호를 입력해주세요.");
@@ -250,7 +250,7 @@ public class AssignRuleController {
     /**
      * 키워드별 배정 가능한 직원 목록을 조회한다.
      *
-     * @param  assignRuleVo 배정규칙 (keyword 필드 사용)
+     * @param  assignRuleVo 배정규칙
      * @return 배정 가능한 직원 목록
      * @throws Exception
      */
@@ -282,114 +282,114 @@ public class AssignRuleController {
         return result;
     }
     
-    /**
-     * 자동 배정 설정을 업데이트한다.
-     *
-     * @param  assignRuleVo 자동 배정 설정 정보
-     * @return 업데이트 결과
-     * @throws Exception
-     */
-    @ElService(key="assignrule0007UpdateAutoConfig")
-    @RequestMapping(value="assignrule0007UpdateAutoConfig")
-    @ElDescription(sub="자동 배정 설정 업데이트", desc="자동 배정 활성화/비활성화 설정을 업데이트한다.")
-    public Map<String, Object> updateAutoAssignConfig(AssignRuleVo assignRuleVo) throws Exception {
-        Map<String, Object> result = new HashMap<>();
-        
-        try {
-            // assignRuleVo의 keyword 필드를 autoAssignEnabled로 활용
-            String autoAssignEnabled = assignRuleVo.getKeyword();
-            if (autoAssignEnabled == null) {
-                result.put("success", false);
-                result.put("message", "자동 배정 설정 값이 필요합니다.");
-                return result;
-            }
-            
-            assignRuleService.updateAutoAssignConfig(autoAssignEnabled);
-            result.put("success", true);
-            result.put("message", "자동 배정 설정이 업데이트되었습니다.");
-            result.put("autoAssignEnabled", autoAssignEnabled);
-            
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("message", e.getMessage());
-        }
-        
-        return result;
-    }
+//    /**
+//     * 자동 배정 설정을 업데이트한다.
+//     *
+//     * @param  assignRuleVo 자동 배정 설정 정보
+//     * @return 업데이트 결과
+//     * @throws Exception
+//     */
+//    @ElService(key="assignrule0007UpdateAutoConfig")
+//    @RequestMapping(value="assignrule0007UpdateAutoConfig")
+//    @ElDescription(sub="자동 배정 설정 업데이트", desc="자동 배정 활성화/비활성화 설정을 업데이트한다.")
+//    public Map<String, Object> updateAutoAssignConfig(AssignRuleVo assignRuleVo) throws Exception {
+//        Map<String, Object> result = new HashMap<>();
+//
+//        try {
+//            // assignRuleVo의 keyword 필드를 autoAssignEnabled로 활용
+//            String autoAssignEnabled = assignRuleVo.getKeyword();
+//            if (autoAssignEnabled == null) {
+//                result.put("success", false);
+//                result.put("message", "자동 배정 설정 값이 필요합니다.");
+//                return result;
+//            }
+//
+//            assignRuleService.updateAutoAssignConfig(autoAssignEnabled);
+//            result.put("success", true);
+//            result.put("message", "자동 배정 설정이 업데이트되었습니다.");
+//            result.put("autoAssignEnabled", autoAssignEnabled);
+//
+//        } catch (Exception e) {
+//            result.put("success", false);
+//            result.put("message", e.getMessage());
+//        }
+//
+//        return result;
+//    }
     
-    /**
-     * 자동 배정 설정을 조회한다.
-     *
-     * @return 자동 배정 설정 정보
-     * @throws Exception
-     */
-    @ElService(key="assignrule0008GetAutoConfig")
-    @RequestMapping(value="assignrule0008GetAutoConfig")
-    @ElDescription(sub="자동 배정 설정 조회", desc="현재 자동 배정 활성화/비활성화 설정을 조회한다.")
-    public Map<String, Object> getAutoAssignConfig() throws Exception {
-        Map<String, Object> result = new HashMap<>();
-        
-        try {
-            String autoAssignEnabled = assignRuleService.getAutoAssignConfig();
-            result.put("success", true);
-            result.put("autoAssignEnabled", autoAssignEnabled);
-            result.put("message", "자동 배정 설정 조회 성공");
-            
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("message", e.getMessage());
-            result.put("autoAssignEnabled", "false"); // 기본값
-        }
-        
-        return result;
-    }
+//    /**
+//     * 자동 배정 설정을 조회한다.
+//     *
+//     * @return 자동 배정 설정 정보
+//     * @throws Exception
+//     */
+//    @ElService(key="assignrule0008GetAutoConfig")
+//    @RequestMapping(value="assignrule0008GetAutoConfig")
+//    @ElDescription(sub="자동 배정 설정 조회", desc="현재 자동 배정 활성화/비활성화 설정을 조회한다.")
+//    public Map<String, Object> getAutoAssignConfig() throws Exception {
+//        Map<String, Object> result = new HashMap<>();
+//
+//        try {
+//            String autoAssignEnabled = assignRuleService.getAutoAssignConfig();
+//            result.put("success", true);
+//            result.put("autoAssignEnabled", autoAssignEnabled);
+//            result.put("message", "자동 배정 설정 조회 성공");
+//
+//        } catch (Exception e) {
+//            result.put("success", false);
+//            result.put("message", e.getMessage());
+//            result.put("autoAssignEnabled", "false"); // 기본값
+//        }
+//
+//        return result;
+//    }
     
-    /**
-     * 배치 자동 배정을 실행한다.
-     *
-     * @return 배치 배정 결과
-     * @throws Exception
-     */
-    @ElService(key="assignrule0009RunBatch")
-    @RequestMapping(value="assignrule0009RunBatch")
-    @ElDescription(sub="배치 자동 배정 실행", desc="모든 미배정 청구를 일괄적으로 자동 배정한다.")
-    public Map<String, Object> runAutoAssignmentBatch() throws Exception {
-        Map<String, Object> result = new HashMap<>();
-        
-        try {
-            String batchResult = assignRuleService.runAutoAssignmentBatch();
-            result.put("success", true);
-            result.put("message", batchResult);
-            
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("message", e.getMessage());
-        }
-        
-        return result;
-    }
+//    /**
+//     * 배치 자동 배정을 실행한다.
+//     *
+//     * @return 배치 배정 결과
+//     * @throws Exception
+//     */
+//    @ElService(key="assignrule0009RunBatch")
+//    @RequestMapping(value="assignrule0009RunBatch")
+//    @ElDescription(sub="배치 자동 배정 실행", desc="모든 미배정 청구를 일괄적으로 자동 배정한다.")
+//    public Map<String, Object> runAutoAssignmentBatch() throws Exception {
+//        Map<String, Object> result = new HashMap<>();
+//
+//        try {
+//            String batchResult = assignRuleService.runAutoAssignmentBatch();
+//            result.put("success", true);
+//            result.put("message", batchResult);
+//
+//        } catch (Exception e) {
+//            result.put("success", false);
+//            result.put("message", e.getMessage());
+//        }
+//
+//        return result;
+//    }
     
-    /**
-     * 청구 유형별 배정 미리보기를 제공한다.
-     *
-     * @param  assignRuleVo 배정규칙 (keyword 필드를 claimType으로 사용)
-     * @return 배정 미리보기 결과
-     * @throws Exception
-     */
-    @ElService(key="assignrule0010PreviewAssignment")
-    @RequestMapping(value="assignrule0010PreviewAssignment")
-    @ElDescription(sub="청구 유형별 배정 미리보기", desc="특정 청구 유형에 대한 배정 예상 정보를 조회한다.")
-    public Map<String, Object> previewAssignment(AssignRuleVo assignRuleVo) throws Exception {
-        String claimType = assignRuleVo.getKeyword(); // keyword 필드를 claimType으로 활용
-        
-        if (claimType == null || claimType.trim().isEmpty()) {
-            Map<String, Object> result = new HashMap<>();
-            result.put("success", false);
-            result.put("message", "청구 유형을 입력해주세요.");
-            return result;
-        }
-        
-        return assignRuleService.previewAssignment(claimType);
-    }
+//    /**
+//     * 청구 유형별 배정 미리보기를 제공한다.
+//     *
+//     * @param  assignRuleVo 배정규칙 (keyword 필드를 claimType으로 사용)
+//     * @return 배정 미리보기 결과
+//     * @throws Exception
+//     */
+//    @ElService(key="assignrule0010PreviewAssignment")
+//    @RequestMapping(value="assignrule0010PreviewAssignment")
+//    @ElDescription(sub="청구 유형별 배정 미리보기", desc="특정 청구 유형에 대한 배정 예상 정보를 조회한다.")
+//    public Map<String, Object> previewAssignment(AssignRuleVo assignRuleVo) throws Exception {
+//        String claimType = assignRuleVo.getKeyword(); // keyword 필드를 claimType으로 활용
+//
+//        if (claimType == null || claimType.trim().isEmpty()) {
+//            Map<String, Object> result = new HashMap<>();
+//            result.put("success", false);
+//            result.put("message", "청구 유형을 입력해주세요.");
+//            return result;
+//        }
+//
+//        return assignRuleService.previewAssignment(claimType);
+//    }
    
 }

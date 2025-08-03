@@ -26,7 +26,7 @@ import com.inswave.elfw.annotation.ElService;
  * ===========================================================
  * DATE				AUTHOR				DESC
  * ===========================================================
- * 2025/07/17			시스템 관리자	 		최초 생성
+ * 2025/07/17		hyunwoo	 		최초 생성
  * 
  */
 @Controller
@@ -47,22 +47,17 @@ public class OcrController {
         String testS3Key = request.getParameter("s3ObjectKey");
         
         if (testS3Key == null || testS3Key.isEmpty()) {
-            // 테스트용 기본값
             testS3Key = "uploads/test-document.jpg";
         }
-        
-        System.out.println("OCR 분석 테스트 시작 - S3 키: " + testS3Key);
         
         try {
             // 단일 문서 분석
             OcrAnalysisResult result = ocrService.analyzeSingleDocument(testS3Key);
             
-            System.out.println("OCR 분석 테스트 결과: " + result.toString());
-            
+
             return result;
             
         } catch (Exception e) {
-            System.err.println("OCR 분석 테스트 실패: " + e.getMessage());
             e.printStackTrace();
             
             // 오류 결과 반환
@@ -91,15 +86,10 @@ public class OcrController {
         if (s3Keys != null && !s3Keys.isEmpty()) {
             s3ObjectKeys = Arrays.asList(s3Keys.split(","));
         } else {
-            // 테스트용 기본값
             s3ObjectKeys = new ArrayList<String>();
-            s3ObjectKeys.add("uploads/test-death-certificate.jpg");
-            s3ObjectKeys.add("uploads/test-disability-report.jpg");
-            s3ObjectKeys.add("uploads/test-surgery-document.jpg");
         }
         
-        System.out.println("다중 파일 OCR 분석 테스트 시작 - 파일 수: " + s3ObjectKeys.size());
-        
+
         Map<String, Object> response = new HashMap<String, Object>();
         
         try {
@@ -138,7 +128,6 @@ public class OcrController {
         Map<String, Object> status = new HashMap<String, Object>();
         
         try {
-            // 간단한 테스트 분석
             List<String> testKeys = new ArrayList<String>();
             testKeys.add("test-key");
             

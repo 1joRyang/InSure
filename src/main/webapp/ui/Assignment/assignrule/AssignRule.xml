@@ -74,298 +74,595 @@
 		<w2:layoutInfo></w2:layoutInfo>
 		<w2:publicInfo method="" />
 		<script lazy="false" type="text/javascript"><![CDATA[
-	scwin.onpageload = function() {
-		// 배정규칙 readOnly false
-		
-		// 버튼 숨김
-		btn_save.show("");   // 저장 버튼 
-		btn_edit.hide();     // 수정 버튼 제거
-		btn_delete.hide();   // 삭제 버튼 제거
-		
-		//search_box
-        var cptIbxName = $p.getComponentById("searchComp_1");
-        if(cptIbxName == undefined){
-			search_box.hide();
+/**
+ * 배정 규칙 관리 시스템
+ * 자동 배정 규칙의 CRUD 기능과 자동/수동 모드 설정을 관리하는 모듈
+ * 
+ * 주요 기능:
+ * - 자동 배정 모드 설정 (자동/수동 토글)
+ * - 배정 규칙 등록, 수정, 삭제, 조회
+ * - 페이징 처리 및 그리드 관리
+ * - 폼 데이터 유효성 검증
+ */
+
+// =============================================================================
+// 상수 및 설정값 정의
+// =============================================================================
+const ASSIGN_RULE_CONFIG = {
+    PAGE_SIZE: 10,                    // 기본 페이지 크기
+    PAGE_NAVIGATOR_SIZE: 5,           // 페이지 네비게이터 크기
+    GRID_HEIGHT: 150,                 // 그리드 높이
+    GRID_VISIBLE_ROWS: 10,            // 그리드 표시 행 수
+    DEFAULT_PAGE_INDEX: 1             // 기본 페이지 번호
+};
+
+const ASSIGN_RULE_MESSAGES = {
+    AUTO_MODE: "자동",
+    MANUAL_MODE: "수동",
+    REGISTER_MODE: "등록",
+    EDIT_MODE: "수정",
+    CONFIRM_SAVE: "저장하시겠습니까?",
+    CONFIRM_UPDATE: "수정하시겠습니까?",
+    CONFIRM_DELETE: "삭제하시겠습니까?",
+    CONFIRM_MODE_CHANGE: "자동 배정 모드를 '{mode}'으로 변경하시겠습니까?",
+    SUCCESS_REGISTER: "등록되었습니다.",
+    SUCCESS_UPDATE: "수정되었습니다.",
+    SUCCESS_DELETE: "삭제되었습니다.",
+    SUCCESS_CONFIG_UPDATE: "자동 배정 설정이 변경되었습니다.",
+    ERROR_TEMPLATE: "에러코드: {code}\n에러메시지: {message}"
+};
+
+const UI_ELEMENTS = {
+    BUTTONS: {
+        SAVE: "btn_save",
+        EDIT: "btn_edit", 
+        DELETE: "btn_delete",
+        RESET: "btn_reset",
+        SEARCH: "btn_search",
+        TOGGLE_AUTO_ASSIGN: "btn_toggleAutoAssign"
+    },
+    COMPONENTS: {
+        SEARCH_BOX: "search_box",
+        GRID: "grd_list",
+        PAGE_LIST: "pgl_assignRuleList",
+        RULE_INFO_GROUP: "grp_assignRuleInfo",
+        AUTO_ASSIGN_MODE_SPAN: "spn_autoAssignMode",
+        LIST_COUNT_SPAN: "spn_listCnt",
+        REGISTER_FLAG_SPAN: "spn_registerFlag",
+        PAGE_INDEX_SPAN: "spn_pageIndex", 
+        TOTAL_PAGE_COUNT_SPAN: "spn_totalPageCount"
+    }
+};
+
+const CSS_CLASSES = {
+    STATUS_AUTO: "status-auto",
+    STATUS_MANUAL: "status-manual"
+};
+
+// =============================================================================
+// 페이지 초기화 및 기본 설정
+// =============================================================================
+
+/**
+ * 페이지 로드 완료 시 실행되는 메인 초기화 함수
+ * UI 초기화, 자동 배정 설정 로드, 규칙 목록 조회 순으로 진행
+ */
+scwin.onpageload = function() {
+    try {
+        initializePageUI();
+        scwin.loadAutoAssignConfig();
+        scwin.searchAssignRules();
+    } catch (error) {
+        console.error("페이지 초기화 중 오류:", error);
+        alert("페이지 초기화 중 오류가 발생했습니다.");
+    }
+};
+
+/**
+ * 페이지 UI 초기 설정
+ * 버튼 표시/숨김 및 검색박스 처리
+ */
+function initializePageUI() {
+    // 초기 버튼 상태 설정 (등록 모드)
+    setButtonVisibility(true, false, false); // save=true, edit=false, delete=false
+    
+    // 검색 컴포넌트가 없으면 검색박스 숨김
+    hideSearchBoxIfNeeded();
+}
+
+/**
+ * 버튼 표시/숨김 상태 설정
+ * @param {boolean} showSave - 저장 버튼 표시 여부
+ * @param {boolean} showEdit - 수정 버튼 표시 여부  
+ * @param {boolean} showDelete - 삭제 버튼 표시 여부
+ */
+function setButtonVisibility(showSave, showEdit, showDelete) {
+    const saveBtn = $p.getComponentById(UI_ELEMENTS.BUTTONS.SAVE);
+    const editBtn = $p.getComponentById(UI_ELEMENTS.BUTTONS.EDIT);
+    const deleteBtn = $p.getComponentById(UI_ELEMENTS.BUTTONS.DELETE);
+    
+    if (saveBtn) showSave ? saveBtn.show("") : saveBtn.hide();
+    if (editBtn) showEdit ? editBtn.show("") : editBtn.hide();
+    if (deleteBtn) showDelete ? deleteBtn.show("") : deleteBtn.hide();
+}
+
+/**
+ * 검색 컴포넌트가 없으면 검색박스 숨김 처리
+ */
+function hideSearchBoxIfNeeded() {
+    const searchComp = $p.getComponentById("searchComp_1");
+    const searchBox = $p.getComponentById(UI_ELEMENTS.COMPONENTS.SEARCH_BOX);
+    
+    if (!searchComp && searchBox) {
+        searchBox.hide();
+    }
+}
+
+// =============================================================================
+// 자동 배정 설정 관리
+// =============================================================================
+
+/**
+ * 자동 배정 설정 로드
+ * 서버에서 현재 자동 배정 모드 설정을 조회
+ */
+scwin.loadAutoAssignConfig = function() {
+    $c.sbm.execute($p, sbm_getAutoAssignConfig);
+};
+
+/**
+ * 자동 배정 설정 조회 완료 콜백
+ * 서버 응답에 따라 UI 상태 업데이트
+ */
+scwin.sbm_getAutoAssignConfig_submitdone = function(e) {
+    const { elData, elHeader } = e.responseJSON;
+    
+    // 조회 실패 시 기본값(수동 모드)으로 설정
+    if (!isValidResponse(elHeader)) {
+        setDefaultAutoAssignConfig();
+    }
+    
+    // UI 상태 업데이트
+    scwin.updateAutoAssignUI();
+};
+
+/**
+ * 자동 배정 설정 기본값 설정
+ * 조회 실패 시 수동 모드로 초기화
+ */
+function setDefaultAutoAssignConfig() {
+    dmp_autoAssignConfig.set("autoAssignEnabled", "false");
+}
+
+/**
+ * 자동 배정 UI 상태 업데이트
+ * 현재 모드에 따라 스타일과 텍스트 변경
+ */
+scwin.updateAutoAssignUI = function() {
+    const isAutoEnabled = dmp_autoAssignConfig.get("autoAssignEnabled") === "true";
+    const modeSpan = $p.getComponentById(UI_ELEMENTS.COMPONENTS.AUTO_ASSIGN_MODE_SPAN);
+    
+    if (modeSpan) {
+        updateModeDisplay(modeSpan, isAutoEnabled);
+    }
+};
+
+/**
+ * 모드 표시 업데이트
+ * @param {Object} modeSpan - 모드 표시 컴포넌트
+ * @param {boolean} isAutoEnabled - 자동 모드 활성화 여부
+ */
+function updateModeDisplay(modeSpan, isAutoEnabled) {
+    if (isAutoEnabled) {
+        modeSpan.setValue(ASSIGN_RULE_MESSAGES.AUTO_MODE);
+        modeSpan.removeClass(CSS_CLASSES.STATUS_MANUAL);
+        modeSpan.addClass(CSS_CLASSES.STATUS_AUTO);
+    } else {
+        modeSpan.setValue(ASSIGN_RULE_MESSAGES.MANUAL_MODE);
+        modeSpan.removeClass(CSS_CLASSES.STATUS_AUTO);
+        modeSpan.addClass(CSS_CLASSES.STATUS_MANUAL);
+    }
+}
+
+/**
+ * 자동 배정 모드 토글 버튼 클릭 이벤트
+ * 현재 모드를 반대로 변경하고 확인 메시지 표시
+ */
+scwin.btn_toggleAutoAssign_onclick = function(e) {
+    const currentMode = dmp_autoAssignConfig.get("autoAssignEnabled");
+    const newMode = (currentMode === "true") ? "false" : "true";
+    const modeText = (newMode === "true") ? ASSIGN_RULE_MESSAGES.AUTO_MODE : ASSIGN_RULE_MESSAGES.MANUAL_MODE;
+    
+    const confirmMessage = ASSIGN_RULE_MESSAGES.CONFIRM_MODE_CHANGE.replace("{mode}", modeText);
+    
+    const promise = $c.win.confirm(confirmMessage);
+    promise.then(function(result) {
+        if (result) {
+            updateAutoAssignMode(newMode);
         }
-		
-		// 자동 배정 설정 조회
-		scwin.loadAutoAssignConfig();
-		
-		// 배정규칙 조회
-		scwin.btn_search_onclick();
-	};
+    });
+};
 
-	/************************** 이벤트 함수 *************************/
-	
-	/**
-	 * 자동 배정 설정 로드
-	 */
-	scwin.loadAutoAssignConfig = function() {
-		$c.sbm.execute($p, sbm_getAutoAssignConfig);
-	};
-	
-	/**
-	 * 자동 배정 설정 조회 콜백
-	 */
-	scwin.sbm_getAutoAssignConfig_submitdone = function(e) {
-		var elData = e.responseJSON.elData;
-		var elHeader = e.responseJSON.elHeader;
-		
-		if(elHeader == null || elHeader == "" || elHeader == "undefined" || elHeader.resSuc == false) {
-			// 기본값 설정 (수동)
-			dmp_autoAssignConfig.set("autoAssignEnabled", "false");
-		}
-		
-		// 자동 배정 모드 UI 업데이트
-		scwin.updateAutoAssignUI();
-	};
-	
-	/**
-	 * 자동 배정 UI 업데이트
-	 */
-	scwin.updateAutoAssignUI = function() {
-		var isAutoEnabled = dmp_autoAssignConfig.get("autoAssignEnabled") === "true";
-		
-		// 자동/수동 모드 표시 업데이트
-		if (isAutoEnabled) {
-			spn_autoAssignMode.setValue("자동");
-			spn_autoAssignMode.removeClass("status-manual");
-			spn_autoAssignMode.addClass("status-auto");
-		} else {
-			spn_autoAssignMode.setValue("수동");
-			spn_autoAssignMode.removeClass("status-auto");
-			spn_autoAssignMode.addClass("status-manual");
-		}
-	};
-	
-	/**
-	 * 자동 배정 모드 토글
-	 */
-	scwin.btn_toggleAutoAssign_onclick = function(e) {
-		var currentMode = dmp_autoAssignConfig.get("autoAssignEnabled");
-		var newMode = (currentMode === "true") ? "false" : "true";
-		var modeText = (newMode === "true") ? "자동" : "수동";
-		
-		var promise = $c.win.confirm("자동 배정 모드를 '" + modeText + "'으로 변경하시겠습니까?");
-		promise.then(function(result) {
-			if (result) {
-				dmp_autoAssignConfig.set("autoAssignEnabled", newMode);
-				$c.sbm.execute($p, sbm_updateAutoAssignConfig);
-			}
-		});
-	};
-	
-	/**
-	 * 자동 배정 설정 업데이트 콜백
-	 */
-	scwin.sbm_updateAutoAssignConfig_submitdone = function(e) {
-		var elHeader = e.responseJSON.elHeader;
-		if(elHeader == null || elHeader == "" || elHeader == "undefined" || elHeader.resSuc == false) {
-			$c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
-			return false;
-		} else {
-			$c.win.alert("자동 배정 설정이 변경되었습니다.");
-			scwin.updateAutoAssignUI();
-		}
-	};
-	
-	/**
-	 * 조회 버튼 클릭 이벤트
-	 */		   
-	scwin.btn_search_onclick = function(e) {
-		// PGAE번호 초기화
-		dmp_assignRuleVo.set("pageIndex","1");
-		pgl_assignRuleList.setSelectedIndex(1);
+/**
+ * 자동 배정 모드 업데이트
+ * @param {string} newMode - 새로운 모드 ("true" 또는 "false")
+ */
+function updateAutoAssignMode(newMode) {
+    dmp_autoAssignConfig.set("autoAssignEnabled", newMode);
+    $c.sbm.execute($p, sbm_updateAutoAssignConfig);
+}
 
-		// 서버통신 - 배정규칙 조회
-		$c.sbm.execute($p, sbm_selectAssignRuleVoList);
-	};
-	
-	scwin.sbm_assignRuleList_submitdone = function(e) {
-		// error 수신시
-		var elData = e.responseJSON.elData;
-		var elHeader  = e.responseJSON.elHeader;
-		if(elHeader == null || elHeader == "" || elHeader == "undefiend" || elHeader.resSuc == false) {
-			$c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
-			return false;
-		}
+/**
+ * 자동 배정 설정 업데이트 완료 콜백
+ * 성공/실패에 따른 메시지 표시 및 UI 업데이트
+ */
+scwin.sbm_updateAutoAssignConfig_submitdone = function(e) {
+    const { elHeader } = e.responseJSON;
+    
+    if (!isValidResponse(elHeader)) {
+        const errorMessage = formatErrorMessage(elHeader);
+        $c.win.alert(errorMessage);
+        return false;
+    }
+    
+    $c.win.alert(ASSIGN_RULE_MESSAGES.SUCCESS_CONFIG_UPDATE);
+    scwin.updateAutoAssignUI();
+};
 
-		// 배정규칙 dataMap 초기화
-		dmp_assignRuleVoDetail.setEmptyValue();
-		
-		// 배정규칙 readOnly false
-		grp_assignRuleInfo.setReadOnly(false);
-		
-		// 버튼 숨김
-		btn_save.show("");   // 저장 버튼
-		btn_edit.hide();     // 수정 버튼 제거
-		btn_delete.hide();   // 삭제 버튼 제거		
+// =============================================================================
+// 배정 규칙 조회 및 페이징 관리
+// =============================================================================
 
-		// 총 레코드 수 업데이트
-        spn_listCnt.setLabel(elData.totalCount);
-        
-        // 데이터를 그리드에 셋팅
+/**
+ * 배정 규칙 조회 버튼 클릭 이벤트
+ * 페이지를 첫 번째로 초기화하고 조회 실행
+ */
+scwin.btn_search_onclick = function(e) {
+    scwin.searchAssignRules();
+};
+
+/**
+ * 배정 규칙 검색 실행
+ * 페이지 번호 초기화 후 서버 조회
+ */
+scwin.searchAssignRules = function() {
+    resetPagination();
+    $c.sbm.execute($p, sbm_selectAssignRuleVoList);
+};
+
+/**
+ * 페이징 정보 초기화
+ * 첫 번째 페이지로 설정
+ */
+function resetPagination() {
+    dmp_assignRuleVo.set("pageIndex", ASSIGN_RULE_CONFIG.DEFAULT_PAGE_INDEX.toString());
+    
+    const pageList = $p.getComponentById(UI_ELEMENTS.COMPONENTS.PAGE_LIST);
+    if (pageList) {
+        pageList.setSelectedIndex(ASSIGN_RULE_CONFIG.DEFAULT_PAGE_INDEX);
+    }
+}
+
+/**
+ * 배정 규칙 목록 조회 완료 콜백
+ * 조회 결과를 그리드에 표시하고 페이징 정보 업데이트
+ */
+scwin.sbm_assignRuleList_submitdone = function(e) {
+    const { elData, elHeader } = e.responseJSON;
+    
+    if (!isValidResponse(elHeader)) {
+        const errorMessage = formatErrorMessage(elHeader);
+        $c.win.alert(errorMessage);
+        return false;
+    }
+    
+    // 폼 초기화 및 UI 상태 설정
+    initializeFormForNewEntry();
+    
+    // 그리드 데이터 설정
+    updateGridData(elData);
+    
+    // 페이징 정보 업데이트
+    updatePaginationInfo(elData);
+};
+
+/**
+ * 신규 등록을 위한 폼 초기화
+ * 상세 정보 폼을 비우고 등록 모드로 설정
+ */
+function initializeFormForNewEntry() {
+    // 상세 정보 초기화
+    dmp_assignRuleVoDetail.setEmptyValue();
+    
+    // 폼을 편집 가능 상태로 설정
+    const ruleInfoGroup = $p.getComponentById(UI_ELEMENTS.COMPONENTS.RULE_INFO_GROUP);
+    if (ruleInfoGroup) {
+        ruleInfoGroup.setReadOnly(false);
+    }
+    
+    // 등록 모드 UI 설정
+    setButtonVisibility(true, false, false); // save=true, edit=false, delete=false
+    setRegisterFlag(ASSIGN_RULE_MESSAGES.REGISTER_MODE);
+}
+
+/**
+ * 등록/수정 플래그 설정
+ * @param {string} flagText - 표시할 텍스트
+ */
+function setRegisterFlag(flagText) {
+    const flagSpan = $p.getComponentById(UI_ELEMENTS.COMPONENTS.REGISTER_FLAG_SPAN);
+    if (flagSpan) {
+        flagSpan.setValue(flagText);
+    }
+}
+
+/**
+ * 그리드 데이터 업데이트
+ * @param {Object} elData - 서버 응답 데이터
+ */
+function updateGridData(elData) {
+    // 총 레코드 수 표시
+    const listCountSpan = $p.getComponentById(UI_ELEMENTS.COMPONENTS.LIST_COUNT_SPAN);
+    if (listCountSpan && elData.totalCount !== undefined) {
+        listCountSpan.setLabel(elData.totalCount.toString());
+    }
+    
+    // 그리드에 데이터 설정
+    if (elData.assignRuleVoList) {
         dlt_assignRuleVoList.setJSON(elData.assignRuleVoList);
-        
-        // 페이지 네비게이터 업데이트
-        var totalPageCount = Math.ceil(elData.totalCount / dmp_assignRuleVo.get("pageSize"));
-        pgl_assignRuleList.setCount(totalPageCount);
-        
-        spn_registerFlag.setValue("등록");
+    }
+}
 
-		// 페이징 정보 업데이트
-        spn_totalPageCount.setValue(totalPageCount);
-        spn_pageIndex.setValue(dmp_assignRuleVo.get("pageIndex"));
-        pgl_assignRuleList.setSelectedIndex(dmp_assignRuleVo.get("pageIndex"));
-	};	
+/**
+ * 페이징 정보 업데이트
+ * @param {Object} elData - 서버 응답 데이터
+ */
+function updatePaginationInfo(elData) {
+    const pageSize = parseInt(dmp_assignRuleVo.get("pageSize")) || ASSIGN_RULE_CONFIG.PAGE_SIZE;
+    const totalPageCount = Math.ceil((elData.totalCount || 0) / pageSize);
+    const currentPageIndex = parseInt(dmp_assignRuleVo.get("pageIndex")) || ASSIGN_RULE_CONFIG.DEFAULT_PAGE_INDEX;
+    
+    // 페이지 네비게이터 업데이트
+    const pageList = $p.getComponentById(UI_ELEMENTS.COMPONENTS.PAGE_LIST);
+    if (pageList) {
+        pageList.setCount(totalPageCount);
+        pageList.setSelectedIndex(currentPageIndex);
+    }
+    
+    // 페이지 정보 표시 업데이트
+    updatePageInfoDisplay(totalPageCount, currentPageIndex);
+}
 
-	/**
-	 * 페이지 번호 클릭 이벤트
-	 */
-	scwin.pgl_assignRuleList_onclick = function(idx) {
-		// 페이지 번호 세팅
-		dmp_assignRuleVo.set("pageIndex", idx);
-		 
-		// 서버통신 - 배정규칙 조회
-		$c.sbm.execute($p, sbm_selectAssignRuleVoList);
-	};
+/**
+ * 페이지 정보 표시 업데이트
+ * @param {number} totalPageCount - 전체 페이지 수
+ * @param {number} currentPageIndex - 현재 페이지 번호
+ */
+function updatePageInfoDisplay(totalPageCount, currentPageIndex) {
+    const totalPageSpan = $p.getComponentById(UI_ELEMENTS.COMPONENTS.TOTAL_PAGE_COUNT_SPAN);
+    const pageIndexSpan = $p.getComponentById(UI_ELEMENTS.COMPONENTS.PAGE_INDEX_SPAN);
+    
+    if (totalPageSpan) {
+        totalPageSpan.setValue(totalPageCount.toString());
+    }
+    
+    if (pageIndexSpan) {
+        pageIndexSpan.setValue(currentPageIndex.toString());
+    }
+}
 
-	// 배정규칙 clear
-	scwin.btn_reset_onclick = function(e) {
-		// 배정규칙 dataMap 초기화
-		dmp_assignRuleVoDetail.setEmptyValue();
-		// 배정규칙 readOnly false
-		grp_assignRuleInfo.setReadOnly(false);
+/**
+ * 페이지 번호 클릭 이벤트
+ * 선택된 페이지로 이동하여 데이터 조회
+ * @param {number} pageIndex - 선택된 페이지 번호
+ */
+scwin.pgl_assignRuleList_onclick = function(pageIndex) {
+    navigateToPage(pageIndex);
+};
 
-		btn_save.show("");   // 저장 버튼 생성
-		btn_edit.hide();     // 수정 버튼 제거
-		btn_delete.hide();   // 삭제 버튼 제거
-		
-		spn_registerFlag.setValue("등록");
-	};
+/**
+ * 지정된 페이지로 이동
+ * @param {number} pageIndex - 이동할 페이지 번호
+ */
+function navigateToPage(pageIndex) {
+    dmp_assignRuleVo.set("pageIndex", pageIndex.toString());
+    $c.sbm.execute($p, sbm_selectAssignRuleVoList);
+}
 
-	/**
-	 * 그리드 셀 클릭 이벤트
-	 */
-	scwin.grd_list_oncellclick = function(row,col,colId) {
-		dmp_assignRuleVoDetail.setJSON(dlt_assignRuleVoList.getRowJSON(row));
+// =============================================================================
+// 그리드 및 폼 관리
+// =============================================================================
 
-		btn_save.hide(); 		// 저장 버튼 제거
-		btn_edit.show("");      // 수정 버튼 생성
-		btn_delete.show("");    // 삭제 버튼 생성
-		
-		spn_registerFlag.setValue("수정");
-	};
+/**
+ * 그리드 셀 클릭 이벤트
+ * 선택된 행의 데이터를 상세 폼에 로드하고 수정 모드로 전환
+ * @param {number} row - 클릭된 행 번호
+ * @param {number} col - 클릭된 열 번호
+ * @param {string} colId - 클릭된 열 ID
+ */
+scwin.grd_list_oncellclick = function(row, col, colId) {
+    loadRowDataToForm(row);
+    switchToEditMode();
+};
 
-	/**
-	 * 저장 버튼 클릭 이벤트
-	 */	
-	scwin.btn_save_onclick = function(e) {
-		// 유효성 체크
-		var valInfo = [
-			{ id: "rule_id", mandatory: true }
-		];
-		
-		if ($c.data.validateGroup(grp_assignRuleInfo, valInfo) === true) {
-			var promise = $c.win.confirm("저장하시겠습니까?");
-			promise.then(function(result) {  
-				if (result){
-					$c.sbm.execute(sbm_insertAssignRuleVo);
-				}
-			})
-		} 	
-	};
+/**
+ * 선택된 행 데이터를 폼에 로드
+ * @param {number} row - 행 번호
+ */
+function loadRowDataToForm(row) {
+    const rowData = dlt_assignRuleVoList.getRowJSON(row);
+    dmp_assignRuleVoDetail.setJSON(rowData);
+}
 
-	/**
-	 * 사원정보 등록 콜백
-	 */
-	scwin.sbm_insertAssignRuleVo_submitdone = function(e) {
-		// error 수신시
-		var elHeader  = e.responseJSON.elHeader;
-		if(elHeader == null || elHeader == "" || elHeader == "undefiend" || elHeader.resSuc == false) {
-			$c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
-			return false;
-		}else{
-			// 등록되었습니다. msg 출력
-			$c.win.alert("등록되었습니다.");
-		}
-		
-		// 재조회
-		scwin.btn_search_onclick();
-	};
+/**
+ * 수정 모드로 전환
+ * 수정/삭제 버튼 표시 및 저장 버튼 숨김
+ */
+function switchToEditMode() {
+    setButtonVisibility(false, true, true); // save=false, edit=true, delete=true
+    setRegisterFlag(ASSIGN_RULE_MESSAGES.EDIT_MODE);
+}
 
-	/**
-	 * 수정 버튼 클릭 이벤트
-	 */		
-	scwin.btn_edit_onclick = function(e) {
-		// 유효성 체크
-		var valInfo = [
-			{ id: "rule_id", mandatory: true }
-		];
-		
-		if ($c.data.validateGroup(grp_assignRuleInfo, valInfo) === true) {
-			var promise = $c.win.confirm("수정하시겠습니까?");
-			promise.then(function(result) {  
-				if (result){
-					$c.sbm.execute(sbm_updateAssignRuleVo);
-				}
-			})
-		} 
-	};
+/**
+ * 초기화 버튼 클릭 이벤트
+ * 폼을 비우고 등록 모드로 전환
+ */
+scwin.btn_reset_onclick = function(e) {
+    initializeFormForNewEntry();
+};
 
-	/**
-	 * 사원정보 수정 콜백
-	 */
-	scwin.sbm_updateAssignRuleVo_submitdone = function(e) {
-		// error 수신시
-		var elHeader  = e.responseJSON.elHeader;
-		if(elHeader == null || elHeader == "" || elHeader == "undefiend" || elHeader.resSuc == false) {
-			$c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
-			return false;
-		}else{
-			// 수정되었습니다. msg 출력
-			$c.win.alert("수정되었습니다.");
-		}
-		// 재조회
-		scwin.btn_search_onclick();
-	};
+// =============================================================================
+// 배정 규칙 CRUD 작업
+// =============================================================================
 
-	/**
-	 * 삭제 버튼 클릭 이벤트
-	 */		
-	scwin.btn_delete_onclick = function(e) {
-		// 유효성 체크
-		var valInfo = [
-			{ id: "rule_id", mandatory: true }
-		];
-		
-		if ($c.data.validateGroup(grp_assignRuleInfo, valInfo) === true) {
-			var promise = $c.win.confirm("삭제하시겠습니까?");
-			promise.then(function(result) {  
-				if (result){
-					$c.sbm.execute(sbm_deleteAssignRuleVo);
-				}
-			})
-		}	
-	};
+/**
+ * 저장 버튼 클릭 이벤트 (신규 등록)
+ * 유효성 검증 후 저장 확인 메시지 표시
+ */
+scwin.btn_save_onclick = function(e) {
+    if (validateRequiredFields()) {
+        showConfirmDialog(ASSIGN_RULE_MESSAGES.CONFIRM_SAVE, function() {
+            $c.sbm.execute(sbm_insertAssignRuleVo);
+        });
+    }
+};
 
-	/**
-	 * 삭제 콜백
-	 */
-	scwin.sbm_deleteAssignRuleVo_submitdone = function(e) {
-		// error 수신시
-		var elHeader  = e.responseJSON.elHeader;
-		if(elHeader == null || elHeader == "" || elHeader == "undefiend" || elHeader.resSuc == false) {
-			$c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
-			return false;
-		}else{
-			// 삭제되었습니다. msg 출력
-			$c.win.alert("삭제되었습니다.");
-		}
-		
-		// 재조회
-		scwin.btn_search_onclick();
-	};
+/**
+ * 수정 버튼 클릭 이벤트
+ * 유효성 검증 후 수정 확인 메시지 표시
+ */
+scwin.btn_edit_onclick = function(e) {
+    if (validateRequiredFields()) {
+        showConfirmDialog(ASSIGN_RULE_MESSAGES.CONFIRM_UPDATE, function() {
+            $c.sbm.execute(sbm_updateAssignRuleVo);
+        });
+    }
+};
+
+/**
+ * 삭제 버튼 클릭 이벤트
+ * 유효성 검증 후 삭제 확인 메시지 표시
+ */
+scwin.btn_delete_onclick = function(e) {
+    if (validateRequiredFields()) {
+        showConfirmDialog(ASSIGN_RULE_MESSAGES.CONFIRM_DELETE, function() {
+            $c.sbm.execute(sbm_deleteAssignRuleVo);
+        });
+    }
+};
+
+/**
+ * 필수 필드 유효성 검증
+ * @returns {boolean} 유효성 검증 결과
+ */
+function validateRequiredFields() {
+    const validationInfo = [
+        { id: "rule_id", mandatory: true }
+    ];
+    
+    const ruleInfoGroup = $p.getComponentById(UI_ELEMENTS.COMPONENTS.RULE_INFO_GROUP);
+    return $c.data.validateGroup(ruleInfoGroup, validationInfo) === true;
+}
+
+/**
+ * 확인 대화상자 표시
+ * @param {string} message - 확인 메시지
+ * @param {Function} callback - 확인 시 실행할 콜백 함수
+ */
+function showConfirmDialog(message, callback) {
+    const promise = $c.win.confirm(message);
+    promise.then(function(result) {
+        if (result && typeof callback === 'function') {
+            callback();
+        }
+    });
+}
+
+// =============================================================================
+// CRUD 작업 완료 콜백 함수들
+// =============================================================================
+
+/**
+ * 규칙 등록 완료 콜백
+ * 성공/실패 메시지 표시 후 목록 재조회
+ */
+scwin.sbm_insertAssignRuleVo_submitdone = function(e) {
+    const { elHeader } = e.responseJSON;
+    
+    if (!isValidResponse(elHeader)) {
+        const errorMessage = formatErrorMessage(elHeader);
+        $c.win.alert(errorMessage);
+        return false;
+    }
+    
+    $c.win.alert(ASSIGN_RULE_MESSAGES.SUCCESS_REGISTER);
+    scwin.searchAssignRules();
+};
+
+/**
+ * 규칙 수정 완료 콜백
+ * 성공/실패 메시지 표시 후 목록 재조회
+ */
+scwin.sbm_updateAssignRuleVo_submitdone = function(e) {
+    const { elHeader } = e.responseJSON;
+    
+    if (!isValidResponse(elHeader)) {
+        const errorMessage = formatErrorMessage(elHeader);
+        $c.win.alert(errorMessage);
+        return false;
+    }
+    
+    $c.win.alert(ASSIGN_RULE_MESSAGES.SUCCESS_UPDATE);
+    scwin.searchAssignRules();
+};
+
+/**
+ * 규칙 삭제 완료 콜백
+ * 성공/실패 메시지 표시 후 목록 재조회
+ */
+scwin.sbm_deleteAssignRuleVo_submitdone = function(e) {
+    const { elHeader } = e.responseJSON;
+    
+    if (!isValidResponse(elHeader)) {
+        const errorMessage = formatErrorMessage(elHeader);
+        $c.win.alert(errorMessage);
+        return false;
+    }
+    
+    $c.win.alert(ASSIGN_RULE_MESSAGES.SUCCESS_DELETE);
+    scwin.searchAssignRules();
+};
+
+// =============================================================================
+// 유틸리티 함수
+// =============================================================================
+
+/**
+ * 서버 응답 유효성 검증
+ * @param {Object} elHeader - 응답 헤더
+ * @returns {boolean} 유효성 여부
+ */
+function isValidResponse(elHeader) {
+    return elHeader && 
+           elHeader !== "" && 
+           elHeader !== "undefined" && 
+           elHeader.resSuc !== false;
+}
+
+/**
+ * 에러 메시지 포맷팅
+ * @param {Object} elHeader - 응답 헤더
+ * @returns {string} 포맷된 에러 메시지
+ */
+function formatErrorMessage(elHeader) {
+    const code = elHeader?.resCode || "N/A";
+    const message = elHeader?.resMsg || "알 수 없는 오류";
+    
+    return ASSIGN_RULE_MESSAGES.ERROR_TEMPLATE
+        .replace("{code}", code)
+        .replace("{message}", message);
+}
+
 ]]></script>
 	</head>
 	<body ev:onpageload="scwin.onpageload">

@@ -327,8 +327,11 @@ scwin.sbm_addSupplementDocs_submitdone = function (e) {
         icon: 'success',
         title: '보완 서류가 정상적으로 제출되었습니다.'
     });
+    
+    setTimeout(function() {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
+    }, 2500);
 
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
 
 };
 
@@ -345,7 +348,6 @@ scwin.saveFileKeysToServer = function() {
 }
 
 scwin.sbm_updateComplete_submitdone = function (e) {
-    alert("보완 서류가 정상적으로 제출되었습니다.");
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
 };
 ]]></script>
