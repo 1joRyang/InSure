@@ -44,20 +44,20 @@ scwin.onpageload = function() {
     
     // 접수내역 조회 버튼 클릭 이벤트
     scwin.onInternalCallClick = function() {
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claim/my-claims-m.xml"
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/myClaim/my-claims-m.xml"
     };
     
     // 메뉴 카드 클릭 이벤트
     scwin.onMenuClick = function(menuType) {
         switch(menuType) {
             case 'premium':
-                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/first.xml"
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/first.xml"
                 break;
             case 'claim':
-                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/requestDoc.xml"
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/myInsure/requestDoc.xml"
                 break;
             case 'consultation':
-                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/insurePageTab1.xml"
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/myInsure/insurePageTab1.xml"
                 break;
             default:
                 alert("메뉴 선택됨");
@@ -68,10 +68,8 @@ scwin.onpageload = function() {
 // 상태별 갯수 조회 함수
 scwin.loadStatusCount = function() {
     try {
-        // 사용자 ID 설정 (실제 환경에서는 세션이나 localStorage에서 가져와야 함)
         var userId = "1"; // 임시로 ID=1 사용
         
-        // localStorage에서 사용자 정보 가져오기 (있는 경우)
         try {
             var user = JSON.parse(localStorage.getItem("user"));
             if (user && user.id) {
@@ -80,15 +78,8 @@ scwin.loadStatusCount = function() {
         } catch (storageError) {
             console.log("localStorage에서 사용자 정보를 가져올 수 없음:", storageError.message);
         }
-        
-        // 데이터맵에 요청 데이터 설정
         dm_statusRequest.set("ID", userId);
-        
-        // WebSquare submission 실행
         $c.sbm.execute(sbm_statusCount);
-        
-        console.log("상태별 갯수 조회 요청 - 사용자 ID:", userId);
-        
     } catch (e) {
         console.error("상태별 갯수 조회 중 오류 발생:", e);
     }
@@ -173,7 +164,7 @@ scwin.updateStatusCounts = function(result) {
 };
 
 scwin.suppDocs_onclick = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/suppDocs.xml"
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claimMobile/suppDocs.xml"
 };
 ]]></script>
         <style type="text/css"><![CDATA[

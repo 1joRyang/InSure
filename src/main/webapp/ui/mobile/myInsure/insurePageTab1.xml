@@ -59,30 +59,24 @@ scwin.onpageload = function() {
 };
 
 scwin.sbm_getMyInsurance_submitdone = function(e) {
-    console.log("=== 보험 조회 완료 ===");
     
     let insuranceList = null;
     
-    // submission target이 정상 작동했는지 먼저 확인
     try {
         insuranceList = dl_insuranceList.getAllJSON();
-        console.log("DataList에서 가져온 데이터:", insuranceList);
     } catch (error) {
         console.error("DataList 접근 오류:", error);
     }
     
     // DataList가 비어있다면 서버 응답에서 직접 가져오기
     if (!insuranceList || insuranceList.length === 0) {
-        console.log("DataList가 비어있어서 서버 응답에서 직접 가져옵니다.");
         
         if (e && e.responseJSON && e.responseJSON.userInsuranceVoList) {
             insuranceList = e.responseJSON.userInsuranceVoList;
-            console.log("서버 응답에서 가져온 데이터:", insuranceList);
             
             // 수동으로 DataList에 데이터 설정
             try {
                 dl_insuranceList.setJSON(insuranceList);
-                console.log("DataList에 수동으로 데이터 설정 완료");
             } catch (error) {
                 console.error("DataList 수동 설정 오류:", error);
             }
@@ -90,7 +84,6 @@ scwin.sbm_getMyInsurance_submitdone = function(e) {
     }
     
     if (insuranceList && insuranceList.length > 0) {
-        console.log("유효한 보험 리스트 발견:", insuranceList.length + "건");
         
         // 각 보험 데이터에 누락된 필드 추가 (기본값 설정)
         insuranceList = insuranceList.map(function(insurance) {
@@ -100,36 +93,27 @@ scwin.sbm_getMyInsurance_submitdone = function(e) {
                 user_name: insurance.user_name,
                 start_date: insurance.start_date,
                 end_date: insurance.end_date,
-                insu_amt: insurance.insu_amt || 50000, // 기본 보험료 (서버에서 null로 옴)
-                insu_type: insurance.insu_type || "종합", // 기본 보험 타입
-                insu_name: insurance.insu_name || (insurance.insu_id + " 보험") // 기본 보험명
+                insu_amt: insurance.insu_amt,
+                insu_type: insurance.insu_type ,
+                insu_name: insurance.insu_name ,
             };
         });
         
-        console.log("필드 보완된 보험 리스트:", insuranceList);
         
-        // 총 보험료 계산
         let totalAmount = scwin.calculateTotalAmount(insuranceList);
-        
-        // 총 보험료 표시
         let amountSpan = $p.getComponentById("spn_totalAmount");
         amountSpan.setValue(scwin.formatNumber(totalAmount));
         
-        // 보험 카드들 동적 생성
         scwin.createInsuranceCards(insuranceList);
     } else {
-        console.log("조회된 보험 정보가 없습니다.");
-        // 기본값 설정
         let amountSpan = $p.getComponentById("spn_totalAmount");
         amountSpan.setValue("0");
         
-        // 메시지 표시
         scwin.showNoDataMessage();
     }
 };
 scwin.sbm_getMyInsurance_submiterror = function(e) {
     console.error("보험 정보 조회 실패:", e);
-    alert("보험 정보를 조회하는 중 오류가 발생했습니다.");
 };
 
 /**
@@ -232,18 +216,7 @@ scwin.createInsuranceCard = function(container, insuranceData, index) {
  */
 scwin.onInsuranceCardClick = function(e) {
     console.log("보험 클릭");
-    // try {
-    //     let clickedCard = e.target;
-    //     let insuranceData = clickedCard.getUserData("insuranceData");
-        
-    //     if (insuranceData) {
-    //         console.log("선택된 보험:", insuranceData);
-                
-    //     }
-              location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_terms.xml"
-    // } catch (error) {
-    //     console.error("보험 카드 클릭 이벤트 처리 중 오류:", error);
-    // }
+              location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/myInsure/m_terms.xml"
 };
 
 /**
@@ -308,8 +281,6 @@ scwin.calculateTotalAmount = function(insuranceList) {
         }
     }
     
-    console.log("활성 보험:", activeCount + "건, 만료 보험:", expiredCount + "건");
-    console.log("총 월 보험료 (활성 보험만):", scwin.formatNumber(total) + "원");
     
     return total;
 };
