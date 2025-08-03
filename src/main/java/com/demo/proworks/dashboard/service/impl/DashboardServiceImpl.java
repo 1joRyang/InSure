@@ -1,9 +1,6 @@
 package com.demo.proworks.dashboard.service.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -38,7 +35,8 @@ public class DashboardServiceImpl implements DashboardService{
 	@Resource(name = "dashboardDAO")
     private DashboardDAO dashboardDAO;
     
-    @Override // 인터페이스의 메서드를 구현한다는 의미
+    // 오늘의 처리 현황
+    @Override
     public TodayStatusVo selectTodayStatusCounts() throws ElException {
         TodayStatusVo resultVo = null;
 
@@ -54,26 +52,31 @@ public class DashboardServiceImpl implements DashboardService{
         return resultVo;
     }
     
+    /*고객 청구 모니터링*/
     @Override
     public ClaimMonitorVo selectClaimMonitorCounts() throws ElException {
     	return dashboardDAO.selectClaimMonitorCounts();
     }
     
+    /*이번 달 성과 데이터*/
     @Override
 	public MonthlyPerfVo selectMonthlyPerformance() throws ElException {
 	    return dashboardDAO.selectMonthlyPerformance();
 	}
 	
+	/*보완 요청 현황 조회*/
 	@Override
 	public SupplementStatusVo selectSupplementStatus() throws ElException {
 	    return dashboardDAO.selectSupplementStatus();
 	}
 	
+	/*전일 처리 건수 조회*/
 	@Override
 	public DailyCountVo selectYesterdayProcessedCount() throws ElException {
 	    return dashboardDAO.selectYesterdayProcessedCount();
 	}
 	
+	/*이번 달 지급률 조회*/
 	@Override
 	public PaymentVo selectPaymentRate() throws ElException {
 	    return dashboardDAO.selectPaymentRate();
@@ -89,28 +92,31 @@ public class DashboardServiceImpl implements DashboardService{
         return dashboardDAO.selectUrgentClaims();
     }
     
+    /*주간 처리 현황*/
     @Override
 	public List<WeeklyTrendVo> selectWeeklyTrend() throws ElException {
-	    // DAO를 통해 조회한 VO 리스트를 그대로 반환합니다.
-	    // 불필요한 데이터 가공 로직을 제거합니다.
-	    return dashboardDAO.selectWeeklyTrend(); // ✅ 이 한 줄이면 충분합니다.
+	    return dashboardDAO.selectWeeklyTrend();
 	}
 	
+	/*청구 유형 분포*/
 	@Override
 	public List<ChartVo> selectClaimTypeDistribution() throws ElException {
 	    return dashboardDAO.selectClaimTypeDistribution();
 	}
 	
+	/*월별 승인률 차트*/
 	@Override
 	public List<MonthlyApprovalRateVo> selectMonthlyApprovalRate() throws ElException {
 	    return dashboardDAO.selectMonthlyApprovalRate();
 	}
 	
+	/*처리 시간 분포 차트*/
 	@Override
     public List<ProcessingTimeVo> selectProcessingTimeTrend() throws ElException {
         return dashboardDAO.selectProcessingTimeTrend();
     }
     
+    /*처리 시간 분포에서 제외하는 장기처리건을 조회*/
     @Override
     public OutlierCountVo selectProcessingTimeOutlierCount() throws ElException {
         int count = dashboardDAO.selectProcessingTimeOutlierCount();
@@ -119,6 +125,7 @@ public class DashboardServiceImpl implements DashboardService{
         return vo;
     }
     
+    /*로그인한 사용자에게 할당된 긴급처리업무*/
     @Override
 	public int selectMyUrgentClaimCount(UrgentCountVo vo) throws ElException {
 	    return dashboardDAO.selectMyUrgentClaimCount(vo);

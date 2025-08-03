@@ -104,7 +104,7 @@
 	</update>
 	
 	<update id="updateClaimTypeDistribution">
-	    /* QueryID : com.demo.proworks.batch.updateClaimTypeDistribution (데이터가 있으면 UPDATE, 없으면 INSERT) */
+	    /* QueryID : com.demo.proworks.batch.updateClaimTypeDistribution (청구유형분포: 데이터가 있으면 UPDATE, 없으면 INSERT) */
 	    INSERT INTO DASHBOARD_CLAIM_TYPE (LABEL, VALUE, UPDATED_AT)
 	    SELECT
 	        IFNULL(claim_type, '기타') AS label,

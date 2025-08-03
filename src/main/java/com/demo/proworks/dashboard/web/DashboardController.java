@@ -27,8 +27,6 @@ import com.demo.proworks.dashboard.vo.UrgentCountVo;
 import com.demo.proworks.dashboard.vo.WeeklyTrendVo;
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
-import org.springframework.web.bind.annotation.RequestMethod;
-import com.inswave.elfw.annotation.ElValidator;
 
 /**
  * @subject : 대시보드 관련 요청을 처리하는 컨트롤러
@@ -53,17 +51,17 @@ public class DashboardController {
 	@ElDescription(sub = "오늘의 처리 현황 조회", desc = "대시보드 상단의 오늘의 처리 현황 데이터를 조회한다.")
 	public Map<String, Object> selectTodayStatusCounts(TodayStatusVo todayStatusVo) throws Exception {
 		System.out.println("====== 1. DashboardController 진입! ======");
-		// 1. Service를 호출하여 조회 결과를 가져옵니다.
+		// 1. Service를 호출하여 조회 결과를 가져온다
         TodayStatusVo resultVo = dashboardService.selectTodayStatusCounts();
         System.out.println("====== 2. Service로부터 받은 데이터 ======");
-        System.out.println(resultVo); // resultVo 객체의 내용을 그대로 출력
-        // 2. 최종 응답을 담을 새로운 Map을 생성합니다.
+        System.out.println(resultVo);
+        // 2. 최종 응답을 담을 새로운 Map 생성
         Map<String, Object> responseWrapper = new HashMap<>();
 
-        // 3. "elData" 라는 키(Key)로 조회한 결과(resultVo)를 Map에 담습니다.
+        // 3. "elData" 라는 키(Key)로 조회한 결과(resultVo)를 Map에 담기
         responseWrapper.put("todayStatusVo", resultVo);
 
-        // 4. 이 Map 객체를 직접 return 합니다.
+        // 4. Map 객체를 직접 return
         System.out.println("====== 3. 클라이언트로 보낼 데이터 ======");
         System.out.println(responseWrapper);
         return responseWrapper;

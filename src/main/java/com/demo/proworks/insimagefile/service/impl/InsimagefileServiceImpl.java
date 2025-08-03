@@ -1,19 +1,13 @@
 package com.demo.proworks.insimagefile.service.impl;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.Base64;
 import java.util.List;
-import java.util.UUID;
 
 import javax.annotation.Resource;
 
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.demo.proworks.insimagefile.service.InsimagefileService;
-import com.demo.proworks.insimagefile.vo.InsimagefileListVo;
 import com.demo.proworks.insimagefile.vo.InsimagefileVo;
 import com.demo.proworks.insimagefile.dao.InsimagefileDAO;
 
@@ -128,36 +122,5 @@ public class InsimagefileServiceImpl implements InsimagefileService {
 		return insimagefileDAO.deleteInsimagefile(insimagefileVo);
 	}
 	
-	/**
-     * 보험금 청구 서류(이미지)를 파일로 저장하고 DB에 기록 한다.
-     
-    @Override
-	public void saveImageFiles(List<MultipartFile> files, String claimType) throws Exception {
-		String uploadPath = "C:/inswave/uploads/";
-		File uploadDir = new File(uploadPath);
-		if(!uploadDir.exists()) uploadDir.mkdir();
-		
-		for (MultipartFile file : files){
-			if(file.isEmpty()) continue;
-			
-			String storedFileName = UUID.randomUUID().toString() + ".jpg";
-			File newFile = new File(uploadPath + storedFileName);
-			
-			// MultipartFile을 바로 파일로 저장
-			file.transferTo(newFile);
-			
-			// DB에 기록할 Vo만들기
-			InsimagefileVo dbVo = new InsimagefileVo();
-			dbVo.setStored_file_name(storedFileName);
-			dbVo.setOriginal_file_name(file.getOriginalFilename());
-			dbVo.setFile_path(uploadPath);
-			dbVo.setFile_size(String.valueOf(file.getSize()));
-			dbVo.setFile_type(file.getContentType());
-			
-			insimagefileDAO.insertInsimagefile(dbVo);
-		
-		}
-   
-	}*/
 	
 }

@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.demo.proworks.batch.service.BatchService;
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
-import org.springframework.web.bind.annotation.RequestMethod;
-import com.inswave.elfw.annotation.ElValidator;
+
 
 /**
  * @subject : 배치 테스트 처리를 담당하는 컨트롤러

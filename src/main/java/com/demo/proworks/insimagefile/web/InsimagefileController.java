@@ -461,7 +461,7 @@ public class InsimagefileController {
     String originalClaimTypeKor = convertClaimTypeToKorean(originalClaimTypeEng);
     String originalClaimContent = String.format("[%s] %s", originalClaimTypeKor, symptom);
 
-    // ✅ 사용자 입력 기준 claimContent를 별도 키로 보관
+    // 사용자 입력 기준 claimContent를 별도 키로 보관
     claimData.put("originalClaimContent", originalClaimContent);
 
     // 3. OCR 분석을 통한 자동 claim_type 결정
