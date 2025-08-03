@@ -145,7 +145,7 @@ scwin.createTable = function(result) {
    });
    
    // 병합 정확도 요약 출력
-   console.log("🔍 병합 통계 요약:");
+   console.log("병합 통계 요약:");
    console.log(`총 미일치 항목 수: ${mergeStats.totalUnmatched}`);
    console.log(`0.5 이상 병합 수: ${mergeStats.mergedAbove05}`);
    console.log(`0.3~0.5 병합 수: ${mergeStats.mergedBetween03And05}`);
@@ -514,7 +514,7 @@ function createCellClickHandler(td, rowIndex, colIndex, cellValue) {
    };
 }
 
-// ========== 🔥 개선된 유사도 계산 함수 (여기가 핵심 변경 부분) ==========
+// 개선된 유사도 계산 함수 
 function calculateSimilarity(str1, str2) {
     if (!str1 || !str2) return 0;
     
@@ -590,7 +590,7 @@ function longestCommonSubstring(str1, str2) {
     return maxLength;
 }
 
-// 기존 Levenshtein Distance 기반 유사도 계산
+// Levenshtein Distance 기반 유사도 계산
 function calculateLevenshteinSimilarity(str1, str2) {
     const matrix = [];
     
@@ -621,7 +621,6 @@ function calculateLevenshteinSimilarity(str1, str2) {
     const maxLength = Math.max(str1.length, str2.length);
     return (maxLength - matrix[str2.length][str1.length]) / maxLength;
 }
-// ========== 개선된 유사도 계산 함수 끝 ==========
 
 // 가장 유사한 rowName 항목 찾기
 function findMostSimilarRowName(col1Value, rowName) {
@@ -753,7 +752,7 @@ scwin.updateColumnTotal = function(colIndex) {
       }
    }
 
-   // 계산된 합계를 합계행에 반영 (포맷팅 적용)
+   // 계산된 합계를 합계행에 반영 
    if (totalRow) {
       const totalCell = totalRow.cells[totalRow.cells.length - 8 + colIndex];
       if (totalCell) {
@@ -762,7 +761,7 @@ scwin.updateColumnTotal = function(colIndex) {
    }
 }
 
-// 셀 값 수정 함수 - focus out 시 값 저장 수정
+// 셀 값 수정 함수 
 function editCell(td, rowIndex, colIndex, currentValue) {
    // 이미 수정 중인 셀이 있으면 저장 후 종료
    const existingInput = document.querySelector('.editing-input');

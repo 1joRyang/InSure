@@ -174,7 +174,7 @@ scwin.onpageload = function() {
         popupName: "청구 영수증"
     };
 
-    $p.openPopup("/InsWebApp/ui/audit/img_modal.xml", jsnOptions);
+    $p.openPopup("/InsWebApp/ui/web/audit/img_modal.xml", jsnOptions);
 
     scwin.genList.push(scwin.index);
 	gen_date.insertChild(scwin.index++);   
@@ -275,7 +275,7 @@ scwin.btn_next_onclick = function (e) {
 
     if (!scwin.isEmp) {
         // 담당자 아님
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-ocr.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure-ocr.xml";
         $p.closePopup("img_popup");
 
     } else if (isClaimOffset && isDateDrop && isHcode) {
@@ -295,7 +295,7 @@ scwin.btn_next_onclick = function (e) {
 };
 
 scwin.btn_befo_onclick = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure_first.xml";
 };
 
 scwin.btn_add_date_onclick = function (e) {
@@ -316,15 +316,15 @@ scwin.btn_del_date_onclick = function (e) {
 };
 
 scwin.ipt_hcode1_onclick = function (e) {
-    openPopup("/InsWebApp/ui/audit/hcode1-popup.xml", "hcode_popup", "병명코드 입력");
+    openPopup("/InsWebApp/ui/web/audit/hcode1-popup.xml", "hcode_popup", "병명코드 입력");
 };
 
 scwin.ipt_hcode2_onclick = function (e) {
-    openPopup("/InsWebApp/ui/audit/hcode2-popup.xml", "hcode_popup", "병명코드 입력");
+    openPopup("/InsWebApp/ui/web/audit/hcode2-popup.xml", "hcode_popup", "병명코드 입력");
 };
 
 scwin.sbm_updateClaim_submitdone = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-ocr.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure-ocr.xml";
     $p.closePopup("img_popup");
 };
 
@@ -358,7 +358,7 @@ function openPopup(link, popupId, popupName, size = {}) {
 scwin.grd_befClaim_oncellclick = function (rowIndex, columnIndex, columnId) {
     let claimNo = dl_claimbefore.getRowJSON(rowIndex).claim_no;
     localStorage.setItem("claimBefore", claimNo);
-    openPopup("/InsWebApp/ui/audit/claimMemo-popup.xml", "term_popup", claimNo, {width: 500});
+    openPopup("/InsWebApp/ui/web/audit/claimMemo-popup.xml", "term_popup", claimNo, {width: 500});
 };
 
 scwin.grd_insure_oncellclick = function (rowIndex, columnIndex, columnId) {

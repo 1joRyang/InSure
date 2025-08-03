@@ -41,7 +41,7 @@ scwin.onpageload = function () {
 
 scwin.btn_next_onclick = function (e) {
     // 페이지 이동
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_second.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure_second.xml";
 };
 
 scwin.btn_change_onclick = function (e) {

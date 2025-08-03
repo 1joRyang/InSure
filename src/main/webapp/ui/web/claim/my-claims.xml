@@ -151,9 +151,9 @@ function moveNsave(rowData) {
     localStorage.setItem("claim", JSON.stringify(claim));
 
     if (rowData.status === "결재완료" || rowData.status == "결재반려") {
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-result.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure-result.xml";
     } else {
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure_first.xml";
     }
     
     

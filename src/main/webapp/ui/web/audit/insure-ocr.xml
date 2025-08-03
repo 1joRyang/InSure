@@ -221,7 +221,7 @@
         popupName: "청구 영수증"
     };
 
-    $p.openPopup("/InsWebApp/ui/audit/img_modal.xml", jsnOptions);
+    $p.openPopup("/InsWebApp/ui/web/audit/img_modal.xml", jsnOptions);
 
     dm_header.set("claimNo", scwin.claim.claimNo);
     dm_header.set("patient", scwin.claim.userName);
@@ -240,7 +240,6 @@
             date_drop.addItem(item.imgIdx, item.dateRange);
         });
         date_drop.setSelectedIndex(0);
-        // todo: insert 하고........... update 치기
 
         getTreatmentWithDate();
 
@@ -292,9 +291,7 @@ function getInsure() {
 }
 
 scwin.sbm_getTreatment_submitdone = function (e) {
-    // todo: insert면 localStorage에 treatmentId 저장
-    console.log("scwin.isGetTreatId", scwin.isGetTreatId, "sel_department.getValue()",sel_department.getValue())
-
+    // insert면 localStorage에 treatmentId 저장
     if (scwin.isGetTreatId) {
         localStorage.setItem("treatmentId", dm_treatment.getJSON().treatment_id)
         scwin.treatmentId = localStorage.getItem("treatmentId");
@@ -324,11 +321,9 @@ scwin.sbm_getTreatment_submitdone = function (e) {
         $c.sbm.execute(sbm_getExcList);
     } else {
         if (scwin.isInsertOnceDone) {
-            console.log("⚠️ insertTreatment 한 번 했으므로 다시 안함");
             return;
         }
-        // todo: treatment 값이 없음 > insert하고 get하기
-        // or treatementId 설정하기 (지금 있는 거중 가장 큰 거 + 1)
+        // treatment 값이 없음 > insert하고 get하기
         scwin.isInsertOnceDone = true;
         $c.sbm.execute(sbm_insertTreatment);
         scwin.isEdit = false;
@@ -401,7 +396,6 @@ scwin.btn_ocr_onclick = function (e) {
     // OCR 버튼 클릭 시 OCR 결과를 받아서 테이블을 동적으로 업데이트
     let formData = new FormData();
     formData.append("img_url", scwin.imgUrl);
-    console.log(scwin.imgUrl);
 
     $.ajax({
         url: 'http://localhost:5000/ocr', //'http://localhost:8000/api/v1/insurance/ocr',
@@ -410,7 +404,6 @@ scwin.btn_ocr_onclick = function (e) {
         contentType: false,  // multipart/form-data 자동 처리
         processData: false,  // FormData 객체를 문자열로 변환하지 않음
         success: function (response) {
-            console.log(response.data);
             scwin.createTable(response.data);
         },
         error: function (xhr, status, error) {
@@ -428,7 +421,7 @@ scwin.btn_ocr_onclick = function (e) {
 
 scwin.btn_before_onclick = function (e) {
     // 이전 화면으로
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_second.xml"
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure_second.xml"
 };
 
 scwin.date_drop_onchange = function (info) {
@@ -449,7 +442,6 @@ const Toast = Swal.mixin({
 })
 
 function saveInsure(idx = -1) {
-    // todo: 날짜 onchange 하면 없애기
     localStorage.removeItem("excTotal");
     localStorage.removeItem("exc");
     localStorage.removeItem("treatmentId");
@@ -478,7 +470,7 @@ function saveInsure(idx = -1) {
 }
 
 scwin.sbm_insertTreatment_submitdone = function (e) {
-    // todo: insert만 하는 로직 없으니까 여기서 처리
+    // insert만 하는 로직 유일함 > 여기서 처리
     $c.sbm.execute(sbm_getTreatment);
     scwin.isGetTreatId = true;
 };
@@ -506,7 +498,7 @@ scwin.sbm_updateClaimItems_submitdone = function (e) {
         localStorage.removeItem("exc");
         localStorage.removeItem("treatmentId");
         
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-result.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure-result.xml";
         return;
     }
 
@@ -549,7 +541,7 @@ scwin.btn_next_onclick = function (e) {
     if (scwin.isEmp) {
         saveInsure();
     } else {
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure-result.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure-result.xml";
     }
     $p.closePopup("img_popup");
 };
