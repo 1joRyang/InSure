@@ -35,30 +35,24 @@
         <script lazy="false" type="text/javascript"><![CDATA[scwin.pinValue = ""; // 현재 입력된 PIN 값을 저장할 변수
 
 scwin.onpageload = function() {
-    // user 객체에서 userId 가져오기
     const userString = localStorage.getItem("user");
     const user = userString ? JSON.parse(userString) : null;
     let userId = user ? user.userId : null;
     
-    // 기존 방식도 fallback으로 시도
     if (!userId) {
         userId = localStorage.getItem("userId");
     }
     
     dma_login_request.set("userId", userId);
     
-    console.log("간편비밀번호 등록 - 사용자 ID:", userId);
     
-    // userId가 없으면 에러 처리
     if (!userId) {
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/insure_login_mobile.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/login/insure_login_mobile.xml";
         return;
     }
 
-    // PIN 입력 상태 초기화
     scwin.updatePinDots();
 
-    // 세션 관리 초기화 추가 (여기에!)
     if (typeof initSessionManagement === 'function') {
         initSessionManagement();
     }
@@ -66,7 +60,7 @@ scwin.onpageload = function() {
 }; 
 
 /**
- * PIN 입력 상태에 따라 원형 UI를 업데이트하는 함수
+ * PIN 입력 상태에 따라 원형 UI 업데이트
  */
 scwin.updatePinDots = function() {
     var currentLength = scwin.pinValue.length;
@@ -87,8 +81,7 @@ scwin.updatePinDots = function() {
 };
 
 /**
- * 숫자 키패드 버튼 클릭 시 공통으로 실행될 함수
- * @param {string} num - 클릭된 버튼의 숫자
+ * 숫자 키패드 버튼 클릭 시 공통으로 실행
  */
 scwin.onNumberKeyClick = function(num) {
     if (scwin.pinValue.length >= 6) return;
@@ -96,10 +89,8 @@ scwin.onNumberKeyClick = function(num) {
     scwin.pinValue += num;
     scwin.updatePinDots();
 
-  // 6자리가 모두 입력되었으면 처리
     if (scwin.pinValue.length === 6) {
         try {
-            // user 객체에서 userId 다시 가져오기 
             const userString = localStorage.getItem("user");
             const user = userString ? JSON.parse(userString) : null;
             let userId = user ? user.userId : null;
@@ -109,7 +100,6 @@ scwin.onNumberKeyClick = function(num) {
                 userId = localStorage.getItem("userId");
             }
             
-            console.log("간편 로그인 시 사용할 userId:", userId);
             
             dma_login_request.set("loginType", "SIMPLE");
             dma_login_request.set("userId", userId);  // userId 추가!
@@ -119,8 +109,6 @@ scwin.onNumberKeyClick = function(num) {
 
             console.log("간편 로그인 요청 데이터:", reqData);
         
-
-            //submission 실행 전 검증
             if (typeof sbm_SimpleLogin === 'undefined') {
                 console.error("sbm_SimpleLogin이 정의되지 않았습니다.");
                 alert("로그인 설정에 오류가 있습니다. 관리자에게 문의하세요.");
@@ -150,9 +138,6 @@ scwin.resetPassword = function() {
 };
 
 
-/**
- * sbm_Simplepw_register 서브미션 완료 후 실행될 함수
- */
 scwin.sbm_SimpleLogin_submitdone = function (e) {
    
         try {
@@ -161,26 +146,23 @@ scwin.sbm_SimpleLogin_submitdone = function (e) {
         if (e && e.responseJSON && e.responseJSON.dma_login_response) {
             const loginResponse = e.responseJSON.dma_login_response;
             
-            // 성공 확인 (resultCode 또는 id 존재 여부)
+            // 성공 확인
             if (loginResponse.resultCode === "OK" || loginResponse.id) {
                 console.log("간편비밀번호 로그인 성공");
                 
-                // id가 있으면 localStorage에 저장
                 if (loginResponse.id) {
                     localStorage.setItem("id", loginResponse.id);
                 }
                 
-                // 로그인 성공 시 메인 페이지로 이동
-                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
+                // 로그인 성공 시 메인 페이지
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/home/m_home.xml";
                 
             } else {
-                // 로그인 실패 시 - PIN 번호 틀림
+                // 로그인 실패 시
                 var message = loginResponse.resultMessage || "비밀번호가 일치하지 않습니다.";
                 
-                // Alert 창 표시
                 alert(message);
                 
-                // 기존 txt_info 메시지도 유지
                 if (typeof txt_info !== 'undefined') {
                     txt_info.setValue(message);
                 }
@@ -189,7 +171,6 @@ scwin.sbm_SimpleLogin_submitdone = function (e) {
                 scwin.updatePinDots();
             }
         } else {
-            // 응답 형식 오류
             console.error("응답 형식 오류:", e);
             
             alert("서버 응답에 오류가 있습니다.");
@@ -219,10 +200,9 @@ scwin.sbm_SimpleLogin_submitdone = function (e) {
 
 
 scwin.btn_clear_onclick = function (e) {
-    scwin.pinValue = ""; // 저장된 PIN 값 전체 삭제
-    scwin.updatePinDots(); // 원형 UI 초기화
+    scwin.pinValue = ""; 
+    scwin.updatePinDots();
 
-    // 텍스트 색상 원래대로 복원
     if (typeof txt_info2 !== 'undefined') {
         txt_info2.setValue("간편 비밀번호 6자리를 입력해주세요.");
         txt_info2.setStyle("color", "#666666"); // 기본 색상
@@ -236,7 +216,6 @@ scwin.btn_delete_onclick = function (e) {
         scwin.pinValue = scwin.pinValue.slice(0, -1);
         scwin.updatePinDots();
 
-         // 입력 시작하면 색상 원래대로 복원
         if (typeof txt_info2 !== 'undefined') {
             txt_info2.setValue("간편 비밀번호 6자리를 입력해주세요.");
             txt_info2.setStyle("color", "#666666"); // 기본 색상

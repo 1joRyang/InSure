@@ -33,10 +33,10 @@
         <w2:layoutInfo/>
         <w2:publicInfo method=""/>
 
-        <script lazy="false" type="text/javascript"><![CDATA[scwin.pinValue = ""; // 현재 입력된 PIN 값을 저장할 변수
+        <script lazy="false" type="text/javascript"><![CDATA[scwin.pinValue = ""; 
 
 scwin.onpageload = function() {
-    // user 객체에서 userId 가져오기
+
     const userString = localStorage.getItem("user");
     const user = userString ? JSON.parse(userString) : null;
     let userId = user ? user.userId : null;
@@ -53,11 +53,10 @@ scwin.onpageload = function() {
     // userId가 없으면 에러 처리
     if (!userId) {
         alert("사용자 정보를 가져올 수 없습니다. 다시 로그인해주세요.");
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/login/insure_login_mobile.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/login/insure_login_mobile.xml";
         return;
     }
 
-    // PIN 입력 상태 초기화
     scwin.updatePinDots();
 
     if (typeof initSessionManagement === 'function') {
@@ -67,7 +66,7 @@ scwin.onpageload = function() {
 }; 
 
 /**
- * PIN 입력 상태에 따라 원형 UI를 업데이트하는 함수
+ * PIN 입력 상태에 따라 원형 UI 업데이트
  */
 scwin.updatePinDots = function() {
     var currentLength = scwin.pinValue.length;
@@ -89,7 +88,6 @@ scwin.updatePinDots = function() {
 
 /**
  * 숫자 키패드 버튼 클릭 시 공통으로 실행될 함수
- * @param {string} num - 클릭된 버튼의 숫자
  */
 scwin.onNumberKeyClick = function(num) {
     if (scwin.pinValue.length >= 6) return;
@@ -138,55 +136,34 @@ scwin.resetPassword = function() {
 };
 
 
-/**
- * sbm_Simplepw_register 서브미션 완료 후 실행될 함수
 
-scwin.sbm_Simplepw_register_ondone = function(e) {
-    var resData = e.get.dma_login_response.JSON;
-
-    if (resData.resultCode === "OK") {
-        // 성공 시: '확인' 페이지로 이동
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/simple_pw.xml&userId=" + localStorage.getItem("userId");
-    } else {
-        // 실패 시: 안내 문구 변경 및 입력값 초기화
-        txt_info.setValue(resData.resultMessage || "등록 중 오류가 발생했습니다.");
-        scwin.pinValue = ""; // 저장된 PIN 값 초기화
-        scwin.updatePinDots(); // 원형 UI 초기화
-    }
-}; */
-
-
-
-/**
- * sbm_Simplepw_register 서브미션 완료 후 실행될 함수
- */
 scwin.sbm_Simplepw_register_submitdone = function (e) {
     var resData = e.responseJSON.dma_login_response;
 
     if (resData && resData.resultCode === "OK") {
-        // 성공 시: '확인' 페이지로 이동
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/add_simple_pw_check.xml&userId=" + localStorage.getItem("userId");
+        // 성공 시
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/login/add_simple_pw_check.xml&userId=" + localStorage.getItem("userId");
     } else {
-        // 실패 시: 안내 문구 변경 및 입력값 초기화
+        // 실패 시
         var message = resData ? resData.resultMessage : "등록 중 오류가 발생했습니다.";
         // txt_info 컴포넌트가 없다면 이 줄에서 에러가 날 수 있습니다.
         txt_info.setValue(message); 
 
         //txt_info.setValue(resData.resultMessage || "등록 중 오류가 발생했습니다.");
-        scwin.pinValue = ""; // 저장된 PIN 값 초기화
-        scwin.updatePinDots(); // 원형 UI 초기화
+        scwin.pinValue = ""; 
+        scwin.updatePinDots();
     }
 };
 
 
 scwin.btn_clear_onclick = function (e) {
-    scwin.pinValue = ""; // 저장된 PIN 값 전체 삭제
-    scwin.updatePinDots(); // 원형 UI 초기화
+    scwin.pinValue = ""; 
+    scwin.updatePinDots(); 
 
-    // 텍스트 색상 원래대로 복원
+    // 텍스트 색상 원래대로
     if (typeof txt_info2 !== 'undefined') {
         txt_info2.setValue("간편 비밀번호 6자리를 입력해주세요.");
-        txt_info2.setStyle("color", "#666666"); // 기본 색상
+        txt_info2.setStyle("color", "#666666"); 
         txt_info2.setStyle("font-weight", "normal");
     }
 };
@@ -197,19 +174,16 @@ scwin.btn_delete_onclick = function (e) {
         scwin.pinValue = scwin.pinValue.slice(0, -1);
         scwin.updatePinDots();
 
-         // 입력 시작하면 색상 원래대로 복원
+         // 입력 시작하면 색상 원래대로
         if (typeof txt_info2 !== 'undefined') {
             txt_info2.setValue("간편 비밀번호 6자리를 입력해주세요.");
-            txt_info2.setStyle("color", "#666666"); // 기본 색상
+            txt_info2.setStyle("color", "#666666");
             txt_info2.setStyle("font-weight", "normal");
         }
     }
 };
 
 
-/**
- * sbm_Simplepw_register 서브미션 에러 후 실행될 함수 (등록 실패 처리)
- */
 scwin.sbm_Simplepw_register_submiterror = function (e) {
     console.log("간편비밀번호 등록 에러 응답:", e);
     
@@ -219,14 +193,12 @@ scwin.sbm_Simplepw_register_submiterror = function (e) {
     if (typeof txt_info2 !== 'undefined') {
         txt_info2.setValue("간편비밀번호 등록에 실패했습니다. 다시 시도해주세요.");
         
-        // 직접 빨간색 스타일 적용
         txt_info2.setStyle("color", "#ff0000");
         txt_info2.setStyle("font-weight", "bold");
     }
     
-    // PIN 값 초기화 및 원형 UI 초기화
     scwin.pinValue = "";
-    scwin.updatePinDots(); // 모든 원형을 회색으로 초기화
+    scwin.updatePinDots();
 };
 ]]></script>
     </head>

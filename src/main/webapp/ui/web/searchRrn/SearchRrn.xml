@@ -67,12 +67,6 @@ const Toast = Swal.mixin({
 })
 
 scwin.onpageload = function() {
-    console.log("=== 페이지 로드 시 컴포넌트 확인 ===");
-    console.log("search_input_front:", typeof search_input_front);
-    console.log("dm_customer_info:", typeof dm_customer_info);
-    console.log("dlt_request_list:", typeof dlt_request_list);
-    
-    // 초기화
     scwin.clearData();
     grd_group.hide();
 };
@@ -102,21 +96,12 @@ scwin.btn_search_onclick = function() {
     
     var residentNo = frontPart.trim() + "-" + backPart.trim();
     
-    // DataMap에 검색 조건 설정
     dm_customer_info.set("rrn", residentNo);
-    
-  
-    // 전송 데이터 확인
-    console.log("전송할 데이터:", dm_customer_info.getJSON());
 
-    // 사용자 정보 조회
     $c.sbm.execute($p, sbm_searchUserInfo);
 };
 
-// 사용자 정보 조회 완료 후
 scwin.sbm_searchUserInfo_submitdone = function(e) {
-    console.log("=== 사용자 정보 조회 응답 ===");
-    console.log("전체 응답:", e.responseJSON);
     
     var elData = e.responseJSON.elData;
     var elHeader = e.responseJSON.elHeader;
@@ -127,16 +112,13 @@ scwin.sbm_searchUserInfo_submitdone = function(e) {
     }
     
     if(elData && elData.id) {
-        // 사용자 정보 표시
         dm_customer_info.setJSON(elData);
         
-        // ID를 청구조회용으로 설정 (추가!)
         dm_customer_info.set("ID", elData.id);
         
         console.log("User ID 설정:", elData.id);
         console.log("설정 후 DataMap:", dm_customer_info.getJSON());
         
-        // 2. 청구목록 조회
         $c.sbm.execute($p, sbm_searchClaimList);
     } else {
         Swal.fire({
@@ -153,10 +135,7 @@ scwin.sbm_searchUserInfo_submitdone = function(e) {
 // 청구목록 조회 완료 후
 scwin.sbm_searchClaimList_submitdone = function(e) {
     grd_group.show();
-    console.log("=== 청구목록 조회 응답 ===");
-    console.log("전체 응답:", e.responseJSON);
     
-    // elData 대신 claimFullJoinVoList 사용
     var claimList = e.responseJSON.claimFullJoinVoList;
     var elHeader = e.responseJSON.elHeader;
     
@@ -189,7 +168,6 @@ scwin.sbm_searchClaimList_submitdone = function(e) {
     }
 };
 
-// 엔터키 이벤트 핸들러 (WebSquare 방식)
 scwin.search_input_front_onkeydown = function(e) {
     if (e.keyCode === 13) { // Enter key
         search_input_back.focus();
@@ -217,7 +195,7 @@ function moveNsave(rowData) {
     
     localStorage.setItem("claim", JSON.stringify(claim));
     
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure_first.xml";
 }
 
 scwin.grid_rnn_oncelldblclick = function (rowIndex, columnIndex, columnId) {
