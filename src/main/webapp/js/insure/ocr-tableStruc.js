@@ -132,9 +132,9 @@ tableStructure = [
                 details: ["65세이상등정액"]
             },
             {
-                subcategory: "정액수가(요양변원)",
+                subcategory: "정액수가(요양병원)",
                 rowspan: 1,
-                details: ["정액수가(요양변원)"]
+                details: ["정액수가(요양병원)"]
             },
             {
                 subcategory: "포괄수가진료비",
