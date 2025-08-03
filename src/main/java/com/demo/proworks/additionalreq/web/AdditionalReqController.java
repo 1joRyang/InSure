@@ -162,56 +162,5 @@ public class AdditionalReqController {
     public void deleteAdditionalReq(AdditionalReqVo additionalReqVo) throws Exception {
         additionalReqService.deleteAdditionalReq(additionalReqVo);
     }
-    
-    
-    // ============================================
-    // 기존 메소드들 (호환성 유지)
-    // ============================================
-    
-    /**
-     * 추가요청 정보를 등록 처리 한다. (기존 호환성)
-     *
-     * @param  additionalReqVo 추가요청 정보
-     * @throws Exception
-     */
-    @ElService(key="ADDITIONALREQIns")    
-    @RequestMapping(value="ADDITIONALREQIns")
-    @ElDescription(sub="추가요청 정보 등록처리",desc="추가요청 정보를 등록 처리 한다.")
-    public void insertAdditionalReq(AdditionalReqVo additionalReqVo) throws Exception {    	
-    	System.out.println("=== 컨트롤러 진입 ===");
-    	System.out.println("claim_no: " + additionalReqVo.getClaim_no());
-    	System.out.println("additional_memo: " + additionalReqVo.getAdditional_memo());
-    	additionalReqService.insertAdditionalReqAndUpdateClaimStatus(additionalReqVo);   
-    }
-       
-    /**
-     * 추가요청 정보를 갱신 처리 한다. (기존 호환성)
-     *
-     * @param  additionalReqVo 추가요청 정보
-     * @throws Exception
-     */
-    @ElService(key="ADDITIONALREQUpd")    
-    @RequestMapping(value="ADDITIONALREQUpd")    
-    @ElValidator(errUrl="/additionalReq/additionalReqRegister", errContinue=true)
-    @ElDescription(sub="추가요청 정보 갱신처리",desc="추가요청 정보를 갱신 처리 한다.")    
-    public void updateAdditionalReq(AdditionalReqVo additionalReqVo) throws Exception {  
- 
-    	additionalReqService.updateAdditionalReq(additionalReqVo);                                            
-    }
-    
-    /**
-     * 추가요청 정보를 Upsert 처리 한다. 
-     *
-     * @param  additionalReqCusVo 추가요청 정보
-     * @throws Exception
-     */
-    @ElService(key = "ADDITIONALREQInsUp")    
-    @RequestMapping(value = "ADDITIONALREQInsUp")
-    @ElDescription(sub = "추가요청 정보 등록처리", desc = "추가요청 정보를 등록 처리 한다.")
-    public void upsertAdditionalReqAndUpdateClaimStatus(AdditionalReqCusVo additionalReqCusVo) throws Exception {    	
-    	System.out.println("=== 컨트롤러 진입 ===");
-    	System.out.println("claim_no: " + additionalReqCusVo.getClaim_no());
-    	System.out.println("additional_memo: " + additionalReqCusVo.getAdditional_memo());
-    	additionalReqService.upsertAdditionalReqAndUpdateClaimStatus(additionalReqCusVo);   
-    }
+
 }

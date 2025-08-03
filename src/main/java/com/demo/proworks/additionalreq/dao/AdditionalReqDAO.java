@@ -114,38 +114,4 @@ public class AdditionalReqDAO extends com.demo.proworks.cmmn.dao.ProworksDefault
     public int updateClaimStatus(AdditionalReqVo vo) throws ElException {
         return update("com.demo.proworks.additionalreq.updateClaimStatus", vo);
     }
-
-    /**
-     * 추가요청 정보를 등록하고 청구 상태를 업데이트한다. (기존 호환성 유지)
-     *  
-     * @param  AdditionalReqVo 추가요청 정보
-     * @return 번호
-     * @throws ElException
-     */
-    public int insertAdditionalReqAndUpdateClaimStatus(AdditionalReqVo vo) throws ElException {
-        int result1 = insert("com.demo.proworks.additionalreq.insertAdditionalReqOnly", vo);
-        
-        int result2 = update("com.demo.proworks.additionalreq.updateClaimStatus", vo);
-        
-        if (result2 == 0) {
-            throw new ElException("청구 상태 업데이트에 실패했습니다. CLAIM_NO: " + vo.getClaim_no());
-        }
-        
-        return result1;
-    }
-    
-    /**
-     * 추가요청 정보를 Upsert하고 청구 상태를 업데이트한다. (기존 호환성 유지)
-     *  
-     * @param  AdditionalReqCusVo 추가요청 정보
-     * @return 번호
-     * @throws ElException
-     */
-    public int upsertAdditionalReqAndUpdateClaimStatus(AdditionalReqCusVo vo) throws ElException {
-        int result = insert("com.demo.proworks.additionalreq.upsertAdditionalReqOnly", vo);
-        
-        update("com.demo.proworks.additionalreq.updateClaimStatus", vo);
-        
-        return result;
-    }
 }
