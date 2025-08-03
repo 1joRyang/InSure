@@ -40,6 +40,7 @@ public class SupplementServiceImpl implements SupplementService {
 		 return resultVO;
 	 }
 	 
+	 /*보완 서류 추가*/
 	 @Override
 	 @Transactional(rollbackFor = Exception.class)
 	 public void addSupplementDocs(SuppVo vo) throws Exception {
@@ -60,6 +61,7 @@ public class SupplementServiceImpl implements SupplementService {
 		 }
 	 }
 	 
+	/*보완 완료 후 상태 변경: 보완완료*/
 	@Override
     public void updateSupplementCompleted(SuppVo vo) throws Exception {
 		supplementDAO.updateSupplementCompleted(vo);

@@ -15,7 +15,7 @@ public class BatchServiceImpl implements BatchService {
 	    private BatchDAO batchDAO;
 	
 	    /**
-	     * 매일 새벽 2시에 월별 승인율 집계 배치를 실행합니다.
+	     * 매일 새벽 2시에 월별 승인율 집계 배치를 실행
 	     */
 	    @Scheduled(cron = "0 0 2 * * *")
 	    @Override

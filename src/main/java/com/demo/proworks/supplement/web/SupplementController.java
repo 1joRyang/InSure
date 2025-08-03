@@ -13,13 +13,10 @@ import org.springframework.stereotype.Controller;
 import com.demo.proworks.supplement.service.SupplementService;
 import com.demo.proworks.supplement.vo.SuppVo;
 
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
 import com.inswave.elfw.exception.ElException;
-import org.springframework.web.bind.annotation.RequestMethod;
-import com.inswave.elfw.annotation.ElValidator;
 
 
 
@@ -54,7 +51,6 @@ public class SupplementController {
         SuppVo resultVo = supplementService.selectSupplementInfo(paramVo);
         System.out.println("5. 클라이언트로 보낼 최종 데이터: " + resultVo);
 
-        // ▼▼▼▼▼ 최종 결과를 "elData" 키로 감싸서 Map 형태로 반환합니다. ▼▼▼▼▼
         Map<String, Object> response = new HashMap<>();
         response.put("elData", resultVo);
         
@@ -74,12 +70,12 @@ public class SupplementController {
     @ElDescription(sub = "보완 정보 조회 내부 로직용", desc = "보완 서류 제출 화면에 필요한 상세 정보를 조회한다.")               
     private SuppVo selectSupplementInfoLogic(String claimNo, long loginUserId) throws Exception {
         
-        // 서비스에 전달할 VO를 생성하고 값을 설정합니다.
+        // 서비스에 전달할 VO를 생성하고 값을 설정
         SuppVo paramVo = new SuppVo();
         paramVo.setClaimNo(claimNo);
         paramVo.setID(loginUserId);
         
-        // 서비스를 호출하여 결과를 반환합니다.
+        // 서비스를 호출하여 결과를 반환
         return supplementService.selectSupplementInfo(paramVo);
     }
     
