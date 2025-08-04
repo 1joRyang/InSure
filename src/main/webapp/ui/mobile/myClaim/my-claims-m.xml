@@ -65,7 +65,6 @@
 
     // 계산한거 들고오기
     dm_getCalc.set("ID", user.id);
-    // console.log(dm_getCalc.getJSON())
     $c.sbm.execute(sbm_getClaimCalc);
 };
 
@@ -104,9 +103,9 @@ scwin.createClaimCard = function(container, claimData, index) {
     cardGroup.bind("onclick", function() {
         localStorage.setItem("userClaim", JSON.stringify(claimData));
         if (claimData.status != "보완") {
-            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claim/claim-detail.xml";
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/claim-detail.xml";
         } else {
-            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/suppDocs.xml";
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/suppDocs.xml";
         }
         
     });

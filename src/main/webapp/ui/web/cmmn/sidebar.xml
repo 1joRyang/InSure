@@ -17,7 +17,7 @@
 scwin.onpageload = function() {
     let now = localStorage.getItem("nowSelect");
     scwin.role = JSON.parse(localStorage.getItem("employee")).role;
-    // localStorage.removeItem("claimImg");
+
     if (now == "dash") {
         scwin.dashboard_onclick();
     } else if (now == "searchClaim") {

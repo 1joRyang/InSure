@@ -158,7 +158,7 @@ scwin.createTable = function(result) {
       processedData.push(data);
    });
 
-   // 🔹 열 별 합계를 계산하여 "합계" 행에 반영
+   // 열 별 합계를 계산하여 "합계" 행에 반영
    let totalRow = processedData.find(row => row.col1 === '합계');
 
    if (totalRow) {
@@ -193,7 +193,7 @@ function findMostSimilarRowNameFromList(col1Value, availableRowNames) {
    return { name: mostSimilar, similarity: maxSimilarity };
 }
 
-// 플랫 리스트 생성 (기존 코드와의 호환성을 위해)
+// 플랫 리스트 생성 
 function createFlatRowNameList() {
    let flatList = [];
    tableStructure.forEach(category => {
@@ -457,7 +457,7 @@ createHierarchicalTable = function(processedData) {
    calculateMainTableTotal();
 }
 
-// 탭 네비게이션을 위한 헬퍼 함수들
+// 탭 네비게이션을 위한..
 function getNextCell(currentRow, currentCol) {
    const table = document.querySelector('#tableContainer table');
    const editableCols = [0, 1, 2, 4, 5]; // 제외항목(3, 6) 제외
@@ -497,14 +497,14 @@ function findCellByPosition(row, col) {
    return cell;
 }
 
-// 제외항목 클릭 핸들러 생성 함수 
+// 제외항목 클릭 핸들러 
 function createExclusionClickHandler(rowIndex, colIndex, td) {
    return function() {
       openExclusionModal(rowIndex, colIndex, td);
    };
 }
 
-// 일반 셀 클릭 핸들러 생성 함수 
+// 일반 셀 클릭 핸들러 
 function createCellClickHandler(td, rowIndex, colIndex, cellValue) {
    return function() {
       if (scwin.isEmp === false) {
@@ -514,7 +514,7 @@ function createCellClickHandler(td, rowIndex, colIndex, cellValue) {
    };
 }
 
-// 개선된 유사도 계산 함수 
+// 유사도 계산 함수 
 function calculateSimilarity(str1, str2) {
     if (!str1 || !str2) return 0;
     
