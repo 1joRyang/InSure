@@ -19,12 +19,12 @@ scwin.onpageload = function() {
 };
 
 scwin.btnNext_onclick = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/home/m_home.xml";
 };
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
-    	<w2:wframe src="/InsWebApp/ui/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
+    	<w2:wframe src="/InsWebApp/ui/mobile/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
     	<xf:group class="sub_contents2" id="group6" style="">
     		<xf:group class="header-section" id="group7" style="">
     			<w2:textbox class="step_tit" id="" label="최종확인" style="" tagname=""></w2:textbox>

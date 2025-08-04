@@ -12,28 +12,18 @@
     			<data xmlns="" />
     		</xf:instance>
     		<w2:dataCollection baseNode="map">
-    			<w2:dataMap baseNode="map" id="dma_step1">
+    			<w2:dataMap baseNode="map" id="dma_step2">
     				<w2:keyInfo>
-    					<w2:key dataType="text" name="name1" id="claimType"></w2:key>
-    				</w2:keyInfo>
-    			</w2:dataMap>
-    			<w2:dataMap baseNode="map" id="dma_consent">
-    				<w2:keyInfo>
-    					<w2:key dataType="text" name="name1" id="agreed"></w2:key>
+    					<w2:key dataType="text" name="name1" id="accidentDate"></w2:key>
     				</w2:keyInfo>
     			</w2:dataMap>
     			<w2:dataMap baseNode="map" id="dma_claimData">
     				<w2:keyInfo></w2:keyInfo>
     			</w2:dataMap>
     		</w2:dataCollection>
-    		<xf:submission id="sbm_saveStep1" action="/InsWebApp/saveStep1.pwkjson" method="post" mediatype="application/json"
-    			ref='data:json,{"id":"dma_step1","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
-    			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_saveStep1_submitdone" ev:submiterror="" abortTrigger="">
-    		</xf:submission>
-    		<xf:submission id="sbm_saveConsent" action="/InsWebApp/saveConsent.pwkjson" method="post" mediatype="application/json"
-    			ref='data:json,{"id":"dma_consent","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler=""
-    			customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_saveConsent_submitdone" ev:submiterror=""
-    			abortTrigger="">
+    		<xf:submission id="sbm_saveStep2" action="/InsWebApp/saveStep2.pwkjson" method="post" mediatype="application/json"
+    			ref='data:json,{"id":"dma_step2","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+    			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.submission1_submitdone" ev:submiterror="" abortTrigger="">
     		</xf:submission>
     		<xf:submission id="sbm_getClaimData" action="/InsWebApp/getClaimData.pwkjson" method="post" mediatype="application/json" ref=""
     			target='data:json,{"id":"dma_claimData","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
@@ -45,12 +35,9 @@
     	<w2:css src="/css/custom.css"></w2:css>
     	<w2:js src="/js/final_check.js"></w2:js>
     	<w2:engine-version>5.0.0</w2:engine-version>
-        <script lazy="false" type="text/javascript"><![CDATA[scwin.selectedType = "";
-
-scwin.isEditMode = false;
-
+        <script lazy="false" type="text/javascript"><![CDATA[scwin.isEditMode = false;
 scwin.onpageload = function() {
-    var urlParams = new URLSearchParams(window.location.search);
+	var urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('mode') === 'edit') {
         scwin.isEditMode = true;
         //수정 모드일 경우 서버에서 기존 데이터 불러오기
@@ -60,95 +47,67 @@ scwin.onpageload = function() {
 
 scwin.sbm_getClaimData_submitdone = function (e) {
     var claimData = e.responseJSON.elData;
-    if (claimData && claimData.claimType) {
-        if(claimData.claimType === "disease") {
-            scwin.diseaseSelectionBox_onclick();
-        } else if (claimData.claimType === "injury") {
-            scwin.injurySelectionBox_onclick();
-        }
+    if (claimData && claimData.accidentDate) {
+        scwin.setAccidentDate(claimData.accidentDate);
     }
-    // 다음 -> 수정완료로 변경
     btnNext.setLabel("수정");
 };
 
+scwin.dateDisplayBox_onclick = function (e) {
+    var popupUrl="/InsWebApp/ui/mobile/claim/popupDatePicker.xml";
+    var popupWidth = 300;
+    var popupHeight = 380;
+    var windowWidth = window.innerWidth;
+    var windowHeight = window.innerHeight;
+    var leftPosition = (windowWidth / 2) - (popupWidth / 2);
+    var topPosition = (windowHeight / 2) - (popupHeight / 2);
+    var popupOptions = {
+        id:"datePickerPopup",
+        type:"iframePopup",
+        width: "300px",
+        height: "380px",
+        width: popupWidth + "px",
+        height: popupHeight + "px",
+        left: leftPosition + "px",
+        top: topPosition + "px",
+        popupName: " 년 / 월 / 일 ",
+        modal: true
+        //useFixPosition: true,
+        //bottom: "0px"    
+    }
+
+    $p.openPopup(popupUrl, popupOptions);
+};
+
+scwin.setAccidentDate = function(date) {
+    if(date){
+        var formattedDate = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
+        txt_accidentDate.setValue(formattedDate);
+
+        dma_step2.set("accidentDate", date);
+    }
+};
 
 
 scwin.btnNext_onclick = function (e) {
-
-    var selectedType = scwin.selectedType;
-
-    if(scwin.selectedType === ""){
-        alert("청구 유형을 선택해주세요.");
+    var accidentDate = dma_step2.get("accidentDate");
+    if(!accidentDate || accidentDate === "날짜를 선택해 주세요"){
+        alert("사고(발병)일을 선택해주세요.");
         return;
     }
-    
-    // 1. DataMap에 선택한 값 넣기
-    dma_step1.set("claimType", scwin.selectedType);
-    console.log(scwin.selectedType);
 
-    // 2. Submission 실행
-    $p.executeSubmission("sbm_saveStep1");
+    $p.executeSubmission("sbm_saveStep2");
 };
 
 
 
-scwin.diseaseSelectionBox_onclick = function (e) {
-    scwin.selectedType = "disease";
-    injurySelectionBox.removeClass("selected");
-    diseaseSelectionBox.addClass("selected");
-};
-
-scwin.injurySelectionBox_onclick = function (e) {
-    scwin.selectedType = "injury";
-    diseaseSelectionBox.removeClass("selected");
-    injurySelectionBox.addClass("selected");
-};
-
-scwin.sbm_saveStep1_submitdone = function (e) {
+scwin.submission1_submitdone = function (e) {
     if (scwin.isEditMode) {
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/sixth2.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/sixth2.xml";
     } else {
-        console.log("TEST: 서브미션 성공. 팝업 열기 시도...");
-        var popupUrl="/InsWebApp/ui/claimMobile/popupConsent2.xml";
-
-        var popupWidth = 300;
-        var popupHeight = 380;
-
-        var windowWidth = window.innerWidth;
-        var windowHeight = window.innerHeight;
-
-        var leftPosition = (windowWidth / 2) - (popupWidth / 2);
-        var topPosition = (windowHeight / 2) - (popupHeight / 2);
-        var options = {
-            id: "consentPopup",
-            type:"iframePopup",
-            //width: "300px",
-            width: popupWidth + "px",
-            height: popupHeight + "px",
-            left : leftPosition + "px",
-            top: topPosition + "px",
-            //height: "380px",
-            popupName: "보험금청구에는 동의가 필요해요!",
-            modal: true
-            //useFixPosition: true,
-            //bottom: "0px"
-        };
-
-    $p.openPopup(popupUrl, options);
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/third.xml"
     }
     
-};
-
-
-scwin.popup_callback = function(data){
-    if(data === "agree"){
-        dma_consent.set("agreed","Y");
-        $p.executeSubmission("sbm_saveConsent");
-    }
-};
-
-scwin.sbm_saveConsent_submitdone = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/second.xml"
 };
 
 
@@ -281,7 +240,7 @@ scwin.sbm_saveConsent_submitdone = function (e) {
 
 .selectionBtn.selected {
     border-color: #4FACFE;
-    background-color: #4FACFE;
+    background-color: #fff8e1;
 }
 
 .selectionBtn.half {
@@ -307,7 +266,7 @@ scwin.sbm_saveConsent_submitdone = function (e) {
 }
 
 .nextBtn:hover {
-   background-color: #4FACFE;
+    background-color: #4FACFE;
 }
 
 /* Scroll to Top button */
@@ -326,19 +285,20 @@ scwin.sbm_saveConsent_submitdone = function (e) {
 .arrowUpIcon { background-image: url('/images/arrow_up_icon.png'); }]]></style>
     </head>
     <body ev:onpageload="scwin.onpageload">
-        <w2:wframe src="/InsWebApp/ui/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
+        <w2:wframe src="/InsWebApp/ui/mobile/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
         <xf:group class="sub_contents2" id="wrapper" style="">
             <xf:group class="header-section" id="header" style="">
-                <w2:textbox class="step_tit" id="" label="청구유형" style="" tagname=""></w2:textbox>
+                <w2:textbox class="step_tit" id="" label="사고일" style="" tagname=""></w2:textbox>
                 <xf:group class="step" id="" style="">
                     <xf:group id="" style="" tagname="ul">
-                    	<xf:group class="current" id="" style="" tagname="li">
-                    		<w2:span id="" label="1" style=""></w2:span>
-                    	</xf:group>
 
                     	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="✔" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="current" id="" style="" tagname="li">
                     		<w2:span id="" label="2" style=""></w2:span>
                     	</xf:group>
+
                     	<xf:group class="inactive" id="" style="" tagname="li">
                     		<w2:span id="" label="3" style=""></w2:span>
                     	</xf:group>
@@ -354,24 +314,20 @@ scwin.sbm_saveConsent_submitdone = function (e) {
                     	<xf:group class="inactive" id="" style="" tagname="li">
                     		<w2:span id="" label="7" style=""></w2:span>
                     	</xf:group>
+
                     </xf:group>
                 </xf:group>
             </xf:group>
 
-            <xf:group class="content-section" id="mainContent" style="margin: 0 auto;">
-                <w2:textbox class="question-text" id="" label="어떤 진료로 방문하셨나요?" style=""></w2:textbox>
+            <xf:group class="content-section" id="mainContent" style="margin:0 auto;">
+            	<w2:textbox class="question-text" id="" label="사고(발병)일은 언제인가요?" style=""></w2:textbox>
+            	<xf:group id="dateDisplayBox" class="date-input-box" ev:onclick="scwin.dateDisplayBox_onclick">
+            		<w2:textbox id="txt_accidentDate" class="date-text" label="날짜를 선택해 주세요"></w2:textbox>
+            		<xf:image src="/InsWebApp/images/insure/calendar.png" class="calendar-icon"></xf:image>
+            	</xf:group>
 
-                <xf:group class="selection-box-container" id="diseaseSelectionBox" ev:onclick="scwin.diseaseSelectionBox_onclick">
-                    <xf:image src="../../images/insure/injecting.png" class="selection-box-icon" id="imgDiseaseIcon"></xf:image>
-                    <w2:textbox id="" label="아팠어요(질병)" class="selection-box-text"></w2:textbox>
-                </xf:group>
 
-                <xf:group class="selection-box-container" id="injurySelectionBox" ev:onclick="scwin.injurySelectionBox_onclick">
-                    <xf:image src="../../images/insure/bandage.png" class="selection-box-icon" id="imgInjuryIcon"></xf:image>
-                    <w2:textbox id="" label="다쳤어요(상해)" class="selection-box-text"></w2:textbox>
-                </xf:group>
-
-                <xf:group style="flex: 1;" id=""></xf:group>
+            	<xf:group style="flex: 1;" id=""></xf:group>
             </xf:group>
 
             <xf:group class="footer-section" id="footer" style="">

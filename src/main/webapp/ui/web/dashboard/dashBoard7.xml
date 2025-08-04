@@ -629,9 +629,9 @@ scwin.grp_noti_onclick = function (e) {
     var role = JSON.parse(localStorage.getItem("employee")).role;
 
     if (role === "실무자") {
-        movePage("/InsWebApp/ui/claim/my-claims.xml", "myClaim");
+        movePage("/InsWebApp/ui/web/claim/my-claims.xml", "myClaim");
     } else {
-        movePage("/InsWebApp/ui/approval/my-approval.xml", "myClaim");
+        movePage("/InsWebApp/ui/web/claim/my-approval.xml", "myClaim");
     }
 };
 ]]></script>

@@ -370,7 +370,7 @@ public class UserController {
 	    
 	    Map<String, Object> responseData = new HashMap<>();
 	    try {
-=
+
 	        userService.temporarilyStorePin(registerVo.getUserId(), registerVo.getSimplePw(), request.getSession());
 	
 	        responseData.put("resultCode", "OK");

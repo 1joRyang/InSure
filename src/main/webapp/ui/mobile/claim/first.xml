@@ -106,10 +106,10 @@ scwin.injurySelectionBox_onclick = function (e) {
 
 scwin.sbm_saveStep1_submitdone = function (e) {
     if (scwin.isEditMode) {
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/sixth2.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/sixth2.xml";
     } else {
         console.log("TEST: 서브미션 성공. 팝업 열기 시도...");
-        var popupUrl="/InsWebApp/ui/claimMobile/popupConsent2.xml";
+        var popupUrl="/InsWebApp/ui/mobile/claim/popupConsent2.xml";
 
         var popupWidth = 300;
         var popupHeight = 380;
@@ -148,7 +148,7 @@ scwin.popup_callback = function(data){
 };
 
 scwin.sbm_saveConsent_submitdone = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/second.xml"
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/second.xml"
 };
 
 
@@ -326,7 +326,7 @@ scwin.sbm_saveConsent_submitdone = function (e) {
 .arrowUpIcon { background-image: url('/images/arrow_up_icon.png'); }]]></style>
     </head>
     <body ev:onpageload="scwin.onpageload">
-        <w2:wframe src="/InsWebApp/ui/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
+        <w2:wframe src="/InsWebApp/ui/mobile/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
         <xf:group class="sub_contents2" id="wrapper" style="">
             <xf:group class="header-section" id="header" style="">
                 <w2:textbox class="step_tit" id="" label="청구유형" style="" tagname=""></w2:textbox>
@@ -362,12 +362,12 @@ scwin.sbm_saveConsent_submitdone = function (e) {
                 <w2:textbox class="question-text" id="" label="어떤 진료로 방문하셨나요?" style=""></w2:textbox>
 
                 <xf:group class="selection-box-container" id="diseaseSelectionBox" ev:onclick="scwin.diseaseSelectionBox_onclick">
-                    <xf:image src="../../images/insure/injecting.png" class="selection-box-icon" id="imgDiseaseIcon"></xf:image>
+                    <xf:image src="../../../images/insure/injecting.png" class="selection-box-icon" id="imgDiseaseIcon"></xf:image>
                     <w2:textbox id="" label="아팠어요(질병)" class="selection-box-text"></w2:textbox>
                 </xf:group>
 
                 <xf:group class="selection-box-container" id="injurySelectionBox" ev:onclick="scwin.injurySelectionBox_onclick">
-                    <xf:image src="../../images/insure/bandage.png" class="selection-box-icon" id="imgInjuryIcon"></xf:image>
+                    <xf:image src="../../../images/insure/bandage.png" class="selection-box-icon" id="imgInjuryIcon"></xf:image>
                     <w2:textbox id="" label="다쳤어요(상해)" class="selection-box-text"></w2:textbox>
                 </xf:group>
 
