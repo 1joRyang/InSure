@@ -51,7 +51,7 @@ function movePage(link, now) {
 scwin.dashboard_onclick = function () {
     removeSClass();
     dashboard.addClass("selected");
-    movePage("/InsWebApp/ui/web/dashBoard/dashBoard7.xml", "dash");
+    movePage("/InsWebApp/ui/web/dashboard/dashBoard7.xml", "dash");
 };
 
 scwin.my_claim_onclick = function () {

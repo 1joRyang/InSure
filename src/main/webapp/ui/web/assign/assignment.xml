@@ -1260,7 +1260,6 @@ function isValidResponse(elHeader) {
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
-        <!-- 기존 body 내용 유지 -->
         <xf:group class="sub_contents" id="" style="">
             <xf:group class="pgtbox" id="" style="">
                 <w2:textbox class="pgt_tit" id="" label="자동배정 설정" style="" tagname=""/>
@@ -1270,7 +1269,6 @@ function isValidResponse(elHeader) {
                 <w2:textbox class="" id="" label="현재 적용 중인 규칙" style="" tagname="h4"/>
             </xf:group>
             
-            <!-- Generator를 위한 별도 컨테이너 영역 -->
             <xf:group id="rule_container" style="padding:20px;">
                 <w2:generator id="rule_gen" style="">
                     <xf:group id="rule_item" style="width:100%; margin-bottom:15px; padding:20px; border:1px solid #e0e0e0; border-radius:8px; background-color:#ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); box-sizing:border-box;">
@@ -1300,7 +1298,6 @@ function isValidResponse(elHeader) {
                 </w2:generator>
             </xf:group>
             
-            <!-- 추가 버튼 및 테스트 버튼 -->
             <xf:group id="button_area" style="width:100%; text-align:right; margin-bottom: 100px;">
                 <xf:trigger class="" ev:onclick="scwin.testBatchAssignment_onclick" id="test_batch" style="width:120px; height:35px; margin-right:10px;color:black;" type="button">
                     <xf:label><![CDATA[일괄 자동배정]]></xf:label>
