@@ -18,19 +18,19 @@ scwin.onpageload = function() {
 };
 
 scwin.footer_home_onclick = function () {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/home/m_home.xml";
 };
 
 scwin.footer_claim_onclick = function () {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/first.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/first.xml";
 };
 
 scwin.footer_list_onclick = function () {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claim/my-claims-m.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/myClaim/my-claims-m.xml";
 };
 
 scwin.footer_insu_onclick = function () {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/insurePageTab1.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/myInsure/insurePageTab1.xml";
 };
 ]]></script>
     </head>

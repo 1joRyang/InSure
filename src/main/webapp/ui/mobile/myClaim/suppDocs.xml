@@ -315,7 +315,7 @@ scwin.sbm_addSupplementDocs_submitdone = function (e) {
     });
     
     setTimeout(function() {
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/home/m_home.xml";
     }, 2500);
 
 
@@ -334,7 +334,7 @@ scwin.saveFileKeysToServer = function() {
 }
 
 scwin.sbm_updateComplete_submitdone = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/Assignment/m_home.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/home/m_home.xml";
 };
 ]]></script>
         <style type="text/css"><![CDATA[/* custom.css */

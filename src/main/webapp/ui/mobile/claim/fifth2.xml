@@ -43,7 +43,7 @@ scwin.onpageload = function() {
     var urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('mode') === 'edit') {
         scwin.isEditMode = true;
-        btnNext.setLabel("수정");;
+        btnNext.setLabel("수정");
     }
     // 미리보기 부모영역 찾기
     var previewBox = document.querySelector('[id$="previewBox"]');
@@ -252,9 +252,9 @@ scwin.camera_callback = function(r){
 
 scwin.sbm_saveStep5_submitdone = function (e) {
     if (scwin.isEditMode) {
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/sixth2.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/sixth2.xml";
     } else {
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/sixth2.xml"
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/sixth2.xml"
     }
     
 };
@@ -436,7 +436,7 @@ scwin.sbm_saveStep5_submitdone = function (e) {
     	<w2:require as="udc_gallery" type="page" variableClone="" src="/InsWebApp/cm/udc/matrix/gallery.xml"></w2:require>
     </head>
     <body ev:onpageload="scwin.onpageload">
-        <w2:wframe src="/InsWebApp/ui/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
+        <w2:wframe src="/InsWebApp/ui/mobile/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
         <xf:group class="sub_contents2" id="wrapper" style="">
             <xf:group class="header-section" id="header" style="">
                 <w2:textbox class="step_tit" id="" label="서류등록" style="" tagname=""></w2:textbox>
@@ -492,16 +492,16 @@ scwin.sbm_saveStep5_submitdone = function (e) {
             		<xf:group class="infoSection" style="">
             			<w2:span style="" label="올바른 예시" class="sectionTitle"></w2:span>
             			<xf:group style="display: flex; gap: 20px;">
-            				<xf:image src="../../images/insure/right1.JPG" style="width: 45%;height: 200px;" id=""></xf:image>
-            				<xf:image src="../../images/insure/right2.JPG" style="width: 45%;height: 200px;" id=""></xf:image>
+            				<xf:image src="../../../images/insure/right1.JPG" style="width: 45%;height: 200px;" id=""></xf:image>
+            				<xf:image src="../../../images/insure/right2.JPG" style="width: 45%;height: 200px;" id=""></xf:image>
             				<xf:group style="height: 50px;"></xf:group>
             			</xf:group>
             		</xf:group>
             		<xf:group class="infoSection" style="">
             			<w2:span style="" label="잘못된 예시" class="sectionTitle"></w2:span>
             			<xf:group style="display: flex; gap: 20px;">
-            				<xf:image id="" src="../../images/insure/fail1.JPG" style="width: 45%;height: 200px;"></xf:image>
-            				<xf:image id="" src="../../images/insure/fail2.JPG" style="width: 45%;height: 200px;"></xf:image>
+            				<xf:image id="" src="../../../images/insure/fail1.JPG" style="width: 45%;height: 200px;"></xf:image>
+            				<xf:image id="" src="../../../images/insure/fail2.JPG" style="width: 45%;height: 200px;"></xf:image>
             				<xf:group style="height: 50px;"></xf:group>
             			</xf:group>
             		</xf:group>
@@ -509,15 +509,15 @@ scwin.sbm_saveStep5_submitdone = function (e) {
             			<w2:span class="sectionTitle" label="유의사항"></w2:span>
             			<xf:group class="infoBox">
             				<xf:group style="display:flex;align-items:center; gap: 8px;" id="">
-            					<xf:image src="../../images/insure/file.png" style="width:29px;height:32px; flex-shrink: 0;" id=""></xf:image>
+            					<xf:image src="../../../images/insure/file.png" style="width:29px;height:32px; flex-shrink: 0;" id=""></xf:image>
             					<w2:textbox id="" label="파일 10장씩, 최대 30장까지" style=""></w2:textbox>
             				</xf:group>
             				<xf:group id="" style="display:flex;align-items:center; gap: 8px;">
-            					<xf:image id="" src="../../images/insure/picture.png" style="width:29px;height:32px; flex-shrink: 0;"></xf:image>
+            					<xf:image id="" src="../../../images/insure/picture.png" style="width:29px;height:32px; flex-shrink: 0;"></xf:image>
             					<w2:textbox id="" label="확장자가 JPG, JPEG, PNG 파일만 등록" style="word-break: keep-all;"></w2:textbox>
             				</xf:group>
             				<xf:group id="" style="display:flex;align-items:center; gap: 8px;">
-            					<xf:image id="" src="../../images/insure/documents.png" style="width:29px;height:32px; flex-shrink: 0;"></xf:image>
+            					<xf:image id="" src="../../../images/insure/documents.png" style="width:29px;height:32px; flex-shrink: 0;"></xf:image>
             					<w2:textbox id="" label="비급여 금액 진료비세부내역서 필수 제출" style="word-break: keep-all;"></w2:textbox>
             				</xf:group>
             			</xf:group>

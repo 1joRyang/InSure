@@ -141,28 +141,28 @@ scwin.formatDate = function(dateStr) {
 
 scwin.btn_edit_symptom_onclick = function (e) {
     // 수정모드 파라미터 전달하며 페이지 이동
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/third.xml&mode=edit";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/third.xml&mode=edit";
 };
 
 scwin.btn_edit_claimType_onclick = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/first.xml&mode=edit";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/first.xml&mode=edit";
 };
 
 scwin.btn_edit_accidentDate_onclick = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/second.xml&mode=edit";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/second.xml&mode=edit";
 };
 
 scwin.btn_edit_account_onclick = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/fourth2.xml&mode=edit";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/fourth2.xml&mode=edit";
 };
 
 scwin.btn_edit_docs_onclick = function (e) {
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/fifth2.xml&mode=edit";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/fifth2.xml&mode=edit";
 };
 
 scwin.sbm_submitFinalClaim_submitdone = function (e) {
     $p.executeSubmission("sbm_ClaimSaveDone");
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/claimMobile/last.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/last.xml";
 };
 
 scwin.sbm_submitFinalClaim_submiterror = function (e) {
@@ -352,7 +352,7 @@ scwin.sbm_ClaimSaveDone_submitdone = function (e) {
 .arrowUpIcon { background-image: url('/images/arrow_up_icon.png'); }]]></style>
     </head>
     <body ev:onpageload="scwin.onpageload">
-        <w2:wframe src="/InsWebApp/ui/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
+        <w2:wframe src="/InsWebApp/ui/mobile/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
         <xf:group class="sub_contents2" id="wrapper" style="">
             <xf:group class="header-section" id="header" style="">
                 <w2:textbox class="step_tit" id="" label="최종확인" style="" tagname=""></w2:textbox>
