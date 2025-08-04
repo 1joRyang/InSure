@@ -418,7 +418,7 @@ scwin.suppDocs_onclick = function (e) {
 ]]></style>
     </head>
     <body ev:onpageload="scwin.onpageload" class="mobile-page-body">
-        <w2:wframe src="/InsWebApp/ui/mobile/cmmn/m_header.xml" style="flex-shrink: 0;" id="" class="wfm_m_header"></w2:wframe>
+        <w2:wframe src="/InsWebApp/ui/mobile/cmmn/m_header_title.xml" style="flex-shrink: 0;" id="" class="wfm_m_header"></w2:wframe>
         <xf:group class="sub_content pageWrapper" id="pageWrapper" style='height: auto;overflow: hidden;flex: 1;'>
             <!-- 메인 콘텐츠 래퍼 -->
             <xf:group id="mainContentWrapper" style="margin-top: 65px;background-color: white;flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;margin-bottom: 70px;">
