@@ -371,7 +371,7 @@ scwin.noti_btn_onclick = function(e) {
 
 scwin.img_logo_onclick = function (e) {
     localStorage.setItem("nowSelect", "myClaim");
-    location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/login/webWrapper.xml";
+    location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/webWrapper.xml";
 };
 
 scwin.logout_btn_onclick = function (e) {
