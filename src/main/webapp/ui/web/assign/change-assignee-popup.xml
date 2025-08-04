@@ -17,7 +17,6 @@
 						<w2:key id="dept_id" name="dept_id" dataType="text" />
 					</w2:keyInfo>
 				</w2:dataMap>
-				<!-- 부서 조회를 위한 dataMap -->
 				<w2:dataMap baseNode="map" id="dmp_deptVo">
 					<w2:keyInfo>
 						<w2:key id="dept_id" name="dept_id" dataType="text" />
@@ -26,31 +25,26 @@
 						<w2:key id="pageIndex" name="pageIndex" dataType="text" />
 					</w2:keyInfo>
 				</w2:dataMap>
-				<!-- 직원 조회를 위한 dataMap -->
 				<w2:dataMap baseNode="map" id="dmp_empVo">
 					<w2:keyInfo>
 						<w2:key dataType="text" name="페이지번호" id="pageIndex" defaultValue="1"></w2:key>
 						<w2:key nullYN="" defaultValue="10" dataType="text" name="페이지사이즈" length="" id="pageSize" encYN=""></w2:key>
 						<w2:key dataType="text" name="페이지건수" id="totalPageCount"></w2:key>
-						<!-- 부서별 조회를 위한 키 추가 -->
 						<w2:key dataType="text" name="부서ID" id="deptId"></w2:key>
 						<w2:key dataType="text" name="재직상태" id="status"></w2:key>
 					</w2:keyInfo>
 				</w2:dataMap>
-				<!-- 청구번호로 담당자 조회를 위한 dataMap -->
 				<w2:dataMap baseNode="map" id="dmp_claimNoVo">
 					<w2:keyInfo>
 						<w2:key id="claim_no" name="claim_no" dataType="text" />
 					</w2:keyInfo>
 				</w2:dataMap>
-				<!-- 부서 목록을 저장할 dataList -->
 				<w2:dataList baseNode="list" id="dlt_departments" saveRemovedData="true">
 					<w2:columnInfo>
 						<w2:column id="dept_id" name="dept_id" dataType="text" />
 						<w2:column id="dept_name" name="dept_name" dataType="text" />
 					</w2:columnInfo>
 				</w2:dataList>
-				<!-- 직원 목록을 저장할 dataList -->
 				<w2:dataList baseNode="list" id="dlt_employees" saveRemovedData="true">
 					<w2:columnInfo>
 						<w2:column id="empNo" name="emp_no" dataType="text" />
@@ -62,7 +56,6 @@
 				</w2:dataList>
 			</w2:dataCollection>
 			<w2:workflowCollection></w2:workflowCollection>
-			<!-- 부서 목록 조회 submission -->
 			<xf:submission id="sbm_getDepartments" ref='data:json,{"id":"dmp_deptVo","key":"insDeptVo"}'
 				target='data:json,{"id":"dlt_departments","key":"elData.insDeptVoList"}' action="/InsWebApp/insdept0001List.pwkjson" method="post"
 				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
@@ -70,15 +63,6 @@
 				ev:submiterror="scwin.sbm_getDepartments_submiterror" abortTrigger="">
 			</xf:submission>
 
-			<!-- 직원 목록 조회 submission -->
-			<!-- <xf:submission id="sbm_getEmployees" ref='data:json,{"id":"dmp_empVo","key":"employeeVo"}'
-				target='data:json,{"id":"dlt_employees","key":"elData.employeeVoList"}' action="/InsWebApp/EmployeeList.pwkjson" method="post"
-				mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
-				processMsg="직원 목록을 조회하고 있습니다..." ev:submit="" ev:submitdone="scwin.sbm_getEmployees_submitdone"
-				ev:submiterror="scwin.sbm_getEmployees_submiterror" abortTrigger="">
-				</xf:submission> -->
-
-			<!-- 현재 담당자 조회 submission -->
 			<xf:submission id="sbm_getCurrentAssignee" ref='data:json,{"id":"dmp_claimNoVo","key":"claimNoVo"}'
 				target='data:json,dmp_claimNoVo' action="/InsWebApp/CLAIMFindUserEmpInfo.pwkjson" method="post" mediatype="application/json"
 				encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="현재 담당자를 조회하고 있습니다..."
@@ -86,7 +70,6 @@
 				abortTrigger="">
 			</xf:submission>
 
-			<!-- 담당자 변경 submission -->
 			<xf:submission id="sbm_updateAssignee" ref='data:json,{"id":"dm_change","key":"claimVo"}' target='data:json,dm_change'
 				action="/InsWebApp/CLAIMUpdAssignee.pwkjson" method="post" mediatype="application/json" encoding="UTF-8" instance="" replace=""
 				errorHandler="" customHandler="" mode="asynchronous" processMsg="담당자를 변경하고 있습니다..." ev:submit=""
@@ -105,24 +88,18 @@
 		<script lazy="false" type="text/javascript"><![CDATA[scwin.onpageload = function() {
     scwin.claim = JSON.parse(localStorage.getItem("claim"));
     try {
-        // localStorage에서 claimNo 조회
         claimNo = scwin.claim.claimNo;
         
         console.log("localStorage에서 청구번호 로드:", claimNo);
     } catch (e) {
-        // localStorage 접근 실패 시 기본값 사용
     }
     
-    // 청구번호 설정
     dm_change.set("claim_no", claimNo);
     
-    // DB에서 현재 담당자 정보 조회
     scwin.loadCurrentAssigneeFromDB(claimNo);
     
-    // 부서 목록 조회
     scwin.loadDepartments();
 
-    // 초기에는 직원 목록을 비워둔 상태로 시작 (부서 선택 후에 로드)
     dlt_employees.removeAll();
     sel_assignee.setValue("");
     dm_change.set("new_assignee", "");
@@ -306,23 +283,17 @@ scwin.sbm_getCurrentAssignee_submitdone = function(e) {
     var elHeader = responseData.elHeader;
     
     if (elHeader && elHeader.resSuc && elData) {
-        // CLAIMFindUserEmpInfo 서비스의 응답 구조에 따라 처리
-        // ClaimUserEmpVo에서 emp_name 필드를 사용
         if (elData.emp_name && elData.emp_name !== "" && elData.emp_name !== null) {
-            // 담당자가 있는 경우
             dm_change.set("current_assignee", elData.emp_name);
         } else {
-            // 담당자가 배정되지 않은 경우 (emp_no가 null이거나 매칭되는 직원이 없음)
             dm_change.set("current_assignee", "미배정");
         }
     } else {
-        // 조회 실패 시 기본값 설정
         dm_change.set("current_assignee", "미배정");
     }
 };
 
 scwin.sbm_getCurrentAssignee_submiterror = function(e) {
-    // 오류 발생 시 기본값 설정
     dm_change.set("current_assignee", "미배정");
 };
 
@@ -335,7 +306,6 @@ scwin.sel_department_onchange = function(e) {
     if (selectedDept && selectedDept !== "") {
         scwin.loadEmployees(selectedDept);
     } else {
-        // 부서를 선택하지 않았으면 직원 목록 초기화
         dlt_employees.removeAll();
         sel_assignee.setValue("");
         dm_change.set("new_assignee", "");
@@ -381,9 +351,6 @@ scwin.btn_save_onclick = function(e) {
     }
     
     try {
-        // 담당자 변경 처리 - CLAIMUpdAssignee 서비스 호출
-        // dm_change에 이미 claim_no와 emp_no가 설정되어 있음
-        
         // submission 호출
         $c.sbm.execute($p, sbm_updateAssignee);
     } catch (e) {
@@ -542,7 +509,6 @@ scwin.twoBtnAlert = (param, func) => {
 ]]></script>
 	</head>
 	<body ev:onpageload="scwin.onpageload">
-		<!-- 전체 페이지를 가운데 정렬하는 컨테이너 -->
 		<xf:group style="padding-left: 20px;padding-right: 20px;">
 			<xf:group style="margin-bottom: 15px;">
 				<w2:textbox style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;" label="청구 번호"></w2:textbox>

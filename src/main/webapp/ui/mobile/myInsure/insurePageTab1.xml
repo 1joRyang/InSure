@@ -30,13 +30,7 @@
 			</w2:dataCollection>
 
 			<w2:workflowCollection>
-				<!-- 사용자 보험 정보를 가져오는 submission -->
 			</w2:workflowCollection>
-			<!-- <xf:submission id="sbm_getMyInsurance" action="/InsWebApp/USERINSURANCEList.pwkjson" method="post" mediatype="application/json"
-				ref='data:json,{"id":"dm_getUserInsurance","key":"userInsuranceVo"}' target='data:json,{"id":"dl_insuranceList","key":"elData"}'
-				encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone=""
-				ev:submiterror="" abortTrigger="">
-				</xf:submission> -->
 			<xf:submission id="sbm_getMyInsurance" action="/InsWebApp/USERINSURANCEList.pwkjson" method="post"
 				mediatype="application/json" ref='data:json,{"id":"dm_getUserInsurance","key":"userInsuranceVo"}'
 				target='data:json,{"id":"dl_insuranceList","key":"userInsuranceVoList"}' encoding="UTF-8" instance="" replace="" errorHandler=""
