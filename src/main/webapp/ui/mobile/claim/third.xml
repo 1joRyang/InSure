@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="/InsWebApp/cm/css/claimPage.css" type="text/css"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare"
+    xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+    	<w2:type>DEFAULT</w2:type>
+    	<w2:buildDate />
+    	<xf:model>
+    		<xf:instance>
+    			<data xmlns="" />
+    		</xf:instance>
+    		<w2:dataCollection baseNode="map">
+    			<w2:dataMap baseNode="map" id="dma_step3">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="name1" id="symptom"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    			<w2:dataMap baseNode="map" id="dma_claimData">
+    				<w2:keyInfo></w2:keyInfo>
+    			</w2:dataMap>
+    		</w2:dataCollection>
+    		<xf:submission id="sbm_saveStep3" action="/InsWebApp/saveStep3.pwkjson" method="post" mediatype="application/json"
+    			ref='data:json,{"id":"dma_step3","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+    			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_saveStep3_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
+    		<xf:submission id="sbm_getClaimData" action="/InsWebApp/getClaimData.pwkjson" method="post" mediatype="application/json" ref=""
+    			target='data:json,{"id":"dma_claimData","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+    			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getClaimData_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
+    	</xf:model>
+    	<w2:leaf>true</w2:leaf>
+    	<w2:fileName>final_check.xml</w2:fileName>
+    	<w2:css src="/css/custom.css"></w2:css>
+    	<w2:js src="/js/final_check.js"></w2:js>
+    	<w2:engine-version>5.0.0</w2:engine-version>
+        <script lazy="false" type="text/javascript"><![CDATA[scwin.isEditMode = false;
+
+scwin.onpageload = function() {
+	var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'edit') {
+        scwin.isEditMode = true;
+        //수정 모드일 경우 서버에서 기존 데이터 불러오기
+        $p.executeSubmission("sbm_getClaimData");
+    }
+};
+
+// 기존 데이터 조회 성공했을 때 실행
+scwin.sbm_getClaimData_submitdone = function (e) {
+    var claimData = e.responseJSON.elData;
+    if (claimData && claimData.symptom) {
+        // textarea에 기존 진단 내용 채워넣음
+        inp_symptom.setValue(claimData.symptom);
+    }
+    // 다음 -> 수정완료로 변경
+    btnNext.setLabel("수정");
+};
+
+
+scwin.btnNext_onclick = function (e) {
+    // 1. 입력값 가져오기
+    var symptomText = inp_symptom.getValue();
+
+    if(symptomText === ""){
+        alert("진단 내용을 입력해주세요.");
+        return;
+    }
+    
+    // 2. DataMap에 입력값 넣기
+    dma_step3.set("symptom", symptomText);
+
+    // 3. Submission 실행 서버 전송
+    $p.executeSubmission("sbm_saveStep3");
+};
+
+scwin.sbm_saveStep3_submitdone = function (e) {
+    if (scwin.isEditMode) {
+        //수정모드 -> 최종확인 페이지 복귀
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/sixth2.xml";
+    } else {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/fourth2.xml"
+    }
+    
+};
+
+]]></script>
+    	<style type="text/css"><![CDATA[/* custom.css */
+
+/*
+  ======================================
+  Common Styles
+  ======================================
+*/
+.pageWrapper {
+    font-family: 'Malgun Gothic', 'Dotum', sans-serif;
+    background-color: #f7f7f7;
+}
+
+/* Header and Progress Bar */
+.pageWrapper > xf\:group:first-child > xf\:group:first-child {
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+#progressBar {
+    height: 100%;
+    background-color: #4FACFE;
+    transition: width 0.5s ease-in-out;
+}
+
+.stepIndicatorContainer {
+    padding-top: 10px;
+}
+
+.progressBtn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    background-color: #fff;
+    color: #ccc;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.progressBtn.completed {
+    background-color: #4FACFE;
+    border-color: #4FACFE;
+    color: #fff;
+}
+
+.progressBtn.active {
+    background-color: #fff;
+    border-color: #4FACFE;
+    color: #4FACFE;
+}
+
+/* Scrollable Main Content Wrapper */
+#mainContentWrapper {
+    flex: 1; /* Take up all remaining space */
+    overflow-y: auto; /* Enable vertical scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Section titles */
+.sectionTitle {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Info Box */
+.infoBox {
+    width: 100%;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Info Row for key-value pairs */
+.infoRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.infoLabel {
+    font-weight: bold;
+    color: #555;
+    flex-shrink: 0;
+    margin-right: 15px;
+}
+
+.infoValue {
+    font-weight: 500;
+    color: #222;
+    text-align: right;
+}
+
+/* Text Button (e.g., '수정') */
+.textButton {
+    background-color: transparent;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Selection Buttons (e.g., '네/아니오') */
+.selectionBtn {
+    background-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    cursor: pointer;
+}
+
+.selectionBtn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.selectionBtn.selected {
+    border-color: #4FACFE;
+    background-color: #fff8e1;
+}
+
+.selectionBtn.half {
+    flex: 1;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Fixed Bottom Button */
+.nextBtn {
+    width: 100%;
+    height: 65px;
+    background-color: #4FACFE;
+    border-radius: 35px;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s;
+}
+
+.nextBtn:hover {
+    background-color: #4FACFE;
+}
+
+/* Scroll to Top button */
+#scrollTopBtn {
+    z-index: 100; /* Ensure it's on top */
+    cursor: pointer;
+}
+
+/* Icon Styles (You must provide the actual image paths) */
+.icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.questionIcon { background-image: url('/images/question_icon.png'); width: 16px; height: 16px; }
+.arrowUpIcon { background-image: url('/images/arrow_up_icon.png'); }]]></style>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+        <w2:wframe src="/InsWebApp/ui/mobile/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
+        <xf:group class="sub_contents2" id="wrapper" style="">
+            <xf:group class="header-section" id="header" style="">
+                <w2:textbox class="step_tit" id="" label="청구상황" style="" tagname=""></w2:textbox>
+                <xf:group class="step" id="" style="">
+                    <xf:group id="" style="" tagname="ul">
+
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="✔" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="✔" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="current" id="" style="" tagname="li">
+                    		<w2:span id="" label="3" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="4" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="5" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="6" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="7" style=""></w2:span>
+                    	</xf:group>
+
+
+                    </xf:group>
+                </xf:group>
+            </xf:group>
+
+            <xf:group class="content-section" id="mainContent" style="margin:0 auto;">
+            	<w2:textbox class="question-text" id="" label="진단 내용을 입력해 주세요" style=""></w2:textbox>
+                <w2:textbox id="" label="재해일 경우 다친 상황을 꼭 설명해 주세요!" class="account-label" style="margin-bottom: 10px;"></w2:textbox>
+                <w2:textarea class="text-input"
+                    id="inp_symptom"
+                    placeholder="예) 위염으로 갔어요.&#10;등산갔다가 허리삐끗했어요."
+                    style="width: 100%; height: 80px;">
+                </w2:textarea>
+
+            	<xf:group style="flex: 1;" id=""></xf:group>
+            </xf:group>
+
+            <xf:group class="footer-section" id="footer" style="">
+                <w2:button class="next-button" id="btnNext" label="다음" ev:onclick="scwin.btnNext_onclick"></w2:button>
+            </xf:group>
+        </xf:group>
+    </body>
+</html>

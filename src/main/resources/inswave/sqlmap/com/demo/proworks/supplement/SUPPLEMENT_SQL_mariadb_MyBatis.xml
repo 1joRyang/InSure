@@ -3,6 +3,7 @@
 
 <mapper namespace="com.demo.proworks.supplement">
 	<select id="selectSupplementInfo" parameterType="com.demo.proworks.supplement.vo.SuppVo" resultType="com.demo.proworks.supplement.vo.SuppVo">
+	<!-- 보완 요청 상세 정보 조회 로직 -->
         SELECT
             c.claim_no AS claimNo,          -- 청구번호
             c.claim_type AS claimType,      -- 청구유형
@@ -22,6 +23,7 @@
     </select>
     
     <update id="updateSupplementCompleted" parameterType="com.demo.proworks.supplement.vo.SuppVo">
+    	<!-- 보완일 업데이트 -->
 	    /* QueryID: com.demo.proworks.supplement.updateSupplementCompleted */
 	    UPDATE ADDITIONAL_REQ
 	    SET
@@ -31,6 +33,7 @@
 	</update>
 	
 	<update id="updateClaimStatus" parameterType="com.demo.proworks.supplement.vo.SuppVo">
+		<!-- 청구상태 보완완료 업데이트 -->
         /* QueryID: com.demo.proworks.supplement.updateClaimStatus */
         UPDATE CLAIM
         SET

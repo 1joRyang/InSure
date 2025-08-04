@@ -99,15 +99,13 @@ public class UserController {
 	    if (info.isSuc()) {
 	           
 
-		        // loginProcess가 세션을 만들지 않는 것에 대비하여, 여기서 직접 세션을 생성합니다.
-		        HttpSession session = request.getSession(true); // 기존 세션을 가져오거나 없으면 새로 생성
+		        // loginProcess가 세션을 만들지 않는 것에 대비
+		        HttpSession session = request.getSession(true);
 		
-		        // 세션에 로그인 성공했다는 최소한의 정보라도 저장합니다.
-		        // (이후 다른 인터셉터가 이 값을 확인할 수 있습니다)
-		        session.setAttribute("loginInfo", info); // info 객체나 user_id 등을 저장
-		        session.setMaxInactiveInterval(30 * 60); // 예: 세션 유효 시간 30분 설정
+		        session.setAttribute("loginInfo", info);
+		        session.setMaxInactiveInterval(30 * 60);
 		        
-		        System.out.println(">>>>> [DEBUG] 세션 강제 생성 완료! Session ID: " + session.getId());
+		        System.out.println("세션 강제 생성 완료 Session ID: " + session.getId());
 
 	    
 	    	try {
@@ -117,15 +115,15 @@ public class UserController {
 		        // DB에서 사용자 정보 조회
 		        UserVo searchUserVo = new UserVo();
 		        searchUserVo.setUserId(user_id);
-	            UserVo userInfo = userService.selectUser(searchUserVo);// 사용자 서비스 호출
+	            UserVo userInfo = userService.selectUser(searchUserVo);
 	            
 	            
 	            if (userInfo != null) {
-	                int customerId = userInfo.getId(); // DB에서 가져온 실제 id 값
+	                int customerId = userInfo.getId();
 	                String userIdString = userInfo.getUserId();
 	                
-	                System.out.println(">>>>> DB에서 조회한 사용자 ID: " + customerId);
-	                System.out.println(">>>>> DB에서 조회한 사용자 userId: " + userIdString);
+	                System.out.println("DB에서 조회한 사용자 ID: " + customerId);
+	                System.out.println("DB에서 조회한 사용자 userId: " + userIdString);
 	                
 	                // 간편비밀번호 등록 여부 확인
 	                boolean hasSimplePassword = userService.hasSimplePassword(userInfo.getUserId());
@@ -146,7 +144,6 @@ public class UserController {
 	                response.setCharacterEncoding("UTF-8");
 	                response.getWriter().write(jsonResponse);
             } else {
-                // 사용자 정보를 찾을 수 없는 경우
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 response.getWriter().write("{\"error\":\"사용자 정보를 찾을 수 없습니다.\"}");
             }
@@ -268,11 +265,6 @@ public class UserController {
 	    String user_id = simpleLoginVo.getUserId();
 	    String simple_pw = simpleLoginVo.getSimplePw();
 	    
-	    
-	    
-	    System.out.println(">>>>> 1. 화면에서 입력받은 id: " + user_id);
-	    System.out.println(">>>>> 1. 화면에서 입력받은 simple_pw: " + simple_pw);
-	    
 	    try {
 	        // 간편비밀번호 검증
 	        boolean isSimplePasswordValid = userService.checkSimplePassword(user_id, simple_pw);
@@ -294,14 +286,13 @@ public class UserController {
 	            // 세션에 로그인 정보 저장
 	            request.getSession().setAttribute("connectedUserId", customerId);
 	
-	            // 응답 JSON 생성 (성공 응답 구조 통일)
+	            // 응답 JSON 생성
 	            Map<String, Object> elData = new HashMap<>();
 	            Map<String, Object> responseMap = new HashMap<>();
 	            
-	            // JavaScript에서 기대하는 필드들 포함
 	            responseMap.put("id", customerId);
 	            responseMap.put("userId", userInfo.getUserId());
-	            responseMap.put("resultCode", "OK");  // 성공 코드 추가
+	            responseMap.put("resultCode", "OK"); 
 	            responseMap.put("status", "SUCCESS");
 	            
 	            elData.put("dma_login_response", responseMap);
@@ -321,7 +312,6 @@ public class UserController {
 	            
 	            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 	            
-	            // 실패 응답도 dma_login_response 구조로 통일
 	            Map<String, Object> elData = new HashMap<>();
 	            Map<String, Object> responseMap = new HashMap<>();
 	            responseMap.put("resultCode", "FAIL");
@@ -380,15 +370,13 @@ public class UserController {
 	    
 	    Map<String, Object> responseData = new HashMap<>();
 	    try {
-	        // 서비스 호출
+
 	        userService.temporarilyStorePin(registerVo.getUserId(), registerVo.getSimplePw(), request.getSession());
 	
-	        // 성공 시 응답 데이터 구성
 	        responseData.put("resultCode", "OK");
 	        responseData.put("resultMessage", "확인 단계로 진행합니다.");
 	
 	    } catch (Exception e) {
-	        // 서비스에서 Exception 발생 시 실패 응답 구성
 	        responseData.put("resultCode", "FAIL");
 	        responseData.put("resultMessage", e.getMessage());
 	    }
@@ -396,7 +384,6 @@ public class UserController {
 	    Map<String, Object> elData = new HashMap<>();
 	    elData.put("dma_login_response", responseData);
 	    
-	    // JSON으로 변환하여 응답 작성
 	    ObjectMapper objectMapper = new ObjectMapper();
 	    response.setContentType("application/json");
 	    response.setCharacterEncoding("UTF-8");
@@ -421,7 +408,7 @@ public class UserController {
 	public void confirmSimplePassword(SimpleConfirmVo confirmVo, HttpServletRequest request, HttpServletResponse response) throws Exception {
 	    Map<String, Object> responseData = new HashMap<>();
 	    
-	    // 서비스 호출하여 성공 여부(boolean) 받기
+	    // 서비스 호출하여 성공 여부 받기
 	    boolean isSuccess = userService.confirmAndSavePin(confirmVo.getUserId(), confirmVo.getSimplePw(), request.getSession());
 	
 	    if (isSuccess) {
@@ -434,11 +421,10 @@ public class UserController {
 	        responseData.put("resultMessage", "비밀번호가 일치하지 않습니다. 다시 시도해주세요.");
 	    }
 	    
-	    // dma_login_response 키로 한번 더 감싸주는 로직 추가
+	    // dma_login_response 키로 한번 더 감싸주기
 	    Map<String, Object> elData = new HashMap<>();
 	    elData.put("dma_login_response", responseData);
 	
-	    // JSON으로 변환하여 응답 작성
 	    ObjectMapper objectMapper = new ObjectMapper();
 	    response.setContentType("application/json");
 	    response.setCharacterEncoding("UTF-8");

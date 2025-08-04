@@ -1,0 +1,2841 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare"
+	xmlns:xf="http://www.w3.org/2002/xforms">
+	<head meta_screenName="심사 결과 창">
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+		<w2:type>COMPONENT</w2:type>
+		<w2:buildDate />
+		<w2:MSA />
+		<xf:model>
+			<w2:dataCollection baseNode="map">
+				<!-- 검색 조건 데이터맵 -->
+				<w2:dataMap baseNode="map" id="dma_search">
+					<w2:keyInfo>
+						<w2:key id="treatment_id" name="치료ID" dataType="text"></w2:key>
+						<w2:key id="claim_no" name="청구번호" dataType="text"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+				<w2:dataMap baseNode="map" id="dma_approvalReq">
+					<w2:keyInfo>
+						<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
+						<w2:key dataType="text" name="approval_memo" id="approval_memo"></w2:key>
+						<w2:key dataType="text" name="request_type" id="request_type"></w2:key>
+						<w2:key dataType="text" name="manager_no" id="manager_no"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+				<!-- 정산 상세정보 데이터맵 추가 -->
+				<w2:dataMap baseNode="map" id="dma_settlementInfo">
+					<w2:keyInfo>
+						<w2:key id="treatment_id" name="치료ID" dataType="text"></w2:key>
+						<w2:key id="claim_no" name="청구번호" dataType="text"></w2:key>
+						<w2:key id="final_due" name="최종수납액" dataType="text"></w2:key>
+						<w2:key id="hospital_prepaid" name="병원공제금" dataType="text"></w2:key>
+						<w2:key id="deducation_amt" name="삭감항목금액" dataType="text"></w2:key>
+						<w2:key id="refund_amt" name="환급금액" dataType="text"></w2:key>
+						<w2:key id="patient_name" name="환자명" dataType="text" defaultValue="홍길동"></w2:key>
+						<w2:key id="hospital_name" name="병원명" dataType="text" defaultValue="서울대학교병원"></w2:key>
+						<w2:key id="treatment_date" name="진료일" dataType="text" defaultValue="2025-01-15"></w2:key>
+						<w2:key id="emp_name" name="심사역" dataType="text" defaultValue="김심사"></w2:key>
+						<w2:key id="status" name="상태" dataType="text" defaultValue="심사중"></w2:key>
+						<w2:key id="generated_memo" name="생성된메모" dataType="text"></w2:key>
+						<w2:key id="receipt_no" name="접수번호" dataType="text"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+				<w2:dataMap baseNode="map" id="dma_settlementTreatmentSearch">
+					<w2:keyInfo>
+						<w2:key id="SC_claim_no" name="검색_청구번호" dataType="text"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+
+				<!-- API 응답 데이터맵 추가 -->
+				<w2:dataMap baseNode="map" id="dma_apiResponse">
+					<w2:keyInfo>
+						<w2:key id="memo" name="메모" dataType="text"></w2:key>
+						<w2:key id="receiptNo" name="접수번호" dataType="text"></w2:key>
+						<w2:key id="receipt_no" name="접수번호" dataType="text"></w2:key>
+						<w2:key id="status" name="상태" dataType="text"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+
+				<!-- 페이징 정보용 데이터맵 -->
+				<w2:dataMap baseNode="map" id="dmp_settlementVo">
+					<w2:keyInfo>
+						<w2:key id="SC_treatment_id" name="검색_치료ID" dataType="text"></w2:key>
+						<w2:key id="SC_claim_no" name="검색_청구번호" dataType="text"></w2:key>
+						<w2:key id="pageIndex" name="페이지번호" dataType="text" defaultValue="1"></w2:key>
+						<w2:key id="pageSize" name="페이지크기" dataType="text" defaultValue="10"></w2:key>
+						<w2:key id="totalPageCount" name="전체페이지수" dataType="text"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+				<!-- CLAIM_RESULT -->
+				<w2:dataMap baseNode="map" id="dma_claimResult">
+					<w2:keyInfo>
+						<w2:key id="claim_no" name="청구번호" dataType="text"></w2:key>
+						<w2:key id="claim_memo" name="청구메모" dataType="text"></w2:key>
+						<w2:key id="amount" name="금액" dataType="text"></w2:key>
+						<w2:key id="date" name="날짜" dataType="text"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+				<!-- 제외 항목 데이터리스트 -->
+				<w2:dataList baseNode="list" id="dlt_excludedItems" saveRemovedData="true" repeatNode="map">
+					<w2:columnInfo>
+						<w2:column id="exc_id" name="제외ID" dataType="text"></w2:column>
+						<w2:column id="item_id" name="항목ID" dataType="text"></w2:column>
+						<w2:column id="treatment_id" name="치료ID" dataType="text"></w2:column>
+						<w2:column id="claim_no" name="청구번호" dataType="text"></w2:column>
+						<w2:column id="exc_reason" name="제외사유" dataType="text"></w2:column>
+						<w2:column id="exc_cost" name="제외금액" dataType="text"></w2:column>
+						<w2:column id="exc_category" name="제외카테고리" dataType="text"></w2:column>
+						<w2:column id="category_name" name="카테고리명" dataType="text"></w2:column>
+					</w2:columnInfo>
+				</w2:dataList>
+
+				<!-- 보험상품 데이터리스트 - 응답 데이터에 누락된 필드 추가 -->
+				<w2:dataList baseNode="list" id="dlt_insuranceProducts" saveRemovedData="true" repeatNode="map">
+					<w2:columnInfo>
+						<w2:column id="ID" name="사용자ID" dataType="text"></w2:column>
+						<w2:column id="insu_id" name="보험ID" dataType="text"></w2:column>
+						<w2:column id="insu_name" name="보험상품명" dataType="text"></w2:column>
+						<w2:column id="user_name" name="가입자명" dataType="text"></w2:column>
+						<w2:column id="insu_amt" name="보험금액" dataType="text"></w2:column>
+						<w2:column id="claim_amt" name="청구금액" dataType="text"></w2:column>
+						<w2:column id="payment_amt" name="지급금액" dataType="text"></w2:column>
+						<w2:column id="status" name="상태" dataType="text"></w2:column>
+						<w2:column id="start_date" name="시작일" dataType="text"></w2:column>
+						<w2:column id="end_date" name="종료일" dataType="text"></w2:column>
+					</w2:columnInfo>
+				</w2:dataList>
+
+				<!-- 정산 목록 데이터리스트 -->
+				<w2:dataList baseNode="list" id="dlt_settlementVoList" saveRemovedData="true" repeatNode="map">
+					<w2:columnInfo>
+						<w2:column dataType="text" name="final_due" id="final_due"></w2:column>
+						<w2:column dataType="text" name="hospital_prepaid" id="hospital_prepaid"></w2:column>
+						<w2:column dataType="text" name="deducation_amt" id="deducation_amt"></w2:column>
+						<w2:column dataType="text" name="refund_amt" id="refund_amt"></w2:column>
+						<w2:column dataType="text" name="treatment_id" id="treatment_id"></w2:column>
+						<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+					</w2:columnInfo>
+				</w2:dataList>
+				<w2:dataList id="dlt_claimUserEmp">
+					<w2:columnInfo>
+						<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+						<w2:column dataType="text" name="emp_name" id="emp_name"></w2:column>
+						<w2:column dataType="text" name="user_name" id="user_name"></w2:column>
+					</w2:columnInfo>
+				</w2:dataList>
+
+				<!-- 전체 데이터를 담을 결과 데이터맵 -->
+				<w2:dataMap baseNode="map" id="dma_result">
+					<w2:keyInfo>
+						<w2:key id="message" name="메시지" dataType="text"></w2:key>
+						<w2:key id="resultCode" name="결과코드" dataType="text"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+
+				<!-- FastAPI 요청용 데이터맵 추가 -->
+				<w2:dataMap baseNode="map" id="dma_apiRequest">
+					<w2:keyInfo>
+						<w2:key id="settlement" name="정산데이터" dataType="object"></w2:key>
+						<w2:key id="excluded_items" name="제외항목목록" dataType="array"></w2:key>
+						<w2:key id="hospital_type" name="병원타입" dataType="text"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+				<w2:dataMap baseNode="map" id="dmp_claimVoDetail">
+					<w2:keyInfo>
+						<w2:key dataType="text" name="claim_no" id="claim_no"></w2:key>
+						<w2:key dataType="text" name="claim_type" id="claim_type"></w2:key>
+						<w2:key dataType="text" name="receipt_date" id="receipt_date"></w2:key>
+						<w2:key dataType="text" name="status" id="status"></w2:key>
+						<w2:key dataType="text" name="emp_no" id="emp_no"></w2:key>
+						<w2:key dataType="text" name="ID" id="ID"></w2:key>
+						<w2:key dataType="text" name="claim_content" id="claim_content"></w2:key>
+						<w2:key dataType="text" name="disease_code" id="disease_code"></w2:key>
+						<w2:key dataType="text" name="date_of_accident" id="date_of_accident"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+				<!-- 응답 데이터를 받을 DataMap 정의 -->
+				<w2:dataMap id="dma_claimNoVo">
+					<w2:keyInfo>
+						<w2:key id="claim_no" dataType="text" />
+					</w2:keyInfo>
+				</w2:dataMap>
+
+				<w2:dataMap id="dma_userEmpResult">
+					<w2:keyInfo>
+						<w2:key id="claim_no" dataType="text" />
+						<w2:key id="user_name" dataType="text" />
+						<w2:key id="emp_name" dataType="text" />
+					</w2:keyInfo>
+				</w2:dataMap>
+				<!-- 정산집계 검색 조건 데이터맵 -->
+				<w2:dataMap baseNode="map" id="dma_settlementSummarySearch">
+					<w2:keyInfo>
+						<w2:key id="SC_claim_no" name="SC_claim_no" dataType="text"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+
+				<!-- 정산집계 결과 데이터맵 -->
+				<w2:dataMap baseNode="map" id="dma_settlementSummary">
+					<w2:keyInfo>
+						<w2:key id="claim_no" name="claim_no" dataType="text"></w2:key>
+						<w2:key id="total_final_due" name="total_final_due" dataType="text"></w2:key>
+						<w2:key id="total_refund_amt" name="total_refund_amt" dataType="text"></w2:key>
+						<w2:key id="total_hp_prepaid" name="total_hp_prepaid" dataType="text"></w2:key>
+						<w2:key id="total_deducation_amt" name="total_deducation_amt" dataType="text"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+				<w2:dataMap baseNode="map" id="dma_excludedItemsSearch">
+					<w2:keyInfo>
+						<w2:key id="SC_claim_no" name="검색_청구번호" dataType="text"></w2:key>
+						<w2:key id="claim_no" name="청구번호" dataType="text"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+
+				<w2:dataList baseNode="list" repeatNode="map" id="dlt_settlementTreatmentList" saveRemovedData="true">
+					<w2:columnInfo>
+						<w2:column dataType="text" name="claim_no" id="claim_no"></w2:column>
+						<w2:column defaultValue="" dataType="text" name="treatment_id" length="" id="treatment_id" encYN=""
+							ignoreStatus="">
+						</w2:column>
+						<w2:column defaultValue="" dataType="text" name="final_due" length="" id="final_due" encYN="" ignoreStatus=""></w2:column>
+						<w2:column defaultValue="" dataType="text" name="refund_amt" length="" id="refund_amt" encYN="" ignoreStatus=""></w2:column>
+						<w2:column dataType="text" name="treatment_date" id="treatment_date"></w2:column>
+						<w2:column dataType="text" name="hospital_prepaid" id="hospital_prepaid"></w2:column>
+						<w2:column dataType="text" name="deducation_amt" id="deducation_amt"></w2:column>
+						<w2:column dataType="text" name="hospital_name" id="hospital_name"></w2:column>
+						<w2:column dataType="text" name="hospital_grade" id="hospital_grade"></w2:column>
+						<w2:column dataType="text" name="patient_type" id="patient_type"></w2:column>
+					</w2:columnInfo>
+				</w2:dataList>
+				<w2:dataMap baseNode="map" id="dma_ID">
+					<w2:keyInfo>
+						<w2:key dataType="text" name="ID" id="ID"></w2:key>
+					</w2:keyInfo>
+				</w2:dataMap>
+			</w2:dataCollection>
+			<w2:workflowCollection />
+
+			<!-- 정산목록 조회 -->
+			<xf:submission id="sbm_selectSettlementVoList" ref='data:json,{"id":"dmp_settlementVo","key":"settlementVo"}'
+				target='data:json,{"id":"dlt_settlementVoList","key":"elData.settlementVoList"}' action="/InsWebApp/SETTLEMENTList.pwkjson"
+				method="post" mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
+				processMsg="정산정보 리스트를 조회 중입니다." ev:submit="" ev:submitdone="scwin.sbm_settlementList_submitdone" ev:submiterror="" abortTrigger="">
+			</xf:submission>
+			<xf:submission id="sbm_selectClaimResult" ref='data:json,{"id":"dma_claimResult","key":"claimResultVo"}'
+				target='data:json,{"id":"dma_claimResult","key":"elData"}' action="/InsWebApp/CLAIMRESULTList.pwkjson" method="post"
+				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_selectClaimResult_submitdone"
+				ev:submiterror="scwin.sbm_selectClaimResult_submiterror">
+			</xf:submission>
+			<!-- 정산정보 단건 조회 -->
+			<xf:submission id="sbm_selectSettlement" ref='data:json,{"id":"dma_search","key":"settlementVo"}'
+				target='data:json,{"id":"dma_settlementInfo","key":"elData"}' action="/InsWebApp/SETTLEMENTUpdView.pwkjson" method="post"
+				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_selectSettlement_submitdone" ev:submiterror="">
+			</xf:submission>
+
+			<xf:submission id="sbm_selectExcludedItems" ref='data:json,{"id":"dma_excludedItemsSearch","key":"excItemVo"}'
+				target='data:json,{"id":"dlt_excludedItems","key":"excItemVoList"}' action="/InsWebApp/EXCITEMListR.pwkjson" method="post"
+				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_selectExcludedItems_submitdone"
+				ev:submiterror="scwin.sbm_selectExcludedItems_submiterror">
+			</xf:submission>
+
+			<!-- 보험상품 목록 조회 - target 수정 -->
+			<xf:submission id="sbm_selectInsuranceProducts" ref='data:json,{"id":"dma_ID","key":"subInsuranceProductVo"}'
+				target='data:json,{"id":"dlt_insuranceProducts","key":"subInsuranceProductVoList"}' action="/InsWebApp/SUBINSURANCEProductsList.pwkjson"
+				method="post" mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_selectInsuranceProducts_submitdone"
+				ev:submiterror="scwin.sbm_selectInsuranceProducts_submiterror" processMsg="가입 보험서비스 불러오는중...">
+			</xf:submission>
+
+			<!-- 심사메모 생성 - 전체 경로 지정 -->
+			<xf:submission id="sbm_generateMemo" ref='data:json,dma_search' target='data:json,{"id":"dma_apiResponse","key":"elData"}'
+				action="/InsWebApp/SETTLEMENTMemoGenerate.pwkjson" method="post" mediatype="application/json" mode="asynchronous"
+				ev:submitdone="scwin.sbm_generateMemo_submitdone" ev:submiterror="scwin.sbm_generateMemo_submiterror">
+			</xf:submission>
+
+			<!-- 정산정보 업데이트 -->
+			<xf:submission id="sbm_updateSettlement" ref='data:json,{"id":"dma_settlementInfo","key":"settlementVo"}'
+				target='data:json,dma_result' action="/InsWebApp/SETTLEMENTUpd.pwkjson" method="post" mediatype="application/json" mode="asynchronous">
+			</xf:submission>
+
+			<xf:submission id="sbm_selectClaimVo" action="/InsWebApp/CLAIMUpdView.pwkjson" method="post" mediatype="application/json"
+				ref="" target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+				ev:submitdone="scwin.sbm_selectClaimVo_submitdone" ev:submiterror="" abortTrigger="">
+			</xf:submission>
+			<xf:submission id="sbm_selectClaimUserEmpInfo" ref='data:json,{"id":"dma_claimNoVo","key":"claimNoVo"}'
+				target='data:json,{"id":"dma_userEmpResult","key":"elData"}' action="/InsWebApp/CLAIMFindUserEmpInfo.pwkjson" method="post"
+				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_selectClaimUserEmpInfo_submitdone"
+				ev:submiterror="scwin.sbm_selectClaimUserEmpInfo_submiterror">
+			</xf:submission>
+			<xf:submission id="sbm_saveClaimResult" ref='data:json,{"id":"dma_claimResult","key":"claimResultVo"}'
+				target='data:json,{"id":"dma_result","key":"elData"}' action="/InsWebApp/CLAIMRESULTSave.pwkjson" method="post"
+				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_saveClaimResult_submitdone"
+				ev:submiterror="scwin.sbm_saveClaimResult_submiterror" processMsg="청구 메모 저장중입니다">
+			</xf:submission>
+
+			<!-- CLAIM_RESULT 업데이트 -->
+			<xf:submission id="sbm_updateClaimResult" ref='data:json,{"id":"dma_claimResult","key":"claimResultVo"}'
+				target='data:json,{"id":"dma_result","key":"elData"}' action="/InsWebApp/CLAIMRESULTUpd.pwkjson" method="post"
+				mediatype="application/json" mode="asynchronous" ev:submitdone="scwin.sbm_updateClaimResult_submitdone"
+				ev:submiterror="scwin.sbm_updateClaimResult_submiterror">
+			</xf:submission>
+
+			<xf:submission id="sbm_selectSettlementTreatment" action="/InsWebApp/SETTLEMENTTreatmentList.pwkjson" method="post"
+				mediatype="application/json" ref='data:json,{"id":"dma_settlementTreatmentSearch","key":"settlementTreatmentVo"}'
+				target='data:json,{"id":"dlt_settlementTreatmentList","key":"settlementTreatmentVoList"}' encoding="UTF-8" instance="" replace=""
+				errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="scwin.sbm_selectSettlementTreatment_submit"
+				ev:submitdone="scwin.sbm_selectSettlementTreatment_submitdone" ev:submiterror="" abortTrigger="">
+			</xf:submission>
+			<!-- 정산집계 조회 submission -->
+			<xf:submission id="sbm_selectSettlementSummary" action="/InsWebApp/SETTLEMENTSummary.pwkjson" method="post"
+				mediatype="application/json" ref='data:json,{"id":"dma_settlementSummarySearch","key":"settlementSummaryVo"}'
+				target='data:json,{"id":"dma_settlementSummary","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+				customHandler="" mode="asynchronous" processMsg="정산집계정보를 조회 중입니다..." ev:submit=""
+				ev:submitdone="scwin.sbm_selectSettlementSummary_submitdone" ev:submiterror="" abortTrigger="">
+			</xf:submission>
+
+			<xf:submission id="sbm_approveApprovalReq" action="/InsWebApp/APPROVALREQApprove.pwkjson" method="post"
+				mediatype="application/json" ref='data:json,{"id":"dma_approvalReq","key":"approvalReqVo"}' target="" encoding="UTF-8" instance=""
+				replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+				ev:submitdone="scwin.sbm_approveApprovalReq_submitdone" ev:submiterror="" abortTrigger="">
+			</xf:submission>
+		</xf:model>
+		<w2:layoutInfo />
+		<w2:publicInfo method="" />
+		<script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
+		<style type="text/css"><![CDATA[
+            .container {
+             
+            }
+            
+    <!--         .header_section {
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+             
+            .main_content {
+                display: flex;
+                gap: 20px;
+            }
+             
+             .left_panel {
+                flex: 1;
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+             
+            .right_panel {
+                width: 500px;
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+             .info_row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 10px;
+                padding: 8px 0;
+                border-bottom: 1px solid #eee;
+            } 
+            
+            .info_label {
+                color: #666;
+                font-weight: 500;
+            }
+            
+            .info_value {
+                color: #333;
+                font-weight: bold;
+            }
+            
+             .amount_display {
+                text-align: center;
+                padding: 30px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+             
+             .amount_number {
+                font-size: 36px;
+                font-weight: bold;
+                margin-bottom: 10px;
+            } 
+            
+             .amount_desc {
+                font-size: 14px;
+                opacity: 0.9;
+            }
+             
+             .memo_textarea {
+                width: 100%;
+                min-height: 200px;
+                padding: 15px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                resize: vertical;
+                font-family: 'Noto Sans KR', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+             -->
+            .button_group {
+                display: flex;
+                gap: 10px;
+                margin-top: 20px;
+            }
+            
+            <!-- .btn_primary {
+                flex: 1;
+                padding: 12px 20px;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-size: 14px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+             -->
+            .btn_primary:hover {
+                background-color: #45a049;
+            }
+            
+            <!-- .btn_secondary {
+                flex: 1;
+                padding: 12px 20px;
+                background-color: white;
+                color: #333;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 14px;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+             -->
+            .btn_secondary:hover {
+                background-color: #f5f5f5;
+                border-color: #999;
+            }
+            
+            <!-- .btn_generate {
+                background-color: #2196F3;
+                color: white;
+                padding: 12px 24px;
+                border: none;
+                border-radius: 4px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: background-color 0.3s; -->
+            <!-- } -->
+            
+            .btn_generate:hover {
+                background-color: #1976D2;
+            }
+            
+            <!-- .excluded_items_section {
+                margin-top: 20px;
+                padding: 15px;
+                background-color: #fff3cd;
+                border: 1px solid #ffeaa7;
+                border-radius: 4px;
+            } -->
+            
+            <!-- .section_title {
+                font-size: 16px;
+                font-weight: bold;
+                margin-bottom: 15px;
+                color: #333;
+            }
+             -->
+            <!-- .status_badge {
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+             -->
+            .status_pending {
+                background-color: #FFF3E0;
+                color: #F57C00;
+            }
+            
+            .status_completed {
+                background-color: #E8F5E9;
+                color: #2E7D32;
+            }
+            
+            .loading_overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+            }
+            
+            .loading_spinner {
+                width: 50px;
+                height: 50px;
+                border: 5px solid #f3f3f3;
+                border-top: 5px solid #3498db;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+            
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            /* 비활성화된 버튼 스타일 */
+            .disabled-button {
+                opacity: 0.5 !important;
+                cursor: not-allowed !important;
+                pointer-events: none !important;
+                background-color: #cccccc !important;
+                color: #666666 !important;
+                border-color: #cccccc !important;
+            }
+
+            /* 읽기 전용 텍스트 영역 스타일 */
+            .readonly-textarea {
+                background-color: #f5f5f5 !important;
+                color: #666666 !important;
+                cursor: not-allowed !important;
+            }
+
+            /* 권한 없음 안내 메시지 */
+            .permission-notice {
+                color: #ff6b6b;
+                font-size: 12px;
+                margin-top: 5px;
+                font-style: italic;
+            }
+            /* 새로운 상태 스타일 추가 */
+            .status_waiting {
+                background-color: #F3E5F5;
+                color: #7B1FA2;
+            }
+
+            .status_supplement {
+                background-color: #FFF8E1;
+                color: #F9A825;
+            }
+
+            .status_return {
+                background-color: #FFEBEE;
+                color: #C62828;
+            }
+
+            .status_approval {
+                background-color: #E3F2FD;
+                color: #1565C0;
+            }
+
+            .status_reject {
+                background-color: #FFCDD2;
+                color: #D32F2F;
+            }
+
+        ]]></style>
+
+		<script lazy="false" type="text/javascript"><![CDATA[/**
+ * 보험 청구 심사 관리 시스템
+ * 청구 건의 심사, 결재, 상태 관리를 수행하는 메인 모듈
+ * 
+ * 주요 기능:
+ * - 청구 데이터 조회 및 관리
+ * - 권한별 UI 제어
+ * - AI 기반 심사 메모 생성
+ * - 결재 프로세스 관리
+ * - 상태별 워크플로우 제어
+ */
+
+// =============================================================================
+// 상수 및 설정값 정의
+// =============================================================================
+const AUDIT_CONFIG = {
+    API_ENDPOINT: "http://localhost:8000/api/v1/insurance/generate-memo-by-claim",
+    LOADING_DELAY: 100,              // 로딩 표시 지연시간 (ms)
+    SUCCESS_TIMER: 1500,             // 성공 알림 시간 (ms)
+    TOAST_TIMER: 3000,               // 토스트 알림 시간 (ms)
+    POPUP_WIDTH: 500,                // 팝업 기본 너비
+    POPUP_HEIGHT: 400                // 팝업 기본 높이
+};
+
+const CLAIM_STATUS = {
+    WAITING: "대기",
+    SUPPLEMENT: "보완", 
+    RETURN: "반송",
+    APPROVAL: "결재중",
+    APPROVED: "결재완료",
+    REJECTED: "결재반려",
+    COMPLETED: "완료"
+};
+
+const USER_ROLES = {
+    WORKER: "실무자",
+    MANAGER: "관리자",
+    APPROVER: "승인자"
+};
+
+const UI_MESSAGES = {
+    ERROR_NO_CLAIM_NO: "청구번호가 설정되지 않았습니다.",
+    ERROR_NO_MEMO: "심사 메모를 먼저 입력해주세요.",
+    ERROR_PERMISSION_DENIED: "권한이 없습니다.",
+    ERROR_OWN_CLAIM_ONLY: "본인이 담당한 청구건만 처리할 수 있습니다.",
+    SUCCESS_MEMO_GENERATED: "심사 메모가 성공적으로 생성되었습니다.",
+    SUCCESS_APPROVAL: "결재가 승인되었습니다.",
+    CONFIRM_COMPLETE: "최종 심사를 완료하시겠습니까?",
+    CONFIRM_APPROVAL: "결재를 승인하시겠습니까?",
+    STATUS_RESTRICTION: "현재 상태에서는 해당 작업을 할 수 없습니다."
+};
+
+const EXCLUDED_CATEGORIES = {
+    "1": "치과, 한방치료 비급여 의료비",
+    "2": "국민건강보험공단으로부터 환급이 가능한 금액", 
+    "3": "건강검진, 예방접종, 인공유산",
+    "4": "영양제, 종합비타민제, 호르몬 투여, 보신용 투약 등",
+    "5": "단순피로, 권태, 여드름, 주근깨, 점, 사마귀 등",
+    "6": "보조기, 보장구, 안경, 렌즈 등 진료 재료구입비",
+    "7": "외모개선 목적의 치료로 인하여 발생한 의료비",
+    "8": "제비용(TV시청료, 전화료, 제증명료 등)",
+    "9": "산재보험에서 보상받는 의료비",
+    "10": "인간면역바이러스(HIV)감염으로 인한 치료비",
+    "11": "해외 소재 의료기관에서 발생한 의료비",
+    "default": "기타"
+};
+
+// =============================================================================
+// 페이지 초기화 및 기본 설정
+// =============================================================================
+
+/**
+ * 페이지 로드 완료 시 실행되는 메인 초기화 함수
+ * 모든 데이터 로드 및 UI 설정을 순차적으로 수행
+ */
+scwin.onpageload = function () {
+    try {
+        initializeAuditSystem();
+    } catch (error) {
+        console.error("심사 시스템 초기화 실패:", error);
+        scwin.noBtnAlertWithTimer({
+            icon: 'error',
+            title: '시스템 초기화 중 오류가 발생했습니다.'
+        });
+    }
+};
+
+/**
+ * 심사 시스템 전체 초기화
+ * 청구 정보 → UI 설정 → 데이터 로드 순으로 진행
+ */
+function initializeAuditSystem() {
+    // 로컬스토리지에서 데이터 로드
+    loadStorageData();
+    
+    // 검색 조건 설정
+    setSearchConditions();
+    
+    // UI 권한 및 상태 설정
+    scwin.setClaimStatus();
+    scwin.setUIPermissions();
+    
+    // 데이터 조회 실행
+    executeDataLoading();
+    
+}
+
+/**
+ * 로컬스토리지에서 청구 및 직원 정보 로드
+ */
+function loadStorageData() {
+    scwin.claim = JSON.parse(localStorage.getItem("claim"));
+    scwin.employee = JSON.parse(localStorage.getItem("employee"));
+    
+}
+
+/**
+ * 검색 조건 설정
+ */
+function setSearchConditions() {
+    const claimNo = scwin.claim.claimNo;
+    const claimId = scwin.claim.ID;
+    
+    dma_search.set("claim_no", claimNo);
+    dma_ID.set("ID", claimId);
+    dma_excludedItemsSearch.set("SC_claim_no", claimNo);
+    dmp_settlementVo.set("SC_claim_no", claimNo);
+}
+
+/**
+ * 데이터 로딩 실행
+ */
+function executeDataLoading() {
+    scwin.loadClaimUserEmpInfo();
+    scwin.searchSettlementData();
+    scwin.sbm_selectSettlementTreatment();
+    scwin.sbm_selectSettlementSummary();
+    scwin.searchExcludedItems();
+    scwin.loadExistingMemo();
+}
+
+// =============================================================================
+// 로딩 표시 관리
+// =============================================================================
+
+/**
+ * 통합 로딩 표시 함수
+ * 다양한 WebSquare 환경에서 호환되는 로딩 표시
+ * @param {boolean} show - 로딩 표시 여부
+ */
+scwin.showLoading = function (show) {
+    try {
+        if (typeof $p.showLoading === 'function') {
+            $p.showLoading(show);
+        } else if (typeof WebSquare.uiplugin.popup.showLoading === 'function') {
+            if (show) {
+                WebSquare.uiplugin.popup.showLoading();
+            } else {
+                WebSquare.uiplugin.popup.hideLoading();
+            }
+        } else if (typeof gcm !== 'undefined' && gcm.win && typeof gcm.win.showLoading === 'function') {
+            gcm.win.showLoading(show);
+        }
+    } catch (error) {
+        console.warn("로딩 표시 오류:", error);
+    }
+};
+
+// =============================================================================
+// 권한 관리 시스템
+// =============================================================================
+
+/**
+ * 권한에 따른 UI 제어 메인 함수
+ * 사용자 역할과 청구 소유권에 따라 UI 요소를 제어
+ */
+scwin.setUIPermissions = function () {
+    const userRole = scwin.employee.role;
+    const isOwnClaim = scwin.claim.empNo === scwin.employee.empNo;
+    const claimStatus = scwin.claim.status;
+
+
+    // 기본 버튼 숨김 처리
+    hideDefaultButtons();
+
+    // 상태별 권한 적용
+    scwin.setStatusBasedPermissions(claimStatus);
+
+    // 역할별 권한 적용
+    if (userRole === USER_ROLES.WORKER) {
+        setWorkerPermissions(isOwnClaim, claimStatus);
+    } else {
+        setManagerPermissions(claimStatus);
+    }
+};
+
+/**
+ * 기본 버튼 숨김 처리
+ */
+function hideDefaultButtons() {
+    btn_reject.hide();
+}
+
+/**
+ * 실무자 권한 설정
+ */
+function setWorkerPermissions(isOwnClaim, claimStatus) {
+    showWorkerButtons();
+    
+    if (isOwnClaim) {
+        enableOwnClaimButtons(claimStatus);
+    } else {
+        disableOtherClaimButtons();
+    }
+}
+
+/**
+ * 실무자용 버튼 표시
+ */
+function showWorkerButtons() {
+    btn_return.show();
+    btn_supplement.show();
+    btn_approval.show();
+    btn_complete.show();
+    btn_approve_complete.hide();
+    btn_reject.hide();
+    btn_generateMemo.show();
+    btn_reject_memo.hide();
+    
+    btn_approval.setValue("결재 신청");
+}
+
+/**
+ * 본인 청구건 버튼 활성화
+ */
+function enableOwnClaimButtons(claimStatus) {
+    txt_examMemo.setReadOnly(false);
+    
+    if (claimStatus === CLAIM_STATUS.REJECTED) {
+        btn_reject_memo.show();
+    }
+}
+
+/**
+ * 타인 청구건 버튼 비활성화
+ */
+function disableOtherClaimButtons() {
+    const buttons = [btn_return, btn_supplement, btn_approval, btn_complete, btn_generateMemo];
+    
+    buttons.forEach(button => {
+        button.setDisabled(true);
+        button.addClass("disabled-button");
+    });
+    
+    txt_examMemo.setReadOnly(true);
+}
+
+/**
+ * 관리자 권한 설정
+ */
+function setManagerPermissions(claimStatus) {
+    hideWorkerButtons();
+    showManagerButtons();
+    setManagerButtonStates(claimStatus);
+    
+    txt_examMemo.setReadOnly(true);
+}
+
+/**
+ * 실무자용 버튼 숨김
+ */
+function hideWorkerButtons() {
+    btn_return.hide();
+    btn_supplement.hide();
+    btn_generateMemo.hide();
+    btn_complete.hide();
+    btn_approval.hide();
+    btn_reject_memo.hide();
+}
+
+/**
+ * 관리자용 버튼 표시
+ */
+function showManagerButtons() {
+    btn_approve_complete.show();
+    btn_reject.show();
+}
+
+/**
+ * 관리자 버튼 상태 설정
+ */
+function setManagerButtonStates(claimStatus) {
+    if (claimStatus === CLAIM_STATUS.APPROVAL) {
+        enableManagerButtons();
+    } else {
+        disableManagerButtons();
+    }
+}
+
+/**
+ * 관리자 버튼 활성화
+ */
+function enableManagerButtons() {
+    btn_approve_complete.setDisabled(false);
+    btn_approve_complete.removeClass("disabled-button");
+    btn_reject.setDisabled(false);
+    btn_reject.removeClass("disabled-button");
+}
+
+/**
+ * 관리자 버튼 비활성화
+ */
+function disableManagerButtons() {
+    btn_approve_complete.setDisabled(true);
+    btn_approve_complete.addClass("disabled-button");
+    btn_reject.setDisabled(true);
+    btn_reject.addClass("disabled-button");
+}
+
+/**
+ * 권한 체크 공통 함수
+ * @param {string} actionName - 액션명
+ * @returns {boolean} 권한 여부
+ */
+scwin.checkPermission = function (actionName) {
+    const userRole = scwin.employee.role;
+    const isOwnClaim = scwin.claim.empNo === scwin.employee.empNo;
+
+    if (userRole === USER_ROLES.WORKER && !isOwnClaim) {
+        Swal.fire({
+            title: '권한 없음',
+            text: UI_MESSAGES.ERROR_OWN_CLAIM_ONLY.replace("처리", actionName),
+            icon: 'warning',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
+        return false;
+    }
+    return true;
+};
+
+// =============================================================================
+// 청구 상태 관리
+// =============================================================================
+
+/**
+ * 청구 상태 설정 메인 함수
+ */
+scwin.setClaimStatus = function () {
+    const status = scwin.claim.status;
+
+    if (status) {
+        spn_status.setValue(status);
+        scwin.setStatusStyle(status);
+    }
+};
+
+/**
+ * 상태별 스타일 설정
+ * @param {string} status - 청구 상태
+ */
+scwin.setStatusStyle = function (status) {
+    // 기존 상태 클래스 제거
+    removeAllStatusClasses();
+    
+    // 상태별 클래스 추가
+    const statusClassMap = {
+        [CLAIM_STATUS.SUPPLEMENT]: "status_supplement",
+        [CLAIM_STATUS.WAITING]: "status_waiting", 
+        [CLAIM_STATUS.APPROVED]: "status_completed",
+        [CLAIM_STATUS.REJECTED]: "status_reject",
+        [CLAIM_STATUS.COMPLETED]: "status_completed",
+        [CLAIM_STATUS.APPROVAL]: "status_approval",
+        [CLAIM_STATUS.RETURN]: "status_return"
+    };
+    
+    const className = statusClassMap[status] || "status_pending";
+    spn_status.addClass(className);
+};
+
+/**
+ * 모든 상태 클래스 제거
+ */
+function removeAllStatusClasses() {
+    const statusClasses = [
+        "status_pending", "status_completed", "status_waiting",
+        "status_supplement", "status_return", "status_approval", "status_reject"
+    ];
+    
+    statusClasses.forEach(className => {
+        spn_status.removeClass(className);
+    });
+}
+
+/**
+ * 상태별 권한 설정 메인 함수
+ * @param {string} status - 청구 상태
+ */
+scwin.setStatusBasedPermissions = function (status) {
+    
+    const permissionConfig = getStatusPermissionConfig(status);
+    applyPermissionConfig(permissionConfig);
+    
+    // 상태 정보 업데이트
+    scwin.updateStatusInfo(status);
+    
+    // 관리자 권한 재설정
+    reapplyManagerPermissions(status);
+};
+
+/**
+ * 상태별 권한 설정 가져오기
+ */
+function getStatusPermissionConfig(status) {
+    const configs = {
+        [CLAIM_STATUS.APPROVAL]: {
+            disabled: true,
+            readonly: true,
+            message: "현재 결재 진행 중입니다. 수정이 제한됩니다."
+        },
+        [CLAIM_STATUS.APPROVED]: {
+            disabled: true,
+            readonly: true,
+            allowComplete: true,
+            message: "결재가 완료되었습니다. 최종 심사 완료만 가능합니다."
+        },
+        [CLAIM_STATUS.REJECTED]: {
+            disabled: false,
+            readonly: false,
+            showRejectMemo: true,
+            message: "결재가 반려되었습니다. 재작업 후 다시 신청해주세요."
+        },
+        [CLAIM_STATUS.COMPLETED]: {
+            disabled: true,
+            readonly: true,
+            message: "심사가 완료되었습니다. 수정이 불가능합니다."
+        },
+        [CLAIM_STATUS.SUPPLEMENT]: {
+            disabled: true,
+            readonly: true,
+            message: "보완 요청 상태입니다. 보완 후 재신청해주세요."
+        },
+        [CLAIM_STATUS.RETURN]: {
+            disabled: true,
+            readonly: true,
+            message: "반송 상태입니다. 수정 후 재신청해주세요."
+        },
+        [CLAIM_STATUS.WAITING]: {
+            disabled: false,
+            readonly: false,
+            message: "심사 대기 중입니다."
+        }
+    };
+    
+    return configs[status] || {
+        disabled: false,
+        readonly: false,
+        message: "기본 상태입니다."
+    };
+}
+
+/**
+ * 권한 설정 적용
+ */
+function applyPermissionConfig(config) {
+    const buttons = [btn_supplement, btn_return, btn_approval, btn_complete, btn_generateMemo];
+    
+    if (scwin.employee.role === USER_ROLES.WORKER && 
+        scwin.claim.empNo === scwin.employee.empNo) {
+        
+        buttons.forEach(button => {
+            if (config.disabled) {
+                button.setDisabled(true);
+                button.addClass("disabled-button");
+            } else {
+                button.setDisabled(false);
+                button.removeClass("disabled-button");
+            }
+        });
+        
+        // 완료 버튼 특별 처리
+        if (config.allowComplete) {
+            btn_complete.setDisabled(false);
+            btn_complete.removeClass("disabled-button");
+        }
+        
+        // 메모 텍스트박스 설정
+        if (config.readonly) {
+            txt_examMemo.setReadOnly(true);
+            txt_examMemo.addClass("readonly-textarea");
+        } else {
+            txt_examMemo.setReadOnly(false);
+            txt_examMemo.removeClass("readonly-textarea");
+        }
+        
+        // 반려 메모 버튼 표시
+        if (config.showRejectMemo) {
+            btn_reject_memo.show();
+        }
+    }
+}
+
+/**
+ * 관리자 권한 재설정
+ */
+function reapplyManagerPermissions(status) {
+    if (scwin.employee && scwin.employee.role !== USER_ROLES.WORKER) {
+        if (status === CLAIM_STATUS.APPROVAL) {
+            enableManagerButtons();
+        } else {
+            disableManagerButtons();
+        }
+    }
+}
+
+/**
+ * 상태 정보 업데이트
+ * @param {string} status - 청구 상태
+ */
+scwin.updateStatusInfo = function (status) {
+    const config = getStatusPermissionConfig(status);
+    
+};
+
+// =============================================================================
+// 상태별 권한 체크 함수
+// =============================================================================
+
+/**
+ * 상태별 권한 체크 메인 함수
+ * @param {string} actionName - 액션명
+ * @returns {boolean} 권한 여부
+ */
+scwin.checkStatusPermission = function (actionName) {
+    const status = scwin.claim.status;
+    const restrictedActions = getRestrictedActions(status);
+    
+    if (restrictedActions.includes(actionName)) {
+        showStatusRestrictionAlert(status, actionName);
+        return false;
+    }
+    
+    return true;
+};
+
+/**
+ * 상태별 제한된 액션 목록 가져오기
+ */
+function getRestrictedActions(status) {
+    const restrictions = {
+        [CLAIM_STATUS.APPROVAL]: ["반송", "보완 요청", "결재 신청", "메모 생성"],
+        [CLAIM_STATUS.APPROVED]: ["반송", "보완 요청", "결재 신청", "메모 생성"],
+        [CLAIM_STATUS.COMPLETED]: ["반송", "보완 요청", "결재 신청", "메모 생성", "심사 완료"],
+        [CLAIM_STATUS.SUPPLEMENT]: ["반송", "보완 요청"],
+        [CLAIM_STATUS.RETURN]: ["반송", "보완 요청"]
+    };
+    
+    return restrictions[status] || [];
+}
+
+/**
+ * 상태 제한 알림 표시
+ */
+function showStatusRestrictionAlert(status, actionName) {
+    const messages = {
+        [CLAIM_STATUS.APPROVAL]: `현재 결재 진행 중이므로 ${actionName}을(를) 할 수 없습니다.`,
+        [CLAIM_STATUS.APPROVED]: `결재가 완료된 상태입니다. ${actionName}을(를) 할 수 없습니다.`,
+        [CLAIM_STATUS.COMPLETED]: `이미 심사가 완료된 건입니다. ${actionName}을(를) 할 수 없습니다.`,
+        [CLAIM_STATUS.SUPPLEMENT]: `현재 보완 요청 상태입니다. 보완 완료 후 재신청해주세요.`,
+        [CLAIM_STATUS.RETURN]: `현재 반송 상태입니다. 수정 완료 후 재신청해주세요.`
+    };
+    
+    scwin.noBtnAlertWithTimer({
+        title: '작업 제한',
+        text: messages[status] || UI_MESSAGES.STATUS_RESTRICTION,
+        icon: 'info'
+    });
+}
+
+/**
+ * 개별 액션별 상세 권한 체크 함수들
+ */
+scwin.checkReturnPermission = function () {
+    return checkActionPermission("반송", ["결재중", "결재완료", "완료", "보완", "반송"]);
+};
+
+scwin.checkSupplementPermission = function () {
+    return checkActionPermission("보완 요청", ["결재중", "결재완료", "완료", "보완", "반송"]);
+};
+
+scwin.checkApprovalPermission = function () {
+    return checkActionPermission("결재 신청", ["결재중", "결재완료", "완료"]);
+};
+
+/**
+ * 액션 권한 체크 공통 함수
+ */
+function checkActionPermission(actionName, restrictedStatuses) {
+    const status = scwin.claim.status;
+    
+    if (restrictedStatuses.includes(status)) {
+        const alertConfig = getActionAlertConfig(actionName, status);
+        
+        scwin.noBtnAlertWithTimer({
+            title: alertConfig.title,
+            text: alertConfig.message,
+            icon: 'warning'
+        });
+        return false;
+    }
+    
+    return true;
+}
+
+/**
+ * 액션별 알림 설정 가져오기
+ */
+function getActionAlertConfig(actionName, status) {
+    const configs = {
+        "반송": {
+            [CLAIM_STATUS.APPROVAL]: { title: "결재 진행 중", message: "결재 진행 중에는 반송할 수 없습니다." },
+            [CLAIM_STATUS.APPROVED]: { title: "결재 완료", message: "결재 완료된 건은 반송할 수 없습니다." },
+            [CLAIM_STATUS.COMPLETED]: { title: "심사 완료", message: "완료된 건은 반송할 수 없습니다." },
+            [CLAIM_STATUS.SUPPLEMENT]: { title: "보완 진행 중", message: "이미 보완 요청된 건입니다." },
+            [CLAIM_STATUS.RETURN]: { title: "반송 상태", message: "이미 반송된 건입니다." }
+        },
+        "보완 요청": {
+            [CLAIM_STATUS.APPROVAL]: { title: "결재 진행 중", message: "결재 진행 중에는 보완 요청할 수 없습니다." },
+            [CLAIM_STATUS.APPROVED]: { title: "결재 완료", message: "결재 완료된 건은 보완 요청할 수 없습니다." },
+            [CLAIM_STATUS.COMPLETED]: { title: "심사 완료", message: "완료된 건은 보완 요청할 수 없습니다." },
+            [CLAIM_STATUS.SUPPLEMENT]: { title: "보완 진행 중", message: "이미 보완 요청된 건입니다." },
+            [CLAIM_STATUS.RETURN]: { title: "반송 상태", message: "반송된 건은 먼저 수정해주세요." }
+        },
+        "결재 신청": {
+            [CLAIM_STATUS.APPROVAL]: { title: "결재 진행 중", message: "이미 결재 진행 중입니다." },
+            [CLAIM_STATUS.APPROVED]: { title: "결재 완료", message: "이미 결재 완료된 건입니다." },
+            [CLAIM_STATUS.COMPLETED]: { title: "심사 완료", message: "완료된 건은 결재신청할 수 없습니다." }
+        }
+    };
+    
+    return configs[actionName]?.[status] || { 
+        title: "작업 제한", 
+        message: `${actionName}을(를) 할 수 없습니다.` 
+    };
+}
+
+// =============================================================================
+// 데이터 조회 및 관리
+// =============================================================================
+
+/**
+ * 정산 데이터 조회 메인 함수
+ */
+scwin.searchSettlementData = function () {
+    scwin.showLoading(true);
+};
+
+/**
+ * 청구 사용자 정보 로드
+ */
+scwin.loadClaimUserEmpInfo = function () {
+    if (!validateClaimNumber()) return;
+    
+    dma_claimNoVo.set("claim_no", scwin.claim.claimNo);
+    $p.executeSubmission("sbm_selectClaimUserEmpInfo");
+};
+
+/**
+ * 기존 메모 로드
+ */
+scwin.loadExistingMemo = function () {
+    if (scwin.claim.claimNo) {
+        dma_claimResult.set("claim_no", scwin.claim.claimNo);
+        $p.executeSubmission("sbm_selectClaimResult");
+    }
+};
+
+/**
+ * 청구번호 유효성 검증
+ */
+function validateClaimNumber() {
+    if (!scwin.claim.claimNo) {
+        Swal.fire({
+            title: '오류',
+            text: UI_MESSAGES.ERROR_NO_CLAIM_NO,
+            icon: 'error',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
+        return false;
+    }
+    return true;
+}
+
+// =============================================================================
+// 정산 치료 데이터 관리
+// =============================================================================
+
+/**
+ * 정산 치료 데이터 조회
+ */
+scwin.sbm_selectSettlementTreatment = function () {
+    if (!validateClaimNumber()) return;
+    
+    dma_settlementTreatmentSearch.set("SC_claim_no", scwin.claim.claimNo);
+
+    try {
+        $p.executeSubmission("sbm_selectSettlementTreatment");
+    } catch (error) {
+        scwin.toastAlert({
+            icon: 'error',
+            title: '정산치료 조회 중 오류가 발생했습니다.'
+        });
+    }
+};
+
+/**
+ * 정산 치료 조회 완료 콜백
+ */
+scwin.sbm_selectSettlementTreatment_submitdone = function (e) {
+    const { elData, elHeader } = e.responseJSON;
+
+    if (!isValidResponse(elHeader)) {
+        handleSettlementTreatmentError(elHeader);
+        return;
+    }
+
+    const treatmentData = extractTreatmentData(elData);
+    
+    if (treatmentData && treatmentData.length > 0) {
+        processTreatmentData(treatmentData);
+    } else {
+        console.log("치료 데이터가 없거나 빈 배열");
+    }
+};
+
+/**
+ * 치료 데이터 추출
+ */
+function extractTreatmentData(elData) {
+    if (!elData) return null;
+    
+    // 다양한 응답 구조 처리
+    if (Array.isArray(elData)) {
+        return elData;
+    } else if (elData.settlementTreatmentVoList) {
+        return elData.settlementTreatmentVoList;
+    } else if (elData.list) {
+        return elData.list;
+    } else {
+        // 첫 번째 키의 값이 배열인지 확인
+        const firstKey = Object.keys(elData)[0];
+        if (firstKey && Array.isArray(elData[firstKey])) {
+            return elData[firstKey];
+        }
+    }
+    
+    return null;
+}
+
+/**
+ * 치료 데이터 처리
+ */
+function processTreatmentData(treatmentData) {
+    
+    // DataList에 설정
+    dlt_settlementTreatmentList.setJSON(treatmentData);
+    
+    // 첫 번째 행의 데이터를 settlementInfo에 반영
+    updateSettlementInfo(treatmentData[0]);
+}
+
+/**
+ * 정산 정보 업데이트
+ */
+function updateSettlementInfo(firstRow) {
+    if (!firstRow) return;
+    
+    const fields = ["hospital_prepaid", "deducation_amt", "final_due", "refund_amt"];
+    
+    fields.forEach(field => {
+        if (firstRow[field]) {
+            dma_settlementInfo.set(field, firstRow[field]);
+        }
+    });
+    
+}
+
+/**
+ * 정산 치료 조회 에러 처리
+ */
+function handleSettlementTreatmentError(elHeader) {
+    scwin.toastAlert({
+        icon: 'warning', 
+        title: '정산치료 조회에 실패했습니다'
+    });
+}
+
+// =============================================================================
+// 정산 집계 데이터 관리
+// =============================================================================
+
+/**
+ * 정산 집계 조회
+ */
+scwin.sbm_selectSettlementSummary = function () {
+    if (!validateClaimNumber()) return;
+
+    dma_settlementSummarySearch.set("SC_claim_no", scwin.claim.claimNo);
+
+    try {
+        $p.executeSubmission("sbm_selectSettlementSummary");
+    } catch (error) {
+        scwin.noBtnAlertWithTimer({
+            title: '오류',
+            text: '정산집계 조회 중 오류가 발생했습니다: ' + error.message,
+            icon: 'error'
+        });
+    }
+};
+
+/**
+ * 정산 집계 조회 완료 콜백
+ */
+scwin.sbm_selectSettlementSummary_submitdone = function (e) {
+    const { elData, elHeader } = e.responseJSON;
+
+    if (!isValidResponse(elHeader)) {
+        handleSettlementSummaryError(elHeader);
+        return;
+    }
+
+    processSettlementSummary(elData);
+};
+
+/**
+ * 정산 집계 데이터 처리
+ */
+function processSettlementSummary(elData) {
+    if (elData) {
+        const summaryData = dma_settlementSummary.getJSON();
+        
+        if (summaryData.total_final_due && summaryData.total_final_due !== "") {
+            console.log("정산집계 데이터 정상 수신");
+        } else {
+            scwin.calculateSummaryFromTreatmentList();
+        }
+    }
+}
+
+/**
+ * 정산 집계 에러 처리
+ */
+function handleSettlementSummaryError(elHeader) {
+    Swal.fire({
+        title: '조회 실패',
+        text: '정산집계 조회에 실패했습니다: ' + (elHeader ? elHeader.resMsg : "응답 없음"),
+        icon: 'error',
+        confirmButtonText: '확인',
+        confirmButtonColor: '#3085d6'
+    });
+}
+
+/**
+ * 정산 집계 조회 에러 콜백
+ */
+scwin.sbm_selectSettlementSummary_submiterror = function (e) {
+    
+    const errorMsg = getErrorMessage(e, "정산집계 조회 중 오류가 발생했습니다.");
+};
+
+// =============================================================================
+// 제외 항목 관리
+// =============================================================================
+
+/**
+ * 제외 항목 조회
+ */
+scwin.searchExcludedItems = function () {
+    const claimNo = scwin.claim.claimNo;
+    
+    setExcludedItemsSearchParams(claimNo);
+    
+    if (!claimNo) {
+        handleNoClaimNumber();
+        return;
+    }
+
+    try {
+        $p.executeSubmission("sbm_selectExcludedItems");
+    } catch (error) {
+        handleExcludedItemsError();
+    }
+};
+
+/**
+ * 제외항목 검색 파라미터 설정
+ */
+function setExcludedItemsSearchParams(claimNo) {
+    if (typeof dma_excludedItemsSearch !== 'undefined') {
+        dma_excludedItemsSearch.set("SC_claim_no", claimNo);
+        dma_excludedItemsSearch.set("claim_no", claimNo);
+    } else if (typeof dma_search !== 'undefined') {
+        dma_search.set("claim_no", claimNo);
+    }
+}
+
+/**
+ * 청구번호 없음 처리
+ */
+function handleNoClaimNumber() {
+    scwin.calculateTotalExcludedAmount();
+    scwin.searchInsuranceProducts();
+}
+
+/**
+ * 제외항목 조회 에러 처리
+ */
+function handleExcludedItemsError() {
+    scwin.calculateTotalExcludedAmount();
+    scwin.searchInsuranceProducts();
+}
+
+/**
+ * 제외항목 조회 성공 콜백
+ */
+scwin.sbm_selectExcludedItems_submitdone = function (e) {
+    const responseData = e.responseJSON;
+    const { elData, elHeader } = responseData;
+
+    if (!isValidResponse(elHeader)) {
+        handleExcludedItemsError();
+        return;
+    }
+
+    const excludedItemsData = extractExcludedItemsData(elData);
+    
+    if (excludedItemsData && excludedItemsData.length > 0) {
+        processExcludedItems(excludedItemsData);
+    } else {
+        console.log("제외항목 데이터가 없거나 빈 배열");
+    }
+
+    scwin.calculateTotalExcludedAmount();
+    scwin.searchInsuranceProducts();
+};
+
+/**
+ * 제외항목 데이터 추출
+ */
+function extractExcludedItemsData(elData) {
+    if (!elData) return null;
+    
+    if (Array.isArray(elData)) {
+        return elData;
+    } else if (elData.excItemVoList) {
+        return elData.excItemVoList;
+    } else if (elData.excludedItemsList) {
+        return elData.excludedItemsList;
+    } else {
+        // 첫 번째 키의 값이 배열인지 확인
+        const keys = Object.keys(elData);
+        if (keys.length > 0) {
+            const firstKey = keys[0];
+            if (Array.isArray(elData[firstKey])) {
+                return elData[firstKey];
+            }
+        }
+    }
+    
+    return null;
+}
+
+/**
+ * 제외항목 처리
+ */
+function processExcludedItems(excludedItemsData) {
+    // 카테고리명 추가 처리
+    excludedItemsData.forEach(function (item) {
+        if (!item.category_name) {
+            item.category_name = getCategoryName(item.exc_category);
+        }
+    });
+
+    // DataList에 설정
+    dlt_excludedItems.setJSON(excludedItemsData);
+
+    // 데이터 검증 로그
+    logExcludedItemsVerification();
+}
+
+/**
+ * 카테고리명 가져오기
+ */
+function getCategoryName(excCategory) {
+    const categoryKey = String(excCategory);
+    return EXCLUDED_CATEGORIES[categoryKey] || EXCLUDED_CATEGORIES.default;
+}
+
+/**
+ * 제외항목 검증 로그
+ */
+function logExcludedItemsVerification() {
+    const verifyCount = dlt_excludedItems.getRowCount();
+    
+}
+
+/**
+ * 제외항목 조회 실패 콜백
+ */
+scwin.sbm_selectExcludedItems_submiterror = function (e) {
+    handleExcludedItemsError();
+};
+
+/**
+ * 제외항목 총액 계산
+ */
+scwin.calculateTotalExcludedAmount = function () {
+    let totalExcluded = 0;
+    const rowCount = dlt_excludedItems.getRowCount();
+
+
+    for (let i = 0; i < rowCount; i++) {
+        const excCost = dlt_excludedItems.getCellData(i, "exc_cost");
+        const cost = parseInt(excCost) || 0;
+        totalExcluded += cost;
+    }
+
+    // 정산 정보에도 반영
+    updateDeductionAmount(totalExcluded);
+};
+
+/**
+ * 공제 금액 업데이트
+ */
+function updateDeductionAmount(totalExcluded) {
+    const deductionAmt = dma_settlementInfo.get("deducation_amt");
+    if (!deductionAmt || deductionAmt === "0") {
+        dma_settlementInfo.set("deducation_amt", totalExcluded.toString());
+    }
+}
+
+// =============================================================================
+// 보험상품 관리
+// =============================================================================
+
+/**
+ * 보험상품 조회
+ */
+scwin.searchInsuranceProducts = function () {
+    const userId = scwin.claim?.ID;
+
+    if (!userId) {
+        scwin.showLoading(false);
+        return;
+    }
+
+    dma_ID.set("ID", userId);
+
+    try {
+        $p.executeSubmission("sbm_selectInsuranceProducts");
+    } catch (error) {
+        scwin.showLoading(false);
+    }
+};
+
+/**
+ * 보험상품 조회 성공 콜백
+ */
+scwin.sbm_selectInsuranceProducts_submitdone = function (e) {
+    const responseData = e.responseJSON;
+    const elHeader = responseData?.elHeader;
+
+    if (isValidResponse(elHeader)) {
+        processInsuranceProducts(responseData.subInsuranceProductVoList);
+    } else {
+        handleInsuranceProductsError(elHeader);
+    }
+
+    scwin.showLoading(false);
+};
+
+/**
+ * 보험상품 데이터 처리
+ */
+function processInsuranceProducts(productData) {
+    if (productData && Array.isArray(productData) && productData.length > 0) {
+        logInsuranceProductsVerification();
+    } else {
+        dlt_insuranceProducts.setJSON([]);
+    }
+}
+
+/**
+ * 보험상품 검증 로그
+ */
+function logInsuranceProductsVerification() {
+    for (let i = 0; i < Math.min(3, dlt_insuranceProducts.getRowCount()); i++) {
+        console.log("그리드 데이터[" + i + "]:", {
+            insu_id: dlt_insuranceProducts.getCellData(i, "insu_id"),
+            insu_name: dlt_insuranceProducts.getCellData(i, "insu_name"),
+            user_name: dlt_insuranceProducts.getCellData(i, "user_name"),
+            insu_amt: dlt_insuranceProducts.getCellData(i, "insu_amt"),
+            status: dlt_insuranceProducts.getCellData(i, "status")
+        });
+    }
+}
+
+/**
+ * 보험상품 에러 처리
+ */
+function handleInsuranceProductsError(elHeader) {
+    dlt_insuranceProducts.setJSON([]);
+}
+
+/**
+ * 보험상품 조회 실패 콜백
+ */
+scwin.sbm_selectInsuranceProducts_submiterror = function (e) {
+    dlt_insuranceProducts.setJSON([]);
+    scwin.showLoading(false);
+};
+
+// =============================================================================
+// AI 메모 생성 시스템
+// =============================================================================
+
+/**
+ * AI 메모 생성 메인 함수
+ */
+scwin.generateMemoFromAPI = function () {
+    // 권한 체크
+    if (!scwin.checkPermission("메모 생성")) return;
+    if (!scwin.checkStatusPermission("메모 생성")) return;
+    if (!validateClaimNumber()) return;
+
+    // 제외항목 검증
+    if (!scwin.validateExcludedItemsBeforeMemo()) {
+        console.warn("제외항목 검증 실패, 그래도 진행합니다.");
+    }
+
+    // 요청 데이터 준비
+    const requestData = scwin.prepareFastAPIRequestData();
+    if (!requestData) {
+        Swal.fire({
+            title: '오류',
+            text: '요청 데이터 준비에 실패했습니다.',
+            icon: 'error',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
+        return;
+    }
+
+    
+    // API 호출 실행
+    executeAIMemoGeneration(requestData);
+};
+
+/**
+ * AI 메모 생성 API 호출
+ */
+function executeAIMemoGeneration(requestData) {
+    scwin.showLoading(true);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", AUDIT_CONFIG.API_ENDPOINT, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            scwin.showLoading(false);
+            handleAIMemoResponse(xhr);
+        }
+    };
+
+    xhr.onerror = function () {
+        scwin.showLoading(false);
+        handleAIMemoNetworkError();
+    };
+
+    xhr.send(JSON.stringify(requestData));
+}
+
+/**
+ * AI 메모 응답 처리
+ */
+function handleAIMemoResponse(xhr) {
+    if (xhr.status === 200) {
+        try {
+            const responseData = JSON.parse(xhr.responseText);
+            
+            if (isSuccessfulMemoResponse(responseData)) {
+                processMemoSuccess(responseData.results[0]);
+            } else {
+                showMemoGenerationError("메모 생성에 실패했습니다. 응답 데이터가 없습니다.");
+            }
+        } catch (error) {
+            showMemoGenerationError("응답 처리 중 오류가 발생했습니다.");
+        }
+    } else {
+        showMemoGenerationError(`API 호출에 실패했습니다. (상태: ${xhr.status})`);
+    }
+}
+
+/**
+ * 메모 응답 성공 여부 확인
+ */
+function isSuccessfulMemoResponse(responseData) {
+    return responseData && 
+           responseData.status === "success" && 
+           responseData.results && 
+           responseData.results.length > 0;
+}
+
+/**
+ * 메모 생성 성공 처리
+ */
+function processMemoSuccess(result) {
+    // 메모 설정
+    txt_examMemo.setValue(result.memo);
+    dma_settlementInfo.set("generated_memo", result.memo);
+    
+    // 요약 정보 설정
+    if (result.summary) {
+        dma_settlementInfo.set("memo_summary", JSON.stringify(result.summary));
+        
+        if (result.summary.settlement_summary) {
+            updateSettlementSummaryFromMemo(result.summary.settlement_summary);
+        }
+    }
+    
+    // 성공 메시지
+    Swal.fire({
+        title: '메모 생성 완료',
+        text: `심사 메모가 성공적으로 생성되었습니다.\n처리된 진료 건수: ${result.treatment_count}건`,
+        icon: 'success',
+        confirmButtonText: '확인',
+        confirmButtonColor: '#3085d6'
+    });
+}
+
+/**
+ * 메모에서 정산 요약 정보 업데이트
+ */
+function updateSettlementSummaryFromMemo(settlementSummary) {
+    const fields = ["total_final_due", "total_refund_amt", "treatment_count"];
+    
+    fields.forEach(field => {
+        if (settlementSummary[field]) {
+            dma_settlementInfo.set(field, settlementSummary[field]);
+        }
+    });
+}
+
+/**
+ * 메모 생성 에러 표시
+ */
+function showMemoGenerationError(message) {
+    Swal.fire({
+        title: '메모 생성 실패',
+        text: message,
+        icon: 'error',
+        confirmButtonText: '확인',
+        confirmButtonColor: '#3085d6'
+    });
+}
+
+/**
+ * 네트워크 에러 처리
+ */
+function handleAIMemoNetworkError() {
+    Swal.fire({
+        title: '네트워크 오류',
+        text: '네트워크 오류가 발생했습니다. FastAPI 서버를 확인해주세요.',
+        icon: 'error',
+        confirmButtonText: '확인',
+        confirmButtonColor: '#3085d6'
+    });
+}
+
+/**
+ * FastAPI 요청 데이터 준비
+ */
+scwin.prepareFastAPIRequestData = function () {
+    try {
+        const settlements = prepareSettlementsData();
+        const treatments = prepareTreatmentsData();
+        const excludedItems = prepareExcludedItemsData();
+
+        const requestData = {
+            settlements: settlements,
+            treatments: treatments,
+            excluded_items: excludedItems
+        };
+
+        logRequestDataStatistics(requestData);
+        return requestData;
+
+    } catch (error) {
+        return null;
+    }
+};
+
+/**
+ * 정산 데이터 준비
+ */
+function prepareSettlementsData() {
+    const settlements = [];
+    const rowCount = dlt_settlementTreatmentList ? dlt_settlementTreatmentList.getRowCount() : 0;
+
+    if (rowCount > 0) {
+        
+        for (let i = 0; i < rowCount; i++) {
+            const settlement = createSettlementObject(i);
+            settlements.push(settlement);
+        }
+    }
+
+    return settlements;
+}
+
+/**
+ * 정산 객체 생성
+ */
+function createSettlementObject(index) {
+    return {
+        settlement_id: parseInt(dlt_settlementTreatmentList.getCellData(index, "settlement_id") || (index + 1)),
+        final_due: parseInt(dlt_settlementTreatmentList.getCellData(index, "final_due")),
+        hospital_prepaid: parseInt(dlt_settlementTreatmentList.getCellData(index, "hospital_prepaid")),
+        deducation_amt: parseInt(dlt_settlementTreatmentList.getCellData(index, "deducation_amt")),
+        refund_amt: parseInt(dlt_settlementTreatmentList.getCellData(index, "refund_amt")),
+        treatment_id: parseInt(dlt_settlementTreatmentList.getCellData(index, "treatment_id")),
+        hospital_name: dlt_settlementTreatmentList.getCellData(index, "hospital_name"),
+        hospital_grade: dlt_settlementTreatmentList.getCellData(index, "hospital_grade"),
+        claim_no: scwin.claim.claimNo
+    };
+}
+
+/**
+ * 치료 데이터 준비
+ */
+function prepareTreatmentsData() {
+    const treatments = [];
+    const rowCount = dlt_settlementTreatmentList ? dlt_settlementTreatmentList.getRowCount() : 0;
+
+    if (rowCount > 0) {
+        for (let i = 0; i < rowCount; i++) {
+            const treatment = createTreatmentObject(i);
+            treatments.push(treatment);
+        }
+    }
+
+    return treatments;
+}
+
+/**
+ * 치료 객체 생성
+ */
+function createTreatmentObject(index) {
+    return {
+        treatment_id: parseInt(dlt_settlementTreatmentList.getCellData(index, "treatment_id")),
+        claim_no: scwin.claim.claimNo,
+        department: dlt_settlementTreatmentList.getCellData(index, "department"),
+        treatment_date: dlt_settlementTreatmentList.getCellData(index, "treatment_date") || 
+                       new Date().toISOString().split('T')[0],
+        patient_type: dlt_settlementTreatmentList.getCellData(index, "patient_type"),
+        hospital_name: dlt_settlementTreatmentList.getCellData(index, "hospital_name"),
+        hospital_grade: dlt_settlementTreatmentList.getCellData(index, "hospital_grade")
+    };
+}
+
+/**
+ * 제외항목 데이터 준비
+ */
+function prepareExcludedItemsData() {
+    if (typeof dlt_excludedItems === 'undefined') {
+        return [];
+    }
+
+    const excludedItems = [];
+    const rowCount = dlt_excludedItems.getRowCount();
+
+    for (let i = 0; i < rowCount; i++) {
+        const item = createExcludedItemObject(i);
+        excludedItems.push(item);
+    }
+
+    return excludedItems;
+}
+
+/**
+ * 제외항목 객체 생성
+ */
+function createExcludedItemObject(index) {
+    const excId = dlt_excludedItems.getCellData(index, "exc_id");
+    const excReason = dlt_excludedItems.getCellData(index, "exc_reason");
+    const excCost = dlt_excludedItems.getCellData(index, "exc_cost");
+    const excCategory = dlt_excludedItems.getCellData(index, "exc_category");
+    const treatmentId = dlt_excludedItems.getCellData(index, "treatment_id");
+
+    return {
+        exc_id: parseInt(excId || (index + 1)),
+        item_id: parseInt(dlt_excludedItems.getCellData(index, "item_id") || "0"),
+        treatment_id: parseInt(treatmentId || "1"),
+        claim_no: scwin.claim.claimNo,
+        exc_reason: excReason || "",
+        exc_cost: parseInt(excCost || "0"),
+        exc_category: excCategory || ""
+    };
+}
+
+/**
+ * 요청 데이터 통계 로그
+ */
+function logRequestDataStatistics(requestData) {
+
+    if (requestData.excluded_items.length > 0) {
+        requestData.excluded_items.forEach(function (item, index) {
+        });
+    } else {
+        console.warn("제외항목이 없습니다!");
+    }
+}
+
+/**
+ * 메모 생성 전 제외항목 검증
+ */
+scwin.validateExcludedItemsBeforeMemo = function () {
+    if (typeof dlt_excludedItems === 'undefined') {
+        return false;
+    }
+
+    const rowCount = dlt_excludedItems.getRowCount();
+
+    if (rowCount === 0) {
+        scwin.calculateTotalExcludedAmount();
+        return dlt_excludedItems.getRowCount() > 0;
+    }
+
+    return true;
+};
+
+// =============================================================================
+// 버튼 이벤트 핸들러
+// =============================================================================
+
+/**
+ * 심사 완료 버튼 클릭
+ */
+scwin.btn_complete_onclick = function () {
+    if (!scwin.checkPermission("심사 완료")) return;
+    if (!validateMemoExists()) return;
+    if (!validateClaimNumber()) return;
+
+    const resultData = scwin.prepareClaimResultData();
+    showCompleteConfirmation(resultData);
+};
+
+/**
+ * 메모 존재 여부 확인
+ */
+function validateMemoExists() {
+    const memo = txt_examMemo.getValue();
+    
+    if (!memo || memo.trim() === "") {
+        scwin.toastAlert({
+            icon: 'warning',
+            title: '심사 메모를 먼저 입력해주세요.'
+        });
+        return false;
+    }
+    return true;
+}
+
+/**
+ * 완료 확인 대화상자 표시
+ */
+function showCompleteConfirmation(resultData) {
+    Swal.fire({
+        title: '최종 심사 완료',
+        icon: 'question',
+        html: createCompleteConfirmationHTML(resultData),
+        showCancelButton: true,
+        confirmButtonText: '완료',
+        cancelButtonText: '취소',
+        confirmButtonColor: '#4FACFE',
+        cancelButtonColor: '#d1d1d1'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            executeComplete();
+        }
+    });
+}
+
+/**
+ * 완료 확인 HTML 생성
+ */
+function createCompleteConfirmationHTML(resultData) {
+    return '<div style="text-align: left;">' +
+           UI_MESSAGES.CONFIRM_COMPLETE + '<br><br>' +
+           '• 청구번호: ' + resultData.claim_no + '<br>' +
+           '• 지급금액: ' + resultData.amount + '원<br>' +
+           '• 처리일자: ' + resultData.date +
+           '</div>';
+}
+
+/**
+ * 완료 처리 실행
+ */
+function executeComplete() {
+    scwin.showLoading(true);
+    $p.executeSubmission("sbm_saveClaimResult");
+    localStorage.removeItem("claim");
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/webWrapper.xml";
+}
+
+/**
+ * 결재 신청/승인 버튼 클릭
+ */
+scwin.btn_approval_onclick = function (e) {
+    if (scwin.employee.role === USER_ROLES.WORKER) {
+        handleWorkerApproval();
+    } else {
+        handleManagerApproval();
+    }
+};
+
+/**
+ * 실무자 결재 신청 처리
+ */
+function handleWorkerApproval() {
+    if (!scwin.checkPermission("결재 신청")) return;
+    if (!scwin.checkApprovalPermission()) return;
+    
+    openClaimApprovalPopup("/InsWebApp/ui/web/audit/approval-modal.xml");
+}
+
+/**
+ * 관리자 결재 승인 처리
+ */
+function handleManagerApproval() {
+    scwin.twoBtnAlert({
+        title: '결재 승인',
+        text: UI_MESSAGES.CONFIRM_APPROVAL,
+        icon: 'question'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            executeApproval();
+        }
+    });
+}
+
+/**
+ * 결재 승인 실행
+ */
+function executeApproval() {
+    if (!validateClaimNumber()) return;
+    
+    dma_approvalReq.set("claim_no", scwin.claim.claimNo);
+    $p.executeSubmission("sbm_approveApprovalReq");
+}
+
+/**
+ * 반송 버튼 클릭
+ */
+scwin.btn_return_onclick = function (e) {
+    if (!scwin.checkPermission("반송")) return;
+    if (!scwin.checkReturnPermission()) return;
+    
+    openClaimReturnPopup("/InsWebApp/ui/web/audit/claimReturnPopup.xml");
+};
+
+/**
+ * 보완 요청 버튼 클릭
+ */
+scwin.btn_supplement_onclick = function (e) {
+    if (!scwin.checkPermission("보완 요청")) return;
+    if (!scwin.checkSupplementPermission()) return;
+    
+    openReqSupplePopup("/InsWebApp/ui/web/audit/reqSupplePopup.xml");
+};
+
+/**
+ * 관리자 결재 완료 버튼 클릭
+ */
+scwin.btn_approve_complete_onclick = function () {
+    if (!validateManagerApproveComplete()) return;
+    
+    showManagerApprovalConfirmation();
+};
+
+/**
+ * 관리자 결재 완료 유효성 검증
+ */
+function validateManagerApproveComplete() {
+    if (scwin.employee.role === USER_ROLES.WORKER) {
+        Swal.fire({
+            title: '권한 없음',
+            text: '관리자만 결재 완료를 할 수 있습니다.',
+            icon: 'warning',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
+        return false;
+    }
+
+    if (scwin.claim.status !== CLAIM_STATUS.APPROVAL) {
+        Swal.fire({
+            title: '작업 불가',
+            text: '결재중 상태에서만 결재 완료가 가능합니다.',
+            icon: 'warning',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6'
+        });
+        return false;
+    }
+
+    return validateClaimNumber();
+}
+
+/**
+ * 관리자 승인 확인 대화상자
+ */
+function showManagerApprovalConfirmation() {
+    Swal.fire({
+        title: '결재 승인',
+        html: createManagerApprovalHTML(),
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '승인',
+        cancelButtonText: '취소',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            executeManagerApproval();
+        }
+    });
+}
+
+/**
+ * 관리자 승인 HTML 생성
+ */
+function createManagerApprovalHTML() {
+    return '<div style="text-align: left;">' +
+           '결재를 승인하시겠습니까?<br><br>' +
+           '• 청구번호: ' + scwin.claim.claimNo + '<br>' +
+           '• 담당자: ' + (scwin.employee.empName || '관리자') +
+           '</div>';
+}
+
+/**
+ * 관리자 승인 실행
+ */
+function executeManagerApproval() {
+    scwin.showLoading(true);
+    
+    dma_approvalReq.set("claim_no", scwin.claim.claimNo);
+    dma_approvalReq.set("approval_memo", "관리자 결재 승인");
+    dma_approvalReq.set("request_type", "APPROVE");
+    
+    $p.executeSubmission("sbm_approveApprovalReq");
+}
+
+/**
+ * 반려 버튼 클릭
+ */
+scwin.btn_reject_onclick = function (e) {
+    openRejectClaimPopup("/InsWebApp/ui/web/audit/RejectClaimPopup.xml");
+};
+
+/**
+ * 반려 메모 버튼 클릭
+ */
+scwin.btn_reject_memo_onclick = function (e) {
+    openClaimReturnPopup("/InsWebApp/ui/web/audit/rejectMemoPopUp.xml");
+};
+
+/**
+ * 이전 버튼 클릭
+ */
+scwin.btn_before_onclick = function (e) {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure-ocr.xml";
+};
+
+// =============================================================================
+// 팝업 관리 시스템
+// =============================================================================
+
+/**
+ * 결재 신청 팝업 열기
+ */
+function openClaimApprovalPopup(link) {
+    const opts = createPopupOptions("claim_Approval_popup", "결재 신청");
+    $p.openPopup(link, opts);
+}
+
+/**
+ * 청구 반송 팝업 열기
+ */
+function openClaimReturnPopup(link) {
+    const opts = createPopupOptions("claim_return_popup", "반송 요청");
+    $p.openPopup(link, opts);
+}
+
+/**
+ * 보완 요청 팝업 열기
+ */
+function openReqSupplePopup(link) {
+    const opts = createPopupOptions("req_supple_popup", "보완 요청");
+    $p.openPopup(link, opts);
+}
+
+/**
+ * 반려 팝업 열기
+ */
+function openRejectClaimPopup(link) {
+    const opts = createPopupOptions("reject_claim_popup", "결재 반려");
+    $p.openPopup(link, opts);
+}
+
+/**
+ * 공통 팝업 옵션 생성
+ */
+function createPopupOptions(id, title) {
+    requires("uiplugin.popup");
+    
+    const winWid = $(window).width();
+    const winHei = $(window).height();
+    const sumLeft = (winWid - AUDIT_CONFIG.POPUP_WIDTH) / 2;
+    const sumTop = (winHei - AUDIT_CONFIG.POPUP_HEIGHT) / 2;
+
+    return {
+        "id": id,
+        "type": "litewindow",
+        "width": AUDIT_CONFIG.POPUP_WIDTH + "px",
+        "height": AUDIT_CONFIG.POPUP_HEIGHT + "px",
+        "top": sumTop,
+        "left": sumLeft,
+        "popupName": title,
+        "modal": true,
+        "useIFrame": false,
+        "title": title,
+        "useATagBtn": false,
+        "frameMode": "wframe"
+    };
+}
+
+// =============================================================================
+// 서버 응답 콜백 함수들
+// =============================================================================
+
+/**
+ * CLAIM_RESULT 데이터 준비
+ */
+scwin.prepareClaimResultData = function () {
+    const memo = txt_examMemo.getValue() || "";
+    const refundAmount = dma_settlementSummary.get("total_refund_amt") || "0";
+    const currentDate = getCurrentDateString();
+
+    // CLAIM_RESULT 데이터 설정
+    dma_claimResult.set("claim_no", scwin.claim.claimNo);
+    dma_claimResult.set("claim_memo", memo.trim());
+    dma_claimResult.set("amount", refundAmount);
+    dma_claimResult.set("date", currentDate);
+
+    return {
+        claim_no: scwin.claim.claimNo,
+        memo: memo.trim(),
+        amount: refundAmount,
+        date: currentDate
+    };
+};
+
+/**
+ * 현재 날짜 문자열 가져오기
+ */
+function getCurrentDateString() {
+    const currentDate = new Date();
+    return currentDate.getFullYear() + '-' +
+           String(currentDate.getMonth() + 1).padStart(2, '0') + '-' +
+           String(currentDate.getDate()).padStart(2, '0');
+}
+
+/**
+ * 결재 승인 성공 콜백
+ */
+scwin.sbm_approveApprovalReq_submitdone = function (e) {
+    const { elHeader } = e.responseJSON;
+    
+    scwin.showLoading(false);
+    
+    if (isValidResponse(elHeader)) {
+        handleApprovalSuccess();
+    } else {
+        handleApprovalError(e.responseJSON?.message);
+    }
+};
+
+/**
+ * 결재 승인 성공 처리
+ */
+function handleApprovalSuccess() {
+    Swal.fire({
+        title: '완료',
+        text: UI_MESSAGES.SUCCESS_APPROVAL,
+        icon: 'success',
+        showConfirmButton: false,
+        timer: AUDIT_CONFIG.SUCCESS_TIMER
+    }).then(() => {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/webWrapper.xml";
+    });
+}
+
+/**
+ * 결재 승인 에러 처리
+ */
+function handleApprovalError(message) {
+    Swal.fire({
+        title: '오류',
+        text: message || '결재 승인 중 오류가 발생했습니다.',
+        icon: 'error',
+        confirmButtonText: '확인'
+    });
+}
+
+/**
+ * 결재 승인 에러 콜백
+ */
+scwin.sbm_approveApprovalReq_submiterror = function (e) {
+    scwin.showLoading(false);
+    
+    
+    const errorMsg = getErrorMessage(e, "결재승인 처리 중 오류가 발생했습니다.");
+    
+    scwin.noBtnAlertWithTimer({
+        title: '에러 발생',
+        text: errorMsg,
+        icon: 'error'
+    });
+};
+
+/**
+ * CLAIM_RESULT 저장 성공 콜백
+ */
+scwin.sbm_saveClaimResult_submitdone = function (e) {
+    const { elHeader } = e.responseJSON;
+
+    if (isValidResponse(elHeader)) {
+        console.log("CLAIM_RESULT 저장 성공");
+    } else {
+        handleClaimResultSaveError(elHeader);
+    }
+};
+
+/**
+ * CLAIM_RESULT 저장 에러 처리
+ */
+function handleClaimResultSaveError(elHeader) {
+    scwin.showLoading(false);
+    
+    const errorMsg = elHeader?.resMsg || "저장에 실패했습니다.";
+    
+    scwin.noBtnAlertWithTimer({
+        title: '오류',
+        icon: 'error',
+        text: errorMsg || 'CLAIM_RESULT 저장 실패.'
+    });
+}
+
+/**
+ * CLAIM_RESULT 저장 실패 콜백
+ */
+scwin.sbm_saveClaimResult_submiterror = function (e) {
+    scwin.showLoading(false);
+    
+    const errorMsg = getErrorMessage(e, "CLAIM_RESULT 저장 중 오류가 발생했습니다.");
+    
+    scwin.noBtnAlertWithTimer({
+        title: '오류',
+        icon: 'error',
+        text: errorMsg
+    });
+    
+    // 심사완료 상태였다면 되돌리기
+    if (dma_settlementInfo.get("status") === "심사완료") {
+        dma_settlementInfo.set("status", "심사중");
+    }
+};
+
+/**
+ * 기존 메모 조회 성공 콜백
+ */
+scwin.sbm_selectClaimResult_submitdone = function (e) {
+    const responseData = e.responseJSON;
+    
+    if (responseData?.elData?.claimResultVoList) {
+        const claimResultList = responseData.elData.claimResultVoList;
+        
+        if (Array.isArray(claimResultList) && claimResultList.length > 0) {
+            const firstResult = claimResultList[0];
+            
+            if (firstResult.claim_memo) {
+                txt_examMemo.setValue(firstResult.claim_memo);
+                
+                // 다른 데이터도 설정
+                setClaimResultData(firstResult);
+            }
+        }
+    }
+};
+
+/**
+ * 청구 결과 데이터 설정
+ */
+function setClaimResultData(result) {
+    if (result.amount) {
+        dma_claimResult.set("amount", result.amount);
+    }
+    if (result.date) {
+        dma_claimResult.set("date", result.date);
+    }
+}
+
+
+/**
+ * 청구 사용자 정보 조회 성공 콜백
+ */
+scwin.sbm_selectClaimUserEmpInfo_submitdone = function (e) {
+    const responseData = e.responseJSON;
+    
+    if (responseData?.elData) {
+        console.log("유저 정보 데이터:", responseData.elData);
+    } else {
+        console.log("유저 정보가 없습니다.");
+    }
+};
+
+// =============================================================================
+// 유틸리티 함수
+// =============================================================================
+
+/**
+ * 서버 응답 유효성 검증
+ * @param {Object} elHeader - 응답 헤더
+ * @returns {boolean} 유효성 여부
+ */
+function isValidResponse(elHeader) {
+    return elHeader && 
+           elHeader !== "" && 
+           elHeader !== "undefined" && 
+           elHeader.resSuc !== false;
+}
+
+/**
+ * 에러 메시지 추출
+ * @param {Object} error - 에러 객체
+ * @param {string} defaultMessage - 기본 메시지
+ * @returns {string} 에러 메시지
+ */
+function getErrorMessage(error, defaultMessage) {
+    let errorMsg = defaultMessage;
+    
+    if (error.status === 404) {
+        errorMsg += "\n요청 URL을 찾을 수 없습니다.";
+    } else if (error.status === 500) {
+        errorMsg += "\n서버 내부 오류가 발생했습니다.";
+    } else if (error.responseText) {
+        try {
+            const errorData = JSON.parse(error.responseText);
+            errorMsg += "\n" + (errorData.message || error.responseText);
+        } catch (ex) {
+            errorMsg += "\n" + error.responseText;
+        }
+    }
+    
+    return errorMsg;
+}
+
+// =============================================================================
+// SweetAlert2 알림 시스템
+// =============================================================================
+
+/**
+ * 토스트 알림
+ * @param {Object} param - 알림 파라미터
+ */
+scwin.toastAlert = (param) => {
+    Swal.mixin({
+        toast: true,
+        showConfirmButton: false,
+        timer: AUDIT_CONFIG.TOAST_TIMER,
+        position: 'top-end',
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+        }
+    }).fire(param);
+};
+
+/**
+ * 확인 버튼 없는 타이머 알림
+ * @param {Object} param - 알림 파라미터
+ */
+scwin.noBtnAlertWithTimer = (param) => {
+    Swal.fire({
+        ...param,
+        timer: AUDIT_CONFIG.SUCCESS_TIMER,
+        showConfirmButton: false
+    });
+};
+
+/**
+ * 두 버튼 확인 알림
+ * @param {Object} param - 알림 파라미터
+ * @param {Function} callback - 결과 처리 함수 (선택적)
+ * @returns {Promise} SweetAlert2 Promise
+ */
+scwin.twoBtnAlert = (param, callback) => {
+    const promise = Swal.fire({
+        ...param,
+        showCancelButton: true,
+        confirmButtonColor: '#4FACFE',
+        cancelButtonColor: '#d1d1d1',
+        confirmButtonText: '완료',
+        cancelButtonText: '취소',
+        reverseButtons: true
+    });
+    
+    if (callback) {
+        return promise.then(callback);
+    }
+    
+    return promise;
+};]]></script>
+	</head>
+	<body ev:onpageload="scwin.onpageload">
+		<w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/web/cmmn/header.xml"></w2:wframe>
+		<xf:group class="sub_content" id="" style="padding:20px; top:100px;">
+			<!-- 헤더 영역 -->
+			<xf:group class="header_section" id=""
+				style="background-color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);border: 1px solid #d9d9d9">
+				<xf:group id="" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+					<w2:textbox id="" label="보험금 정산 심사" style="font-size:24px;font-weight:bold;"></w2:textbox>
+					<xf:group id="" style="display:flex;align-items:center;gap:10px;">
+						<w2:span class="status_badge status_pending" id="spn_status" ref="data:dma_settlementInfo.status"
+							style="display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold;"></w2:span>
+						<!-- <xf:trigger type="button" id="btn_refresh" ev:onclick="scwin.refreshData" style="padding:4px 12px;font-size:12px;">
+							<xf:label>새로고침</xf:label>
+							</xf:trigger> -->
+					</xf:group>
+				</xf:group>
+
+				<xf:group id="" style="display:flex;gap:30px;flex-wrap:wrap;">
+					<xf:group id="">
+						<w2:span id="" label="청구번호: " style="color:#666;"></w2:span>
+						<w2:span id="" ref="data:dma_userEmpResult.claim_no" style="font-weight:bold;"></w2:span>
+					</xf:group>
+					<xf:group id="">
+						<w2:span id="" label="환자명: " style="color:#666;"></w2:span>
+						<w2:span id="" ref="data:dma_userEmpResult.user_name" style="font-weight:bold;"></w2:span>
+					</xf:group>
+					<xf:group id="">
+						<w2:span id="" label="심사역: " style="color:#666;"></w2:span>
+						<w2:span id="" ref="data:dma_userEmpResult.emp_name" style="font-weight:bold;"></w2:span>
+					</xf:group>
+					<xf:group id="">
+						<w2:span id="spn_receiptNo" style="color:#2196F3;font-weight:bold;"></w2:span>
+					</xf:group>
+				</xf:group>
+			</xf:group>
+
+			<!-- 메인 컨텐츠 영역 -->
+			<xf:group class="main_content" id="" style="display: flex; gap: 20px;">
+				<!-- 왼쪽 패널 -->
+				<xf:group class="left_panel" id=""
+					style="flex: 1; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);border: 1px solid #d9d9d9">
+					<!-- 금액 표시 영역 -->
+					<xf:group class="amount_display" id=""
+						style="text-align: center; padding: 30px; background: #d9e3f0; color: black; border-radius: 8px; margin-bottom: 20px;">
+						<w2:textbox class="amount_number" id="txt_amountNumber" label=""
+							style="font-size: 36px; font-weight: bold; margin-bottom: 10px;" ref="data:dma_settlementSummary.total_refund_amt"
+							displayFormat="#,### 원">
+						</w2:textbox>
+						<w2:textbox class="amount_desc" id="txt_amountDesc" label="" style="font-size: 14px; opacity: 0.9;">
+						</w2:textbox>
+					</xf:group>
+
+
+					<xf:group id=""
+						style="background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+
+
+						<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
+							meta_snippetName="6_01 그리드" style="">
+							<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dlt_settlementTreatmentList"
+								focusMode="row" id="grd_settlement" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 153px;">
+								<w2:caption id="caption2" style="" value="this is a grid caption."></w2:caption>
+								<w2:header id="header2" style="">
+									<w2:row id="row3" style="">
+										<w2:column removeBorderStyle="false" width="70" inputType="text" id="column9" value="진료날짜" blockSelect="false"
+											displayMode="label">
+										</w2:column>
+										<w2:column removeBorderStyle="false" width="70" inputType="text" id="column11" value="최종 수납액" blockSelect="false"
+											displayMode="label">
+										</w2:column>
+										<w2:column width="70" inputType="text" id="column13" value="병원 공제금" displayMode="label"></w2:column>
+										<w2:column width="70" inputType="text" id="column15" value="삭감항목금액" displayMode="label"></w2:column>
+										<w2:column removeBorderStyle="false" width="70" inputType="text" id="column10" value="지급금액" blockSelect="false"
+											displayMode="label">
+										</w2:column>
+									</w2:row>
+								</w2:header>
+								<w2:gBody id="gBody2" style="">
+									<w2:row id="row4" style="">
+										<w2:column removeBorderStyle="false" width="70" inputType="text" id="treatment_date" blockSelect="false"
+											displayMode="label">
+										</w2:column>
+										<w2:column removeBorderStyle="false" width="70" inputType="text" id="final_due" blockSelect="false" displayMode="label"
+											displayFormat="#,### 원">
+										</w2:column>
+										<w2:column width="70" inputType="text" id="hospital_prepaid" displayMode="label" displayFormat="#,### 원">
+										</w2:column>
+										<w2:column width="70" inputType="text" id="deducation_amt" displayMode="label" displayFormat="#,### 원">
+										</w2:column>
+										<w2:column removeBorderStyle="false" width="70" inputType="text" id="refund_amt" blockSelect="false" displayMode="label"
+											displayFormat="#,### 원">
+										</w2:column>
+									</w2:row>
+								</w2:gBody>
+							</w2:gridView>
+						</xf:group>
+						<!-- 제목 -->
+						<xf:group id="" style="margin-bottom: 20px;">
+							<w2:span id="" label="지급 금액 산출 내역" style="font-size: 16px; font-weight: bold; color: #333;"></w2:span>
+						</xf:group>
+
+						<!-- 계산 내역 -->
+						<xf:group id="" style="background-color: #f8f9fa; padding: 15px; border-radius: 4px;">
+							<!-- 총 청구금액 -->
+							<xf:group class="info_row" id=""
+								style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+								<w2:span class="info_label" id="" label="최종 수납액" style="color: #666; font-size: 14px;"></w2:span>
+								<w2:span class="info_value" id="" style="color: #333; font-weight: 600; font-size: 14px;"
+									ref="data:dma_settlementSummary.total_final_due" displayFormat="#,### 원">
+								</w2:span>
+							</xf:group>
+
+							<!-- 공제금액 (자기부담금) -->
+							<xf:group class="info_row" id=""
+								style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+								<w2:span class="info_label" id="" label="병원 공제금" style="color: #666; font-size: 14px;"></w2:span>
+								<w2:span class="info_value" id="" style="color: #333; font-weight: 600; font-size: 14px;"
+									ref="data:dma_settlementSummary.total_hp_prepaid" displayFormat="#,### 원">
+									<w2:span label="-"></w2:span>
+								</w2:span>
+							</xf:group>
+
+							<!-- 본인부담금 (10%) -->
+							<xf:group class="info_row" id=""
+								style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+								<w2:span class="info_label" id="" label="삭감 항목 금액" style="color: #666; font-size: 14px;"></w2:span>
+								<w2:span class="info_value" id="" style="color: #333; font-weight: 600; font-size: 14px;"
+									ref="data:dma_settlementSummary.total_deducation_amt" displayFormat="#,### 원">
+									<w2:span label="-"></w2:span>
+								</w2:span>
+							</xf:group>
+
+							<!-- 구분선 (계산선) -->
+							<xf:group id="" style="margin: 15px 0; padding: 0;">
+								<hr style="border: none; border-top: 2px solid #333; margin: 0;" />
+							</xf:group>
+
+							<!-- 최종 지급금액 -->
+							<xf:group class="info_row" id=""
+								style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+								<w2:span class="info_label" id="" label="최종 지급금액" style="color: #333; font-weight: bold; font-size: 15px;">
+								</w2:span>
+								<w2:span class="info_value" id="" style="color: #007bff; font-weight: bold; font-size: 16px;"
+									ref="data:dma_settlementSummary.total_refund_amt" displayFormat="#,### 원">
+								</w2:span>
+							</xf:group>
+						</xf:group>
+					</xf:group>
+
+
+				</xf:group>
+
+				<!-- 오른쪽 패널 -->
+				<xf:group class="right_panel" id=""
+					style="width: 500px; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);border: 1px solid #d9d9d9;">
+
+					<!-- 보험상품 그리드 - SQL 구조에 맞게 수정 -->
+					<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
+						meta_snippetName="6_01 그리드" style="">
+						<w2:gridView id="grd_insuranceProducts" style="height:180px;border: 1px solid #d9d9d9;"
+							dataList="data:dlt_insuranceProducts" autoFit="allColumn" readOnly="true" class="gvw" scrollByColumn="false"
+							scrollByColumnAdaptive="false">
+							<w2:caption style="" id="caption2" value="보험 상품 목록"></w2:caption>
+							<w2:header style="" id="header2">
+								<w2:row style="" id="row3">
+									<w2:column width="100" inputType="text" id="column4" value="보험ID" displayMode="label"></w2:column>
+									<w2:column width="150" inputType="text" id="column5" value="보험상품명" displayMode="label"></w2:column>
+									<w2:column width="100" inputType="text" id="column6" value="가입자명" displayMode="label"></w2:column>
+									<w2:column width="100" inputType="text" id="column7" value="보험금액" displayMode="label"></w2:column>
+								</w2:row>
+							</w2:header>
+							<w2:gBody style="" id="gBody2">
+								<w2:row style="" id="row4">
+									<w2:column width="100" inputType="text" id="insu_id" displayMode="label"></w2:column>
+									<w2:column width="150" inputType="text" id="insu_name" displayMode="label"></w2:column>
+									<w2:column width="100" inputType="text" id="user_name" displayMode="label"></w2:column>
+									<w2:column width="100" inputType="text" id="insu_amt" displayMode="label" dataType="number" displayFormat="#,###">
+									</w2:column>
+								</w2:row>
+							</w2:gBody>
+						</w2:gridView>
+					</xf:group>
+
+
+
+					<w2:textbox class="section_title" id="" label="심사 메모"></w2:textbox>
+
+					<!-- 메모 입력 영역 -->
+					<xf:textarea class="memo_textarea" id="txt_examMemo" ref="data:dma_claimResult.claim_memo"
+						placeholder="심사메모 생성 버튼을 클릭하여 AI가 자동으로 생성한 메모를 확인하세요."
+						style="width: 100%; min-height: 200px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; resize: vertical; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; line-height: 1.6;"></xf:textarea>
+
+					<!-- 메모 관련 버튼 -->
+					<xf:group style="margin-top:15px;" id="">
+						<xf:trigger ev:onclick="scwin.generateMemoFromAPI"
+							style="background-color: #2196F3; color: white; padding: 12px 24px; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background-color 0.3s;"
+							id="btn_generateMemo" type="button" class="btn_generate">
+							<xf:label>AI 심사메모 생성</xf:label>
+						</xf:trigger>
+					</xf:group>
+					<xf:group class="button_group" id="" style="display: flex; gap: 10px; margin-top: 20px;">
+					</xf:group>
+
+					<!-- 심사 액션 버튼들 -->
+					<xf:group id="" style="border-top:1px solid #eee;padding-top: 20px;">
+
+						<xf:group class="button_group" id="">
+							<xf:trigger class="btn_secondary" id="btn_return" type="button" ev:onclick="scwin.btn_return_onclick">
+								<xf:label>반송요청</xf:label>
+							</xf:trigger>
+							<xf:trigger class="btn_secondary" id="btn_supplement" type="button" ev:onclick="scwin.btn_supplement_onclick">
+								<xf:label>보완요청</xf:label>
+							</xf:trigger>
+							<xf:trigger class="btn_secondary" id="btn_approval" type="button" style="" ev:onclick="scwin.btn_approval_onclick">
+								<xf:label>결재신청</xf:label>
+							</xf:trigger>
+							<xf:trigger class="btn_secondary" id="btn_reject_memo" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true"
+								meta_snippetName="8_01 기본버튼" style="" type="button" ev:onclick="scwin.btn_reject_memo_onclick">
+								<xf:label><![CDATA[반려메모]]></xf:label>
+							</xf:trigger>
+						</xf:group>
+
+						<xf:group class="button_group" id="">
+							<xf:trigger class="btn_secondary" id="btn_before" meta_snippetCategory="08_버튼" meta_snippetKeyComponent="true"
+								meta_snippetName="8_01 기본버튼" style="" type="button" ev:onclick="scwin.btn_before_onclick">
+								<xf:label><![CDATA[이전]]></xf:label>
+							</xf:trigger>
+							<xf:trigger style="width:100%;padding:16px;font-size:16px;" id="btn_reject" type="button" class="btn_secondary"
+								ev:onclick="scwin.btn_reject_onclick">
+								<xf:label>결재 반려</xf:label>
+							</xf:trigger>
+							<xf:trigger ev:onclick="scwin.btn_complete_onclick" style="width:100%;padding:16px;font-size:16px;" id="btn_complete"
+								type="button" class="btn_primary">
+								<xf:label>최종 심사 완료</xf:label>
+							</xf:trigger>
+							<xf:trigger ev:onclick="scwin.btn_approve_complete_onclick"
+								style="width:100%;padding:16px;font-size:16px;background-color:#28a745;" id="btn_approve_complete" type="button" class="btn_primary">
+								<xf:label>결재 완료</xf:label>
+							</xf:trigger>
+
+						</xf:group>
+					</xf:group>
+				</xf:group>
+			</xf:group>
+		</xf:group>
+	</body>
+</html>

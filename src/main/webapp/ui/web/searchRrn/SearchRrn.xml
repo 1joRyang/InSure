@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="/InsWebApp/cm/css/searchRnn.css" type="text/css"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+        	<w2:dataCollection baseNode="map">
+        		<w2:dataList baseNode="list" repeatNode="map" id="dlt_request_list" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="청구번호" id="claim_no"></w2:column>
+        				<w2:column dataType="text" name="청구유형" id="claim_type"></w2:column>
+        				<w2:column dataType="text" name="피보험자" id="user_name"></w2:column>
+        				<w2:column dataType="number" name="청구금액" id="amount"></w2:column>
+        				<w2:column dataType="text" name="담당자" id="emp_name"></w2:column>
+        				<w2:column dataType="text" name="상태" id="status"></w2:column>
+        				<w2:column dataType="text" name="ID" id="ID"></w2:column>
+        				<w2:column dataType="text" name="emp_no" id="emp_no"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dm_customer_info">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="고객명" id="userName"></w2:key>
+        				<w2:key dataType="text" name="주민번호" id="rrn"></w2:key>
+        				<w2:key dataType="text" name="연락처" id="phone_number"></w2:key>
+        				<w2:key dataType="text" name="사용자아이디" id="ID"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        	</w2:dataCollection>
+        	<w2:workflowCollection />
+        	<xf:submission id="sbm_searchClaimList" action="/InsWebApp/CLAIMFullJoinListByRrn.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dm_customer_info","key":"elData"}'
+        		target='data:json,{"id":"dlt_request_list","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_searchClaimList_submitdone"
+        		ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_searchUserInfo" action="/InsWebApp/UserInfoByRrn.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,{"id":"dm_customer_info","key":"elData"}' target='' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="검색 중.." ev:submit="" ev:submitdone="scwin.sbm_searchUserInfo_submitdone"
+        		ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        <script lazy="false" type="text/javascript"><![CDATA[// 데이터 초기화 함수를 맨 위로 이동
+scwin.clearData = function() {
+    search_input_front.setValue("");
+    search_input_back.setValue("");
+    dm_customer_info.setEmptyValue();
+    dlt_request_list.removeAll();
+};
+
+const Toast = Swal.mixin({
+	toast: true,
+	showConfirmButton: false,
+    timer: 3000,
+	position: 'top-end',
+	timerProgressBar: true,
+	didOpen: (toast) => {
+		toast.addEventListener('mouseenter', Swal.stopTimer)
+		toast.addEventListener('mouseleave', Swal.resumeTimer)
+	}
+})
+
+scwin.onpageload = function() {
+    scwin.clearData();
+    grd_group.hide();
+};
+
+// 조회 버튼 클릭
+scwin.btn_search_onclick = function() {
+    var frontPart = search_input_front.getValue();
+    var backPart = search_input_back.getValue();
+    
+    if (!frontPart || frontPart.trim() === "") {
+        Toast.fire({
+            title:'주민번호 앞자리를 입력해주세요.', 
+            icon:'warning',
+        });
+        search_input_front.focus();
+        return;
+    }
+    
+    if (!backPart || backPart.trim() === "") {
+        Toast.fire({
+            title:'주민번호 뒷자리를 입력해주세요.', 
+            icon:'warning',
+        });
+        search_input_back.focus();
+        return;
+    }
+    
+    var residentNo = frontPart.trim() + "-" + backPart.trim();
+    
+    dm_customer_info.set("rrn", residentNo);
+
+    $c.sbm.execute($p, sbm_searchUserInfo);
+};
+
+scwin.sbm_searchUserInfo_submitdone = function(e) {
+    
+    var elData = e.responseJSON.elData;
+    var elHeader = e.responseJSON.elHeader;
+
+    if(elHeader == null || elHeader == "" || elHeader == "undefined" || elHeader.resSuc == false) {
+        $c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
+        return false;
+    }
+    
+    if(elData && elData.id) {
+        dm_customer_info.setJSON(elData);
+        
+        dm_customer_info.set("ID", elData.id);
+        
+        console.log("User ID 설정:", elData.id);
+        console.log("설정 후 DataMap:", dm_customer_info.getJSON());
+        
+        $c.sbm.execute($p, sbm_searchClaimList);
+    } else {
+        Swal.fire({
+            title:'해당 주민번호로 등록된 고객이 없습니다.', 
+            icon:'warning',
+            timer: 2000,
+            showConfirmButton: false,
+        });
+
+        scwin.clearData();
+    }
+};
+
+// 청구목록 조회 완료 후
+scwin.sbm_searchClaimList_submitdone = function(e) {
+    grd_group.show();
+    
+    var claimList = e.responseJSON.claimFullJoinVoList;
+    var elHeader = e.responseJSON.elHeader;
+    
+    console.log("청구목록 데이터:", claimList);
+    console.log("청구목록 길이:", claimList ? claimList.length : "null");
+    
+    if(elHeader == null || elHeader == "" || elHeader == "undefined" || elHeader.resSuc == false) {
+        $c.win.alert(`에러코드 : ${elHeader.resCode}\n에러메시지 : ${elHeader.resMsg}`);
+        return false;
+    }
+    
+    if(claimList && claimList.length > 0) {
+        // 청구목록을 DataList에 설정
+        claimList.forEach(function(item) {
+            if (!item.amount) {  // amount 값이 없으면
+                item.amount = 0;  // 0
+            }
+        });
+
+        dlt_request_list.setJSON(claimList);
+        console.log("청구목록 설정 완료:", claimList.length + "건");
+    } else {
+        dlt_request_list.removeAll();
+        Swal.fire({
+            title:'해당 고객의 청구 내역이 없습니다.', 
+            icon:'warning',
+            timer: 2000,
+            showConfirmButton: false,
+        });
+    }
+};
+
+scwin.search_input_front_onkeydown = function(e) {
+    if (e.keyCode === 13) { // Enter key
+        search_input_back.focus();
+    }
+};
+
+scwin.search_input_back_onkeydown = function(e) {
+    if (e.keyCode === 13) { // Enter key
+        scwin.btn_search_onclick();
+    }
+};
+
+function moveNsave(rowData) {
+    // claimNo, ID, user_name, status, empName
+    localStorage.removeItem("claimImg");
+    //console.log(rowData);
+    const claim = {
+        claimNo: rowData.claim_no,
+        ID: rowData.id,
+        empName: rowData.emp_name,
+        userName: rowData.user_name,
+        empNo:rowData.emp_no,
+        status: rowData.status
+    };
+    
+    localStorage.setItem("claim", JSON.stringify(claim));
+    
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure_first.xml";
+}
+
+scwin.grid_rnn_oncelldblclick = function (rowIndex, columnIndex, columnId) {
+    let rowData = grid_rnn.getRowJSON(rowIndex);
+    moveNsave(rowData);
+};
+]]></script>
+    </head>
+    <body ev:onpageload="scwin.onpageload" class="">
+    	<xf:group class="sub_contents" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
+    		style="">
+    		<xf:group class="pgtbox" id="" meta_snippetCategory="02_타이틀" meta_snippetKeyComponent="true" meta_snippetName="2_01 페이지타이틀"
+    			style="border-bottom: .2px solid #3674B5;padding-bottom: 20px;">
+    			<w2:textbox class="pgt_tit" id="" label="주민번호 조회" style="" tagname=""></w2:textbox>
+    		</xf:group>
+    		<xf:group style="" id="" class="search-section">
+    			<w2:textbox style="" id="" label="주민번호" class="search-label"></w2:textbox>
+    			<xf:group style="" id="" class="search-row">
+    				<xf:input id="search_input_front" style="" class="search-input" placeholder="주민번호 앞자리를 입력하세요."
+    					ev:onkeydown="scwin.search_input_front_onkeydown">
+    				</xf:input>
+    				<w2:textbox id="" label="-" style=""></w2:textbox>
+    				<xf:input id="search_input_back" style="" class="search-input" ev:onkeydown="scwin.search_input_back_onkeydown" placeholder="주민번호 뒷자리를 입력하세요."></xf:input>
+    				<w2:button style="" id="btn_search" class="search-btn" label="검색" ev:onclick="scwin.btn_search_onclick"></w2:button>
+    			</xf:group>
+    		</xf:group>
+    		<xf:group style="" id="" class="info-section">
+    			<w2:textbox id="" label="고객 기본 정보" style="" class="info-title"></w2:textbox>
+    			<xf:group style="" id="" class="info-row">
+    				<xf:group style="" id="" class="info-group">
+    					<w2:textbox style="" id="" label="고객명" class="info-label"></w2:textbox>
+    					<w2:textbox ref="data:dm_customer_info.userName" style="height: 18px;" id="txt_customer_name" label="" class="info-input"></w2:textbox>
+    				</xf:group>
+    				<xf:group style="" id="" class="info-group">
+    					<w2:textbox style="" id="" label="주민번호" class="info-label"></w2:textbox>
+    					<w2:textbox ref="data:dm_customer_info.rrn" style="height: 18px;" id="txt_resident_no" label="" class="info-input"></w2:textbox>
+    				</xf:group>
+    				<xf:group style="" id="" class="info-group">
+    					<w2:textbox style="" id="" label="연락처" class="info-label"></w2:textbox>
+    					<w2:textbox ref="data:dm_customer_info.phone_number" style="height: 18px;" id="txt_contact" label="" class="info-input"></w2:textbox>
+    				</xf:group>
+    			</xf:group>
+    		</xf:group>
+    		<xf:group style="margin-bottom: 100px;" id="grd_group" class="">
+    			<xf:group tagname="caption" text="고객 청구목록" class="results-title"></xf:group>
+    			<xf:group adaptiveThreshold="" class="gvwbox" id="" meta_snippetCategory="06_그리드" meta_snippetKeyComponent="true"
+    				meta_snippetName="6_01 그리드" style="">
+    				<w2:gridView autoFit="allColumn" checkReadOnlyOnPasteEnable="" class="gvw" dataList="data:dlt_request_list"
+    					focusMode="row" id="grid_rnn" scrollByColumn="false" scrollByColumnAdaptive="false" style="height: 170px;margin-top: 7px;"
+    					ev:oncelldblclick="scwin.grid_rnn_oncelldblclick" readOnly="true">
+    					<w2:caption id="caption3" style="" value="this is a grid caption."></w2:caption>
+    					<w2:header id="header" style="" class="gvw-header">
+    						<w2:row id="header-row" style="">
+    							<w2:column width="70" inputType="text" style="" id="column1" value="청구번호" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column2" value="청구유형" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column3" value="피보험자" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column4" value="청구금액" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column5" value="담당자" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column7" value="상태" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="column13" value="ID" displayMode="label"
+    								hidden="true">
+    							</w2:column>
+    							<w2:column hidden="true" width="70" inputType="text" style="" id="column14" value="emp_no"
+    								displayMode="label">
+    							</w2:column>
+    						</w2:row>
+    					</w2:header>
+    					<w2:gBody id="gBody" style="" class="gvw-body">
+    						<w2:row id="gvw-row" style="">
+    							<w2:column width="70" inputType="text" style="" id="claim_no" value="" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="claim_type" value="" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="user_name" value="" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="amount" value="" class="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="emp_name" value="" class="" displayMode="label"></w2:column>
+    							<w2:column customFormatter="scwin.statusFmt" width="70" inputType="text" style="" id="status" value=""
+    								class="" displayMode="label">
+    							</w2:column>
+    							<w2:column width="70" inputType="text" style="" id="ID" value="" displayMode="label"></w2:column>
+    							<w2:column width="70" inputType="text" style="" id="emp_no" value="" displayMode="label"></w2:column>
+    						</w2:row>
+    					</w2:gBody>
+    				</w2:gridView>
+    			</xf:group>
+    		</xf:group>
+    	</xf:group>
+    </body>
+</html>

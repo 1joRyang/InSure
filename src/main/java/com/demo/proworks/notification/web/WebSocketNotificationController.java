@@ -26,7 +26,7 @@ import com.inswave.elfw.annotation.ElDescription;
 import com.inswave.elfw.annotation.ElService;
 
 /**
- * @subject     : 웹소켓 알림 전용 컨트롤러 (기존 코드 수정 없이 독립 실행)
+ * @subject     : 웹소켓 알림 전용 컨트롤러 
  * @description : 실손보험 자동 배정 후 웹소켓 실시간 알림을 전송하는 전용 컨트롤러
  * @author      : 웹소켓팀
  * @since       : 2025/07/21
@@ -48,123 +48,10 @@ public class WebSocketNotificationController {
     @Resource(name = "notificationServiceImpl")
     private NotificationService notificationService;
     
-    /**
-     * 🔥 자동 배정 + 웹소켓 알림 (기존 로직과 독립)
-     * 
-     * @param assignRuleVo keyword 필드에 claimNo 입력
-     * @return 배정 결과 + 웹소켓 알림 결과
-     */
-    @ElService(key="websocket0001AutoAssignWithNotification")
-    @RequestMapping(value="websocket0001AutoAssignWithNotification")
-    @ElDescription(sub="자동 배정 + 웹소켓 알림", desc="기존 자동 배정을 실행하고 성공 시 웹소켓 실시간 알림을 전송한다.")
-    public Map<String, Object> autoAssignWithNotification(AssignRuleVo assignRuleVo) throws Exception {
-        Map<String, Object> result = new HashMap<String, Object>();
-        
-        try {
-            String claimNo = assignRuleVo.getKeyword(); // keyword 필드를 claimNo로 사용
-            
-            if (claimNo == null || claimNo.trim().isEmpty()) {
-                result.put("success", false);
-                result.put("message", "청구번호를 입력해주세요.");
-                return result;
-            }
-            
-            logger.info("🚀 웹소켓 알림 포함 자동 배정 시작: {}", claimNo);
-            
-            // 1. 배정 전 청구 정보 조회 (웹소켓 알림용)
-            //ClaimVo beforeClaim = getClaimInfo(claimNo);
-            
-            // 2. 기존 자동 배정 로직 실행 (기존 서비스 그대로 사용)
-            String assignResult = assignRuleService.assignEmployeeToClaim(claimNo);
-            
-            // 3. 배정 성공 시 웹소켓 알림 전송
-            if (assignResult.contains("자동 배정 완료")) {
-                // 배정 후 청구 정보 조회
-                ClaimVo afterClaim = getClaimInfo(claimNo);
-                
-                // 웹소켓 알림 전송
-                Map<String, Object> notificationResult = sendWebSocketNotification(afterClaim, assignResult);
-                
-                result.put("success", true);
-                result.put("assignResult", assignResult);
-                result.put("notificationResult", notificationResult);
-                result.put("message", "자동 배정 및 웹소켓 알림 완료");
-                
-                logger.info("✅ 자동 배정 + 웹소켓 알림 성공: {}", claimNo);
-                
-            } else {
-                result.put("success", true);
-                result.put("assignResult", assignResult);
-                
-                Map<String, Object> notificationResult = new HashMap<String, Object>();
-				notificationResult.put("sent", false);
-				notificationResult.put("reason", "배정 실패");
-				result.put("notificationResult", notificationResult);
-                result.put("message", "자동 배정 처리 완료 (알림 없음)");
-            }
-            
-        } catch (Exception e) {
-            logger.error("❌ 자동 배정 + 웹소켓 알림 실패: {}", e.getMessage(), e);
-            result.put("success", false);
-            result.put("message", "처리 중 오류 발생: " + e.getMessage());
-        }
-        
-        return result;
-    }
+   
     
     /**
-     * 🔥 일괄 자동 배정 + 웹소켓 알림
-     */
-    @ElService(key="websocket0002BatchAssignWithNotification")
-    @RequestMapping(value="websocket0002BatchAssignWithNotification")
-    @ElDescription(sub="일괄 자동 배정 + 웹소켓 알림", desc="모든 미배정 청구를 일괄 자동 배정하고 웹소켓 알림을 전송한다.")
-    public Map<String, Object> batchAssignWithNotification() throws Exception {
-        Map<String, Object> result = new HashMap<>();
-        
-        try {
-            logger.info("📊 일괄 자동 배정 + 웹소켓 알림 시작");
-            
-            // 1. 기존 일괄 배정 로직 실행
-            List<String> assignResults = assignRuleService.assignAllUnassignedClaims();
-            
-            // 2. 결과 분석
-            int successCount = 0;
-            int failCount = 0;
-            
-            for (String assignResult : assignResults) {
-                if (assignResult.contains("배정 완료") || assignResult.contains("자동 배정 완료")) {
-                    successCount++;
-                } else {
-                    failCount++;
-                }
-            }
-            
-            // 3. 일괄 배정 완료 웹소켓 알림 전송
-            Map<String, Object> batchNotificationResult = sendBatchCompleteNotification(
-                assignResults.size(), successCount, failCount, assignResults
-            );
-            
-            result.put("success", true);
-            result.put("totalProcessed", assignResults.size());
-            result.put("successCount", successCount);
-            result.put("failCount", failCount);
-            result.put("assignResults", assignResults);
-            result.put("notificationResult", batchNotificationResult);
-            result.put("message", String.format("일괄 배정 완료 - 성공: %d건, 실패: %d건", successCount, failCount));
-            
-            logger.info("✅ 일괄 자동 배정 + 웹소켓 알림 완료: {}건 처리", assignResults.size());
-            
-        } catch (Exception e) {
-            logger.error("❌ 일괄 자동 배정 + 웹소켓 알림 실패: {}", e.getMessage(), e);
-            result.put("success", false);
-            result.put("message", "일괄 배정 중 오류 발생: " + e.getMessage());
-        }
-        
-        return result;
-    }
-    
-    /**
-     * 🧪 웹소켓 연결 테스트
+     * 웹소켓 연결 테스트
      */
     @ElService(key="websocket0003TestConnection")
     @RequestMapping(value="websocket0003TestConnection")
@@ -175,7 +62,6 @@ public class WebSocketNotificationController {
         try {
             RestTemplate restTemplate = new RestTemplate();
             
-            // 웹소켓 서버 상태 확인
             Map<String, Object> response = restTemplate.getForObject(
                 "http://localhost:8081/api/connection-status", 
                 Map.class
@@ -199,7 +85,7 @@ public class WebSocketNotificationController {
     }
     
     /**
-     * 수동 웹소켓 알림 전송 (테스트용)
+     * 수동 웹소켓 알림 전송
      */
     @ElService(key="websocket0004SendTestNotification")
     @RequestMapping(value="websocket0004SendTestNotification")

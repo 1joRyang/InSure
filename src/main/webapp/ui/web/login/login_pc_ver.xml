@@ -1,0 +1,407 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+        
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <w2:type>COMPONENT</w2:type>
+                
+        <w2:buildDate/>
+                
+        <w2:MSA/>
+                
+        <xf:model>
+
+        	<w2:dataCollection baseNode="map">
+        		<w2:dataMap baseNode="map" id="dma_login_request">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="실무자아이디" id="empNo"></w2:key>
+        				<w2:key dataType="text" name="비밀번호" id="empPw"></w2:key>
+        				<w2:key dataType="text" name="로그인 타입" id="loginType"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_login_response">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="실무자아이디" id="empNo"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_logout_response">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="실무자아이디" id="empNo"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        	</w2:dataCollection>
+
+        	<w2:workflowCollection />
+
+        	<xf:submission id="sbm_EmployeeLogin" action="/InsWebApp/EmployeeLogin.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,[{"id":"dma_login_request","key":"elData"},{"id":"dma_login_response","key":"elData"}]' target="" encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_EmployeeLogin_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        </xf:model>
+
+        <w2:layoutInfo/>
+                
+        <w2:publicInfo method=""/>
+                
+        <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
+        <script lazy="false" type="text/javascript"><![CDATA[scwin.onpageload = function() {
+    dma_login_request.set("empNo", "");
+    dma_login_request.set("empPw", "");
+
+    dma_login_request.set("loginType", "EMPLOYEE");
+
+    ibx_empNo.focus();
+
+     
+    scwin.isPasswordVisible = false;
+    scwin.passwordInput = null;
+};
+
+
+scwin.trigger1_login_onclick = function(e) {
+    var actualEmpNo = "";
+    var actualEmpPw = "";
+    
+    if (typeof ibx_empNo !== 'undefined' && ibx_empNo.getValue) {
+        actualEmpNo = ibx_empNo.getValue();
+    }
+    if (typeof ibx_empPw !== 'undefined' && ibx_empPw.getValue) {
+        actualEmpPw = ibx_empPw.getValue();
+    }
+    
+    dma_login_request.set("empNo", actualEmpNo);
+    dma_login_request.set("empPw", actualEmpPw);
+
+    // 아이디 입력값 검증
+    if (actualEmpNo === "" || actualEmpNo === null) {
+        scwin.toastAlert({
+            icon: 'warning',
+            title: '아이디를 입력해주세요.'
+        });
+        ibx_empNo.focus();
+        return;
+    }
+
+    // 비밀번호 입력값 검증
+    if (actualEmpPw === "" || actualEmpPw === null) {
+        scwin.toastAlert({
+            icon: 'warning',
+            title: '비밀번호를 입력해주세요.'
+        });
+        ibx_empPw.focus(); 
+        return;
+    }
+
+    var finalData = dma_login_request.getJSON();
+    console.log("최종 전송 데이터:", finalData);
+
+    $c.sbm.execute(sbm_EmployeeLogin, finalData);
+};
+
+scwin.sbm_EmployeeLogin_submitdone = function (e) {
+    
+    try {
+        if (e && e.responseJSON && e.responseJSON.dma_login_response) {
+            const loginResponse = e.responseJSON.dma_login_response;
+
+             // Employee 객체
+             const employee = {
+                empNo: loginResponse.empNo,     
+                empName: loginResponse.empName,   
+                status: loginResponse.empStatus,     
+                deptId: loginResponse.deptId, 
+                role: loginResponse.role
+            };
+
+            localStorage.removeItem("user");
+            localStorage.removeItem("simple");
+            localStorage.setItem("employee", JSON.stringify(employee));
+            
+            if (typeof $p !== 'undefined' && $p.setSession) {
+                $p.setSession("empNo", employee.empNo); 
+                $p.setSession("empName", employee.empName); 
+                $p.setSession("deptId", employee.deptId); 
+                $p.setSession("role", employee.role); 
+                $p.setSession("empStatus", employee.status); 
+                console.log("($p.setSession) 웹스퀘어 세션에 저장된 empNo:", $p.getSession("empNo"));
+            } 
+
+            // 메인 페이지로
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/webWrapper.xml";
+            
+        } else {
+            scwin.toastAlert({
+                icon: 'warning',
+                title: '아이디 또는 비밀번호를 확인해주세요.'
+            });
+            dma_login_request.set("empPw", "");
+            ibx_empPw.focus();
+        }
+    } catch (error) {
+        console.error("로그인 결과 처리 중 오류가 발생했습니다:", error);
+        scwin.toastAlert({
+            icon: 'error',
+            title: '로그인 결과를 처리하는 중 오류가 발생했습니다.'
+        });
+    }
+};
+
+
+scwin.sbm_EmployeeLogin_submiterror = function(e) {
+    scwin.toastAlert({
+        icon: 'warning',
+        title: '아이디 또는 비밀번호를 확인해주세요.'
+    });
+    dma_login_request.set("empPw", "");
+    ibx_empPw.focus();
+};
+
+
+
+// 로컬스토리지에서 employee 읽기
+function getEmployee() {
+    try {
+        const employeeData = localStorage.getItem("employee");
+        return employeeData ? JSON.parse(employeeData) : null;
+    } catch (error) {
+        console.error("employee 데이터 읽기 실패:", error);
+        return null;
+    }
+}
+
+/**
+ * 현재 로그인 상태 확인 함수
+ */
+function getCurrentLoginType() {
+    const user = localStorage.getItem("user");
+    const simple = localStorage.getItem("simple");
+    const employee = localStorage.getItem("employee");
+    
+    // 우선순위: EMPLOYEE > SIMPLE > USER
+    if (employee) {
+        return { type: "EMPLOYEE", data: JSON.parse(employee) };
+    } else if (simple) {
+        return { 
+            type: "SIMPLE", 
+            data: JSON.parse(simple), 
+            userInfo: user ? JSON.parse(user) : null 
+        };
+    } else if (user) {
+        return { type: "USER", data: JSON.parse(user) };
+    } else {
+        return { type: "NONE", data: null };
+    }
+}
+
+/**
+ * 로그인 권한 체크
+ */
+function checkLoginPermission(requiredType) {
+    const currentLogin = getCurrentLoginType();
+    
+    switch (requiredType) {
+        case "USER":
+            return ["USER", "SIMPLE", "EMPLOYEE"].includes(currentLogin.type);
+        case "SIMPLE":
+            return ["SIMPLE", "EMPLOYEE"].includes(currentLogin.type);
+        case "EMPLOYEE":
+            return currentLogin.type === "EMPLOYEE";
+        default:
+            return false;
+    }
+}
+
+
+/**
+ * Employee 권한 체크
+ */
+function checkEmployeeAuth() {
+    const currentLogin = getCurrentLoginType();
+    if (currentLogin.type !== "EMPLOYEE") {
+        scwin.noBtnAlertWithTimer({
+            title:'Employee 권한이 필요합니다.', 
+            icon:'warning'
+        })
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/login/login_pc_ver.xml";
+        return false;
+    }
+    return true;
+}
+
+scwin.isPasswordVisible = false;
+scwin.passwordInput = null;
+
+/**
+ * 비밀번호 보기/숨기기 토글 함수
+ */
+scwin.anchor_pw_onclick = function () {
+    if (!scwin.passwordInput) {
+        scwin.passwordInput = document.querySelector('.w2inputbox input, .w2input input') ||
+                             document.querySelector('input[name*="empPw"], input[name*="password"]') ||
+                             document.querySelector('input[type="password"]') ||
+                             document.querySelector('input[type="text"]');
+    }
+    
+    if (scwin.passwordInput) {
+        scwin.isPasswordVisible = !scwin.isPasswordVisible;
+        scwin.passwordInput.type = scwin.isPasswordVisible ? "text" : "password";
+        
+        setTimeout(function() {
+            scwin.passwordInput.focus();
+        }, 50);
+    }
+};
+
+
+/**
+ * 아이디 입력창에서 키 입력 처리
+ */
+scwin.ibx_empNo_onkeydown = function (e) {
+    if (e.keyCode === 13) { 
+        e.preventDefault();
+        ibx_empPw.focus(); 
+    }
+};
+
+/**
+ * 비밀번호 입력창에서 키 입력 처리
+ */
+scwin.ibx_empPw_onkeydown = function (e) {
+    if (e.keyCode === 13) { 
+        e.preventDefault();
+        scwin.trigger1_login_onclick();
+    }
+};
+
+
+
+scwin.sbm_EmployeeLogout_submitdone = function (e) {
+    
+    try {
+        const currentLogin = getCurrentLoginType();
+        
+        localStorage.removeItem("user");
+        localStorage.removeItem("simple");
+        localStorage.removeItem("employee");
+        
+        
+        // 로그인 타입별 페이지 이동
+        if (currentLogin.type === "EMPLOYEE") {
+            // Employee 로그아웃 후 Employee 로그인 페이지로
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/login/login_pc_ver.xml";
+        } else {
+            // USER/SIMPLE 로그아웃 후 user 로그인 페이지로
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/login/insure_login_mobile.xml";
+        }
+        
+    } catch (error) {
+        console.error("로그아웃 처리 중 오류:", error);
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/login/login_pc_ver.xml";
+    }
+};
+
+
+/**
+ * 통합 로그아웃 함수
+ */
+function logout() {
+    const currentLogin = getCurrentLoginType();
+
+    // 모든 로그인 정보 삭제
+    localStorage.removeItem("user");
+    localStorage.removeItem("simple");
+    localStorage.removeItem("employee");
+
+    // 로그인 타입별 로그아웃 처리
+    if (currentLogin.type === "EMPLOYEE") {
+        // Employee 로그아웃 후 Employee 로그인 페이지로
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/login/login_pc_ver.xml";
+    } else {
+        // USER/SIMPLE 로그아웃 후 user 로그인 페이지로
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/login/insure_login_mobile.xml";
+    }
+    
+    if (currentLogin.type === "NONE") {
+        console.log("이미 로그아웃 상태입니다.");
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/login/login_pc_ver.xml";
+        return;
+    }
+    
+    if (confirm("로그아웃 하시겠습니까?")) {
+        sbm_EmployeeLogout.submit();       
+    }
+}
+
+]]></script>
+
+    </head>
+        
+    <body class="" ev:onpageload="scwin.onpageload">
+
+    	<xf:group class="login_wrap" id="" style=";background-image:/InsWebApp/images/ws5/logo/insureLogo.png;">
+
+    		<xf:group class="login_logo" id="" tagname="h1">
+
+
+    			<xf:image id="" src="/InsWebApp/images/ws5/logo/insureLogo.png" style="width:142px;height:47px;"></xf:image>
+    		</xf:group>
+
+    		<xf:group class="login_container" id="" style="left:560px; ">
+
+    			<xf:group class="login_header" id="">
+
+    				<xf:group style="width:360px;height:65px;background-position:center;vertical-align:middle;text-align:center;" id="">
+    					<xf:image src="/InsWebApp/images/ws5/logo/insureLogo.png" style="width:142px;height:47px;" id=""></xf:image>
+    				</xf:group>
+    			</xf:group>
+    			<xf:group class="login_contents" id="" style="">
+
+    				<xf:group id="" tagname="ul">
+
+    					<xf:group id="" tagname="li">
+
+    						<w2:textbox class="tit" for="user_id" id="" label="아이디" style="" tagname="label" />
+
+    						<xf:input adjustMaxLength="false" id="ibx_empNo" placeholder="아이디를 입력해주세요." style="" ref="data:dma_login_request.empNo" class="id_ibx" ev:onkeydown="scwin.ibx_empNo_onkeydown"/>
+
+    					</xf:group>
+
+    					<xf:group id="" tagname="li">
+
+    						<w2:textbox class="tit" for="user_pw" id="" label="비밀번호" style="" tagname="label" />
+
+    						<xf:group class="login_form" id="">
+
+    							<xf:input adjustMaxLength="false" id="ibx_empPw" placeholder="비밀번호를 입력해주세요." style="" type="password" ref="data:dma_login_request.empPw" class="pw_ibx" ev:onkeydown="scwin.ibx_empPw_onkeydown"/>
+
+    							<w2:anchor class="btn_login_password" id="anchor_pw" outerDiv="false" style="" ev:onclick="scwin.anchor_pw_onclick">
+
+    								<xf:label><![CDATA[비밀번호 보기]]></xf:label>
+
+    							</w2:anchor>
+
+    						</xf:group>
+    					</xf:group>
+
+    				</xf:group>
+
+    				<xf:group class="login_btn" id="" style="">
+
+    					<xf:trigger class="btn_login" id="trigger1_login" style="" type="button" ev:onclick="scwin.trigger1_login_onclick">
+
+    						<xf:label><![CDATA[Login]]></xf:label>
+
+    					</xf:trigger>
+
+    				</xf:group>
+
+    			</xf:group>
+
+
+    		</xf:group>
+    	</xf:group>
+
+    	
+    </body>
+
+</html>

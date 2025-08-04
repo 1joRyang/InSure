@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="/InsWebApp/cm/css/claimPage.css" type="text/css"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare"
+    xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    	<w2:type>DEFAULT</w2:type>
+    	<w2:buildDate />
+    	<xf:model>
+    		<xf:instance>
+    			<data xmlns="" />
+    		</xf:instance>
+    		<w2:dataCollection baseNode="map">
+    			<w2:dataList baseNode="list" repeatNode="map" id="dl_bankList" saveRemovedData="true">
+    				<w2:columnInfo>
+    					<w2:column dataType="text" name="은행명" id="label"></w2:column>
+    					<w2:column dataType="text" name="은행코드" id="code"></w2:column>
+    				</w2:columnInfo>
+    				<w2:data use="true">
+    					<w2:row>
+    						<label><![CDATA[IBK기업은행]]></label>
+    						<code><![CDATA[003]]></code>
+    					</w2:row>
+    					<w2:row>
+    						<label><![CDATA[KB국민은행]]></label>
+    						<code><![CDATA[004]]></code>
+    					</w2:row>
+    					<w2:row>
+    						<label><![CDATA[KEB하나은행]]></label>
+    						<code><![CDATA[005]]></code>
+    					</w2:row>
+    					<w2:row>
+    						<label><![CDATA[NH농협은행]]></label>
+    						<code><![CDATA[011]]></code>
+    					</w2:row>
+    					<w2:row>
+    						<label><![CDATA[우리은행]]></label>
+    						<code><![CDATA[020]]></code>
+    					</w2:row>
+    					<w2:row>
+    						<label><![CDATA[신한은행]]></label>
+    						<code><![CDATA[088]]></code>
+    					</w2:row>
+    				</w2:data>
+    			</w2:dataList>
+    			<w2:dataMap baseNode="map" id="dma_account">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="계좌선택옵션" id="accountOption"></w2:key>
+    					<w2:key dataType="text" name="자동이체계좌" id="defaultAccount"></w2:key>
+    					<w2:key dataType="text" name="새은행" id="newBank"></w2:key>
+    					<w2:key dataType="text" name="새계좌정보" id="newAccountNo"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    			<w2:dataMap baseNode="map" id="dma_step4">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="name1" id="accountOption"></w2:key>
+    					<w2:key dataType="text" name="name2" id="bankCode"></w2:key>
+    					<w2:key dataType="text" name="name3" id="bankName"></w2:key>
+    					<w2:key dataType="text" name="name4" id="accountNo"></w2:key>
+    					<w2:key dataType="text" name="name5" id="accountHolder"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    			<w2:dataMap baseNode="map" id="dma_claimData">
+    				<w2:keyInfo></w2:keyInfo>
+    			</w2:dataMap>
+    			<w2:dataMap baseNode="map" id="dma_userInfo">
+    				<w2:keyInfo></w2:keyInfo>
+    			</w2:dataMap>
+    		</w2:dataCollection>
+    		<xf:submission id="sbm_saveStep4" action="/InsWebApp/saveStep4.pwkjson" method="post" mediatype="application/json"
+    			ref='data:json,{"id":"dma_step4","key":"elData"}' target="" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+    			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_saveStep4_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
+    		<xf:submission id="sbm_getClaimData" action="/InsWebApp/getClaimData.pwkjson" method="post" mediatype="application/json" ref=""
+    			target='data:json,{"id":"dma_claimData","key":"elData"}' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+    			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getClaimData_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
+    		<xf:submission id="sbm_getUserInfo" action="/InsWebApp/getUserInfo.pwkjson" method="post" mediatype="application/json" ref=""
+    			target='data:json,dma_userInfo' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+    			mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getUserInfo_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
+    	</xf:model>
+    	<w2:leaf>true</w2:leaf>
+    	<w2:fileName>final_check.xml</w2:fileName>
+    	<w2:css src="/css/custom.css"></w2:css>
+    	<w2:js src="/js/final_check.js"></w2:js>
+    	<w2:engine-version>5.0.0</w2:engine-version>
+        <script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
+        <script lazy="false" type="text/javascript"><![CDATA[scwin.isEditMode = false;
+scwin.onpageload = function() {
+    // 로그인한 사용자 기본 정보 서버에 요청
+    $p.executeSubmission("sbm_getUserInfo");
+
+};
+
+scwin.sbm_getClaimData_submitdone = function (e) {
+    var claimData = e.responseJSON.elData;
+    if (claimData) {
+        rdo_account_option.setValue(claimData.accountOption);
+
+        if (claimData.accountOption === "NEW") {
+            sbx_new_bank.setValue(claimData.bankCode);
+            inp_new_accountNo.setValue(claimData.accountNo);
+            inp_new_accountHolder.setValue(claimData.accountHolder);
+        }
+    }
+    btnNext.setLabel("수정");
+};
+
+// 계좌선택옵션 라디오 버튼 값 바뀔 때 실행
+scwin.onAccountOptionChange = function(info){
+    var grpDefault = $p.getComponentById("grp_default_account");
+    var grpNew = $p.getComponentById("grp_new_account");
+
+    if(info.value === "DEFAULT"){
+        var dataMap = $p.getComponentById("dma_userInfo");
+        var userInfo = dataMap.getJSON();
+
+        if (userInfo && userInfo.userName) {
+            var displayText = userInfo.default_bank_name + " | " + userInfo.account + " | 예금주 : " + userInfo.userName;
+            var txtBox = $p.getComponentById("txt_default_account");
+            txtBox.setLabel(displayText);
+        }
+        grpDefault.show();
+        grpNew.hide();
+
+    } else if (info.value === "NEW"){
+        //새 계좌 선택시 기본계좌 숨김, 새 계좌 입력 보여줌
+        grpDefault.hide();
+        grpNew.show();
+    }
+};
+
+scwin.btnNext_onclick = function (e) {
+    var selectedOption = rdo_account_option.getValue();
+    dma_step4.set("accountOption", selectedOption);
+    
+    if (selectedOption === "DEFAULT"){
+        var defaultAccountInfo = txt_default_account.getLabel().split(" | ");
+        var accountHolderPart = defaultAccountInfo[2].split(":");
+        dma_step4.set("bankName", defaultAccountInfo[0]);
+        dma_step4.set("accountNo", defaultAccountInfo[1].replace(/-/g,''));
+        dma_step4.set("bankCode","DEFAULT_BANK_CODE");
+        dma_step4.set("accountHolder", accountHolderPart[1]);
+        scwin.twoBtnAlert({
+            icon:"question",
+            title: "선택된 계좌: " + txt_default_account.getLabel(),
+            }, (result) => {
+                if (result.isConfirmed) {
+                    $p.executeSubmission("sbm_saveStep4");
+                }
+            }
+        )
+
+    } else if(selectedOption === "NEW"){
+        var bankCode = sbx_new_bank.getValue();
+        var bankName = sbx_new_bank.getText();
+        var accountNo = inp_new_accountNo.getValue();
+        var accountHolder = inp_new_accountHolder.getValue();
+
+        if(!bankCode || !accountNo || !accountHolder){
+            scwin.toastAlertMobile({
+                icon: 'warning',
+                title: '은행과 계좌번호를 모두 입력해주세요.'
+            });
+            return;
+        }
+        dma_step4.set("bankCode", bankCode);
+        dma_step4.set("bankName", bankName);
+        dma_step4.set("accountNo", accountNo);
+        dma_step4.set("accountHolder", accountHolder);
+
+        $p.executeSubmission("sbm_saveStep4");
+    }
+    
+};
+
+scwin.onAccountNoKeyup = function(e){
+    var component = inp_new_accountNo;
+    var value = component.getValue();
+    var onlyNumbers = value.replace(/\D/g,'');
+    component.setValue(onlyNumbers);
+};
+
+scwin.sbm_saveStep4_submitdone = function (e) {
+    if (scwin.isEditMode) {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/sixth2.xml";
+    } else {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/fifth2.xml"
+    }
+    
+};
+
+scwin.onHolderNameKeyup = function(e) {
+    var component = inp_new_accountHolder;
+    var value = component.getValue();
+    
+    var onlyText = value.replace(/[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z]/g,'');
+
+    if(value !== onlyText) {
+        component.setValue(onlyText);
+    }
+};
+
+// (최초, 수정) 사용자 정보 조회 성공했을 때 실행
+scwin.sbm_getUserInfo_submitdone = function (e) {
+    console.log("=========e.responseJSON :", e.responseJSON);
+    var dataMap = $p.getComponentById("dma_userInfo");
+
+    var actualUserInfo = e.responseJSON.userVo;
+    console.log("=======actualUserInfo :" , actualUserInfo);
+    if(actualUserInfo) {
+        dataMap.setJSON(actualUserInfo);
+
+        var displayText = actualUserInfo.default_bank_name + " | " + actualUserInfo.account + " | 예금주 : " + actualUserInfo.userName;
+        var txtBox = $p.getComponentById("txt_default_account");
+        txtBox.setLabel(displayText);
+    }
+
+    var urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.get('mode') === 'edit') {
+        scwin.isEditMode = true;
+        $p.executeSubmission("sbm_getClaimData");
+    } else {
+        //기본값으로 자동이체계좌 설정
+        rdo_account_option.setValue("DEFAULT");
+    }
+};
+]]></script>
+        <style type="text/css"><![CDATA[/* custom.css */
+
+/*
+  ======================================
+  Common Styles
+  ======================================
+*/
+.pageWrapper {
+    font-family: 'Malgun Gothic', 'Dotum', sans-serif;
+    background-color: #f7f7f7;
+}
+
+/* Header and Progress Bar */
+.pageWrapper > xf\:group:first-child > xf\:group:first-child {
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+#progressBar {
+    height: 100%;
+    background-color: #4FACFE;
+    transition: width 0.5s ease-in-out;
+}
+
+.stepIndicatorContainer {
+    padding-top: 10px;
+}
+
+.progressBtn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    background-color: #fff;
+    color: #ccc;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.progressBtn.completed {
+    background-color: #4FACFE;
+    border-color: #4FACFE;
+    color: #fff;
+}
+
+.progressBtn.active {
+    background-color: #fff;
+    border-color: #4FACFE;
+    color: #4FACFE;
+}
+
+/* Scrollable Main Content Wrapper */
+#mainContentWrapper {
+    flex: 1; /* Take up all remaining space */
+    overflow-y: auto; /* Enable vertical scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Section titles */
+.sectionTitle {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Info Box */
+.infoBox {
+    width: 100%;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+
+/* Info Row for key-value pairs */
+.infoRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.infoLabel {
+    font-weight: bold;
+    color: #555;
+    flex-shrink: 0;
+    margin-right: 15px;
+}
+
+.infoValue {
+    font-weight: 500;
+    color: #222;
+    text-align: right;
+}
+
+/* Text Button (e.g., '수정') */
+.textButton {
+    background-color: transparent;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Selection Buttons (e.g., '네/아니오') */
+.selectionBtn {
+    background-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    cursor: pointer;
+}
+
+.selectionBtn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.selectionBtn.selected {
+    border-color: #4FACFE;
+    background-color: #fff8e1;
+}
+
+.selectionBtn.half {
+    flex: 1;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Fixed Bottom Button */
+.nextBtn {
+    width: 100%;
+    height: 65px;
+    background-color: #4FACFE;
+    border-radius: 35px;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s;
+}
+
+.nextBtn:hover {
+    background-color: #4FACFE;
+}
+
+/* Scroll to Top button */
+#scrollTopBtn {
+    z-index: 100; /* Ensure it's on top */
+    cursor: pointer;
+}
+
+/* Icon Styles (You must provide the actual image paths) */
+.icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.questionIcon { background-image: url('/images/question_icon.png'); width: 16px; height: 16px; }
+.arrowUpIcon { background-image: url('/images/arrow_up_icon.png'); }]]></style>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+        <w2:wframe src="/InsWebApp/ui/mobile/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
+        <xf:group class="sub_contents2" id="wrapper" style="">
+            <xf:group class="header-section" id="header" style="">
+                <w2:textbox class="step_tit" id="" label="보험금계좌" style="" tagname=""></w2:textbox>
+                <xf:group class="step" id="" style="">
+                    <xf:group id="" style="" tagname="ul">
+
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="✔" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="✔" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="✔" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="current" id="" style="" tagname="li">
+                    		<w2:span id="" label="4" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="5" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="6" style=""></w2:span>
+                    	</xf:group>
+                    	<xf:group class="inactive" id="" style="" tagname="li">
+                    		<w2:span id="" label="7" style=""></w2:span>
+                    	</xf:group>
+
+
+
+                    </xf:group>
+                </xf:group>
+            </xf:group>
+
+            <xf:group class="content-section" id="mainContent" style="margin:0 auto;">
+            	<w2:textbox class="question-text1" id="" label="보험금 받을 계좌를" style=""></w2:textbox>
+            	<w2:textbox class="question-text" id="" label="입력해 주세요" style=""></w2:textbox>
+            	<w2:textbox class="account-label" id="" label="보험금 지급 계좌"></w2:textbox>
+
+                <xf:select1 id="rdo_account_option" style="" class="yn-button-container" selectedindex="0"
+                            appearance="full" ev:onviewchange="scwin.onAccountOptionChange"
+                            ref="data:dma_account.accountOption">
+                    <xf:choices>
+                        <xf:item>
+                            <xf:label>자동이체계좌</xf:label>
+                            <xf:value>DEFAULT</xf:value>
+                        </xf:item>
+                        <xf:item>
+                            <xf:label>새로운 계좌</xf:label>
+                            <xf:value>NEW</xf:value>
+                        </xf:item>
+                    </xf:choices>
+                </xf:select1>
+
+                <xf:group id="grp_default_account" class="infoBox" style="margin-top:15px;">
+                    <w2:textbox id="txt_default_account" label="" style="font-weight:500;"></w2:textbox>
+                </xf:group>
+
+                <xf:group id="grp_new_account" class="" style="margin-top:15px; display:none;">
+                    <xf:select1 id="sbx_new_bank" ref="data:dma_account.newBank"
+                    appearance="minimal" chooseOption="true" chooseOptionLabel="은행 선택"
+                    style=""
+                    allOption="false" submenuSize="auto" dataList="data:dl_bankList">
+                        <xf:choices>
+                            <xf:itemset nodeset="data:dl_bankList">
+                                <xf:label ref="label"></xf:label>
+                                <xf:value ref="code"></xf:value>
+                            </xf:itemset>
+                        </xf:choices>
+                    </xf:select1>
+                    <w2:input id="inp_new_accountNo" ref="data:dma_account.newAccountNo"
+                                class="text-input" style="margin-top:15px"
+                                dataType="number" inputmode="numeric"
+                                ev:onkeyup="scwin.onAccountNoKeyup"
+                                placeholder="계좌번호를 입력해주세요('-')없이">
+                    </w2:input>
+                    <w2:input id="inp_new_accountHolder" class="text-input"
+                                placeholder="예금주명을 입력하세요"
+                                ev:onkeyup="scwin.onHolderNameKeyup"
+                                style="margin-top: 15px;">
+                    </w2:input>
+                </xf:group>
+                <xf:group style="flex: 1;" id=""></xf:group>
+            </xf:group>
+
+            <xf:group class="footer-section" id="footer" style="">
+                <w2:button class="next-button" id="btnNext" label="다음" ev:onclick="scwin.btnNext_onclick"></w2:button>
+            </xf:group>
+        </xf:group>
+    </body>
+</html>

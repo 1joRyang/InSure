@@ -32,14 +32,19 @@ public interface DashboardService {
 	 */
 	 public TodayStatusVo selectTodayStatusCounts() throws ElException;
 	 
+	 /*고객 청구 모니터링*/
 	 public ClaimMonitorVo selectClaimMonitorCounts() throws ElException;
 	 
+	 /*이번 달 성과 데이터*/
 	 public MonthlyPerfVo selectMonthlyPerformance() throws ElException;
 	 
+	 /*보완 요청 현황 조회*/
 	 public SupplementStatusVo selectSupplementStatus() throws ElException;
 	 
+	 /*전일 처리 건수 조회*/
 	 public DailyCountVo selectYesterdayProcessedCount() throws ElException;
 	 
+	 /*이번 달 지급률 조회*/
 	 public PaymentVo selectPaymentRate() throws ElException;
 	 
 	 /**
@@ -49,16 +54,22 @@ public interface DashboardService {
      */
     public List<UrgentClaimVo> selectUrgentClaims() throws ElException;
     
+    /*주간 처리 현황*/
     public List<WeeklyTrendVo> selectWeeklyTrend() throws ElException;
     
+    /*청구 유형 분포*/
     public List<ChartVo> selectClaimTypeDistribution() throws ElException;
     
+    /*월별 승인률 차트*/
     public List<MonthlyApprovalRateVo> selectMonthlyApprovalRate() throws ElException;
     
+    /*처리 시간 분포 차트*/
     public List<ProcessingTimeVo> selectProcessingTimeTrend() throws ElException;
     
+    /*처리 시간 분포에서 제외하는 장기처리건을 조회*/
     public OutlierCountVo selectProcessingTimeOutlierCount() throws ElException;
     
+    /*로그인한 사용자에게 할당된 긴급처리업무*/
     public int selectMyUrgentClaimCount(UrgentCountVo vo) throws ElException;
     
 

@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="/InsWebApp/cm/css/claimPage.css" type="text/css"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare"
+    xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>DEFAULT</w2:type>
+        <w2:buildDate />
+        <xf:model>
+            <w2:dataCollection baseNode="map">
+                <w2:dataMap baseNode="map" id="dm_statusRequest">
+                    <w2:keyInfo>
+                        <w2:key dataType="text" name="사용자ID" id="ID"></w2:key>
+                    </w2:keyInfo>
+                </w2:dataMap>
+                <w2:dataMap baseNode="map" id="dm_statusResult">
+                    <w2:keyInfo>
+                        <w2:key dataType="text" name="사용자ID" id="ID"></w2:key>
+                        <w2:key dataType="number" name="대기상태갯수" id="waitingCount"></w2:key>
+                        <w2:key dataType="number" name="보완상태갯수" id="supplementCount"></w2:key>
+                        <w2:key dataType="number" name="완료상태갯수" id="completedCount"></w2:key>
+                        <w2:key dataType="number" name="전체갯수" id="totalCount"></w2:key>
+                    </w2:keyInfo>
+                </w2:dataMap>
+            </w2:dataCollection>
+            <w2:workflowCollection />
+            <xf:submission id="sbm_statusCount" action="/InsWebApp/CLAIMStatusCount.pwkjson" method="post" mediatype="application/json" 
+                ref='data:json,{"id":"dm_statusRequest","key":"elData"}'
+                target='data:json,{"id":"dm_statusResult","key":"elData"}' encoding="UTF-8"
+                instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="상태별 갯수 조회 중.." 
+                ev:submit="" ev:submitdone="scwin.sbm_statusCount_submitdone" ev:submiterror="" abortTrigger="">
+            </xf:submission>
+        </xf:model>
+        <w2:leaf>true</w2:leaf>
+        <w2:fileName>mobile_home.xml</w2:fileName>
+        <w2:css src="/css/custom.css"></w2:css>
+        <w2:js src="/js/mobile_home.js"></w2:js>
+        <w2:engine-version>5.0.0</w2:engine-version>
+        <script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = function() {
+    // 페이지 로드 시 상태별 갯수 조회
+    scwin.loadStatusCount();
+    
+    // 접수내역 조회 버튼 클릭 이벤트
+    scwin.onInternalCallClick = function() {
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/myClaim/my-claims-m.xml"
+    };
+    
+    // 메뉴 카드 클릭 이벤트
+    scwin.onMenuClick = function(menuType) {
+        switch(menuType) {
+            case 'premium':
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claim/first.xml"
+                break;
+            case 'claim':
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/myInsure/requestDoc.xml"
+                break;
+            case 'consultation':
+                location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/myInsure/insurePageTab1.xml"
+                break;
+            default:
+                alert("메뉴 선택됨");
+        }
+    };
+};
+
+// 상태별 갯수 조회 함수
+scwin.loadStatusCount = function() {
+    try {
+        var userId = "1"; // 임시로 ID=1 사용
+        
+        try {
+            var user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.id) {
+                userId = user.id;
+            }
+        } catch (storageError) {
+            console.log("localStorage에서 사용자 정보를 가져올 수 없음:", storageError.message);
+        }
+        dm_statusRequest.set("ID", userId);
+        $c.sbm.execute(sbm_statusCount);
+    } catch (e) {
+        console.error("상태별 갯수 조회 중 오류 발생:", e);
+    }
+};
+
+// 상태별 갯수 조회 성공 콜백
+scwin.sbm_statusCount_submitdone = function(e) {
+    try {
+        console.log("상태별 갯수 조회 응답:", e);
+        
+        // 데이터맵에서 결과 값 가져오기
+        var waitingCount = dm_statusResult.get("waitingCount") || 0;
+        var supplementCount = dm_statusResult.get("supplementCount") || 0;
+        var completedCount = dm_statusResult.get("completedCount") || 0;
+        var totalCount = dm_statusResult.get("totalCount") || 0;
+        
+        console.log("조회된 상태별 갯수:", {
+            waiting: waitingCount,
+            supplement: supplementCount,
+            completed: completedCount,
+            total: totalCount
+        });
+        
+        // 화면에 값 설정
+        scwin.updateStatusCounts({
+            waitingCount: waitingCount,
+            supplementCount: supplementCount,
+            completedCount: completedCount,
+            totalCount: totalCount
+        });
+        
+    } catch (error) {
+        console.error("상태별 갯수 조회 결과 처리 중 오류:", error);
+    }
+};
+
+// 상태별 갯수를 화면에 업데이트하는 함수
+scwin.updateStatusCounts = function(result) {
+    try {
+        if (result) {
+            // WebSquare 컴포넌트로 접근하여 값 설정 시도
+            try {
+                if (typeof waitingCountValue !== 'undefined' && waitingCountValue.setValue) {
+                    waitingCountValue.setValue(result.waitingCount);
+                }
+                if (typeof supplementCountValue !== 'undefined' && supplementCountValue.setValue) {
+                    supplementCountValue.setValue(result.supplementCount);
+                }
+                if (typeof completedCountValue !== 'undefined' && completedCountValue.setValue) {
+                    completedCountValue.setValue(result.completedCount);
+                }
+                console.log("WebSquare 컴포넌트 방식으로 값 설정 완료");
+            } catch (wsError) {
+                console.log("WebSquare 컴포넌트 접근 실패, DOM 방식 사용:", wsError.message);
+                
+                // WebSquare 컴포넌트 접근이 실패하면 DOM 접근 시도
+                var waitingElement = document.getElementById('waitingCountValue');
+                var supplementElement = document.getElementById('supplementCountValue');
+                var completedElement = document.getElementById('completedCountValue');
+                
+                if (waitingElement) {
+                    waitingElement.textContent = result.waitingCount;
+                    console.log("대기 상태 갯수 설정:", result.waitingCount);
+                }
+                if (supplementElement) {
+                    supplementElement.textContent = result.supplementCount;
+                    console.log("보완 요청 갯수 설정:", result.supplementCount);
+                }
+                if (completedElement) {
+                    completedElement.textContent = result.completedCount;
+                    console.log("완료 갯수 설정:", result.completedCount);
+                }
+            }
+            
+            console.log("상태별 갯수 화면 업데이트 완료:", result);
+        } else {
+            console.warn("상태별 갯수 데이터가 없습니다.");
+        }
+    } catch (error) {
+        console.error("상태별 갯수 화면 업데이트 중 오류:", error);
+    }
+};
+
+scwin.suppDocs_onclick = function (e) {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/claimMobile/suppDocs.xml"
+};
+]]></script>
+        <style type="text/css"><![CDATA[
+/* Mobile Home Page Styles */
+.pageWrapper {
+    font-family: 'Malgun Gothic', 'Dotum', sans-serif;
+    background-color: #f5f5f5;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* 헤더 스타일 */
+.header {
+    background-color: #ffffff;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+.header_title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #4a90e2;
+}
+
+.notification_icon {
+    width: 24px;
+    height: 24px;
+    background-color: #ddd;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* 메인 콘텐츠 래퍼 */
+#mainContentWrapper {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px;
+    box-sizing: border-box;
+    padding-bottom: 80px; /* 하단 네비게이션 공간 확보 */
+}
+
+/* 내선번호 현황 섹션 */
+.internal_num_section {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.section_title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.section_icon {
+    width: 20px;
+    height: 20px;
+    background-color: #ddd;
+    border-radius: 4px;
+    margin-right: 8px;
+}
+
+.number_item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.number_item:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.number_label {
+    font-weight: 500;
+    color: #555;
+}
+
+.number_value {
+    color: #333;
+    font-weight: 600;
+}
+
+/* 내선번호 조회 버튼 */
+.internal_call_btn {
+    width: 100%;
+    height: 50px;
+    background-color: #4a90e2;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.2s;
+}
+
+.internal_call_btn:hover {
+    background-color: #357abd;
+}
+
+/* 메뉴 카드 스타일 */
+.menu_section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.menu_card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.menu_card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.menu_card.blue {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+}
+
+.menu_card.green {
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+}
+
+.menu_card.yellow {
+    background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+}
+
+.menu_subtitle {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+}
+
+.menu_title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.arrow_icon {
+    font-size: 18px;
+    color: #999;
+}
+
+/* 하단 네비게이션 */
+.bottom_nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    border-top: 1px solid #e0e0e0;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.nav_item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 11px;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.nav_item.active {
+    color: #4a90e2;
+}
+
+.nav_icon {
+    width: 24px;
+    height: 24px;
+    background-color: #ddd;
+    border-radius: 4px;
+    margin-bottom: 4px;
+    transition: background-color 0.2s;
+}
+
+.nav_item.active .nav_icon {
+    background-color: #4a90e2;
+}
+
+.nav_label {
+    font-weight: 500;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 480px) {
+    #mainContentWrapper {
+        padding: 15px;
+    }
+    
+    .internal_num_section {
+        padding: 15px;
+    }
+    
+    .menu_card {
+        padding: 15px;
+    }
+    
+    .header {
+        padding: 12px 15px;
+    }
+}
+]]></style>
+    </head>
+    <body ev:onpageload="scwin.onpageload" class="mobile-page-body">
+        <w2:wframe src="/InsWebApp/ui/mobile/cmmn/m_header_title.xml" style="flex-shrink: 0;" id="" class="wfm_m_header"></w2:wframe>
+        <xf:group class="sub_content pageWrapper" id="pageWrapper" style='height: auto;overflow: hidden;flex: 1;'>
+            <!-- 메인 콘텐츠 래퍼 -->
+            <xf:group id="mainContentWrapper" style="margin-top: 65px;background-color: white;flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;margin-bottom: 70px;">
+                <!-- 내선번호 현황 섹션 -->
+                <xf:group class="internal_num_section" style="margin-left: 20px;margin-right: 20px;margin-bottom: 20px;margin-top: 10px">
+                    <xf:group class="section_title">
+                        <xf:group class="section_icon"></xf:group>
+                        <w2:span label="내 접수 현황"></w2:span>
+                    </xf:group>
+                    
+                    <xf:group class="number_item">
+                        <w2:span class="number_label" label="진행 중"></w2:span>
+                        <w2:span id="waitingCountValue" class="number_value" label="0"></w2:span>
+                    </xf:group>
+                    
+                    <xf:group class="number_item" id="suppDocs" ev:onclick="scwin.suppDocs_onclick">
+                        <w2:span class="number_label" label="보완 요청"></w2:span>
+                        <w2:span id="supplementCountValue" class="number_value" label="0"></w2:span>
+                    </xf:group>
+                    
+                    <xf:group class="number_item">
+                        <w2:span class="number_label" label="완료"></w2:span>
+                        <w2:span id="completedCountValue" class="number_value" label="0"></w2:span>
+                    </xf:group>
+                    
+                    <xf:trigger class="internal_call_btn" type="button" ev:onclick="scwin.onInternalCallClick">
+                        <xf:label>접수 내역으로 이동</xf:label>
+                    </xf:trigger>
+                </xf:group>
+                
+                <!-- 메뉴 섹션 -->
+                <xf:group class="menu_section" style="margin-left: 20px;margin-right: 20px;margin-bottom: 10px;">
+                    <xf:group class="menu_card blue" ev:onclick="scwin.onMenuClick('premium')">
+                        <w2:span class="menu_subtitle" label="보험금 청구가 필요할 땐?"></w2:span>
+                        <xf:group class="menu_title">
+                            <w2:span label="보험금 지급 신청 바로가기"></w2:span>
+                            <w2:span class="arrow_icon" label="〉"></w2:span>
+                        </xf:group>
+                    </xf:group>
+                    
+                    <xf:group class="menu_card green" ev:onclick="scwin.onMenuClick('claim')">
+                        <w2:span class="menu_subtitle" label="제출에 필요한 서류를 모르겠다면?"></w2:span>
+                        <xf:group class="menu_title">
+                            <w2:span label="실손 보험 제출 서류 알아보기"></w2:span>
+                            <w2:span class="arrow_icon" label="〉"></w2:span>
+                        </xf:group>
+                    </xf:group>
+                    
+                    <xf:group class="menu_card yellow" ev:onclick="scwin.onMenuClick('consultation')">
+                        <w2:span class="menu_subtitle" label="내 보험을 알아 보고 싶은데?"></w2:span>
+                        <xf:group class="menu_title">
+                            <w2:span label="나의 보험 바로가기"></w2:span>
+                            <w2:span class="arrow_icon" label="〉"></w2:span>
+                        </xf:group>
+                    </xf:group>
+                </xf:group>
+            </xf:group>
+            
+        </xf:group>
+        <w2:wframe style="flex-shrink: 0;" id="" class="wfm_m_footer" src="/InsWebApp/ui/mobile/cmmn/m_footer.xml"></w2:wframe>
+    </body>
+</html>

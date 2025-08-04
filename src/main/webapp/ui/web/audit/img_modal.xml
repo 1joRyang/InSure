@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="/InsWebApp/css/img-modal.css" type="text/css"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+    	<w2:type>COMPONENT</w2:type>
+    	<w2:buildDate />
+    	<w2:MSA />
+    	<xf:model>
+    		<w2:dataCollection baseNode="map">
+    			<w2:dataList baseNode="list" repeatNode="map" id="dl_imgKey" saveRemovedData="true">
+    				<w2:columnInfo>
+    					<w2:column dataType="text" name="file_path" id="file_path"></w2:column>
+    					<w2:column dataType="text" name="file_id" id="file_id"></w2:column>
+    				</w2:columnInfo>
+    				<w2:data use="false"></w2:data>
+    			</w2:dataList>
+    			<w2:dataList baseNode="list" repeatNode="map" id="dl_imgList" saveRemovedData="true">
+    				<w2:columnInfo>
+    					<w2:column dataType="text" name="imgSrc" id="imgSrc"></w2:column>
+    					<w2:column dataType="text" name="imgTitle" id="imgTitle"></w2:column>
+    				</w2:columnInfo>
+    			</w2:dataList>
+    			<w2:dataMap baseNode="map" id="dm_img">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="presignedUrl" id="presignedUrl"></w2:key>
+    					<w2:key dataType="text" name="objectKey" id="objectKey"></w2:key>
+    					<w2:key dataType="text" name="filename" id="filename"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    			<w2:dataMap baseNode="map" id="dm_objectKey">
+    				<w2:keyInfo>
+    					<w2:key dataType="text" name="objectKey" id="objectKey"></w2:key>
+    				</w2:keyInfo>
+    			</w2:dataMap>
+    		</w2:dataCollection>
+    		<w2:workflowCollection />
+    		<xf:submission id="sbm_getS3Key" action="/InsWebApp/InsimagefileList.pwkjson" method="post" mediatype="application/json" ref=""
+    			target='data:json,{"id":"dl_imgKey","key":"elData.insimagefileVoList"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+    			customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getS3Key_submitdone" ev:submiterror=""
+    			abortTrigger="">
+    		</xf:submission>
+    		<xf:submission id="sbm_getImg" action="/InsWebApp/getS3ViewUrl.pwkjson" method="post" mediatype="application/json"
+    			ref='data:json,{"id":"dm_objectKey","key":"param"}' target='data:json,{"id":"dm_img","key":"elData"}' encoding="UTF-8" instance=""
+    			replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+    			ev:submitdone="scwin.sbm_getImg_submitdone" ev:submiterror="" abortTrigger="">
+    		</xf:submission>
+    	</xf:model>
+    	<w2:layoutInfo />
+    	<w2:publicInfo method="" />
+    	<script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = function () {
+    scwin.zoomScale = 1;
+    scwin.currentImgIndex = 1;
+    
+    let claim = JSON.parse(localStorage.getItem("claim"));
+    let req = {"elData": {"claim_no": claim.claimNo}};
+
+    let claimImg = JSON.parse(localStorage.getItem("claimImg"));
+    if (claimImg) {
+        console.log(claimImg, "HAS");
+        
+        dl_imgList.setJSON(claimImg);
+        scwin.renderImageList();
+        scwin.renderFullImageViewer();
+        scwin.highlightSelectedThumbnail(1);
+    } else {
+        $c.sbm.execute(sbm_getS3Key, req);
+    }  
+};
+
+scwin.sbm_getS3Key_submitdone = function (e) {
+    const imgList = dl_imgKey.getAllJSON();
+    scwin._imgTotalCount = imgList.length;
+    scwin._imgLoadCount = 0;
+
+    if (!imgList || imgList.length === 0) return;
+
+    // 이미지 요청 보내기
+    imgList.forEach((item) => {
+        dm_objectKey.set("objectKey", item.file_path);
+        $c.sbm.execute(sbm_getImg);
+    });
+};
+
+scwin.sbm_getImg_submitdone = function (e) {
+    const imgData = dm_img.getJSON(); 
+    const imgUrl = imgData?.presignedUrl;
+
+    const rowIndex = dl_imgList.insertRow();
+    dl_imgList.setCellData(rowIndex, "imgSrc", imgUrl);
+    dl_imgList.setCellData(rowIndex, "imgTitle", scwin._imgLoadCount + 1);
+  
+    scwin._imgLoadCount++;
+
+    if (scwin._imgLoadCount === scwin._imgTotalCount) {
+        scwin.renderImageList();
+        scwin.renderFullImageViewer();
+        scwin.highlightSelectedThumbnail(1);
+
+        // localStorage에 claimImg라는 이름으로 저장
+        localStorage.setItem("claimImg", JSON.stringify(dl_imgList.getAllJSON()));
+    }
+};
+
+// 썸네일 목록
+scwin.renderImageList = function () {
+    const len = dl_imgList.getRowCount();
+    const targetGrp = $p.getComponentById("imgList");
+
+    for (let i = 1; i < len + 1; i++) {
+        const imgInfo = dl_imgList.getRowData(i-1); // [imgSrc, imgTitle]
+
+        const cmpGroup = $p.dynamicCreate("thumb_item_" + i, "group", {
+            class: "imgGrp",
+            style: "padding: 10px; width: 90%; margin-bottom:6px; display:flex; flex-direction: column; align-items:center;"
+        }, targetGrp);
+
+        const imgThumb = document.createElement("img");
+        imgThumb.src = imgInfo[0];
+        imgThumb.alt = i;
+        imgThumb.style.cssText = "width: 90%; cursor: pointer;";
+        imgThumb.addEventListener("click", scwin.onThumbnailClick);
+        cmpGroup.appendChild(imgThumb);
+
+        const imgTitle = $p.dynamicCreate("thumb_txt_" + i, "output", {
+            style: "font-size:15px; color:#FFF;"
+        }, cmpGroup);
+        imgTitle.setValue(imgInfo[1]);
+    }
+};
+
+// 이미지 뷰어 초기 렌더링 (1개만 표시)
+scwin.renderFullImageViewer = function () {
+    const container = $p.getComponentById("imgContainer");
+    const children = container.getChildren();
+
+    for (let i = 0; i < children.length; i++) {
+        const comp = children[i];
+        const id = comp.getID?.() || comp.id;
+        if (id?.startsWith("viewer_img_")) {
+            container.removeChild(comp);
+        }
+    }
+
+    const len = dl_imgList.getRowCount();
+    for (let i = 1; i < len + 1; i++) {
+        const row = dl_imgList.getRowData(i - 1);
+        const visible = i === 1 ? "block" : "none";
+
+        const img = document.createElement("img");
+        img.id = "viewer_img_" + i;
+        img.src = row[0];
+        img.alt = "viewer_img_" + i;
+        img.style.cssText = `
+            width: 100%;
+            max-width: 800px;
+            display: ${visible};
+            margin: auto;
+            object-fit: contain;
+        `;
+
+        const wrapper = document.createElement("div");
+        wrapper.style.cssText = `
+            display: inline-block;
+            overflow: visible;
+            width: max-content;
+        `;
+
+        // 이미지 삽입
+        wrapper.appendChild(img);
+
+        // wrapper를 컨테이너에 추가
+        container.appendChild(wrapper);
+    }
+
+    scwin.zoomScale = 1;
+    scwin.currentImgIndex = 1;
+};
+
+scwin.highlightSelectedThumbnail = function(index) {
+    const len = dl_imgList.getRowCount();
+    console.log(index)
+
+    for (let i = 1; i < len + 1; i++) {
+        const group = $p.getComponentById("thumb_item_" + i);
+        if (!group) continue;
+
+        if (i === index) {
+            group.addClass("selected-thumb");
+        } else {
+            group.removeClass("selected-thumb");
+        }
+    }
+};
+
+// 썸네일 클릭 시 해당 이미지만 보이게
+scwin.onThumbnailClick = function (e) {
+    const index = parseInt(e.target.alt);
+    scwin.currentImgIndex = index;
+    scwin.zoomScale = 1;
+
+    const images = document.querySelectorAll('[id^="viewer_img_"]');
+    
+    images.forEach((img, i) => {
+        img.style.display = i === (index - 1) ? "block" : "none";
+        img.style.transform = "scale(1)";
+    });
+
+    scwin.highlightSelectedThumbnail(index);
+
+    if (e?.target?.blur) e.target.blur();
+
+    let len = $p.parent().scwin.genList?.length;
+    $p.parent().gen_date?.getChild($p.parent().scwin.genList[len-1], "ipt_idx").setValue(e.target.alt);
+};
+
+// 줌 조절 함수
+scwin.adjustZoom = function (factor) {
+    scwin.zoomScale *= factor;
+
+    const currentId = "viewer_img_" + scwin.currentImgIndex;
+    const targetImg = document.getElementById(currentId);
+    if (targetImg) {
+        targetImg.style.transform = "scale(" + scwin.zoomScale + ")";
+        targetImg.style.transformOrigin = "top left";  // 왼쪽 상단 기준 확대
+    }
+};
+
+
+scwin.btn_plus_onclick = function (e) {
+    console.log("+")
+    scwin.adjustZoom(1.1);
+};
+
+scwin.btn_minus_onclick = function (e) {
+    console.log("-")
+    scwin.adjustZoom(0.9);
+};
+]]></script>
+    	<style type="text/css"><![CDATA[]]></style>
+    </head>
+    <body ev:onpageload="scwin.onpageload" style="">
+    	<xf:group meta_snippetCategory="01_화면분할" meta_snippetName="1_05 좌측 고정 2단 분할_width값 200px" meta_snippetKeyComponent="true"
+    		style="height: 100%;display: flex;flex-direction: row;overflow: hidden;" id="" class="">
+    		<xf:group style="width:10%;background-color:#6E6D6D;height: 100%;overflow-y: scroll;overflow-x: hidden;padding-right: 10px;"
+    			id="imgList" class="imgList">
+    		</xf:group>
+    		<xf:group
+    			style="width:90%; overflow-y:auto; display:flex; flex-direction:column; align-items:center; padding-top:20px; background-color:gainsboro; overflow-x: auto;  white-space:nowrap;justify-content: center;    align-items: center;"
+    			id="imgContainer" class="imgContainer">
+    		</xf:group>
+    	</xf:group>
+    	<xf:group style="position: relative;float: right;bottom: 70px;right: 50px;" id="">
+    		<xf:trigger meta_snippetCategory="08_버튼" anchorWithGroupClass="" meta_snippetName="8_02 아이콘조회버튼"
+    			ev:onclick="scwin.btn_minus_onclick" meta_snippetKeyComponent="true"
+    			style="margin-right: 5px;width: 50px;height: 50px;z-index: 1000;filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.3));" id="btn_minus"
+    			type="button" class="btn_cm row_del icon">
+    			<xf:label><![CDATA[search]]></xf:label>
+    		</xf:trigger>
+    		<xf:trigger meta_snippetCategory="08_버튼" anchorWithGroupClass="" meta_snippetName="8_02 아이콘조회버튼"
+    			meta_snippetKeyComponent="true"
+    			style="width: 50px;height: 50px;z-index: 1000;filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.3));" id="btn_plus" type="button"
+    			class="btn_cm row_add icon" ev:onclick="scwin.btn_plus_onclick">
+    			<xf:label><![CDATA[search]]></xf:label>
+    		</xf:trigger>
+    	</xf:group>
+    </body>
+</html>

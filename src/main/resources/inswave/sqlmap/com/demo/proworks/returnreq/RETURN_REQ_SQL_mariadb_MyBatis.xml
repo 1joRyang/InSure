@@ -114,7 +114,7 @@
     </select>
 
 	<insert id="upsertReturnReqAndClaimStatus" parameterType="com.demo.proworks.returnreq.vo.ReturnReqVo">
-		<!-- MySQL/MariaDB UPSERT 구문 -->
+		<!-- UPSERT 구문 -->
 		INSERT INTO RETURN_REQ
 		(CLAIM_NO, RETURN_MEMO,REQUEST_DATE)
 		VALUES

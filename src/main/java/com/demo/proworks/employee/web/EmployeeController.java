@@ -76,7 +76,7 @@ public class EmployeeController {
 	public void login(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		 
 		 try {
-        // 1. 원시 JSON 문자열 읽기
+        // 원시 JSON 문자열 읽기
         StringBuilder sb = new StringBuilder();
         BufferedReader reader = request.getReader();
         String line;
@@ -87,18 +87,18 @@ public class EmployeeController {
         
         System.out.println(">>>>> 받은 JSON 문자열: " + jsonString);
         
-        // 2. JSON 수동 파싱 (ObjectMapper 사용)
-        ObjectMapper jsonMapper = new ObjectMapper();  // 변수명 변경
+        // JSON 수동 파싱
+        ObjectMapper jsonMapper = new ObjectMapper(); 
         JsonNode jsonNode = jsonMapper.readTree(jsonString);
         
-        // 3. 각 필드 추출 (null 체크 포함)
+        // 각 필드 추출
         String empNo = jsonNode.get("empNo") != null ? jsonNode.get("empNo").asText() : null;
         String empPw = jsonNode.get("empPw") != null ? jsonNode.get("empPw").asText() : null;
         String loginType = jsonNode.get("loginType") != null ? jsonNode.get("loginType").asText() : null;
         
         System.out.println(">>>>> 파싱된 데이터 - empNo: " + empNo + ", empPw: " + empPw + ", loginType: " + loginType);
         
-        // 4. 입력값 검증
+        // 입력값 검증
         if (empNo == null || empNo.trim().isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             sendErrorResponse(response, "아이디가 입력되지 않았습니다.");
@@ -111,14 +111,12 @@ public class EmployeeController {
             return;
         }
 
-        // 5. 프레임워크의 로그인 프로세스를 호출
         LoginInfo info = loginProcess.processLogin(request, empNo, "EMPLOYEE", empPw);
         
         System.out.println(">>>>> 로그인 결과: " + info.toString());
 
         if (info.isSuc()) {
             try {
-                // DB에서 완전한 employee 정보 조회
                 EmployeeVo searchEmpVo = new EmployeeVo();
                 searchEmpVo.setEmpNo(empNo);
                 EmployeeVo empInfo = employeeService.selectEmployee(searchEmpVo);
@@ -129,27 +127,18 @@ public class EmployeeController {
 	                    Map<String, Object> elData = new HashMap<>();
 	                    Map<String, Object> responseMap = new HashMap<>();
 	
-	                    // 로그인 상태
 	                    responseMap.put("status", "SUCCESS");
 	                    
-	                    // EmployeeVo의 컬럼들만 포함 (empPw 제외)
 	                    responseMap.put("empNo", empInfo.getEmpNo());
 	                    responseMap.put("empName", empInfo.getEmpName());
 	                    responseMap.put("empStatus", empInfo.getStatus());
 	                    responseMap.put("deptId", empInfo.getDeptId());
 	                    responseMap.put("role", empInfo.getRole());
 	                    
-	                    
-	                      // 디버깅을 위한 로그 추가
-					    System.out.println(">>>>> empInfo.getEmpNo(): " + empInfo.getEmpNo());
-					    System.out.println(">>>>> empInfo.getEmpName(): " + empInfo.getEmpName());
-					    System.out.println(">>>>> empInfo.getStatus(): " + empInfo.getStatus());
-					    System.out.println(">>>>> empInfo.getDeptId(): " + empInfo.getDeptId());
-					    System.out.println(">>>>> empInfo.getRole(): " + empInfo.getRole());
 	
 	                    elData.put("dma_login_response", responseMap);
 	
-	                    ObjectMapper responseMapper = new ObjectMapper();  // 변수명 변경
+	                    ObjectMapper responseMapper = new ObjectMapper(); 
 	                    String jsonResponse = responseMapper.writeValueAsString(elData);
 	                    
 	                    System.out.println(">>>>> 전송할 응답: " + jsonResponse);
@@ -184,97 +173,6 @@ public class EmployeeController {
 	    }
 	}
     
-       /* try {
-            // 1. 원시 JSON 문자열 읽기
-            StringBuilder sb = new StringBuilder();
-            BufferedReader reader = request.getReader();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-            String jsonString = sb.toString();
-            
-            AppLog.debug("받은 JSON 문자열: " + jsonString);
-            
-            // 2. JSON 수동 파싱 (ObjectMapper 사용)
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readTree(jsonString);
-            
-            // 3. 각 필드 추출 (null 체크 포함)
-            String empNo = jsonNode.get("empNo") != null ? jsonNode.get("empNo").asText() : null;
-            String empPw = jsonNode.get("empPw") != null ? jsonNode.get("empPw").asText() : null;
-            String loginType = jsonNode.get("loginType") != null ? jsonNode.get("loginType").asText() : null;
-            
-            AppLog.debug("파싱된 데이터 - empNo: " + empNo + ", empPw: " + empPw + ", loginType: " + loginType);
-            
-            // 4. 입력값 검증
-            if (empNo == null || empNo.trim().isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                sendErrorResponse(response, "아이디가 입력되지 않았습니다.");
-                return;
-            }
-            
-            if (empPw == null || empPw.trim().isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                sendErrorResponse(response, "비밀번호가 입력되지 않았습니다.");
-                return;
-            }
-
-
-            
-            // 프레임워크의 로그인 프로세스를 호출 (UserController와 동일한 순서)
-            LoginInfo info = loginProcess.processLogin(request, empNo, "EMPLOYEE", empPw);
-            
-            System.out.println(" 로그인 결과: " + info.toString());
-
-
-
-			            
-
-
-            if (info.isSuc()) {
-                // 로그인 성공 처리
-                try {
-                    ProworksUserHeader userHeader = (ProworksUserHeader) request.getSession().getAttribute("userHeader");
-
-                    if (userHeader != null) {
-                        Map<String, Object> elData = new HashMap<>();
-                        Map<String, Object> responseMap = new HashMap<>();
-
-                        responseMap.put("status", "SUCCESS");
-                        responseMap.put("empName", userHeader.getTestUserName());
-                        responseMap.put("role", userHeader.getUserRole());
-
-                        elData.put("dma_login_response", responseMap);
-
-                        String jsonResponse = mapper.writeValueAsString(elData);
-
-                        response.setContentType("application/json");
-                        response.setCharacterEncoding("UTF-8");
-                        response.getWriter().write(jsonResponse);
-
-                    } else {
-                        throw new Exception("로그인 후 세션 정보를 가져오는 데 실패했습니다.");
-                    }
-
-                } catch (Exception e) {
-                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    AppLog.error("로그인 성공 후 세션 처리 중 에러", e);
-                    sendErrorResponse(response, "로그인 처리 중 오류가 발생했습니다.");
-                }
-
-            } else {
-                // 로그인 실패 처리
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                sendErrorResponse(response, "로그인 실패: 아이디 또는 비밀번호가 올바르지 않습니다.");
-            }
-            
-        } catch (Exception e) {
-            AppLog.error("JSON 파싱 중 오류 발생", e);
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            sendErrorResponse(response, "요청 데이터를 처리할 수 없습니다: " + e.getMessage());
-        }
-    }*/
 
     /**
      * 에러 응답을 보내는 헬퍼 메서드
@@ -313,14 +211,12 @@ public class EmployeeController {
 	        String empNo = null;
 	
 	        if (session != null) {
-	            // userHeader에서 가져오기 (SessionDataAdapter에서 설정한 것)
 	            ProworksUserHeader userHeader = (ProworksUserHeader) session.getAttribute("userHeader");
 	            if (userHeader != null) {
-	                empNo = userHeader.getUserId(); // Employee의 경우 empNo가 userId로 저장됨
+	                empNo = userHeader.getUserId();
 	            }
 	        }
 	
-	        // LoginAdapter를 통한 로그아웃 처리
 	        if (empNo != null) {
 	            LoginInfo logoutInfo = loginProcess.processLogout(request, empNo);
 	        } else {

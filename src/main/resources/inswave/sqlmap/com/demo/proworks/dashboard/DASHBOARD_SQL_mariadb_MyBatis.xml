@@ -17,6 +17,7 @@
 <mapper namespace="com.demo.proworks.dashboard">
 	<select id="selectTodayStatusCounts"
 		resultType="com.demo.proworks.dashboard.vo.TodayStatusVo" useCache="false">
+		<!-- 오늘의 처리 현황을 조회 -->
 		<!-- QueryID : com.demo.proworks.dashboard.selectTodayStatusCounts -->
 		SELECT
             COUNT(CASE WHEN status = '대기' THEN 1 END) AS waitingCount,
@@ -31,6 +32,7 @@
 	
 	<select id="selectClaimMonitorCounts"
 		resultType="com.demo.proworks.dashboard.vo.ClaimMonitorVo" useCache="false">
+		<!-- 고객 청구 모니터링 -->
 		<!-- QueryID : com.demo.proworks.dashboard.selectClaimMonitorCounts -->
 		<![CDATA[
     SELECT
@@ -42,6 +44,7 @@
 	</select>
 	
 	<select id="selectMonthlyPerformance" resultType="com.demo.proworks.dashboard.vo.MonthlyPerfVo" useCache="false">
+		<!--이번 달 성과 데이터-->
 	    /* QueryID : com.demo.proworks.dashboard.selectMonthlyPerformance */
 	    <![CDATA[
 	    SELECT
@@ -60,6 +63,7 @@
 	</select>
 	
 	<select id="selectSupplementStatus" resultType="com.demo.proworks.dashboard.vo.SupplementStatusVo" useCache="false">
+		<!--보완 요청 현황 조회-->
 	    /* QueryID : com.demo.proworks.dashboard.selectSupplementStatus */
 	    <![CDATA[
 	    SELECT
@@ -72,6 +76,7 @@
 	</select>
 	
 	<select id="selectYesterdayProcessedCount" resultType="com.demo.proworks.dashboard.vo.DailyCountVo" useCache="false">
+		<!--전일 처리 건수 조회-->
 	    /* QueryID : com.demo.proworks.dashboard.selectYesterdayProcessedCount */
 	    SELECT
 	        CONCAT(COUNT(*), '건') AS yesterdayProcessedCount
@@ -82,6 +87,7 @@
 	</select>
 	
 	<select id="selectPaymentRate" resultType="com.demo.proworks.dashboard.vo.PaymentVo" useCache="false">
+		<!--이번 달 지급률 조회-->
 	    /* QueryID : com.demo.proworks.dashboard.selectPaymentRate */
 	    <![CDATA[
 	    SELECT
@@ -102,7 +108,8 @@
 	    ]]>
 	</select>
 	
-<select id="selectUrgentClaims" resultType="com.demo.proworks.dashboard.vo.UrgentClaimVo">
+	<select id="selectUrgentClaims" resultType="com.demo.proworks.dashboard.vo.UrgentClaimVo" useCache="false">
+		<!--우선 처리 업무 목록을 조회-->
 	    /* QueryID : com.demo.proworks.dashboard.selectUrgentClaims (단순화) */
 	    <![CDATA[
 	    WITH RECURSIVE BusinessDays AS (
@@ -157,6 +164,7 @@
 	</select>
 	
 	<select id="selectWeeklyTrend" resultType="com.demo.proworks.dashboard.vo.WeeklyTrendVo">
+		<!--주간 처리 현황-->
 	    /* QueryID : com.demo.proworks.dashboard.selectWeeklyTrend (배치 통계 테이블 조회 - 7 영업일) */
 	    <![CDATA[
 	    WITH RECURSIVE DateRange AS (
@@ -188,6 +196,7 @@
 	</select>
 	
 	<select id="selectClaimTypeDistribution" resultType="com.demo.proworks.dashboard.vo.ChartVo">
+		<!--청구 유형 분포-->
 	    /* QueryID : com.demo.proworks.dashboard.selectClaimTypeDistribution (청구 유형별 분포) */
 	    SELECT
 	        LABEL AS label,
@@ -199,6 +208,7 @@
 	</select>
 	
 	<select id="selectMonthlyApprovalRate" resultType="com.demo.proworks.dashboard.vo.MonthlyApprovalRateVo">
+		<!--월별 승인률 차트-->
 	    /* QueryID : com.demo.proworks.dashboard.selectMonthlyApprovalRate (배치 통계 테이블 조회) */
 	    <![CDATA[
 	    SELECT
@@ -217,6 +227,7 @@
 	
 	
 	<select id="selectProcessingTimeTrend" resultType="com.demo.proworks.dashboard.vo.ProcessingTimeVo">
+		<!--처리 시간 분포 차트-->
 	    /* QueryID : com.demo.proworks.dashboard.selectProcessingTimeTrend (배치 통계 테이블 조회) */
 	    <![CDATA[
 	    WITH RECURSIVE DateRange AS (
@@ -244,6 +255,7 @@
 	
 	
 	<select id="selectProcessingTimeOutlierCount" resultType="int">
+		<!--처리 시간 분포에서 제외하는 장기처리건을 조회-->
 	    /* QueryID : com.demo.proworks.dashboard.selectProcessingTimeOutlierCount (배치 통계 테이블 조회) */
 	    <![CDATA[
 	    WITH RECURSIVE DateRange AS (
@@ -267,6 +279,7 @@
 	</select>
 	
 	<select id="selectMyUrgentClaimCount" parameterType="com.demo.proworks.dashboard.vo.UrgentCountVo" resultType="int">
+		<!--로그인한 사용자에게 할당된 긴급처리업무-->
 	    /* QueryID: com.demo.proworks.dashboard.selectMyUrgentClaimCount (나의 긴급 처리 건수 조회) */
 	    <![CDATA[
 	    WITH RECURSIVE BusinessDays AS (

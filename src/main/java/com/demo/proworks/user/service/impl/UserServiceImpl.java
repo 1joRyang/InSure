@@ -112,7 +112,7 @@ public class UserServiceImpl implements UserService {
 	
 	
 	    if (storedUser == null) {
-	        System.out.println("❌ [Service] 사용자를 찾을 수 없음");
+	        System.out.println(" 사용자를 찾을 수 없음");
 	        return false;
 	    }
 	
@@ -173,21 +173,6 @@ public class UserServiceImpl implements UserService {
      */   	
 	public void temporarilyStorePin(String userId, String rawSimplePw, HttpSession session) throws Exception {
 	    
-	    // 1. 세션의 로그인 정보와 요청 사용자가 일치하는지 검증	    
-	    //LoginInfo loggedInUser = (LoginInfo) session.getAttribute("loginInfo");
-	    		   
-	    
-	    /*if (loggedInUser == null || !loggedInUser.getUserId().equals(userId)) {
-	        throw new Exception("인증 정보가 올바르지 않습니다.");
-	    }
-	
-	    // 2. PIN 암호화
-	    String hashedSimplePw = passwordEncoder.encode(rawSimplePw);
-	
-	    // 3. 암호화된 PIN을 세션에 임시 저장
-	    session.setAttribute("tempSimplePw", hashedSimplePw);
-	     */
-	     
 	     
         String hashedSimplePw = passwordEncoder.encode(rawSimplePw);
 
@@ -212,33 +197,26 @@ public class UserServiceImpl implements UserService {
 	 * @throws Exception
 	 */
 	public boolean confirmAndSavePin(String userId, String confirmationPin, HttpSession session) throws Exception {
-	    // 1. 세션에서 임시 저장된 암호화 PIN 가져오기
+	    // 임시 저장된 암호화 PIN 가져오기
 	    String tempHashedPin = (String) session.getAttribute("tempSimplePw");
-	    //UserVo loggedInUser = (UserVo) session.getAttribute("loginInfo");
-	  
 	
-	    /* 2. 유효성 검증
-	    if (loggedInUser == null || !loggedInUser.getUserId().equals(userId) || tempHashedPin == null) {
-	        return false; // 비정상 접근
-	    }*/
-	
-	    // 3. 입력된 확인 PIN과 임시 PIN 비교
+	    // 입력된 확인 PIN과 임시 PIN 비교
 	    if (passwordEncoder.matches(confirmationPin, tempHashedPin)) {
 	    
 	        UserVo updateUserVo = new UserVo();
 		    updateUserVo.setUserId(userId);
 		    updateUserVo.setSimplePw(tempHashedPin); 
 		    
-	        // 4. 일치하면 DB에 최종 저장
+	        // 일치하면 DB에 최종 저장
 	        userDAO.updateSimplePassword(updateUserVo);
 	        
-	        // 5. 세션의 임시 비밀번호 제거
+	        // 세션의 임시 비밀번호 제거
 	        session.removeAttribute("tempSimplePw");
 	        
-	        return true; // 성공
+	        return true;
 	    }
 	
-	    return false; // 불일치
+	    return false;
 	}
 
 

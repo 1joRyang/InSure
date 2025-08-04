@@ -2,9 +2,6 @@ package com.demo.proworks.insimagefile.service;
 
 import java.util.List;
 
-import org.springframework.web.multipart.MultipartFile;
-
-import com.demo.proworks.insimagefile.vo.InsimagefileListVo;
 import com.demo.proworks.insimagefile.vo.InsimagefileVo;
 
 /**  

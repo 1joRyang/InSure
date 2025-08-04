@@ -117,37 +117,4 @@ public interface AssignRuleService {
 	 */
 	public List<EmployeeVo> getAvailableEmployeesByKeyword(String keyword) throws Exception;
 	
-	/**
-	 * 자동 배정 설정을 업데이트한다.
-	 *
-	 * @param autoAssignEnabled 자동 배정 활성화 여부 ("true" 또는 "false")
-	 * @throws Exception
-	 */
-	public void updateAutoAssignConfig(String autoAssignEnabled) throws Exception;
-	
-	/**
-	 * 자동 배정 설정을 조회한다.
-	 *
-	 * @return 자동 배정 활성화 여부 ("true" 또는 "false")
-	 * @throws Exception
-	 */
-	public String getAutoAssignConfig() throws Exception;
-	
-	/**
-	 * 여러 청구를 일괄로 자동 배정한다 (배치 처리용).
-	 *
-	 * @return 배정 결과 메시지
-	 * @throws Exception
-	 */
-	public String runAutoAssignmentBatch() throws Exception;
-	
-	/**
-	 * 특정 청구 유형에 따른 배정 가능한 부서와 직원을 미리 보기한다.
-	 *
-	 * @param claimType 청구 유형
-	 * @return 배정 예상 정보 Map
-	 * @throws Exception
-	 */
-	public java.util.Map<String, Object> previewAssignment(String claimType) throws Exception;
-	
 }

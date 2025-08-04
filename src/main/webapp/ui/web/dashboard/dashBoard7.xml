@@ -1,0 +1,863 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+        	<w2:dataCollection baseNode="map">
+        		<w2:dataMap baseNode="map" id="dma_todayStatus">
+        			<w2:keyInfo>
+        				<w2:key dataType="number" name="처리대기 건수" id="waitingCount"></w2:key>
+        				<w2:key dataType="number" name="결재중 건수" id="processingCount"></w2:key>
+        				<w2:key dataType="number" name="완료 건수" id="completedCount"></w2:key>
+        				<w2:key dataType="number" name="반송 건수" id="returnedCount"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_claimMonitor">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="100만원 이하 건수" id="countUnder1M"></w2:key>
+        				<w2:key dataType="text" name="100만원 이상 건수" id="countOver1M"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_monthlyPerf">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="총처리건수" id="totalProcessedCount"></w2:key>
+        				<w2:key dataType="text" name="평균처리시간" id="avgProcessingTime"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_supplementStatus">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="보완요청 건수" id="requestCount"></w2:key>
+        				<w2:key dataType="text" name="보완완료 건수" id="completedCount"></w2:key>
+        				<w2:key dataType="text" name="평균보완 시간" id="avgProcessingTime"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_dailyCount">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="전일처리건수" id="yesterdayProcessedCount"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_paymentRate">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="승인률" id="approvalRate"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dlt_urgentClaims" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="청구번호" id="claimNo"></w2:column>
+        				<w2:column dataType="text" name="고객명" id="userName"></w2:column>
+        				<w2:column dataType="text" name="청구내용" id="claimContent"></w2:column>
+        				<w2:column dataType="text" name="배정유형" id="claimType"></w2:column>
+        				<w2:column dataType="text" name="마감시간" id="deadline"></w2:column>
+        				<w2:column dataType="text" name="담당자명" id="empName"></w2:column>
+        				<w2:column dataType="text" name='상태' id="status"></w2:column>
+        				<w2:column dataType="text" name="남은시간" id="timeRemaining"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dl_weeklyTrend" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="요일" id="reportDate"></w2:column>
+        				<w2:column dataType="text" name="결재 건" id="approvalCount"></w2:column>
+        				<w2:column dataType="text" name="단순 지급" id="simplePayCount"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dlt_claimTypeChart" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="라벨" id="label"></w2:column>
+        				<w2:column dataType="number" name="값" id="value"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dlt_monthlyApprovalRateChart" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="월" id="label"></w2:column>
+        				<w2:column dataType="number" name="승인율" id="value"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dlt_processingTimeChart" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="날짜" id="label"></w2:column>
+        				<w2:column dataType="number" name="평균처리시간" id="value"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dmp_outlierInfo">
+        			<w2:keyInfo>
+        				<w2:key dataType="number" name="장기처리건수" id="outlierCount"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dlt_weekly_approval" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="요일" id="label"></w2:column>
+        				<w2:column dataType="text" name="건수" id="value"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataList baseNode="list" repeatNode="map" id="dlt_weekly_simplePay" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column dataType="text" name="요일" id="label"></w2:column>
+        				<w2:column dataType="text" name="건수" id="value"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dma_urgentCount_req">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="직원번호" id="empNo"></w2:key>
+        				<w2:key dataType="text" name="역할" id="role"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        		<w2:dataMap baseNode="map" id="dma_urgentCount_res">
+        			<w2:keyInfo>
+        				<w2:key dataType="text" name="긴급건수" id="urgentCount"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        	</w2:dataCollection>
+        	<w2:workflowCollection />
+        	<xf:submission id="sbm_getTodayStatus" action="/InsWebApp/selectTodayStatusCounts.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_todayStatus","key":"todayStatusVo"}'
+        		target='data:json,{"id":"dma_todayStatus","key":"todayStatusVo"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getTodayStatus_submitdone"
+        		ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getClaimMonitor" action="/InsWebApp/selectClaimMonitorCounts.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_claimMonitor","key":"claimMonitorVo"}'
+        		target='data:json,{"id":"dma_claimMonitor","key":"claimMonitorVo"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getMonthlyPerf" action="/InsWebApp/selectMonthlyPerformance.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_monthlyPerf","key":"monthlyPerfVo"}'
+        		target='data:json,{"id":"dma_monthlyPerf","key":"monthlyPerfVo"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getSupplementStatus" action="/InsWebApp/selectSupplementStatus.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_supplementStatus","key":"supplementStatusVo"}'
+        		target='data:json,{"id":"dma_supplementStatus","key":"supplementStatusVo"}' encoding="UTF-8" instance="" replace=""
+        		errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror=""
+        		abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getYesterdayCount" action="/InsWebApp/selectYesterdayCount.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_dailyCount","key":"dailyCountVo"}'
+        		target='data:json,{"id":"dma_dailyCount","key":"dailyCountVo"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getPaymentRate" action="/InsWebApp/selectPaymentRate.pwkjson" method="post" mediatype="application/json"
+        		ref='data:json,{"id":"dma_paymentRate","key":"PaymentVo"}' target='data:json,{"id":"dma_paymentRate","key":"PaymentVo"}'
+        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getUrgentClaims" action="/InsWebApp/selectUrgentClaims.pwkjson" method="post"
+        		mediatype="application/json" ref="" target='data:json,{"id":"dlt_urgentClaims","key":"dlt_urgentClaims"}' encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getUrgentClaims_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getWeeklyTrend" action="/InsWebApp/selectWeeklyTrend.pwkjson" method="post" mediatype="application/json"
+        		ref="" target='data:json,{"id":"dl_weeklyTrend","key":"weeklyTrendList"}' encoding="UTF-8" instance="" replace="" errorHandler=""
+        		customHandler="" mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getWeeklyTrend_submitdone"
+        		ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getClaimType" action="/InsWebApp/selectClaimTypeDistribution.pwkjson" method="post"
+        		mediatype="application/json" ref="" target='' encoding="UTF-8" instance="" replace="" errorHandler="" customHandler=""
+        		mode="asynchronous" processMsg="" ev:submit="" ev:submitdone="scwin.sbm_getClaimType_submitdone" ev:submiterror=""
+        		abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getMonthlyApprovalRate" action="/InsWebApp/selectMonthlyApprovalRate.pwkjson" method="post"
+        		mediatype="application/json" ref="" target='data:json,{"id":"dlt_monthlyApprovalRateChart","key":"monthlyRateData"}'
+        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getMonthlyApprovalRate_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getProcessingTimeTrend" action="/InsWebApp/selectProcessingTimeTrend.pwkjson" method="post"
+        		mediatype="application/json" ref="" target='data:json,{"id":"dlt_processingTimeChart","key":"processingTimeData"}'
+        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getProcessingTimeTrend_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getOutlierCount" action="/InsWebApp/selectProcessingTimeOutlierCount.pwkjson" method="post"
+        		mediatype="application/json" ref="data:json,dmp_outlierInfo" target='data:json,{"id":"dmp_outlierInfo","key":"outlierCountData"}'
+        		encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getOutlierCount_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_getMyUrgentCount" action="/InsWebApp/selectMyUrgentClaimCount.pwkjson" method="post"
+        		mediatype="application/json" ref='data:json,{"id":"dma_urgentCount_req","key":"vo"}' target='data:json,{"id":"dma_urgentCount_res"}' encoding="UTF-8"
+        		instance="" replace="" errorHandler="" customHandler="" mode="asynchronous" processMsg="" ev:submit=""
+        		ev:submitdone="scwin.sbm_getMyUrgentCount_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        <script lazy="false" type="text/javascript"><![CDATA[function getEmployee() {
+    try {
+        const employeeData = localStorage.getItem("employee");
+        return employeeData ? JSON.parse(employeeData) : null;
+    } catch (error) {
+        console.error("employee 데이터 읽기 실패:", error);
+        return null;
+    }
+}
+
+scwin.onpageload = function() {
+    setTimeout(function(){
+        console.log("페이지 모든 컴포넌트 준비 완료, 데이터 조회를 시작합니다.");
+
+        $p.executeSubmission("sbm_getTodayStatus");
+        $p.executeSubmission("sbm_getSupplementStatus");
+        $p.executeSubmission("sbm_getClaimMonitor");
+        $p.executeSubmission("sbm_getMonthlyPerf");
+        $p.executeSubmission("sbm_getYesterdayCount");
+        $p.executeSubmission("sbm_getPaymentRate");
+        $p.executeSubmission("sbm_getUrgentClaims");
+        $p.executeSubmission("sbm_getWeeklyTrend");
+        $p.executeSubmission("sbm_getClaimType");
+        $p.executeSubmission("sbm_getMonthlyApprovalRate");
+        $p.executeSubmission("sbm_getProcessingTimeTrend");
+        $p.executeSubmission("sbm_getOutlierCount");
+
+        var employee = getEmployee();
+        console.log("1. 로그인 정보 (from getEmployee):", employee);
+        if (employee && employee.empNo && employee.role) {
+            console.log("2. 직원 번호와 역할을 DataMap에 설정합니다:", employee.empNo, employee.role);
+            dma_urgentCount_req.set("empNo", employee.empNo);
+            dma_urgentCount_req.set("role", employee.role);
+            console.log("3. 긴급 건수 조회를 위한 submission을 실행합니다.");
+            $p.executeSubmission("sbm_getMyUrgentCount");
+        } else {
+            console.log("로그인 정보가 없어 알림 바를 숨깁니다.");
+            grp_noti.hide();
+        }
+    },200);
+        
+};
+        
+scwin.sbm_getTodayStatus_submitdone = function (e) {
+    console.log("서버로부터 받은 원본 응답: ", e.responseJSON);
+};
+
+scwin.sbm_getUrgentClaims_submitdone = function (e) {
+    console.log("====== [클라이언트] 우선 처리 업무 데이터 수신 ======");
+    console.log("서버로부터 받은 원본 응답(JSON):", e.responseJSON);
+
+    let urgentTaskList = e.responseJSON.dlt_urgentClaims;
+
+    if (urgentTaskList && urgentTaskList.length > 0) {
+        console.log("유효한 우선 처리 업무 리스트 발견:", urgentTaskList.length + "건");
+        // 동적으로 업무 아이템 UI를 생성하는 함수 호출
+        scwin.createUrgentTaskItems(urgentTaskList);
+    } else {
+        console.log("조회된 우선 처리 업무가 없습니다.");
+    }
+    console.log("==============================================");
+};
+
+scwin.createUrgentTaskItems = function(taskList){
+    // UI를 생성할 부모 컨테이너
+    let parentGroup = $p.getComponentById("grp_urgentTaskContainer");
+    
+    // --- 아래 부분을 수정 ---
+    // 기존에 생성된 아이템이 있다면 모두 삭제
+    let children = parentGroup.getChildren();
+    for (let i = children.length - 1; i >= 0; i--) {
+        parentGroup.removeChild(children[i]);
+    }
+    // --- 여기까지 수정 ---
+
+    // 각 데이터에 대해 아이템 생성
+    for (let i = 0; i < taskList.length; i++) {
+        let taskData = taskList[i];
+        scwin.createUrgentTaskItem(parentGroup, taskData, i);
+    }
+};
+
+scwin.createUrgentTaskItem = function(container, taskData, index){
+let itemId = "task_item_" + index;
+
+    // 1. task_item group 생성
+    let taskItemGroup = $p.dynamicCreate(itemId, "group", {
+        "tagname": "div",
+        "style": "display: flex; align-items: center; padding: 15px 5px; border-bottom: 1px solid #f0f0f0;"
+    }, container);
+
+    // 2. priority_line group 생성
+    $p.dynamicCreate(itemId + "_line", "group", {
+        "tagname": "div",
+        "style": "width: 4px; height: 40px; border-radius: 2px; margin-right: 15px; background-color: #eb4e4e;"
+    }, taskItemGroup);
+
+    // 3. task_content group 생성
+    let contentGroup = $p.dynamicCreate(itemId + "_content", "group", {
+        "tagname": "div",
+        "style": "flex-grow: 1; min-width: 0;"
+    }, taskItemGroup); // !!!!! 부모를 taskItemGroup으로 수정 !!!!!
+
+    // 3-1. 제목(title) textbox 생성
+    let titleBox = $p.dynamicCreate(itemId + "_title", "textbox", {
+        "tagname": "p",
+        "style": "font-size: 15px; font-weight: 500; color: #333; margin-bottom: 4px;"
+    }, contentGroup);
+    let titleText = "청구번호: " + taskData.claimNo + " | " + taskData.userName + " | " + taskData.claimContent;
+    titleBox.setValue(titleText);
+
+    // 3-2. 상세(details) textbox 생성
+    let detailsBox = $p.dynamicCreate(itemId + "_details", "textbox", {
+        "tagname": "p",
+        "style": "font-size: 13px; color: #666;"
+    }, contentGroup);
+    detailsBox.setValue("담당자: " + taskData.empName);
+
+    // 4. task_actions group 생성
+    let actionsGroup = $p.dynamicCreate(itemId + "_actions", "group", {
+        "tagname": "div",
+        "style": "display: flex; align-items: center; gap: 8px;"
+    }, taskItemGroup);
+
+    // 4-1. 상태 배지 (배경색/글자색 동적 변경)
+    let statusColors = {
+        "대기": { "bg": "#E3F2FD", "color": "#1565C0" },
+        "결재중": { "bg": "#F3E5F5", "color": "#6A1B9A" },
+        "결재반려": { "bg": "#FFF3E0", "color": "#F57C00" },
+        "결재완료": { "bg": "#E3F2FD", "color": "#1565C0" },
+        "보완": { "bg": "#FFF8E1", "color": "#F9A825" },
+        "보완완료": { "bg": "#E3F2FD", "color": "#1565C0" }
+    };
+
+    let currentStatusColor = statusColors[taskData.status] || statusColors["보완"];
+    
+    let statusBadge = $p.dynamicCreate(itemId + "_status", "textbox", {
+        "style": "font-size: 12px; padding: 4px 8px; border-radius: 4px; font-weight: 500; background-color: " + currentStatusColor.bg + "; color: " + currentStatusColor.color + ";",
+    }, actionsGroup);
+    statusBadge.setValue(taskData.status);
+
+    // 4-2. 남은 시간
+    let deadlineText = taskData.deadline || "";
+    let isOverdue = deadlineText.includes("초과");
+    
+let deadlineColors = {
+    "overdue": { "bg": "#fff5f5", "color": "#fa5252" },
+    "imminent": { "bg": "#f1f3f5", "color": "#495057" }
+    };
+    let currentDeadlineColor = isOverdue ? deadlineColors.overdue : deadlineColors.imminent;
+    
+    let deadlineBox = $p.dynamicCreate(itemId + "_deadline", "textbox", {
+        "tagname": "span",
+        "style": "font-size: 12px; padding: 4px 8px; border-radius: 4px; font-weight: 500; background-color: " + currentDeadlineColor.bg + "; color: " + currentDeadlineColor.color + ";"
+    }, actionsGroup);
+    deadlineBox.setValue(deadlineText);
+};
+
+scwin.sbm_getWeeklyTrend_submitdone = function (e) {
+    setTimeout(function() {
+        try {
+            var chartDataFromServer = e.responseJSON.weeklyTrendList;
+            var approvalData = [];
+            var simplePayData = [];
+
+            for (var i = 0; i < chartDataFromServer.length; i++) {
+                var item = chartDataFromServer[i];
+                approvalData.push({ label: item.reportDate, value: item.approvalCount });
+                simplePayData.push({ label: item.reportDate, value: item.simplePayCount });
+            }
+
+            dlt_weekly_approval.setJSON(approvalData);
+            dlt_weekly_simplePay.setJSON(simplePayData);
+
+            var simplePayAttrs = {
+                "theme": "fusion", "baseFont": "Noto Sans KR, sans-serif",
+                "palettecolors": "#57B96E", "drawAnchors": "1", "anchorRadius": "4", "lineThickness": "2",
+                "showLegend": "1", "legendPosition": "top-right", "plottooltext": "단순 지급: $value건",
+                "showBorder": "0", "bgAlpha": "0"
+            };
+            var approvalAttrs = {
+                "theme": "fusion", "baseFont": "Noto Sans KR, sans-serif",
+                "palettecolors": "#5D68E5", "drawAnchors": "1", "anchorRadius": "4", "lineThickness": "2",
+                "showLegend": "0", "plottooltext": "결재 건: $value건", "bgAlpha": "0", "canvasBgAlpha": "0",
+                "showXAxisLine": "0", "showYAxisValues": "0", "numDivLines": "0"
+            };
+
+            // 전역 변수 대신 $p.getComponentById() 사용
+            var simplePayChart = $p.getComponentById("chart_weeklyTrend_simplePay");
+            var approvalChart = $p.getComponentById("chart_weeklyTrend_approval");
+
+            // 컴포넌트가 존재하는지 확인 후 실행
+            if (simplePayChart && approvalChart) {
+                simplePayChart.setChartAttribute(simplePayAttrs);
+                approvalChart.setChartAttribute(approvalAttrs);
+
+                simplePayChart.draw();
+                approvalChart.draw();
+            }
+
+        } catch (error) {
+            console.error("주간 처리 현황 차트 그리기 중 오류 발생:", error);
+        }
+    }, 0);
+};
+
+/*
+scwin.sbm_getWeeklyTrend_submitdone = function (e) {
+        // 1. 서버 응답에서 데이터 배열 추출
+        var chartDataFromServer = e.responseJSON.weeklyTrendList;
+
+        // 2. dataList에 수동으로 데이터 설정
+        dl_weeklyTrend.setJSON(chartDataFromServer);
+
+        // 3. 차트 스타일 속성 설정
+        var chartAttrs = {
+            "theme": "fusion",
+            "baseFont": "Noto Sans KR, sans-serif",
+            "palettecolors": "#5D68E5,#57B96E",
+            "lineThickness": "2",
+            "drawAnchors": "1",
+            "anchorRadius": "4",
+            "showLegend": "1",
+            "legendPosition": "top-right",
+            "plottooltext": "$seriesName: $value건",
+            "showBorder": "0",
+            "bgAlpha": "0"
+        };
+        chart_weeklyTrend.setChartAttribute(chartAttrs);
+
+        // 4. 차트 그리기
+        chart_weeklyTrend.draw();
+   
+};
+
+ */
+
+/*
+scwin.initWeeklyChart = function() {
+    var chartAttrs = {
+        "caption": "",
+        "subCaption": "",
+        "baseFont": "Noto Sans KR, sans-serif",
+        "showValues": "0",
+        "theme": "fusion",
+        "palettecolors": "#5D68E5,#57B96E",
+        "plotFillAlpha": "10",
+        "lineThickness": "2",
+        "drawAnchors": "1",
+        "anchorRadius": "4",
+        "showLegend": "1",
+        "legendPosition": "top-right",
+        "plottooltext": "$seriesName: $value건"
+    };
+
+    chart_weeklyTrend.setChartAttribute(chartAttrs);
+};
+ */
+
+scwin.sbm_getClaimType_submitdone = function (e) {
+        // 1. 서버 응답에서 실제 데이터 배열을 추출
+        var chartDataFromServer = e.responseJSON.claimTypeData;
+
+        // 2. 추출한 데이터를 dataList에 수동으로 설정
+        dlt_claimTypeChart.setJSON(chartDataFromServer);
+
+        // 3. 차트 스타일 속성 (라벨 제거 & 범례 정리)
+        var chartAttrs = {
+            "theme": "fusion",
+            "caption": "",
+            "baseFont": "Noto Sans KR, sans-serif",
+            "palettecolors": "#5D68E5,#57B96E,#F3B63A,#FC5C65,#20C997,#868e96",
+            
+            // 범례 (Legend) 설정
+            "showLegend": "1",
+            "legendPosition": "bottom",
+            "legendItemFontSize": "13",
+
+            // 도넛 차트 모양 설정
+            "doughnutRadius": "50",
+            "startingAngle": "300",
+
+            //[핵심] 값 & 라벨 표시 설정
+            "showPercentValues": "0", // 차트의 모든 퍼센트 값 표시 기능을 끈다.
+            "showValues": "0",        // 차트의 모든 숫자 값 표시 기능을 끈다.
+
+            // 툴팁 (마우스 올렸을 때) 설정
+            "plottooltext": "<b>$label:</b> $dataValue건 ($percentValue)",
+
+            // 크기 및 여백 설정
+            "pieRadius": "80",
+            "chartTopMargin": "10",
+            "chartBottomMargin": "10",
+            "showBorder": "0",
+            "bgAlpha": "0"
+        };
+        chart_claimType.setChartAttribute(chartAttrs);
+
+        // 4. 차트를 그리기
+        chart_claimType.draw();
+        
+};
+
+
+
+/**
+ * 월별 승인율 데이터 조회 완료 시
+ */
+scwin.sbm_getMonthlyApprovalRate_submitdone = function (e) {
+        var chartDataFromServer = e.responseJSON.monthlyRateData;
+        dlt_monthlyApprovalRateChart.setJSON(chartDataFromServer);
+        
+        // 차트 스타일 속성 설정
+        var chartAttrs = {
+            "theme": "fusion",
+            "baseFont": "Noto Sans KR, sans-serif",
+            "palettecolors": "#578FCA",
+
+            // Y축(세로축) 설정
+            "yAxisMinValue": "0",     // Y축 최소값
+            "yAxisMaxValue": "100",    // Y축 최대값
+            //"yAxisName": "승인율(%)",
+            
+            // 숫자 포맷 설정
+            "numberSuffix": "%",       // 값 뒤에 '%' 단위 표시
+            "formatNumberScale": "0",  // 1000단위 콤마(,) 사용 안 함
+            "decimals": "1",           // 소수점 1자리까지 표시
+
+            // 디자인
+            "showValues": "0",         // 막대 위에 값 숨기기
+            "plottooltext": "$label: $dataValue", // 툴팁
+            "showBorder": "0",
+            "bgAlpha": "0",
+            "canvasBgAlpha": "0"
+    };
+    chartAttrs.chartTopMargin = "40";
+    chartAttrs.chartBottomMargin = "10";
+    chartAttrs.chartLeftMargin = "10";
+    chartAttrs.chartRightMargin = "20";
+
+    chart_monthlyRate.setChartAttribute(chartAttrs);
+    chart_monthlyRate.setPlotColor(["#578FCA"]);
+
+    // 차트 그리기
+    chart_monthlyRate.draw();
+    
+};
+
+
+scwin.sbm_getProcessingTimeTrend_submitdone = function (e) {
+
+        // 1. 서버 응답에서 데이터 추출 및 데이터리스트에 설정
+        var chartDataFromServer = e.responseJSON.processingTimeData;
+        dlt_processingTimeChart.setJSON(chartDataFromServer);
+
+        // 2. 차트 스타일 속성 설정 (중복 제거 및 정리)
+        var chartAttrs = {
+            "theme": "fusion",
+            "baseFont": "Noto Sans KR, sans-serif",
+            "plotFillColor": "#62C578", // 막대 색상
+
+            // Y축(세로축) 설정
+            //"yAxisName": "평균 처리 시간 (시간)",
+            
+            // 숫자 포맷 설정
+            "numberSuffix": "시간",      // 값 뒤에 '시간' 단위 표시
+            "formatNumberScale": "0",    // 1000단위 콤마 사용 안 함
+            "decimals": "1",           // 소수점 1자리까지 표시
+
+            // 디자인
+            "showValues": "0",           // 막대 위에 값 숨기기
+            "plottooltext": "$label: $dataValue", // 툴팁
+            "showBorder": "0",
+            "bgAlpha": "0",
+            "canvasBgAlpha": "0"
+        };
+
+        // 3. 여백 속성 추가
+        chartAttrs.chartTopMargin = "40";
+        chartAttrs.chartBottomMargin = "10";
+        chartAttrs.chartLeftMargin = "10";
+        chartAttrs.chartRightMargin = "20";
+
+        // 4. 속성 적용
+        chart_processingTime.setChartAttribute(chartAttrs);
+
+        // 5. 차트 그리기
+        chart_processingTime.draw();
+        
+};
+
+
+scwin.sbm_getOutlierCount_submitdone = function (e) {
+    // 1. 서버 응답에서 실제 데이터 객체를 추출합니다.
+    var outlierData = e.responseJSON.outlierCountData;
+
+    // 2. 데이터맵(dmp_outlierInfo)에 데이터를 설정합니다.
+    dmp_outlierInfo.setJSON(outlierData);
+
+    // 3. (핵심) 데이터맵의 값을 화면 컴포넌트(outlierCountBox)에 강제로 직접 설정합니다.
+    outlierCountBox.setValue(dmp_outlierInfo.get("outlierCount"));
+};
+
+scwin.sbm_getMyUrgentCount_submitdone = function (e) {
+    try {
+        var count = e.responseJSON.urgentCount; 
+        
+        console.log("서버 응답에서 직접 추출한 건수:", count);
+
+        if (count > 0) {
+            var noti_textbox = $p.getComponentById("grp_noti_text");
+            if (noti_textbox) {
+                noti_textbox.setValue("긴급 처리 요청: " + count + "건이 처리 대기 중입니다.");
+                grp_noti.show();
+            }
+        } else {
+            grp_noti.hide();
+        }
+    } catch (error) {
+        console.error("긴급 건수 처리 중 오류 발생:", error);
+        grp_noti.hide();
+    }
+};
+
+function removeSClass() {
+    const elements = parent.document.getElementsByClassName("selected");
+    for (let i = 0; i < elements.length; i++) {
+        elements[i].classList.remove("selected");
+    }
+}
+
+function movePage(link, now) {
+    parent.WebSquare.util.getComponentById("web_container").setSrc(link);
+    localStorage.setItem("nowSelect", now);
+}
+
+scwin.grp_noti_onclick = function (e) {
+    removeSClass();
+    
+    var myClaimComponent = parent.WebSquare.util.getComponentById("my_claim");
+    if(myClaimComponent) {
+        myClaimComponent.addClass("selected");
+    }
+    
+    var role = JSON.parse(localStorage.getItem("employee")).role;
+
+    if (role === "실무자") {
+        movePage("/InsWebApp/ui/web/claim/my-claims.xml", "myClaim");
+    } else {
+        movePage("/InsWebApp/ui/web/claim/my-approval.xml", "myClaim");
+    }
+};
+]]></script>
+        <style type="text/css"><![CDATA[
+
+            /* ----- Global & Wrapper ----- */
+            .dashboard_wrap { background-color: #f4f6f9; padding: 20px;}
+            .flex_row { display: flex; flex-direction: row; gap: 20px; margin-bottom: 20px;}
+            .flex_row:last-child { margin-bottom: 0;}
+            /* ----- Notification Bar ----- */
+            .notification_bar { background-color: #fff3cd; color: #856404; padding: 12px 20px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; cursor: pointer; }
+            .notification_bar::before { content: "▲"; margin-right: 10px; }
+
+            /* ----- Common Panel Style ----- */
+            .panel { flex: 1; background-color: #ffffff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column;}
+            .panel_title { font-size: 16px; font-weight: bold; color: #333; }
+            .panel_content { flex-grow: 1; display: flex; flex-direction: column; }
+            
+            /* ----- Panel Header Style ----- */
+            .panel_header_with_icon { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+            .header_icon { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+                          background-size: 60%; background-repeat: no-repeat; background-position: center; }
+            .icon_pink { background-color: #fff0f0; 
+                        background-image: url('../../images/insure/doc.png')}
+            .icon_yellow { background-color: #fff9e0; }
+            .icon_blue { background-color: #e7f5ff; }
+            .icon_green { background-color: #e6fcf5; }
+
+            /* ===== (수정) Top Panel Content Style ===== */
+            .status_item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
+            .status_item:last-child { border-bottom: none; } /* 마지막 항목은 선 제거 */
+            
+            .status_label { color: #555; }
+            .status_value { color: #111; font-weight: bold; }
+            .status_value.red { color: #fa5252; }
+            .status_value.orange { color: #fd7e14; }
+            .status_value.blue { color: #339af0; }
+            .status_value.green { color: #20c997; }
+            
+            /* ----- Chart Placeholder ----- */
+            .chart_placeholder { flex-grow: 1; width: 100%; min-height: 200px; background-color: #f7f7f7; border: 1px dashed #e0e0e0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #aaa; }
+
+            /* ----- KPI Card Style ----- */
+            .kpi_card { flex: 1; background-color: #fff; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
+            .kpi_title_box { padding: 8px; margin-bottom: 10px; font-size: 14px; color: #555; }
+            .kpi_value_box { padding: 8px; font-size: 24px; font-weight: bold; color: #333; }
+
+            /* ----- 우선 처리 업무 목록 스타일 ----- */
+            .task_panel .panel_header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+            .task_list { padding: 0; margin: 0; list-style: none; }
+            .task_item { display: flex; align-items: center; padding: 15px 5px; border-bottom: 1px solid #f0f0f0; }
+            .task_item:last-child { border-bottom: none; }
+            .task_item .priority_line { width: 4px; height: 40px; border-radius: 2px; margin-right: 15px; }
+            .priority_high { background-color: #eb4e4e; }
+            .priority_medium { background-color: #f0a03c; }
+            .priority_low { background-color: #57b96e; }
+            .priority_default { background-color: #adb5bd; }
+            .task_item .task_content { flex-grow: 1; min-width: 0; }
+            .task_content .title { font-size: 15px; font-weight: 500; color: #333; margin-bottom: 4px;}
+            .task_content .details { font-size: 13px; color: #666; white-space: normal; word-break: break-all;}
+            .task_item .task_actions { display: flex; align-items: center; gap: 8px; }
+            .status_badge { font-size: 12px; padding: 4px 8px; border-radius: 4px; font-weight: 500;}
+            .status_badge_yellow { background-color: #fff8e1; color: #f59f0b; }
+            .status_badge_blue { background-color: #e7f5ff; color: #339af0; }
+            .status_badge_green { background-color: #e6fcf5; color: #20c997; }
+            .status_badge_gray { background-color: #f1f3f5; color: #868e96; }
+            .btn { text-decoration: none; padding: 6px 14px; border-radius: 5px; font-size: 13px; font-weight: 500; text-align: center;}
+            .btn_primary { background-color: #4c6ef5; color: white; }
+            .btn_secondary { background-color: #f1f3f5; color: #495057; }
+            .btn_view_all { background-color: #e9ecef; color: #495057; }
+        ]]>
+        </style>
+    </head>
+    <body ev:onpageload="scwin.onpageload" style="overflow-x: hidden;">
+        <xf:group class="sub_contents" id="" style="padding: 0;">
+            <xf:group class="dashboard_wrap" id="grp_dashboard">
+
+                <xf:group class="notification_bar" id="grp_noti" ev:onclick="scwin.grp_noti_onclick">
+                    <w2:textbox id="grp_noti_text" label="긴급 심사 요청 - 고객 청구건 3건이 승인 대기 중입니다." tagname="span"></w2:textbox>
+                </xf:group>
+
+                <xf:group class="flex_row" id="grp_top_panels">
+                    <xf:group class="panel">
+    <xf:group class="panel_header_with_icon">
+        <w2:textbox class="panel_title" label="오늘의 처리 현황" tagname="h3"></w2:textbox>
+        <xf:group class="header_icon icon_pink"></xf:group>
+    </xf:group>
+    <xf:group class="panel_content">
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="처리 대기" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value red" ref="data:dma_todayStatus.waitingCount" dataType="number" displayFormat="#,##0건" tagname="span" label=""></w2:textbox>
+        </xf:group>
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="결재 중" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value orange" ref="data:dma_todayStatus.processingCount" dataType="number" displayFormat="#,##0건" tagname="span" label=""></w2:textbox>
+        </xf:group>
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="완료" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value green" ref="data:dma_todayStatus.completedCount" dataType="number" displayFormat="#,##0건" tagname="span" label=""></w2:textbox>
+        </xf:group>
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="반송" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value" ref="data:dma_todayStatus.returnedCount" dataType="number" displayFormat="#,##0건" tagname="span" label=""></w2:textbox>
+        </xf:group>
+    </xf:group>
+</xf:group>
+                    
+                    <xf:group class="panel">
+    <xf:group class="panel_header_with_icon">
+        <w2:textbox class="panel_title" label="보완 요청 현황" tagname="h3"></w2:textbox>
+        <xf:group class="header_icon icon_yellow"></xf:group>
+    </xf:group>
+    <xf:group class="panel_content">
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="보완 요청" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value orange" ref="data:dma_supplementStatus.requestCount" displayFormat="#,##0건" dataType="number" tagname="span" label=""></w2:textbox>
+        </xf:group>
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="보완 완료" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value blue" ref="data:dma_supplementStatus.completedCount" displayFormat="#,##0건" dataType="number" tagname="span" label=""></w2:textbox>
+        </xf:group>
+        <xf:group class="status_item" style="border-bottom: none;">
+            <w2:textbox class="status_label" label="평균 보완 시간" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value" ref="data:dma_supplementStatus.avgProcessingTime" tagname="span" label=""></w2:textbox>
+        </xf:group>
+    </xf:group>
+</xf:group>
+                    
+                    <xf:group class="panel">
+                        <xf:group class="panel_header_with_icon">
+                            <w2:textbox class="panel_title" label="고객 청구 모니터링" tagname="h3"></w2:textbox>
+                            <xf:group class="header_icon icon_blue"></xf:group>
+                        </xf:group>
+                        <xf:group class="panel_content">
+                            <xf:group class="status_item">
+                                <w2:textbox class="status_label" label="100만원 이하" tagname="span"></w2:textbox>
+                                <w2:textbox class="status_value red" ref="data:dma_claimMonitor.countUnder1M" dataType="number" displayFormat="#,##0건" tagname="span" label=""></w2:textbox>
+                            </xf:group>
+                            <xf:group class="status_item">
+                                <w2:textbox class="status_label" label="100만원 이상" tagname="span"></w2:textbox>
+                                <w2:textbox class="status_value red" ref="data:dma_claimMonitor.countOver1M" dataType="number" displayFormat="#,##0건" tagname="span" label=""></w2:textbox>
+                            </xf:group>
+                        </xf:group>
+                    </xf:group>
+                    
+                    <xf:group class="panel">
+    <xf:group class="panel_header_with_icon">
+         <w2:textbox class="panel_title" label="이번 달 성과" tagname="h3"></w2:textbox>
+         <xf:group class="header_icon icon_green"></xf:group>
+    </xf:group>
+    <xf:group class="panel_content">
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="총 처리 건수" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value" ref="data:dma_monthlyPerf.totalProcessedCount" tagname="span" label=""></w2:textbox>
+        </xf:group>
+        <xf:group class="status_item">
+            <w2:textbox class="status_label" label="평균 처리 시간" tagname="span"></w2:textbox>
+            <w2:textbox class="status_value" ref="data:dma_monthlyPerf.avgProcessingTime" tagname="span" label=""></w2:textbox>
+        </xf:group>
+        </xf:group>
+</xf:group>
+                </xf:group>
+                
+                <xf:group class="flex_row" id="grp_mid_charts">
+                    <xf:group class="panel">
+                    	<w2:textbox class="panel_title" label="주간 처리 현황 추이" tagname="h3"></w2:textbox>
+                    	<w2:fusionchart
+                            id="chart_weeklyTrend"
+                            chartType="msline"
+                            ref="data:dl_weeklyTrend"
+                            labelNode="reportDate"
+                            seriesColumns="[['approvalCount','simplePayCount']]"
+                            style="width: 100%; height: 250px;"
+                            drawType="javascript">
+                        </w2:fusionchart>
+                        
+                    </xf:group>
+                    <xf:group class="panel"><w2:textbox class="panel_title" label="청구 유형별 분포" tagname="h3"></w2:textbox>
+                        <w2:fusionchart id="chart_claimType" chartType="Doughnut2D" ref="data:dlt_claimTypeChart"
+                            style="width: 100%; height: 250px;" drawType="javascript">
+                        </w2:fusionchart>
+                    </xf:group>
+                </xf:group>
+                
+                <xf:group class="flex_row" id="grp_bot_charts">
+                    <xf:group class="panel">
+                        <w2:textbox class="panel_title" label="월별 승인율 추이" tagname="h3"></w2:textbox>
+                        <w2:fusionchart id="chart_monthlyRate" chartType="Column2D" ref="data:dlt_monthlyApprovalRateChart"
+                            style="width: 100%; height: 250px;" drawType="javascript">
+                        </w2:fusionchart>
+                    </xf:group>
+                    <xf:group class="panel">
+                        <xf:group style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <w2:textbox class="panel_title" label="평균 처리 시간" tagname="h3"></w2:textbox>
+                            <xf:group tagname="span" style="">
+                                <w2:textbox tagname="span" label="장기처리(3일 초과) " style="font-size: 13px; color: #888;"></w2:textbox>
+                                <w2:textbox id="outlierCountBox" ref="data:dmp_outlierInfo.outlierCount" tagname="span"
+                                style="font-size: 14px; color: #dc3545; font-weight: bold;" displayFormat="#,##건"></w2:textbox>
+                            </xf:group>
+                        </xf:group>    
+                        <w2:fusionchart id="chart_processingTime" chartType="Column2D" ref="data:dlt_processingTimeChart"
+                            style="width: 100%; height: 250px;" drawType="javascript">
+                        </w2:fusionchart>
+                    </xf:group>
+                </xf:group>
+                
+                <xf:group class="flex_row" id="grp_kpi_row">
+                    <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="평균 처리 시간"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox ref="data:dma_monthlyPerf.avgProcessingTime" label=""></w2:textbox></xf:group></xf:group>
+                    <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="지급률"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox ref="data:dma_paymentRate.approvalRate" label=""></w2:textbox></xf:group></xf:group>
+                    <xf:group class="kpi_card"><xf:group class="kpi_title_box"><w2:textbox label="전일 처리"></w2:textbox></xf:group><xf:group class="kpi_value_box"><w2:textbox ref="data:dma_dailyCount.yesterdayProcessedCount" label=""></w2:textbox></xf:group></xf:group>
+                </xf:group>
+                
+                <xf:group class="flex_row" id="grp_task_list">
+                    <xf:group class="panel task_panel">
+                        <xf:group class="panel_header" id="" style="">
+                            <w2:textbox class="panel_title" label="우선 처리 업무" tagname="h3"></w2:textbox>
+                        </xf:group>
+
+                        <xf:group class="task_list" id="grp_urgentTaskContainer" style="height:400px; overflow-y: auto;">
+                            
+                        </xf:group>
+
+                    </xf:group>
+                </xf:group>
+                
+            </xf:group>
+        </xf:group>
+    </body>
+</html>

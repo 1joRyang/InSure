@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="/InsWebApp/cm/css/claimPage.css" type="text/css"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate/>
+        <w2:MSA/>
+        <xf:model>
+            <w2:dataCollection baseNode="map"/>
+            <w2:workflowCollection/>
+        </xf:model>
+        <w2:layoutInfo/>
+        <w2:publicInfo method=""/>
+        <script lazy="false" type="text/javascript"><![CDATA[
+scwin.onpageload = function() {
+	
+};
+
+scwin.btnNext_onclick = function (e) {
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/home/m_home.xml";
+};
+]]></script>
+    </head>
+    <body ev:onpageload="scwin.onpageload">
+    	<w2:wframe src="/InsWebApp/ui/mobile/cmmn/m_header_claim.xml" style="" id="" class="wfm_m_header"></w2:wframe>
+    	<xf:group class="sub_contents2" id="group6" style="">
+    		<xf:group class="header-section" id="group7" style="">
+    			<w2:textbox class="step_tit" id="" label="최종확인" style="" tagname=""></w2:textbox>
+    			<xf:group class="step" id="" style="">
+    				<xf:group id="" style="" tagname="ul">
+    					<xf:group class="inactive" id="" style="" tagname="li">
+    						<w2:span id="" label="✔" style=""></w2:span>
+    					</xf:group>
+    					<xf:group class="inactive" id="" style="" tagname="li">
+    						<w2:span id="" label="✔" style=""></w2:span>
+    					</xf:group>
+    					<xf:group class="inactive" id="" style="" tagname="li">
+    						<w2:span id="" label="✔" style=""></w2:span>
+    					</xf:group>
+    					<xf:group class="inactive" id="" style="" tagname="li">
+    						<w2:span id="" label="✔" style=""></w2:span>
+    					</xf:group>
+    					<xf:group class="inactive" id="" style="" tagname="li">
+    						<w2:span id="" label="✔" style=""></w2:span>
+    					</xf:group>
+    					<xf:group class="inactive" id="" style="" tagname="li">
+    						<w2:span id="" label="✔" style=""></w2:span>
+    					</xf:group>
+    					<xf:group class="current" id="" style="" tagname="li">
+    						<w2:span id="" label="7" style=""></w2:span>
+    					</xf:group>
+    				</xf:group>
+    			</xf:group>
+    		</xf:group>
+    		<xf:group class="content-section" id="mainContent" style="margin:0 auto;">
+    			<xf:group style="width: 100%;height: 100%;justify-content: center;display: flex;flex-direction: column;" id="">
+    				<xf:group style="width: 100%;justify-content: center;display: flex;align-items: center;" id="">
+    					<xf:group tagname="div"
+    						style="width: 80px;height: 80px;border-radius:100px;background-color: rgb(34, 197, 94, 0.22);justify-content: center;display: flex;align-items: center;"
+    						id="" class="">
+    						<w2:span style="font-size: 50px;color: #22C55E;width: 100%;text-align: center;" id="" label="✔"></w2:span>
+    					</xf:group>
+    				</xf:group>
+    				<w2:textbox style="text-align: center;margin-top: 20px" id="" label="청구 접수 완료" class="question-text"></w2:textbox>
+    			</xf:group>
+    		</xf:group>
+    		<xf:group class="footer-section" id="footer" style="">
+    			<w2:button class="next-button" ev:onclick="scwin.btnNext_onclick" id="button3" label="홈으로 가기"></w2:button>
+    		</xf:group>
+    	</xf:group>
+    </body>
+</html>
