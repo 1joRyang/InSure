@@ -46,7 +46,7 @@ scwin.btn_next_onclick = function (e) {
 
 scwin.btn_change_onclick = function (e) {
     // 담당자 변경 팝업 호출
-    openChangeAssigneePopup("/InsWebApp/ui/Assignment/change-assignee-popup.xml");
+    openChangeAssigneePopup("/InsWebApp/ui/web/assign/change-assignee-popup.xml");
 };
 
 // 담당자 변경 팝업 함수
@@ -78,7 +78,7 @@ function openChangeAssigneePopup(link) {
 }
 
 scwin.btn_reject_onclick = function (e) {
-    openClaimReturnPopup("/InsWebApp/ui/Assignment/claimReturnPopup.xml");
+    openClaimReturnPopup("/InsWebApp/ui/web/audit/claimReturnPopup.xml");
 };
 
 function openClaimReturnPopup(link) {
@@ -109,7 +109,7 @@ function openClaimReturnPopup(link) {
 }
 
 scwin.btn_sup_onclick = function (e) {
-     openClaimSupplyPopup("/InsWebApp/ui/Assignment/reqSupplePopup.xml");
+     openClaimSupplyPopup("/InsWebApp/ui/web/audit/reqSupplePopup.xml");
 
 };
 
@@ -141,7 +141,7 @@ function openClaimSupplyPopup(link) {
 }]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload">
-    	<w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/header.xml"></w2:wframe>
+    	<w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/web/cmmn/header.xml"></w2:wframe>
     	<xf:group meta_snippetCategory="00_화면시작" meta_snippetName="0_01 페이지시작" meta_snippetKeyComponent="true" style="" id=""
     		class="sub_contents">
     		<xf:group style="justify-content: space-between;" class="pgtbox">
@@ -154,7 +154,7 @@ function openClaimSupplyPopup(link) {
     				<w2:textbox ref="data:dm_header.claimNo" style="padding-left: 10px;" id="" label="" class="pgt_tit"></w2:textbox>
     			</xf:group>
     		</xf:group>
-            <w2:wframe src="/InsWebApp/ui/audit/img_modal.xml" style="width: 100%;height: 700px;" id=""></w2:wframe>
+            <w2:wframe src="/InsWebApp/ui/web/audit/img_modal.xml" style="width: 100%;height: 700px;" id=""></w2:wframe>
     		<xf:group meta_snippetCategory="08_버튼" meta_snippetName="8_04 전체제어버튼" meta_snippetKeyComponent="true" style="margin-top: 40px;"
     			id="" class="btnbox">
     			<xf:group style="" id="" class="rt">

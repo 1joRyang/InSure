@@ -106,7 +106,7 @@ scwin.sbm_getReturn_submitdone = function (e) {
 ]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload" class="mobile-page-body">
-        <w2:wframe src="/InsWebApp/ui/cmmn/m_header_title.xml" style="flex-shrink: 0;" id="" class="wfm_m_header"></w2:wframe>
+        <w2:wframe src="/InsWebApp/ui/mobile/cmmn/m_header_title.xml" style="flex-shrink: 0;" id="" class="wfm_m_header"></w2:wframe>
     	<xf:group class="mobile-page-contain" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
     		style="display: flex;flex-direction: column;gap: 15px;">
     		<xf:group style="border: 1px solid #D9D9D9;border-radius: 15px;padding: 20px;" id="">
@@ -193,6 +193,6 @@ scwin.sbm_getReturn_submitdone = function (e) {
     			<w2:textbox id="memo" label="" style="width: 100%;min-height: 50px;"></w2:textbox>
     		</xf:group>
     	</xf:group>
-        <w2:wframe style="flex-shrink: 0;" id="" class="wfm_m_footer" src="/InsWebApp/ui/cmmn/m_footer.xml"></w2:wframe>
+        <w2:wframe style="flex-shrink: 0;" id="" class="wfm_m_footer" src="/InsWebApp/ui/mobile/cmmn/m_footer.xml"></w2:wframe>
     </body>
 </html>

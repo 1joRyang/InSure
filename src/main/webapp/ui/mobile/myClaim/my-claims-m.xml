@@ -240,7 +240,7 @@ scwin.getStatusColor = function(status) {
 };]]></script>
     </head>
     <body ev:onpageload="scwin.onpageload" class="mobile-page-body">
-        <w2:wframe src="/InsWebApp/ui/cmmn/m_header_title.xml" style="flex-shrink: 0;" id="" class="wfm_m_header"></w2:wframe>
+        <w2:wframe src="/InsWebApp/ui/moblie/cmmn/m_header_title.xml" style="flex-shrink: 0;" id="" class="wfm_m_header"></w2:wframe>
     	<xf:group class="mobile-page-contain" id="" meta_snippetCategory="00_화면시작" meta_snippetKeyComponent="true" meta_snippetName="0_01 페이지시작"
     		style="display: flex;flex-direction: column;gap: 15px;">
     		<xf:group id=""
@@ -267,6 +267,6 @@ scwin.getStatusColor = function(status) {
     			<xf:group style="width: 100%; height: 100%; box-sizing: border-box;" id="claimContainer" class="claimContainer"></xf:group>
     		</xf:group>
     	</xf:group>
-        <w2:wframe style="flex-shrink: 0;" id="" class="wfm_m_footer" src="/InsWebApp/ui/cmmn/m_footer.xml"></w2:wframe>
+        <w2:wframe style="flex-shrink: 0;" id="" class="wfm_m_footer" src="/InsWebApp/ui/moblie/cmmn/m_footer.xml"></w2:wframe>
     </body>
 </html>

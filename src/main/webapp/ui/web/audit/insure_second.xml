@@ -367,7 +367,7 @@ scwin.grd_insure_oncellclick = function (rowIndex, columnIndex, columnId) {
     </head>
     <body ev:onpageload="scwin.onpageload">
     	
-    	<w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/header.xml"></w2:wframe>
+    	<w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/web/cmmn/header.xml"></w2:wframe>
     	<xf:group style="width: 100%;display: flex; overflow-x: hidden;" id="">
     		<xf:group style="width: 100%;" id="" class="sub_contents ">
     			<xf:group class="pgtbox" style="justify-content: space-between;">

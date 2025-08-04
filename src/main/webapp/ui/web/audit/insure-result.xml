@@ -2068,7 +2068,7 @@ function executeComplete() {
     scwin.showLoading(true);
     $p.executeSubmission("sbm_saveClaimResult");
     localStorage.removeItem("claim");
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/webWrapper.xml";
 }
 
 /**
@@ -2124,7 +2124,7 @@ scwin.btn_return_onclick = function (e) {
     if (!scwin.checkPermission("반송")) return;
     if (!scwin.checkReturnPermission()) return;
     
-    openClaimReturnPopup("/InsWebApp/ui/Assignment/claimReturnPopup.xml");
+    openClaimReturnPopup("/InsWebApp/ui/web/audit/claimReturnPopup.xml");
 };
 
 /**
@@ -2134,7 +2134,7 @@ scwin.btn_supplement_onclick = function (e) {
     if (!scwin.checkPermission("보완 요청")) return;
     if (!scwin.checkSupplementPermission()) return;
     
-    openReqSupplePopup("/InsWebApp/ui/Assignment/reqSupplePopup.xml");
+    openReqSupplePopup("/InsWebApp/ui/web/audit/reqSupplePopup.xml");
 };
 
 /**
@@ -2223,14 +2223,14 @@ function executeManagerApproval() {
  * 반려 버튼 클릭
  */
 scwin.btn_reject_onclick = function (e) {
-    openRejectClaimPopup("/InsWebApp/ui/Assignment/RejectClaimPopup.xml");
+    openRejectClaimPopup("/InsWebApp/ui/web/audit/RejectClaimPopup.xml");
 };
 
 /**
  * 반려 메모 버튼 클릭
  */
 scwin.btn_reject_memo_onclick = function (e) {
-    openClaimReturnPopup("/InsWebApp/ui/web/assign/rejectMemoPopUp.xml");
+    openClaimReturnPopup("/InsWebApp/ui/web/audit/rejectMemoPopUp.xml");
 };
 
 /**
@@ -2365,7 +2365,7 @@ function handleApprovalSuccess() {
         showConfirmButton: false,
         timer: AUDIT_CONFIG.SUCCESS_TIMER
     }).then(() => {
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/webWrapper.xml";
     });
 }
 
@@ -2593,7 +2593,7 @@ scwin.twoBtnAlert = (param, callback) => {
 };]]></script>
 	</head>
 	<body ev:onpageload="scwin.onpageload">
-		<w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/cmmn/header.xml"></w2:wframe>
+		<w2:wframe style="z-index: 20;top: 0;width: 100%;" id="" src="/InsWebApp/ui/web/cmmn/header.xml"></w2:wframe>
 		<xf:group class="sub_content" id="" style="padding:20px; top:100px;">
 			<!-- 헤더 영역 -->
 			<xf:group class="header_section" id=""
