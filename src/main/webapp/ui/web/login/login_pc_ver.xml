@@ -127,7 +127,7 @@ scwin.sbm_EmployeeLogin_submitdone = function (e) {
             } 
 
             // 메인 페이지로
-            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/login/webWrapper.xml";
+            location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/webWrapper.xml";
             
         } else {
             scwin.toastAlert({

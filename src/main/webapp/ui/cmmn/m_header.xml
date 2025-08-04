@@ -30,7 +30,7 @@ scwin.onpageload = function() {
 };
 
 scwin.img_logo_onclick = function (e) {
-    location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobileWrapper.xml"
+    location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/home/m_home.xml"
 };
 
 scwin.logout_btn_onclick = function (e) {
@@ -49,7 +49,7 @@ scwin.sbm_UserLogout_submitdone = function (e) {
     localStorage.removeItem("employee");
     
     // 로그인 페이지로 이동
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/insure_login_mobile.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/login/insure_login_mobile.xml";
 
 };
 

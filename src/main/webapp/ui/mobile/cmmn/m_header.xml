@@ -30,7 +30,7 @@ scwin.onpageload = function() {
 };
 
 scwin.img_logo_onclick = function (e) {
-    location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/m_home.xml"
+    location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/mobile/home/m_home.xml"
 };
 
 scwin.logout_btn_onclick = function (e) {

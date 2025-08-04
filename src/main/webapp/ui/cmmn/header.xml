@@ -76,7 +76,7 @@
     	<w2:layoutInfo />
     	<w2:publicInfo method="" />
     	<script cache="false" scopeExternal="false" src="/InsWebApp/js/insure/sweet-alert.js" scopeVariable="" type="text/javascript"></script>
-    	<script lazy="false" type="text/javascript"><![CDATA[// 알림 데이터를 저장할 전역 객체
+    	<script lazy="false" type="text/javascript"><![CDATA[
 var notificationDataStore = {};
 
 scwin.onpageload = function() {
@@ -100,7 +100,7 @@ scwin.onpageload = function() {
     });
 };
 
-// 알림 아이템을 동적으로 생성하는 함수
+// 알림 아이템을 동적으로 생성
 scwin.createNotificationItem = function(notificationData) {
     try {
         // 알림 타입에 따른 제목 설정
@@ -140,16 +140,8 @@ scwin.createNotificationItem = function(notificationData) {
             "ev:onclick": "scwin.handleNotificationClick",
         }, listArea);
         
-        // 알림 데이터를 카드에 저장
-        // 전역 객체에 데이터 저장
         notificationDataStore[cardId] = notificationData;
-
-        // 카드에 ID 저장  
-        cardGroup.setUserData("cardId", cardId);
-        // 카드 클릭 이벤트 바인딩
-        //cardGroup.bind("onclick", function(e) {
-        //    scwin.handleNotificationClick(notificationData);
-        //}); 
+ 
 
       //   제목 생성
         var titleOutput = $p.dynamicCreate(cardId + "_title", "output", {
@@ -178,9 +170,9 @@ scwin.createNotificationItem = function(notificationData) {
             actionButton.setValue(buttonText);
             actionButton.setUserData("notiId", notificationData.noti_id);
             
-            // 버튼 클릭 이벤트 바인딩 (이벤트 전파 방지)
+            // 버튼 클릭 이벤트 바인딩
             actionButton.bind("onclick", function(e) {
-                e.stopPropagation(); // 카드 클릭 이벤트 방지
+                e.stopPropagation();
                 var notiId = e.target.getUserData("notiId");
                 scwin.handleNotificationAction(notiId);
             });
@@ -282,11 +274,10 @@ scwin.sbm_markAsRead_submitdone = function(e) {
 };
 
 /**
- * WebSocket에서 호출하는 알림 목록 추가 함수
+ * 알림 목록 추가 함수
  */
 scwin.addNotificationToList = function(notificationData) {
     try {
-        // 새로운 알림 카드를 동적으로 생성
         scwin.createNotificationItem(notificationData);
         console.log('새 알림이 목록에 추가되었습니다:', notificationData);
     } catch (e) {
@@ -315,7 +306,7 @@ scwin.updateNotificationBadge = function() {
 };
 
 /**
- * 페이지 최초 로드 시, 서버에서 알림 목록과 미읽음 개수를 가져오기
+ * 알림 목록과 미읽음 개수를 가져오기
  */
 scwin.loadInitialNotifications = function() {
     const empNo = JSON.parse(localStorage.getItem("employee"))?.empNo;
@@ -386,7 +377,7 @@ scwin.noti_btn_onclick = function(e) {
 
 scwin.img_logo_onclick = function (e) {
     localStorage.setItem("nowSelect", "myClaim");
-    location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/webWrapper.xml"
+    location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/webWrapper.xml";
 };
 
 scwin.logout_btn_onclick = function (e) {
@@ -408,7 +399,6 @@ scwin.logout_btn_onclick = function (e) {
 // 로그아웃 실패 시 처리
 scwin.sbm_EmployeeLogout_submiterror = function(e) {
     console.error("로그아웃 실패:", e);
-    //alert("로그아웃 처리 중 오류가 발생했습니다.");
 };
 
 scwin.sbm_EmployeeLogout_submitdone = function (e) {
@@ -418,25 +408,22 @@ scwin.sbm_EmployeeLogout_submitdone = function (e) {
     localStorage.removeItem("user");
     localStorage.removeItem("simple");
     localStorage.removeItem("employee");
-    localStorage.removeItem("notifications"); // 알림도 정리
+    localStorage.removeItem("notifications");
     
     // 로그인 페이지로 이동
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/login/login_pc_ver.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/login/login_pc_ver.xml";
 };
 
 scwin.sbm_getClaimInfo_submitdone = function(e) {
     try {
-        console.log("=== 청구 정보 조회 성공 ===");
         
         var responseData = e.responseJSON;
         
-        // 서버 성공 여부 확인
         if (!responseData.elHeader.resSuc) {
             console.error("서버 처리 실패:", responseData.elHeader.resMsg);
             return;
         }
         
-        // elData에서 청구 정보 추출
         var claimInfo = responseData.elData;
         console.log("조회된 청구 정보:", claimInfo);
 
@@ -452,26 +439,20 @@ scwin.sbm_getClaimInfo_submitdone = function(e) {
         console.log(claim);
         console.log("localStorage 업데이트 완료:");
 
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure_first.xml";
         
     } catch (err) {
         console.error("처리 중 오류:", err);
     }
 };
 
-/**
- * 청구 정보 조회 실패 콜백
- */
+
 scwin.sbm_getClaimInfo_submiterror = function(e) {
     try {
-        console.error("=== 청구 정보 조회 실패 ===");
-        console.error("오류 응답:", e);
         
         var tempClaimNumber = sessionStorage.getItem("tempClaimNumber");
         var notificationType = sessionStorage.getItem("tempNotificationType");
         
-        console.error("실패한 청구번호:", tempClaimNumber);
-        console.error("알림 타입:", notificationType);
         
         // 사용자에게 오류 알림
         var errorMsg = "청구 정보를 불러오는데 실패했습니다.";
@@ -489,7 +470,6 @@ scwin.sbm_getClaimInfo_submiterror = function(e) {
     } catch (err) {
         console.error("오류 처리 중 추가 오류:", err);
         
-        // 최종 안전장치
         sessionStorage.removeItem("tempClaimNumber");
         sessionStorage.removeItem("tempNotificationType");
     }
