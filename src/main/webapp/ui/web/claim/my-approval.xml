@@ -97,7 +97,7 @@ function moveNsave(rowData) {
     };
     localStorage.setItem("claim", JSON.stringify(claim));
     
-    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
+    location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure_first.xml";
 }
 
 scwin.grd_d_oncelldblclick = function (rowIndex, columnIndex, columnId) {
