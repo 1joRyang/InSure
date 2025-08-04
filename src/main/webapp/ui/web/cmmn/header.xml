@@ -81,35 +81,28 @@ var notificationDataStore = {};
 
 scwin.onpageload = function() {
 
-    // [수정] window 객체에 초기화 여부를 저장하는 플래그를 확인합니다.
     if (!window.isWebSocketInitialized) {
         if (typeof WebSocketService !== "undefined") {
             WebSocketService.init();
-            window.isWebSocketInitialized = true; // ✨ 초기화 완료 플래그 설정
+            window.isWebSocketInitialized = true; 
             console.log("최초 웹소켓 연결을 초기화합니다.");
         }
     } else {
         console.log("기존 웹소켓 연결을 재사용합니다.");
     }
 
-    // 초기 알림 로딩은 페이지마다 실행해도 괜찮습니다.
     scwin.loadInitialNotifications();
 
-    // 3. 'notification_received' 이벤트를 감지하는 리스너 추가
-    // 이 리스너는 websocket.js에서 보낸 알림을 받아 처리합니다.
     document.addEventListener('notification_received', function(e) {
-        console.log("✅ [header.xml] 'notification_received' 이벤트를 수신했습니다!", e.detail);
         
-        // 이벤트에 담겨온 데이터(e.detail)로 그리드에 알림을 추가합니다.
         scwin.addNotificationToList(e.detail);
         scwin.updateNotificationBadge();
     });
 };
 
-// [신규] 알림 아이템을 동적으로 생성하는 함수
+//알림 아이템을 동적으로 생성하는 함수
 scwin.createNotificationItem = function(notificationData) {
     try {
-        // 알림 타입에 따른 제목 설정
         var titleText = '';
         var buttonText = '';
         var showButton = false;
@@ -134,49 +127,36 @@ scwin.createNotificationItem = function(notificationData) {
         var cardId = "noti_item_" + notificationData.noti_id;
         var listArea = $p.getComponentById("notification_list_area");
         
-        // 읽음 여부에 따른 스타일 설정
         var isRead = notificationData.is_read === 'Y' || notificationData.is_read === true;
         var cardStyle = isRead 
             ? "background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; opacity: 0.7;"
             : "background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer;";
         
-        // 1. 메인 카드 그룹 생성
         var cardGroup = $p.dynamicCreate(cardId, "group", {
             style: cardStyle,
             "ev:onclick": "scwin.handleNotificationClick",
         }, listArea);
         
         // 알림 데이터를 카드에 저장
-        // 전역 객체에 데이터 저장
         notificationDataStore[cardId] = notificationData;
 
-        // 카드에 ID 저장  
         cardGroup.setUserData("cardId", cardId);
-        // 카드 클릭 이벤트 바인딩
-        //cardGroup.bind("onclick", function(e) {
-        //    console.log("카드 클릭됨!");
-        //    scwin.handleNotificationClick(notificationData);
-        //}); 
 
-      //  2. 제목 생성
         var titleOutput = $p.dynamicCreate(cardId + "_title", "output", {
             style: "font-weight: bold; font-size: 14px; color: #333; margin-bottom: 5px; display: block; width: 100%;"
         }, cardGroup);
         titleOutput.setValue(titleText);
 
-        // 3. 내용 생성
         var contentOutput = $p.dynamicCreate(cardId + "_content", "output", {
             style: "font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4; display: block; width: 100%;"
         }, cardGroup);
         contentOutput.setValue(notificationData.noti_content);
 
-        // 4. 날짜 생성
         var dateOutput = $p.dynamicCreate(cardId + "_date", "output", {
             style: "font-size: 11px; color: #999; display: block; width: 100%;"
         }, cardGroup);
         dateOutput.setValue(notificationData.created_date);
 
-        // 5. 보완 요청인 경우 버튼 추가
         if (showButton) {
             var actionButton = $p.dynamicCreate(cardId + "_button", "trigger", {
                 style: "background-color: #4A90E2; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; margin-top: 8px; cursor: pointer;"
@@ -185,26 +165,23 @@ scwin.createNotificationItem = function(notificationData) {
             actionButton.setValue(buttonText);
             actionButton.setUserData("notiId", notificationData.noti_id);
             
-            // 버튼 클릭 이벤트 바인딩 (이벤트 전파 방지)
+            // 버튼 클릭 이벤트
             actionButton.bind("onclick", function(e) {
-                e.stopPropagation(); // 카드 클릭 이벤트 방지
+                e.stopPropagation();
                 var notiId = e.target.getUserData("notiId");
                 scwin.handleNotificationAction(notiId);
             });
         }
 
-        console.log('✅ [header.xml] 새 알림 카드를 동적으로 생성했습니다.');
+        console.log('[header.xml]새 알림 카드를 동적으로 생성했습니다.');
 
     } catch (e) {
-        console.error('❌ [header.xml] 알림 카드 생성 실패:', e);
+        console.error('[header.xml] 알림 카드 생성 실패:', e);
     }
 };
 
 scwin.handleNotificationClick = function(e) {
     try {
-        console.log("=== 디버깅: 알림 클릭 ===");
-        
-        // 청구번호 추출 (기존 로직)
         var targetId = e.target.id;
         var notiId = targetId.match(/NOTI_\d+/)[0];
         var cardId = "noti_item_" + notiId;
@@ -225,7 +202,6 @@ scwin.handleNotificationClick = function(e) {
         
         console.log("추출된 청구번호:", claimNumber);
         
-        // 데이터맵 설정
         if (dma_getClaimInfo) {
             dma_getClaimInfo.set("claim_no", claimNumber);
             console.log("데이터맵 설정 완료:", dma_getClaimInfo.getJSON());
@@ -234,7 +210,6 @@ scwin.handleNotificationClick = function(e) {
             return;
         }
         
-        // 서브미션 실행
         $c.sbm.execute(sbm_getClaimInfo);
         
     } catch (err) {
@@ -254,11 +229,9 @@ scwin.markNotificationAsRead = function(notiId) {
             return;
         }
         
-        // 읽음 처리를 위한 데이터 설정
         dma_markAsRead.set("notiId", notiId);
         dma_markAsRead.set("empNo", empNo);
         
-        // 서버에 읽음 처리 요청
         $c.sbm.execute(sbm_markAsRead);
         
         console.log("알림 읽음 처리 요청:", notiId);
@@ -294,15 +267,15 @@ scwin.sbm_markAsRead_submitdone = function(e) {
 };
 
 /**
- * WebSocket에서 호출하는 알림 목록 추가 함수
+ * 알림 목록 추가 함수
  */
 scwin.addNotificationToList = function(notificationData) {
     try {
         // 새로운 알림 카드를 동적으로 생성
         scwin.createNotificationItem(notificationData);
-        console.log('✅ [header.xml] 새 알림이 목록에 추가되었습니다:', notificationData);
+        console.log('[header.xml] 새 알림이 목록에 추가되었습니다:', notificationData);
     } catch (e) {
-        console.error('❌ [header.xml] 알림 목록 추가 실패:', e);
+        console.error('[header.xml] 알림 목록 추가 실패:', e);
     }
 };
 
@@ -327,7 +300,7 @@ scwin.updateNotificationBadge = function() {
 };
 
 /**
- * [서버 통신] 페이지 최초 로드 시, 서버에서 알림 목록과 미읽음 개수를 가져옵니다.
+ *서버에서 알림 목록과 미읽음 개수를 가져오기
  */
 scwin.loadInitialNotifications = function() {
     const empNo = JSON.parse(localStorage.getItem("employee"))?.empNo;
@@ -337,15 +310,12 @@ scwin.loadInitialNotifications = function() {
     }
 };
 
-/**
- * sbm_getNotifications 서브미션의 성공 콜백 함수
- */
+
 scwin.sbm_getNotifications_submitdone = function(e) {
     try {
         const responseData = e.responseJSON.elData;
         if (!responseData) return;
 
-        // 기존 목록을 비웁니다 - $p.dynamicCreate로 생성된 컴포넌트들 제거
         var listArea = $p.getComponentById("notification_list_area");
         if (listArea) {
             // 기존 자식 컴포넌트들을 모두 제거
@@ -358,19 +328,16 @@ scwin.sbm_getNotifications_submitdone = function(e) {
             }
         }
         
-        // 서버에서 받은 기존 알림들을 동적으로 생성합니다.
         if (responseData.notificationVoList && responseData.notificationVoList.length > 0) {
             responseData.notificationVoList.forEach(function(item) {
                 scwin.createNotificationItem(item);
             });
             
-            // 알림이 있으면 "알림 없음" 메시지 숨기기
             var noMsgArea = $p.getComponentById("no_notification_message");
             if (noMsgArea) {
                 noMsgArea.setStyle("display", "none");
             }
         } else {
-            // 알림이 없으면 "알림 없음" 메시지 표시
             var noMsgArea = $p.getComponentById("no_notification_message");
             if (noMsgArea) {
                 noMsgArea.setStyle("display", "block");
@@ -391,7 +358,7 @@ scwin.sbm_getNotifications_submitdone = function(e) {
 };
 
 /**
- * [UI 이벤트] 종 아이콘 클릭 시 알림 패널을 토글합니다.
+ * 종 아이콘 클릭 시 알림 패널을 토글
  */
 scwin.noti_btn_onclick = function(e) {
     const panel = $p.getComponentById("notification_panel");
@@ -404,7 +371,7 @@ scwin.noti_btn_onclick = function(e) {
 
 scwin.img_logo_onclick = function (e) {
     localStorage.setItem("nowSelect", "myClaim");
-    location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/webWrapper.xml"
+    location.href="/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/login/webWrapper.xml";
 };
 
 scwin.logout_btn_onclick = function (e) {
@@ -426,7 +393,6 @@ scwin.logout_btn_onclick = function (e) {
 // 로그아웃 실패 시 처리
 scwin.sbm_EmployeeLogout_submiterror = function(e) {
     console.error("로그아웃 실패:", e);
-    //alert("로그아웃 처리 중 오류가 발생했습니다.");
 };
 
 scwin.sbm_EmployeeLogout_submitdone = function (e) {
@@ -436,7 +402,7 @@ scwin.sbm_EmployeeLogout_submitdone = function (e) {
     localStorage.removeItem("user");
     localStorage.removeItem("simple");
     localStorage.removeItem("employee");
-    localStorage.removeItem("notifications"); // 알림도 정리
+    localStorage.removeItem("notifications");
     
     // 로그인 페이지로 이동
     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/login/login_pc_ver.xml";
@@ -444,17 +410,14 @@ scwin.sbm_EmployeeLogout_submitdone = function (e) {
 
 scwin.sbm_getClaimInfo_submitdone = function(e) {
     try {
-        console.log("=== 청구 정보 조회 성공 ===");
         
         var responseData = e.responseJSON;
         
-        // 서버 성공 여부 확인
         if (!responseData.elHeader.resSuc) {
             console.error("서버 처리 실패:", responseData.elHeader.resMsg);
             return;
         }
         
-        // elData에서 청구 정보 추출
         var claimInfo = responseData.elData;
         console.log("조회된 청구 정보:", claimInfo);
 
@@ -470,20 +433,16 @@ scwin.sbm_getClaimInfo_submitdone = function(e) {
         console.log(claim);
         console.log("localStorage 업데이트 완료:");
 
-        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
+        location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/web/audit/insure_first.xml";
         
     } catch (err) {
         console.error("처리 중 오류:", err);
     }
 };
 
-/**
- * 청구 정보 조회 실패 콜백
- */
+
 scwin.sbm_getClaimInfo_submiterror = function(e) {
     try {
-        console.error("=== 청구 정보 조회 실패 ===");
-        console.error("오류 응답:", e);
         
         var tempClaimNumber = sessionStorage.getItem("tempClaimNumber");
         var notificationType = sessionStorage.getItem("tempNotificationType");
@@ -499,20 +458,13 @@ scwin.sbm_getClaimInfo_submiterror = function(e) {
         
         alert(errorMsg + "\n\n관리자에게 문의하세요.");
         
-        // 임시 데이터 정리
         sessionStorage.removeItem("tempClaimNumber");
         sessionStorage.removeItem("tempNotificationType");
         
-        // 선택적으로 기본 페이지로 이동할 수도 있음
-        // if (notificationType === 'approval_request') {
-        //     console.log("실패 시에도 결재 페이지로 이동 시도...");
-        //     location.href = "/InsWebApp/websquare/websquare.html?w2xPath=/InsWebApp/ui/audit/insure_first.xml";
-        // }
         
     } catch (err) {
         console.error("오류 처리 중 추가 오류:", err);
         
-        // 최종 안전장치
         sessionStorage.removeItem("tempClaimNumber");
         sessionStorage.removeItem("tempNotificationType");
     }
