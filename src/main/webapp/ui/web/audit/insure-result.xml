@@ -2603,9 +2603,6 @@ scwin.twoBtnAlert = (param, callback) => {
 					<xf:group id="" style="display:flex;align-items:center;gap:10px;">
 						<w2:span class="status_badge status_pending" id="spn_status" ref="data:dma_settlementInfo.status"
 							style="display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold;"></w2:span>
-						<!-- <xf:trigger type="button" id="btn_refresh" ev:onclick="scwin.refreshData" style="padding:4px 12px;font-size:12px;">
-							<xf:label>새로고침</xf:label>
-							</xf:trigger> -->
 					</xf:group>
 				</xf:group>
 
